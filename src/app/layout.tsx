@@ -4,7 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Home, Package, FileText, Users, LogOut, Settings, LifeBuoy } from 'lucide-react';
+import { Home, Package, FileText, Users, LogOut, Settings, LifeBuoy, BarChart3, List, FilePlus, FileMinus, Goal, Building } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from '@/components/icons/logo';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, SidebarContent, SidebarSeparator } from '@/components/ui/sidebar';
@@ -17,9 +17,16 @@ export const metadata: Metadata = {
 
 const navItems = [
   { href: '/', icon: Home, label: 'Dashboard' },
-  { href: '/inventory', icon: Package, label: 'Inventory' },
-  { href: '/invoices', icon: FileText, label: 'Invoices' },
-  { href: '/suppliers', icon: Users, label: 'Suppliers' },
+  { href: '/inventory', icon: Package, label: 'Product Service Listing' },
+  { href: '/stock-in', icon: FilePlus, label: 'Stock In Log (Add)' },
+  { href: '/sales', icon: BarChart3, label: 'Sales Listing' },
+  { href: '/invoices', icon: FileText, label: 'Invoice Generator' },
+  { href: '/expenses', icon: FileMinus, label: 'Expense Listing' },
+  { href: '/suppliers', icon: Users, label: 'Supplies Inventory' },
+  { href: '/sales-report', icon: BarChart3, label: 'Sales Report' },
+  { href: '/expense-report', icon: FileMinus, label: 'Expense Report' },
+  { href: '/goals', icon: Goal, label: 'Target Goals' },
+  { href: '/financial-statement', icon: Building, label: 'Financial Statement' },
 ];
 
 export default function RootLayout({
@@ -28,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -40,7 +47,7 @@ export default function RootLayout({
             <SidebarHeader>
               <div className="flex items-center gap-2">
                 <Logo className="size-8 text-primary" />
-                <span className="text-lg font-semibold">StockPilot</span>
+                <span className="text-lg font-semibold">ARKSHEETS</span>
               </div>
             </SidebarHeader>
             <SidebarContent>
@@ -95,10 +102,10 @@ export default function RootLayout({
             </SidebarFooter>
           </Sidebar>
           <SidebarInset className="flex flex-col transition-all duration-300 ease-in-out">
-            <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
+            <header className="sticky top-0 z-10 flex h-14 items-center gap-4 bg-transparent px-4 md:px-6">
               <SidebarTrigger className="md:hidden" />
               <div className="flex-1">
-                {/* Potentially add breadcrumbs or search here */}
+                 <h1 className="text-2xl font-bold">BUSINESS DASHBOARD</h1>
               </div>
                <Link href="/settings">
                 <Button variant="ghost" size="icon" className="rounded-full">

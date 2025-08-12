@@ -3,20 +3,28 @@ import type { SVGProps } from 'react';
 export function Logo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        {...props}
     >
-      <path d="M6 20V10" />
-      <path d="M18 20V4" />
-      <path d="M12 20v-4" />
-      <path d="m4 10 8-8 8 8" />
-      <path d="M2 10h20" />
+        <path
+            d="M5.10_3.97_C5.35_3.4_5.88_3_6.5_3_H17.5_C18.12_3_18.65_3.4_18.9_3.97_L21_8_H3_L5.10_3.97_Z"
+            fill="currentColor"
+            className="text-primary/50"
+        ></path>
+        <path
+            d="M19_9_L17_15_H7_L5_9_H19_Z"
+            fill="currentColor"
+            className="text-primary/70"
+        ></path>
+        <path
+            d="M17_16_L15_22_H9_L7_16_H17_Z"
+            fill="currentColor"
+            className="text-primary"
+        ></path>
     </svg>
   );
 }
