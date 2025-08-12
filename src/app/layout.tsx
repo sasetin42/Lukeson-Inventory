@@ -4,10 +4,10 @@ import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider, Sidebar, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Home, Package, FileText, Users, LogOut, Settings } from 'lucide-react';
+import { Home, Package, FileText, Users, LogOut, Settings, LifeBuoy } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from '@/components/icons/logo';
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, SidebarContent } from '@/components/ui/sidebar';
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, SidebarContent, SidebarSeparator } from '@/components/ui/sidebar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export const metadata: Metadata = {
@@ -34,7 +34,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased h-full bg-background">
+      <body className="font-body antialiased h-full bg-background transition-colors duration-300">
         <SidebarProvider>
           <Sidebar>
             <SidebarHeader>
@@ -57,7 +57,8 @@ export default function RootLayout({
                 ))}
               </SidebarMenu>
             </SidebarContent>
-            <SidebarFooter>
+            <SidebarFooter className="mt-auto">
+              <SidebarSeparator className="mb-2" />
                <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="justify-start w-full gap-2 p-2 h-auto">
@@ -74,9 +75,15 @@ export default function RootLayout({
                 <DropdownMenuContent side="right" align="start" className="w-56">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
+                    <LifeBuoy className="mr-2 h-4 w-4" />
+                    <span>Support</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
@@ -87,18 +94,20 @@ export default function RootLayout({
               </DropdownMenu>
             </SidebarFooter>
           </Sidebar>
-          <SidebarInset className="flex flex-col">
+          <SidebarInset className="flex flex-col transition-all duration-300 ease-in-out">
             <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
               <SidebarTrigger className="md:hidden" />
               <div className="flex-1">
                 {/* Potentially add breadcrumbs or search here */}
               </div>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Settings className="h-5 w-5" />
-                <span className="sr-only">Settings</span>
-              </Button>
+               <Link href="/settings">
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <Settings className="h-5 w-5" />
+                  <span className="sr-only">Settings</span>
+                </Button>
+              </Link>
             </header>
-            <main className="flex-1 overflow-auto p-4 md:p-6">
+            <main className="flex-1 overflow-auto p-4 md:p-6 fade-in">
               {children}
             </main>
           </SidebarInset>
