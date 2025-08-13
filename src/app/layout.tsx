@@ -11,8 +11,8 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, Sidebar
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 export const metadata: Metadata = {
-  title: 'StockPilot',
-  description: 'Comprehensive Inventory Management Information System',
+  title: 'ARKSHEETS - All-in-One Business Management',
+  description: 'A comprehensive, all-in-one business management system tailored for businesses in the Philippines.',
 };
 
 const navItems = [
