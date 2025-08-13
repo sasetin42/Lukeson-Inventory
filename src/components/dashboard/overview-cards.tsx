@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { products, suppliers, invoices } from '@/lib/data';
 import { Package, Truck, Users, DollarSign, AlertCircle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function OverviewCards() {
   const totalProducts = products.length;
@@ -18,11 +19,15 @@ export default function OverviewCards() {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {cardData.map(({ title, value, icon: Icon, isWarning }) => (
-        <Card key={title}>
+      {cardData.map(({ title, value, icon: Icon, isWarning }, index) => (
+        <Card 
+          key={title}
+          className="fade-in-up"
+          style={{ animationDelay: `${index * 100}ms` }}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            <Icon className={`h-4 w-4 text-muted-foreground ${isWarning ? 'text-destructive' : ''}`} />
+            <Icon className={cn('h-4 w-4 text-muted-foreground', isWarning && 'text-destructive')} />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{value}</div>
