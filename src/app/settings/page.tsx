@@ -38,7 +38,7 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle>Password</CardTitle>
             <CardDescription>Change your password.</CardDescription>
-          </Header>
+          </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="current-password">Current Password</Label>
