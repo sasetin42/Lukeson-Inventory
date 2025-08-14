@@ -1,11 +1,12 @@
-import type { Product, Supplier, Invoice, Sales } from './types';
+import type { Product, Supplier, Invoice, Sales, InventoryKpi } from './types';
+import { Box, DollarSign, Tag, AlertTriangle, XCircle, Star, Clock, Repeat } from 'lucide-react';
 
 export const products: Product[] = [
-  { id: 'PROD001', name: 'Smart T-Shirt', sku: 'SKU-TS-001', category: 'Apparel', stock: 150, price: 25.00, status: 'In Stock', description: 'A comfortable and stylish t-shirt made from 100% organic cotton. Features a modern fit and a unique, minimalist design on the front. Available in multiple colors and sizes.', tags: ['cotton', 't-shirt', 'apparel', 'casual'] },
-  { id: 'PROD002', name: 'Ergonomic Mouse', sku: 'SKU-EM-002', category: 'Electronics', stock: 45, price: 75.50, status: 'Low Stock', description: 'A wireless ergonomic mouse designed for comfort during long hours of use. It features customizable buttons, adjustable DPI, and a long-lasting rechargeable battery.', tags: ['mouse', 'ergonomic', 'wireless', 'electronics'] },
-  { id: 'PROD003', name: 'Insulated Water Bottle', sku: 'SKU-WB-003', category: 'Accessories', stock: 200, price: 30.00, status: 'In Stock', description: 'A 32oz stainless steel insulated water bottle that keeps drinks cold for 24 hours or hot for 12 hours. BPA-free and leak-proof lid.', tags: ['water bottle', 'insulated', 'stainless steel'] },
-  { id: 'PROD004', name: 'Leather-bound Journal', sku: 'SKU-JN-004', category: 'Stationery', stock: 0, price: 22.00, status: 'Out of Stock', description: 'A classic leather-bound journal with 200 lined pages of high-quality, acid-free paper. Perfect for writing, sketching, or note-taking.', tags: ['journal', 'leather', 'notebook', 'stationery'] },
-  { id: 'PROD005', name: 'Wireless Headphones', sku: 'SKU-HP-005', category: 'Electronics', stock: 80, price: 120.00, status: 'In Stock', description: 'Over-ear wireless headphones with active noise cancellation, a 30-hour battery life, and crystal-clear audio quality. Includes a carrying case.', tags: ['headphones', 'wireless', 'ANC', 'audio'] },
+  // { id: 'PROD001', name: 'Smart T-Shirt', sku: 'SKU-TS-001', category: 'Apparel', stock: 150, price: 25.00, status: 'In Stock', description: 'A comfortable and stylish t-shirt made from 100% organic cotton. Features a modern fit and a unique, minimalist design on the front. Available in multiple colors and sizes.', tags: ['cotton', 't-shirt', 'apparel', 'casual'] },
+  // { id: 'PROD002', name: 'Ergonomic Mouse', sku: 'SKU-EM-002', category: 'Electronics', stock: 45, price: 75.50, status: 'Low Stock', description: 'A wireless ergonomic mouse designed for comfort during long hours of use. It features customizable buttons, adjustable DPI, and a long-lasting rechargeable battery.', tags: ['mouse', 'ergonomic', 'wireless', 'electronics'] },
+  // { id: 'PROD003', name: 'Insulated Water Bottle', sku: 'SKU-WB-003', category: 'Accessories', stock: 200, price: 30.00, status: 'In Stock', description: 'A 32oz stainless steel insulated water bottle that keeps drinks cold for 24 hours or hot for 12 hours. BPA-free and leak-proof lid.', tags: ['water bottle', 'insulated', 'stainless steel'] },
+  // { id: 'PROD004', name: 'Leather-bound Journal', sku: 'SKU-JN-004', category: 'Stationery', stock: 0, price: 22.00, status: 'Out of Stock', description: 'A classic leather-bound journal with 200 lined pages of high-quality, acid-free paper. Perfect for writing, sketching, or note-taking.', tags: ['journal', 'leather', 'notebook', 'stationery'] },
+  // { id: 'PROD005', name: 'Wireless Headphones', sku: 'SKU-HP-005', category: 'Electronics', stock: 80, price: 120.00, status: 'In Stock', description: 'Over-ear wireless headphones with active noise cancellation, a 30-hour battery life, and crystal-clear audio quality. Includes a carrying case.', tags: ['headphones', 'wireless', 'ANC', 'audio'] },
 ];
 
 export const suppliers: Supplier[] = [
@@ -28,4 +29,15 @@ export const sales: Sales[] = [
   { id: 'SALE003', productName: 'Insulated Water Bottle', customerName: 'Bob Williams', date: '2024-05-26', quantity: 3, total: 90.00 },
   { id: 'SALE004', productName: 'Wireless Headphones', customerName: 'Frank Martin', date: '2024-05-25', quantity: 1, total: 120.00 },
   { id: 'SALE005', productName: 'Smart T-Shirt', customerName: 'Grace Lee', date: '2024-05-24', quantity: 5, total: 125.00 },
+];
+
+export const inventoryKpis: InventoryKpi[] = [
+  { title: 'Total Products', value: 0, icon: Box, subtext: 'Total Products', color: 'blue' },
+  { title: 'Total Value', value: '₱0.0M', icon: DollarSign, subtext: 'Total Value', color: 'green' },
+  { title: 'Categories', value: 1, icon: Tag, subtext: 'Categories', color: 'purple' },
+  { title: 'Low Stock', value: 0, icon: AlertTriangle, subtext: 'Low Stock', color: 'yellow' },
+  { title: 'Out of Stock', value: 0, icon: XCircle, subtext: 'Out of Stock', color: 'red' },
+  { title: 'Added This Week', value: 0, icon: Star, subtext: 'Added This Week', color: 'indigo' },
+  { title: 'Pending Orders', value: 2, icon: Clock, subtext: 'Pending Orders', color: 'orange' },
+  { title: 'Turnover Rate', value: '4.2x', icon: Repeat, subtext: 'Turnover Rate', color: 'teal' },
 ];

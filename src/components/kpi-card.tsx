@@ -7,8 +7,9 @@ type KpiCardProps = {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  trend: string;
-  color: 'blue' | 'green' | 'yellow' | 'purple';
+  trend?: string;
+  color: 'blue' | 'green' | 'yellow' | 'purple' | 'red' | 'indigo' | 'cyan' | 'orange' | 'pink' | 'teal';
+  subtext?: string;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 const colorClasses = {
@@ -16,6 +17,12 @@ const colorClasses = {
   green: 'text-green-500',
   yellow: 'text-yellow-500',
   purple: 'text-purple-500',
+  red: 'text-red-500',
+  indigo: 'text-indigo-500',
+  cyan: 'text-cyan-500',
+  orange: 'text-orange-500',
+  pink: 'text-pink-500',
+  teal: 'text-teal-500'
 };
 
 const iconColorClasses = {
@@ -23,10 +30,16 @@ const iconColorClasses = {
   green: 'text-green-500',
   yellow: 'text-yellow-500',
   purple: 'text-purple-500',
+  red: 'text-red-500',
+  indigo: 'text-indigo-500',
+  cyan: 'text-cyan-500',
+  orange: 'text-orange-500',
+  pink: 'text-pink-500',
+  teal: 'text-teal-500'
 }
 
-export default function KpiCard({ title, value, icon: Icon, trend, color, className, ...props }: KpiCardProps) {
-  const isPositive = !trend.startsWith('-');
+export default function KpiCard({ title, value, icon: Icon, trend, color, subtext, className, ...props }: KpiCardProps) {
+  const isPositive = trend && !trend.startsWith('-');
   const TrendIcon = isPositive ? ArrowUp : ArrowDown;
   
   return (
@@ -39,10 +52,15 @@ export default function KpiCard({ title, value, icon: Icon, trend, color, classN
         <div className={cn("text-3xl font-bold", color === 'yellow' ? 'text-yellow-600' : 'text-foreground')}>
           {value}
         </div>
-        <p className="text-xs text-muted-foreground flex items-center gap-1">
-          <TrendIcon className={cn("h-4 w-4", isPositive ? 'text-green-500' : 'text-red-500')} />
-          {trend}
-        </p>
+        {trend && (
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            <TrendIcon className={cn("h-4 w-4", isPositive ? 'text-green-500' : 'text-red-500')} />
+            {trend}
+          </p>
+        )}
+        {subtext && (
+            <p className="text-xs text-muted-foreground">{subtext}</p>
+        )}
       </CardContent>
     </Card>
   );

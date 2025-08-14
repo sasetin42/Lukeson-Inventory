@@ -39,3 +39,11 @@ export type Sales = {
   quantity: number;
   total: number;
 };
+
+export type InventoryKpi = {
+    title: string;
+    value: string | number;
+    icon: any;
+    subtext: string;
+    color: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'indigo' | 'cyan' | 'teal';
+};
