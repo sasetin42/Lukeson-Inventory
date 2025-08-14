@@ -52,7 +52,7 @@ export default function RootLayout({
               </div>
             </SidebarHeader>
             <SidebarContent>
-              <SidebarMenu className="p-4">
+              <SidebarMenu className="p-4 gap-2.5">
                 {navItems.map((item) => (
                   <SidebarMenuItem key={item.label}>
                     <SidebarMenuButton asChild>
