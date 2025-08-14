@@ -1,41 +1,57 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { products, suppliers, invoices } from '@/lib/data';
-import { Package, Truck, Users, DollarSign, AlertCircle } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Package, ShoppingCart, AlertTriangle, DollarSign, ArrowUp } from 'lucide-react';
+import KpiCard from '@/components/kpi-card';
 
 export default function OverviewCards() {
   const totalProducts = products.length;
   const lowStockItems = products.filter(p => p.status === 'Low Stock').length;
-  const totalSuppliers = suppliers.length;
-  const pendingInvoices = invoices.filter(i => i.status === 'Pending').reduce((acc, i) => acc + i.amount, 0);
+  const activeOrders = invoices.filter(i => i.status === 'Pending').length;
+  const monthlyRevenue = invoices.filter(i => i.status === 'Paid').reduce((acc, i) => acc + i.amount, 0);
 
   const cardData = [
-    { title: 'Total Products', value: totalProducts, icon: Package },
-    { title: 'Low Stock Items', value: lowStockItems, icon: AlertCircle, isWarning: lowStockItems > 0 },
-    { title: 'Total Suppliers', value: totalSuppliers, icon: Truck },
-    { title: 'Pending Invoices', value: `$${pendingInvoices.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: DollarSign },
+    { 
+      title: 'Total Products', 
+      value: totalProducts, 
+      icon: Package, 
+      trend: '+12% from last month',
+      color: 'blue'
+    },
+    { 
+      title: 'Active Orders', 
+      value: activeOrders, 
+      icon: ShoppingCart, 
+      trend: '+8% from last week',
+      color: 'green'
+    },
+    { 
+      title: 'Low Stock Alerts', 
+      value: lowStockItems, 
+      icon: AlertTriangle, 
+      trend: '3 new this week',
+      color: 'yellow'
+    },
+    { 
+      title: 'Monthly Revenue', 
+      value: `$${monthlyRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
+      icon: DollarSign, 
+      trend: '+15% from last month',
+      color: 'purple'
+    },
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {cardData.map(({ title, value, icon: Icon, isWarning }, index) => (
-        <Card 
-          key={title}
-          className="fade-in-up"
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {cardData.map((card, index) => (
+        <KpiCard
+          key={card.title}
+          title={card.title}
+          value={card.value}
+          icon={card.icon}
+          trend={card.trend}
+          color={card.color as any}
           style={{ animationDelay: `${index * 100}ms` }}
-        >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{title}</CardTitle>
-            <Icon className={cn('h-4 w-4 text-muted-foreground', isWarning && 'text-destructive')} />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{value}</div>
-            <p className="text-xs text-muted-foreground">
-              {title === 'Low Stock Items' && lowStockItems > 0 ? `${lowStockItems} items need attention` : `As of today`}
-            </p>
-          </CardContent>
-        </Card>
+          className="fade-in-up"
+        />
       ))}
     </div>
   );

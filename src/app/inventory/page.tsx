@@ -1,15 +1,15 @@
 import PageHeader from "@/components/page-header";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { Package } from "lucide-react";
 import InventoryTable from "@/components/inventory/inventory-table";
 import AddProductDialog from "@/components/inventory/add-product-dialog";
 
 export default function InventoryPage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <PageHeader 
         title="Inventory" 
         description="Track and manage your products." 
+        icon={<Package className="h-6 w-6" />}
         actions={<AddProductDialog />}
       />
       <InventoryTable />

@@ -1,14 +1,15 @@
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Truck } from "lucide-react";
 import SupplierList from "@/components/suppliers/supplier-list";
 
 export default function SuppliersPage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <PageHeader
         title="Suppliers"
         description="Maintain detailed profiles for each supplier."
+        icon={<Truck className="h-6 w-6" />}
         actions={
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
