@@ -15,7 +15,7 @@ export default function PageHeader({ title, description, icon, actions }: PageHe
           {icon}
           <div className="grid gap-1">
             <h1 className="text-[22px] font-bold tracking-tight leading-[26px]">{title}</h1>
-            {description && <p className="text-muted-foreground">{description}</p>}
+            {description && <p className="text-muted-foreground text-[13px] leading-[18px]">{description}</p>}
           </div>
         </div>
         {actions && <div>{actions}</div>}
