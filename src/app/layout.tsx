@@ -10,7 +10,7 @@ import { Logo } from '@/components/icons/logo';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, SidebarContent, SidebarSeparator } from '@/components/ui/sidebar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/components/app-layout';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 
 export const metadata: Metadata = {
@@ -128,30 +128,31 @@ export default function RootLayout({
                 {navGroups.map((group) => (
                   <div key={group.title}>
                     <h3 className={`text-xs font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
-                    {group.items.map((item) => (
-                      <Collapsible key={item.title} defaultOpen className="w-full">
-                        <CollapsibleTrigger className="w-full">
+                    <Accordion type="single" collapsible className="w-full">
+                      {group.items.map((item) => (
+                        <AccordionItem value={item.title} key={item.title}>
+                          <AccordionTrigger>
                             <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
                                 <span className="text-sm font-medium">{item.title}</span>
-                                <ChevronDown className="h-4 w-4 transition-transform duration-200" />
                             </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <SidebarMenu className="ml-4 border-l border-gray-200 dark:border-gray-700 py-1">
-                            {item.links.map((link) => (
-                              <SidebarMenuItem key={link.label}>
-                                <SidebarMenuButton asChild>
-                                  <Link href={link.href}>
-                                    <link.icon className={link.color} />
-                                    <span>{link.label}</span>
-                                  </Link>
-                                </SidebarMenuButton>
-                              </SidebarMenuItem>
-                            ))}
-                          </SidebarMenu>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    ))}
+                          </AccordionTrigger>
+                          <AccordionContent>
+                            <SidebarMenu className="ml-4 border-l border-gray-200 dark:border-gray-700 py-1">
+                              {item.links.map((link) => (
+                                <SidebarMenuItem key={link.label}>
+                                  <SidebarMenuButton asChild>
+                                    <Link href={link.href}>
+                                      <link.icon className={link.color} />
+                                      <span>{link.label}</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              ))}
+                            </SidebarMenu>
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
                   </div>
                 ))}
               </div>
