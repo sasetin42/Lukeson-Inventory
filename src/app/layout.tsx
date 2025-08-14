@@ -105,7 +105,7 @@ export default function RootLayout({
             <header className="sticky top-0 z-10 flex h-14 items-center gap-4 bg-transparent px-4 md:px-6">
               <SidebarTrigger className="md:hidden" />
               <div className="flex-1">
-                 <h1 className="text-2xl font-bold">BUSINESS DASHBOARD</h1>
+                 <h1 className="text-2xl font-bold">Lukeson Company IMS</h1>
               </div>
                <Link href="/settings">
                 <Button variant="ghost" size="icon" className="rounded-full">
