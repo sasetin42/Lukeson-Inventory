@@ -3,7 +3,7 @@ import { inventoryKpis } from "@/lib/data";
 
 export default function InventoryKpiCards() {
   return (
-    <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-8">
+    <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-7">
       {inventoryKpis.map((kpi, index) => (
         <KpiCard
           key={kpi.title}
