@@ -12,7 +12,7 @@ export default function DashboardPage() {
       <PageHeader 
         title="Dashboard Overview"
         description="Enhanced inventory management with grouped navigation and smart button interactions"
-        icon={<RocketIcon className="h-6 w-6" />}
+        icon={<RocketIcon className="h-6 w-6 text-blue-500" />}
         actions={
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="bg-blue-100 text-blue-600 border-blue-200">Smart Buttons Active</Badge>

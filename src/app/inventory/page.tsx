@@ -9,7 +9,7 @@ export default function InventoryPage() {
       <PageHeader 
         title="Inventory" 
         description="Track and manage your products." 
-        icon={<Package className="h-6 w-6" />}
+        icon={<Package className="h-6 w-6 text-green-500" />}
         actions={<AddProductDialog />}
       />
       <InventoryTable />

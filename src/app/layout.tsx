@@ -16,17 +16,17 @@ export const metadata: Metadata = {
 };
 
 const navItems = [
-  { href: '/', icon: Home, label: 'Dashboard' },
-  { href: '/inventory', icon: Package, label: 'Product Service Listing' },
-  { href: '/stock-in', icon: FilePlus, label: 'Stock In Log (Add)' },
-  { href: '/sales', icon: BarChart3, label: 'Sales Listing' },
-  { href: '/invoices', icon: FileText, label: 'Invoice Generator' },
-  { href: '/expenses', icon: FileMinus, label: 'Expense Listing' },
-  { href: '/suppliers', icon: Users, label: 'Supplies Inventory' },
-  { href: '/sales-report', icon: BarChart3, label: 'Sales Report' },
-  { href: '/expense-report', icon: FileMinus, label: 'Expense Report' },
-  { href: '/goals', icon: Goal, label: 'Target Goals' },
-  { href: '/financial-statement', icon: Building, label: 'Financial Statement' },
+  { href: '/', icon: Home, label: 'Dashboard', color: 'text-sky-500' },
+  { href: '/inventory', icon: Package, label: 'Product Service Listing', color: 'text-green-500' },
+  { href: '/stock-in', icon: FilePlus, label: 'Stock In Log (Add)', color: 'text-blue-500' },
+  { href: '/sales', icon: BarChart3, label: 'Sales Listing', color: 'text-orange-500' },
+  { href: '/invoices', icon: FileText, label: 'Invoice Generator', color: 'text-purple-500' },
+  { href: '/expenses', icon: FileMinus, label: 'Expense Listing', color: 'text-red-500' },
+  { href: '/suppliers', icon: Users, label: 'Supplies Inventory', color: 'text-yellow-500' },
+  { href: '/sales-report', icon: BarChart3, label: 'Sales Report', color: 'text-orange-500' },
+  { href: '/expense-report', icon: FileMinus, label: 'Expense Report', color: 'text-red-500' },
+  { href: '/goals', icon: Goal, label: 'Target Goals', color: 'text-indigo-500' },
+  { href: '/financial-statement', icon: Building, label: 'Financial Statement', color: 'text-pink-500' },
 ];
 
 export default function RootLayout({
@@ -56,7 +56,7 @@ export default function RootLayout({
                   <SidebarMenuItem key={item.label}>
                     <SidebarMenuButton asChild>
                       <Link href={item.href}>
-                        <item.icon />
+                        <item.icon className={item.color} />
                         <span>{item.label}</span>
                       </Link>
                     </SidebarMenuButton>

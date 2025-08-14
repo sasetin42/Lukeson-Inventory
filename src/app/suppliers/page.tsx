@@ -9,7 +9,7 @@ export default function SuppliersPage() {
       <PageHeader
         title="Suppliers"
         description="Maintain detailed profiles for each supplier."
-        icon={<Truck className="h-6 w-6" />}
+        icon={<Truck className="h-6 w-6 text-orange-500" />}
         actions={
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />

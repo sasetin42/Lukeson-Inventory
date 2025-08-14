@@ -106,7 +106,7 @@ export default function AddProductDialog() {
             <div className="text-right pt-2">
                 <Label htmlFor="tags">Tags</Label>
                 <Button variant="ghost" size="sm" onClick={handleGenerateTags} disabled={isGenerating}>
-                  {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-yellow-400" />}
                 </Button>
             </div>
             <div className="col-span-3">

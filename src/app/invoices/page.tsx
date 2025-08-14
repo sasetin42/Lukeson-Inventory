@@ -9,7 +9,7 @@ export default function InvoicesPage() {
       <PageHeader
         title="Invoices"
         description="Manage your invoices and track payments."
-        icon={<FileText className="h-6 w-6" />}
+        icon={<FileText className="h-6 w-6 text-purple-500" />}
         actions={
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />

@@ -60,7 +60,7 @@ export default function SuggestedActionsCard() {
           <CardDescription>Get smart recommendations for your inventory.</CardDescription>
         </div>
         <Button onClick={handleSuggestActions} disabled={isLoading}>
-          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lightbulb className="mr-2 h-4 w-4" />}
+          {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lightbulb className="mr-2 h-4 w-4 text-yellow-400" />}
           Get Suggestions
         </Button>
       </CardHeader>
@@ -77,7 +77,7 @@ export default function SuggestedActionsCard() {
         )}
         {suggestions.map((suggestion, index) => (
           <Alert key={index}>
-            <Lightbulb className="h-4 w-4" />
+            <Lightbulb className="h-4 w-4 text-yellow-400" />
             <AlertTitle>{suggestion.action}{suggestion.product && `: ${suggestion.product}`}</AlertTitle>
             <AlertDescription>{suggestion.reason}</AlertDescription>
           </Alert>
