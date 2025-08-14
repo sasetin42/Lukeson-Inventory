@@ -4,20 +4,15 @@ import StockChart from "@/components/dashboard/stock-chart";
 import SuggestedActionsCard from "@/components/ai/suggested-actions-card";
 import PageHeader from "@/components/page-header";
 import { RocketIcon } from "@/components/icons/rocket";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 
 export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <PageHeader 
-          title="Dashboard Overview"
-          description="Enhanced inventory management with grouped navigation and smart button interactions"
-          icon={<RocketIcon className="h-6 w-6 text-blue-500" />}
-        />
-        <Separator className="my-4" />
-      </div>
+      <PageHeader 
+        title="Dashboard Overview"
+        description="Enhanced inventory management with grouped navigation and smart button interactions"
+        icon={<RocketIcon className="h-6 w-6 text-blue-500" />}
+      />
       <div className="grid gap-6">
         <OverviewCards />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

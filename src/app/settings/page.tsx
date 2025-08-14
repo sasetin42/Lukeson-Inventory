@@ -3,18 +3,14 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 
 export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <PageHeader
-          title="Settings"
-          description="Manage your account and application settings."
-        />
-        <Separator className="my-4" />
-      </div>
+      <PageHeader
+        title="Settings"
+        description="Manage your account and application settings."
+      />
       <div className="grid gap-6">
         <Card>
           <CardHeader>
