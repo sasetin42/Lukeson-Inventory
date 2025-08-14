@@ -9,7 +9,7 @@ type PageHeaderProps = {
 
 export default function PageHeader({ title, description, icon, actions }: PageHeaderProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
           {icon}

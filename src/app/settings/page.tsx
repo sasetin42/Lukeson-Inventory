@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 
 export default function SettingsPage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <div>
         <PageHeader
           title="Settings"
@@ -38,7 +38,7 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle>Password</CardTitle>
             <CardDescription>Change your password.</CardDescription>
-          </CardHeader>
+          </Header>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="current-password">Current Password</Label>
