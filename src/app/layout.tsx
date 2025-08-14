@@ -129,9 +129,10 @@ export default function RootLayout({
             <SidebarContent>
               <div className="flex flex-col gap-2 px-2">
                 <Accordion type="single" collapsible className="w-full">
-                  {navGroups.map((group) => (
+                  {navGroups.map((group, groupIndex) => (
                     <div key={group.title}>
-                      <h3 className={`text-xs font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
+                      {groupIndex > 0 && <SidebarSeparator className="my-2" />}
+                      <h3 className={`text-sm font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
                       {group.items.map((item) => (
                           <AccordionItem value={item.title} key={item.title}>
                             <AccordionTrigger>
