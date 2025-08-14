@@ -31,7 +31,7 @@ const navGroups = [
         ],
       },
       {
-        title: 'Inventory Management',
+        title: 'Inventory',
         links: [
           { href: '/inventory', icon: Package, label: 'Product', color: 'text-blue-500' },
           { href: '/category', icon: List, label: 'Category', color: 'text-orange-500' },
