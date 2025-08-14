@@ -121,43 +121,43 @@ export default function RootLayout({
               <div className="flex items-center gap-3">
                 <Logo className="size-9 text-primary" />
                 <div className="flex flex-col">
-                  <h1 className="text-xl font-bold tracking-tight text-foreground">ARKSHEETS</h1>
+                  <h1 className="text-xl font-bold tracking-tight text-foreground">StockPilot</h1>
                   <p className="text-sm text-muted-foreground">Workspace</p>
                 </div>
               </div>
             </SidebarHeader>
             <SidebarContent>
               <div className="flex flex-col gap-2 px-2">
-                {navGroups.map((group) => (
-                  <div key={group.title}>
-                    <h3 className={`text-xs font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
-                    <Accordion type="single" collapsible className="w-full">
+                <Accordion type="single" collapsible className="w-full">
+                  {navGroups.map((group) => (
+                    <div key={group.title}>
+                      <h3 className={`text-xs font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
                       {group.items.map((item) => (
-                        <AccordionItem value={item.title} key={item.title}>
-                          <AccordionTrigger>
-                            <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
-                                <span className="text-[15px] font-bold leading-[18px]">{item.title}</span>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <SidebarMenu className="ml-4 border-l border-gray-200 dark:border-gray-700 py-1">
-                              {item.links.map((link) => (
-                                <SidebarMenuItem key={link.label}>
-                                  <SidebarMenuButton asChild>
-                                    <Link href={link.href}>
-                                      <link.icon className={link.color} />
-                                      <span className="font-bold leading-[18px]">{link.label}</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              ))}
-                            </SidebarMenu>
-                          </AccordionContent>
-                        </AccordionItem>
+                          <AccordionItem value={item.title} key={item.title}>
+                            <AccordionTrigger>
+                              <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
+                                  <span className="text-[15px] font-bold leading-[18px]">{item.title}</span>
+                              </div>
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              <SidebarMenu className="ml-4 border-l border-gray-200 dark:border-gray-700 py-1">
+                                {item.links.map((link) => (
+                                  <SidebarMenuItem key={link.label}>
+                                    <SidebarMenuButton asChild>
+                                      <Link href={link.href}>
+                                        <link.icon className={link.color} />
+                                        <span className="font-bold leading-[18px]">{link.label}</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                ))}
+                              </SidebarMenu>
+                            </AccordionContent>
+                          </AccordionItem>
                       ))}
-                    </Accordion>
-                  </div>
-                ))}
+                    </div>
+                  ))}
+                </Accordion>
               </div>
             </SidebarContent>
             <SidebarFooter className="mt-auto">
