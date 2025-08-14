@@ -24,7 +24,7 @@ const navGroups = [
     color: 'text-blue-500',
     items: [
       {
-        title: 'Overview Management',
+        title: 'Overview',
         links: [
           { href: '/', icon: LayoutGrid, label: 'Dashboard', color: 'text-sky-500' },
           { href: '/analytics', icon: BarChart2, label: 'Analytics', color: 'text-green-500' },
