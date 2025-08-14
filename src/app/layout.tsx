@@ -126,7 +126,7 @@ export default function RootLayout({
                 </div>
               </div>
             </SidebarHeader>
-            <SidebarContent>
+            <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
               <div className="flex flex-col gap-2 px-2">
                 <Accordion type="multiple" defaultValue={['Overview', 'Inventory']} className="w-full">
                   {navGroups.map((group, groupIndex) => (
