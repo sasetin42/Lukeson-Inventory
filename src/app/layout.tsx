@@ -137,7 +137,7 @@ export default function RootLayout({
                           <AccordionItem value={item.title} key={item.title}>
                             <AccordionTrigger>
                               <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
-                                  <span className="text-[15px] font-bold leading-[18px]">{item.title}</span>
+                                  <span className="text-[14px] font-bold">{item.title}</span>
                               </div>
                             </AccordionTrigger>
                             <AccordionContent>
@@ -147,7 +147,7 @@ export default function RootLayout({
                                     <SidebarMenuButton asChild>
                                       <Link href={link.href}>
                                         <link.icon className={link.color} />
-                                        <span className="font-bold leading-[18px]">{link.label}</span>
+                                        <span className="font-normal leading-[18px] text-xs">{link.label}</span>
                                       </Link>
                                     </SidebarMenuButton>
                                   </SidebarMenuItem>
