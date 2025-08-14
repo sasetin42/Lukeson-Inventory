@@ -11,20 +11,25 @@ export default function AppLayout({
 }) {
     const pathname = usePathname();
     const mainRef = useRef<HTMLElement>(null);
+    const headerRef = useRef<HTMLElement>(null);
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
+        const mainEl = mainRef.current;
+        if (!mainEl) return;
+
         const handleScroll = () => {
-            if (mainRef.current) {
-                setScrolled(mainRef.current.scrollTop > 5);
+            const isScrolled = mainEl.scrollTop > 5;
+            setScrolled(isScrolled);
+            if (headerRef.current) {
+                headerRef.current.setAttribute('data-scrolled', isScrolled.toString());
             }
         };
 
-        const mainEl = mainRef.current;
-        mainEl?.addEventListener('scroll', handleScroll);
-
+        mainEl.addEventListener('scroll', handleScroll);
+        
         return () => {
-            mainEl?.removeEventListener('scroll', handleScroll);
+            mainEl.removeEventListener('scroll', handleScroll);
         };
     }, []);
 
@@ -32,12 +37,15 @@ export default function AppLayout({
         if (mainRef.current) {
             mainRef.current.scrollTop = 0;
             setScrolled(false);
+            if (headerRef.current) {
+                headerRef.current.setAttribute('data-scrolled', 'false');
+            }
         }
     }, [pathname]);
 
     return (
         <SidebarInset className="flex flex-col transition-all duration-300 ease-in-out">
-            <header data-scrolled={scrolled} className="sticky top-0 z-10 flex h-auto items-center gap-4 border-b bg-background px-4 py-2 transition-all duration-300 sm:h-auto sm:border-0 md:px-6">
+            <header ref={headerRef} data-scrolled={scrolled} className="sticky top-0 z-10 flex h-auto items-center gap-4 border-b bg-background px-4 py-2 transition-all duration-300 sm:h-auto sm:border-0 md:px-6">
                 <SidebarTrigger className="md:hidden" />
                 <div className="flex-1" />
             </header>
