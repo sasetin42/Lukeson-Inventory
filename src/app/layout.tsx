@@ -128,7 +128,7 @@ export default function RootLayout({
             </SidebarHeader>
             <SidebarContent>
               <div className="flex flex-col gap-2 px-2">
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion type="multiple" defaultValue={['Overview', 'Inventory']} className="w-full">
                   {navGroups.map((group, groupIndex) => (
                     <div key={group.title}>
                       {groupIndex > 0 && <SidebarSeparator className="my-2" />}
@@ -147,7 +147,7 @@ export default function RootLayout({
                                     <SidebarMenuButton asChild>
                                       <Link href={link.href}>
                                         <link.icon className={link.color} />
-                                        <span className="font-normal leading-[18px] text-xs">{link.label}</span>
+                                        <span className="font-normal leading-[18px] text-[14px]">{link.label}</span>
                                       </Link>
                                     </SidebarMenuButton>
                                   </SidebarMenuItem>
@@ -207,3 +207,4 @@ export default function RootLayout({
     </html>
   );
 }
+

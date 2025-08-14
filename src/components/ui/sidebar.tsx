@@ -22,7 +22,7 @@ import { usePathname } from 'next/navigation'
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
-const SIDEBAR_WIDTH = "220px"
+const SIDEBAR_WIDTH = "240px"
 const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
@@ -522,7 +522,7 @@ const sidebarMenuButtonVariants = cva(
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
       size: {
-        default: "h-auto text-xs py-[10px]",
+        default: "h-auto py-[10px]",
         sm: "h-7 text-xs",
         lg: "h-12 text-sm group-data-[collapsible=icon]:!p-0",
       },
@@ -591,13 +591,11 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), {
-            'bg-[#EEF6FE] text-[#3A82F7]': isActive,
-            'hover:text-[#3A82F7] [&>svg]:hover:text-[#3A82F7]': true,
-        }, className)}
+        className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
         style={{
             ...props.style,
-            borderLeft: isActive ? `3px solid ${iconColor}` : '3px solid transparent'
+            borderLeft: isActive ? `3px solid ${iconColor}` : '3px solid transparent',
+            ...(isActive && { backgroundColor: '#EEF6FE', color: '#3A82F7' })
         }}
         {...props}
       />
@@ -797,3 +795,4 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+
