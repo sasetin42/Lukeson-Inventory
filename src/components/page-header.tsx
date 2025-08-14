@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { Separator } from './ui/separator';
 
 type PageHeaderProps = {
   title: string;
@@ -21,7 +20,6 @@ export default function PageHeader({ title, description, icon, actions }: PageHe
         </div>
         {actions && <div>{actions}</div>}
       </div>
-      <Separator />
     </div>
   );
 }

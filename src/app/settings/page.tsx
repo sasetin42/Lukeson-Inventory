@@ -8,10 +8,13 @@ import { Separator } from "@/components/ui/separator";
 export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Settings"
-        description="Manage your account and application settings."
-      />
+      <div>
+        <PageHeader
+          title="Settings"
+          description="Manage your account and application settings."
+        />
+        <Separator className="my-4" />
+      </div>
       <div className="grid gap-6">
         <Card>
           <CardHeader>
