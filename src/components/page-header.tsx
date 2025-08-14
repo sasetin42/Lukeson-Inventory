@@ -9,8 +9,8 @@ type PageHeaderProps = {
 
 export default function PageHeader({ title, description, icon, actions }: PageHeaderProps) {
   return (
-    <div className="space-y-2 sticky top-0 bg-background z-10 py-2 -mx-4 px-4 md:-mx-6 md:px-6 border-b mb-2">
-      <div className="flex items-start justify-between">
+    <div className="space-y-2 sticky top-0 bg-background z-10 -mx-4 px-4 md:-mx-6 md:px-6 border-b">
+      <div className="flex items-start justify-between py-2">
         <div className="flex items-center gap-4 [&>svg]:size-8 [&>svg]:transition-all [&>svg]:duration-300 header-[data-scrolled=true]_&>svg]:size-6">
           {icon}
           <div className="grid gap-0">
