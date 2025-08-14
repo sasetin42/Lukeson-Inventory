@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MoreHorizontal, Package } from "lucide-react";
+import { MoreHorizontal, Package, PlusCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
