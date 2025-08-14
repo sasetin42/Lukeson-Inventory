@@ -106,12 +106,6 @@ export default function RootLayout({
             <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:h-auto sm:border-0 md:px-6">
               <SidebarTrigger className="md:hidden" />
               <div className="flex-1" />
-               <Link href="/settings">
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Settings className="h-5 w-5" />
-                  <span className="sr-only">Settings</span>
-                </Button>
-              </Link>
             </header>
             <main className="flex-1 overflow-auto p-4 md:p-6">
               {children}
