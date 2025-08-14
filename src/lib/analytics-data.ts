@@ -3,7 +3,7 @@ import { DollarSign, Package, ShoppingCart, TrendingUp } from "lucide-react";
 export const analyticsKpiData = [
     {
       title: "Total Revenue",
-      value: "$328,000",
+      value: "₱328,000",
       icon: DollarSign,
       trend: "+15.2% from last month",
       color: "green"
@@ -17,7 +17,7 @@ export const analyticsKpiData = [
     },
     {
       title: "Avg Order Value",
-      value: "$67.12",
+      value: "₱67.12",
       icon: ShoppingCart,
       trend: "-2.3% from last month",
       color: "purple"

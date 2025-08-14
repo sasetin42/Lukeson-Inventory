@@ -20,7 +20,7 @@ export default function RecentSales() {
               <p className="text-sm font-medium leading-none">{sale.customerName}</p>
               <p className="text-sm text-muted-foreground">{sale.productName}</p>
             </div>
-            <div className="ml-auto font-medium">+${sale.total.toFixed(2)}</div>
+            <div className="ml-auto font-medium">+₱{sale.total.toFixed(2)}</div>
           </div>
         ))}
       </CardContent>

@@ -32,7 +32,7 @@ export default function OverviewCards() {
     },
     { 
       title: 'Monthly Revenue', 
-      value: `$${monthlyRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
+      value: `₱${monthlyRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
       icon: DollarSign, 
       trend: '+15% from last month',
       color: 'purple'

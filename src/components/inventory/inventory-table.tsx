@@ -57,7 +57,7 @@ export default function InventoryTable() {
                 <TableCell>{product.sku}</TableCell>
                 <TableCell>{product.category}</TableCell>
                 <TableCell className="text-right">{product.stock}</TableCell>
-                <TableCell className="text-right">${product.price.toFixed(2)}</TableCell>
+                <TableCell className="text-right">₱{product.price.toFixed(2)}</TableCell>
                 <TableCell>
                   <Badge variant={getStatusVariant(product.status)}>{product.status}</Badge>
                 </TableCell>

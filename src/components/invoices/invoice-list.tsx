@@ -52,7 +52,7 @@ export default function InvoiceList() {
               <Badge variant={getStatusVariant(invoice.status)}>{invoice.status}</Badge>
             </div>
             <div className="text-lg font-semibold text-right">
-              ${invoice.amount.toFixed(2)}
+              ₱{invoice.amount.toFixed(2)}
             </div>
           </CardContent>
         </Card>

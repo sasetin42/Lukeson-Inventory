@@ -35,7 +35,7 @@ export default function RevenueProfitChart() {
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => `$${Number(value) / 1000}k`}
+              tickFormatter={(value) => `₱${Number(value) / 1000}k`}
             />
             <Tooltip
                 contentStyle={{
