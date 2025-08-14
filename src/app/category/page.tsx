@@ -1,18 +1,22 @@
 import PageHeader from "@/components/page-header";
-import { List } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { List, PlusCircle } from "lucide-react";
+import CategoryList from "@/components/category/category-list";
 
 export default function CategoryPage() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader 
-        title="Category" 
-        description="Manage product categories." 
-        icon={<List className="h-6 w-6 text-orange-500" />}
+        title="Category Management" 
+        description="Organize your products with hierarchical categories" 
+        actions={
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Category
+          </Button>
+        }
       />
-      <div className="p-4">
-        <h2 className="text-lg font-semibold">Category Page</h2>
-        <p className="text-muted-foreground">Content for categories goes here.</p>
-      </div>
+      <CategoryList />
     </div>
   );
 }
