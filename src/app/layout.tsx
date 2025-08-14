@@ -118,9 +118,12 @@ export default function RootLayout({
         <SidebarProvider>
           <Sidebar>
             <SidebarHeader>
-              <div className="flex items-center gap-2">
-                <Logo className="size-8 text-primary" />
-                <span className="text-lg font-semibold text-foreground">ARKSHEETS</span>
+              <div className="flex items-center gap-3">
+                <Logo className="size-9 text-primary" />
+                <div className="flex flex-col">
+                  <h1 className="text-xl font-bold tracking-tight text-foreground">ARKSHEETS</h1>
+                  <p className="text-sm text-muted-foreground">Workspace</p>
+                </div>
               </div>
             </SidebarHeader>
             <SidebarContent>
@@ -133,7 +136,7 @@ export default function RootLayout({
                         <AccordionItem value={item.title} key={item.title}>
                           <AccordionTrigger>
                             <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
-                                <span className="text-sm font-bold leading-[18px]">{item.title}</span>
+                                <span className="text-[15px] font-bold leading-[18px]">{item.title}</span>
                             </div>
                           </AccordionTrigger>
                           <AccordionContent>
