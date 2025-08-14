@@ -35,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full dark">
+    <html lang="en" className="h-full">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -47,7 +47,7 @@ export default function RootLayout({
             <SidebarHeader>
               <div className="flex items-center gap-2">
                 <Logo className="size-8 text-primary" />
-                <span className="text-lg font-semibold">ARKSHEETS</span>
+                <span className="text-lg font-semibold text-foreground">ARKSHEETS</span>
               </div>
             </SidebarHeader>
             <SidebarContent>
@@ -74,7 +74,7 @@ export default function RootLayout({
                       <AvatarFallback>A</AvatarFallback>
                     </Avatar>
                     <div className="text-left">
-                      <p className="text-sm font-medium">Admin</p>
+                      <p className="text-sm font-medium text-foreground">Admin</p>
                       <p className="text-xs text-muted-foreground">admin@stockpilot.com</p>
                     </div>
                   </Button>
