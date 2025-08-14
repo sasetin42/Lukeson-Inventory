@@ -37,6 +37,6 @@ export const inventoryKpis: InventoryKpi[] = [
   { title: 'Categories', value: 1, icon: Tag, subtext: 'Categories', color: 'purple' },
   { title: 'Low Stock', value: 0, icon: AlertTriangle, subtext: 'Low Stock', color: 'yellow' },
   { title: 'Out of Stock', value: 0, icon: XCircle, subtext: 'Out of Stock', color: 'red' },
-  { title: 'Added This Week', value: 0, icon: Star, subtext: 'Added This Week', color: 'indigo' },
+  { title: 'This Week', value: 0, icon: Star, subtext: 'Added This Week', color: 'indigo' },
   { title: 'Pending Orders', value: 2, icon: Clock, subtext: 'Pending Orders', color: 'orange' },
 ];
