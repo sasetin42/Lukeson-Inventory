@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { Logo } from '@/components/icons/logo';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, SidebarContent, SidebarSeparator } from '@/components/ui/sidebar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import PageHeader from '@/components/page-header';
 
 export const metadata: Metadata = {
   title: 'ARKSHEETS - All-in-One Business Management',
@@ -51,7 +52,7 @@ export default function RootLayout({
               </div>
             </SidebarHeader>
             <SidebarContent>
-              <SidebarMenu>
+              <SidebarMenu className="p-4">
                 {navItems.map((item) => (
                   <SidebarMenuItem key={item.label}>
                     <SidebarMenuButton asChild>
@@ -102,7 +103,7 @@ export default function RootLayout({
             </SidebarFooter>
           </Sidebar>
           <SidebarInset className="flex flex-col transition-all duration-300 ease-in-out">
-            <header className="sticky top-0 z-10 flex h-14 items-center gap-4 bg-transparent px-4 md:px-6">
+            <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4 sm:h-auto sm:border-0 md:px-6">
               <SidebarTrigger className="md:hidden" />
               <div className="flex-1" />
                <Link href="/settings">

@@ -18,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { usePathname } from 'next/navigation'
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -512,11 +513,11 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-primary data-[active=true]:font-medium data-[active=true]:text-primary-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-all hover:bg-[#EEF6FE] focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+        default: "",
         outline:
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
@@ -544,7 +545,6 @@ const SidebarMenuButton = React.forwardRef<
   (
     {
       asChild = false,
-      isActive = false,
       variant = "default",
       size = "default",
       tooltip,
@@ -555,6 +555,35 @@ const SidebarMenuButton = React.forwardRef<
   ) => {
     const Comp = asChild ? Slot : "button"
     const { isMobile, state } = useSidebar()
+    const pathname = usePathname()
+    // @ts-ignore
+    const isActive = props.href === pathname
+
+    const iconColor = React.useMemo(() => {
+        const child = React.Children.toArray(props.children).find(c => React.isValidElement(c) && (c.props as any).className?.includes('text-'))
+        if(child && React.isValidElement(child)) {
+            const match = (child.props as any).className.match(/text-([a-z]+)-(\d+)/);
+            if (match) {
+                const color = match[1];
+                const shade = match[2];
+                // Note: This is a simplification and might not work for all Tailwind colors.
+                // It assumes standard color names. You might need a more robust mapping.
+                const colorMap: Record<string, string> = {
+                    sky: '#0ea5e9',
+                    green: '#22c55e',
+                    blue: '#3b82f6',
+                    orange: '#f97316',
+                    purple: '#a855f7',
+                    red: '#ef4444',
+                    yellow: '#eab308',
+                    indigo: '#6366f1',
+                    pink: '#ec4899',
+                };
+                return colorMap[color];
+            }
+        }
+        return 'transparent'
+    }, [props.children]);
 
     const button = (
       <Comp
@@ -562,7 +591,13 @@ const SidebarMenuButton = React.forwardRef<
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+        className={cn(sidebarMenuButtonVariants({ variant, size }), {
+            'bg-[#EEF6FE] text-[#3A82F7]': isActive,
+        }, className)}
+        style={{
+            ...props.style,
+            borderLeft: isActive || undefined ? `3px solid ${iconColor}` : '3px solid transparent'
+        }}
         {...props}
       />
     )
