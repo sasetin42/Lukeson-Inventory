@@ -112,7 +112,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased h-full bg-background transition-colors duration-300">
         <SidebarProvider>
@@ -133,7 +133,7 @@ export default function RootLayout({
                         <AccordionItem value={item.title} key={item.title}>
                           <AccordionTrigger>
                             <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
-                                <span className="text-sm font-medium">{item.title}</span>
+                                <span className="text-sm font-bold leading-[18px]">{item.title}</span>
                             </div>
                           </AccordionTrigger>
                           <AccordionContent>
@@ -143,7 +143,7 @@ export default function RootLayout({
                                   <SidebarMenuButton asChild>
                                     <Link href={link.href}>
                                       <link.icon className={link.color} />
-                                      <span>{link.label}</span>
+                                      <span className="font-bold leading-[18px]">{link.label}</span>
                                     </Link>
                                   </SidebarMenuButton>
                                 </SidebarMenuItem>
