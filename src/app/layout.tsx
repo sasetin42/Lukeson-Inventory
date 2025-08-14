@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 const navGroups = [
   {
     title: 'CORE FEATURES',
+    color: 'text-blue-500',
     items: [
       {
         title: 'Overview Management',
@@ -59,6 +60,7 @@ const navGroups = [
   },
   {
     title: 'OPERATIONS',
+    color: 'text-green-500',
     items: [
       {
         title: 'Sales and CRM',
@@ -85,6 +87,7 @@ const navGroups = [
   },
   {
     title: 'SETTINGS',
+    color: 'text-red-500',
     items: [
       {
         title: 'System Settings',
@@ -124,7 +127,7 @@ export default function RootLayout({
               <div className="flex flex-col gap-2 px-2">
                 {navGroups.map((group) => (
                   <div key={group.title}>
-                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 py-2">{group.title}</h3>
+                    <h3 className={`text-xs font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
                     {group.items.map((item) => (
                       <Collapsible key={item.title} defaultOpen className="w-full">
                         <CollapsibleTrigger className="w-full">
