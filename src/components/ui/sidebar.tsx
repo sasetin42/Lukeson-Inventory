@@ -77,14 +77,15 @@ const SidebarProvider = React.forwardRef<
 
     // Defer reading the cookie until after hydration
     React.useEffect(() => {
-        const cookieValue = document.cookie
-          .split('; ')
-          .find(row => row.startsWith(`${SIDEBAR_COOKIE_NAME}=`))
-          ?.split('=')[1];
-        
-        if (cookieValue !== undefined) {
-            _setOpen(cookieValue === 'true');
-        }
+      if (typeof document === 'undefined') return;
+      const cookieValue = document.cookie
+        .split('; ')
+        .find(row => row.startsWith(`${SIDEBAR_COOKIE_NAME}=`))
+        ?.split('=')[1];
+      
+      if (cookieValue !== undefined) {
+          _setOpen(cookieValue === 'true');
+      }
     }, []);
 
     const open = openProp ?? _open
