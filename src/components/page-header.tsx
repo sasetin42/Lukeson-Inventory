@@ -14,7 +14,7 @@ export default function PageHeader({ title, description, icon, actions }: PageHe
         <div className="flex items-center gap-4">
           {icon}
           <div className="grid gap-1">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{title}</h1>
+            <h1 className="text-xl font-bold tracking-tight">{title}</h1>
             {description && <p className="text-muted-foreground">{description}</p>}
           </div>
         </div>
