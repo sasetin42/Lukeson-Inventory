@@ -51,7 +51,7 @@ export default function InvoiceList() {
               <span>Due Date: {invoice.date}</span>
               <Badge variant={getStatusVariant(invoice.status)}>{invoice.status}</Badge>
             </div>
-            <div className="text-2xl font-semibold text-right">
+            <div className="text-xl font-semibold text-right">
               ${invoice.amount.toFixed(2)}
             </div>
           </CardContent>
