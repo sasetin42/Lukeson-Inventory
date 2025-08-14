@@ -12,7 +12,7 @@ export default function AnalyticsPage() {
       <PageHeader
         title="Analytics"
         description="Detailed analytics and reports."
-        icon={<BarChart2 className="h-6 w-6" />}
+        icon={<BarChart2 className="h-6 w-6 text-green-500" />}
       />
 
       <Tabs defaultValue="overview">
