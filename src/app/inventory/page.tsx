@@ -39,7 +39,8 @@ export default function InventoryPage() {
     setIsSubmitting(true);
     try {
       let imageUrl = '';
-      if (data.image) {
+      // Only upload if a new image is provided (it will be a base64 string)
+      if (data.image && typeof data.image === 'string' && data.image.startsWith('data:image')) {
         const storageRef = ref(storage, `products/${Date.now()}_${data.name.replace(/\s+/g, '-')}.webp`);
         const snapshot = await uploadString(storageRef, data.image, 'data_url');
         imageUrl = await getDownloadURL(snapshot.ref);
