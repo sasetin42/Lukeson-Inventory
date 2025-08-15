@@ -62,7 +62,7 @@ export function AddCategoryDialog({
     onOpenChange, 
     onConfirm,
     isSubmitting = false,
-    existingCategories
+    existingCategories = []
 }: AddCategoryDialogProps) {
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
@@ -140,7 +140,7 @@ export function AddCategoryDialog({
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">No Parent</SelectItem>
-                      {existingCategories && existingCategories.map(cat => (
+                      {existingCategories.map(cat => (
                         <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                       ))}
                     </SelectContent>
