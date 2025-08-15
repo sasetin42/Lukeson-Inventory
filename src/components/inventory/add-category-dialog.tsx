@@ -50,7 +50,7 @@ interface AddCategoryDialogProps {
   onOpenChange: (open: boolean) => void;
   onConfirm: (data: CategoryFormValues) => void;
   isSubmitting?: boolean;
-  existingCategories?: Category[];
+  existingCategories: Category[]; // Removed optional and default from here
 }
 
 const iconList = Object.keys(LucideIcons).filter(key => 
@@ -62,7 +62,7 @@ export function AddCategoryDialog({
     onOpenChange, 
     onConfirm,
     isSubmitting = false,
-    existingCategories = []
+    existingCategories = [] // Set default value here
 }: AddCategoryDialogProps) {
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
