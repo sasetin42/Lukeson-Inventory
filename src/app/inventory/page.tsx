@@ -295,7 +295,7 @@ export default function InventoryPage() {
         onOpenChange={setAddCategoryOpen}
         onConfirm={handleAddCategory}
         isSubmitting={isSubmitting}
-        existingCategories={categories}
+        existingCategories={categories || []}
       />
     </div>
   );
