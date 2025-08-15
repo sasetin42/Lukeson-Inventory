@@ -85,16 +85,14 @@ export default function InventoryPage() {
               Create a new product with image upload, automatic compression and intelligent validation
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="flex-grow pr-1 -mr-1 no-scrollbar">
-            <div className="px-6">
-              <AddProductForm 
-                onSuccess={handleAddProduct} 
-                categories={uniqueCategories} 
-                suppliers={supplierNames}
-                onCancel={() => setAddProductOpen(false)}
-              />
-            </div>
-          </ScrollArea>
+          <div className='flex-grow overflow-y-auto no-scrollbar'>
+            <AddProductForm 
+              onSuccess={handleAddProduct} 
+              categories={uniqueCategories} 
+              suppliers={supplierNames}
+              onCancel={() => setAddProductOpen(false)}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </div>
