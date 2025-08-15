@@ -6,8 +6,14 @@ export type Product = {
   stock: number;
   price: number;
   status: 'In Stock' | 'Low Stock' | 'Out of Stock';
-  description: string;
+  description?: string;
   tags: string[];
+  supplier?: string;
+  unit?: string;
+  barcode?: string;
+  minStock: number;
+  maxStock: number;
+  initialStock: number;
 };
 
 export type Supplier = {

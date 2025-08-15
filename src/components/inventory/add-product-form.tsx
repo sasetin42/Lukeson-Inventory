@@ -1,6 +1,6 @@
 'use client';
 
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -21,68 +21,90 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { X } from 'lucide-react';
+import { Upload, X, Camera, Sparkles, Wand } from 'lucide-react';
 import type { Product } from '@/lib/types';
 
 const productSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   sku: z.string().min(1, 'SKU is required.'),
-  category: z.string().min(1, 'Category is required.'),
-  stock: z.coerce.number().min(0, 'Stock cannot be negative.'),
-  price: z.coerce.number().min(0, 'Price cannot be negative.'),
-  status: z.enum(['In Stock', 'Low Stock', 'Out of Stock']),
   description: z.string().optional(),
-  tags: z.array(z.object({ value: z.string() })).optional(),
+  category: z.string().min(1, 'Category is required.'),
+  supplier: z.string().min(1, 'Supplier is required.'),
+  price: z.coerce.number().min(0, 'Price cannot be negative.'),
+  unit: z.string().min(1, 'Unit is required.'),
+  barcode: z.string().optional(),
+  minStock: z.coerce.number().min(0, 'Min stock cannot be negative.'),
+  maxStock: z.coerce.number().min(0, 'Max stock cannot be negative.'),
+  initialStock: z.coerce.number().min(0, 'Initial stock cannot be negative.'),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
 interface AddProductFormProps {
-  onSuccess: (newProduct: Product) => void;
+  onSuccess: (newProduct: ProductFormValues) => void;
+  onCancel: () => void;
   categories: string[];
+  suppliers: string[];
 }
 
-export function AddProductForm({ onSuccess, categories }: AddProductFormProps) {
+export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: AddProductFormProps) {
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: '',
       sku: '',
       category: '',
-      stock: 0,
+      supplier: '',
       price: 0,
-      status: 'In Stock',
+      unit: 'Pieces',
       description: '',
-      tags: [],
+      barcode: '',
+      minStock: 0,
+      maxStock: 0,
+      initialStock: 0,
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: 'tags',
-  });
-
   function onSubmit(data: ProductFormValues) {
-    const newProduct: Product = {
-      ...data,
-      id: `PROD${Date.now()}`,
-      tags: data.tags ? data.tags.map((t) => t.value) : [],
-    };
-    onSuccess(newProduct);
+    onSuccess(data);
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div>
+          <FormLabel>Product Image</FormLabel>
+          <p className="text-sm text-muted-foreground mb-2">Upload a high-quality image of your product. Will be optimized to 800x800px.</p>
+          <div className="flex items-center justify-center w-full">
+              <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/80">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                      <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                      <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, GIF (MAX. 10MB)</p>
+                  </div>
+              </div>
+          </div>
+           <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                    <Sparkles className="h-3 w-3 text-purple-500" />
+                    Auto compression
+                </div>
+                <div className="flex items-center gap-1">
+                    <Wand className="h-3 w-3 text-purple-500" />
+                    WebP conversion
+                </div>
+            </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Product Name</FormLabel>
+                <FormLabel>Product Name *</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Smart T-Shirt" {...field} />
+                  <Input placeholder="Enter product name" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -93,9 +115,9 @@ export function AddProductForm({ onSuccess, categories }: AddProductFormProps) {
             name="sku"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>SKU</FormLabel>
+                <FormLabel>SKU *</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., SKU-TS-001" {...field} />
+                  <Input placeholder="Product SKU" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -111,7 +133,7 @@ export function AddProductForm({ onSuccess, categories }: AddProductFormProps) {
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Tell us about the product..."
+                  placeholder="Product description..."
                   className="resize-none"
                   {...field}
                 />
@@ -121,20 +143,20 @@ export function AddProductForm({ onSuccess, categories }: AddProductFormProps) {
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="category"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Category</FormLabel>
+                <FormLabel>Category *</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
+                      <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -149,101 +171,140 @@ export function AddProductForm({ onSuccess, categories }: AddProductFormProps) {
               </FormItem>
             )}
           />
-          <FormField
+           <FormField
             control={form.control}
-            name="stock"
+            name="supplier"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Stock Level</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="0" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Unit Price (₱)</FormLabel>
-                <FormControl>
-                  <Input type="number" placeholder="0.00" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        
-        <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status</FormLabel>
-                 <Select
+                <FormLabel>Supplier *</FormLabel>
+                <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="Select supplier" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="In Stock">In Stock</SelectItem>
-                    <SelectItem value="Low Stock">Low Stock</SelectItem>
-                    <SelectItem value="Out of Stock">Out of Stock</SelectItem>
+                    {suppliers.map((supplier) => (
+                      <SelectItem key={supplier} value={supplier}>
+                        {supplier}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-        <div>
-          <FormLabel>Tags</FormLabel>
-          <div className="space-y-2 mt-2">
-            {fields.map((field, index) => (
-              <div key={field.id} className="flex items-center gap-2">
-                <FormField
-                  control={form.control}
-                  name={`tags.${index}.value`}
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormControl>
-                        <Input placeholder="e.g., cotton" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => remove(index)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="mt-2"
-            onClick={() => append({ value: '' })}
-          >
-            Add Tag
-          </Button>
         </div>
 
-        <Button type="submit" className="w-full">
-          Add Product
-        </Button>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Unit Price ($) *</FormLabel>
+                    <FormControl>
+                    <Input type="number" placeholder="0.00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="unit"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Unit</FormLabel>
+                    <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    >
+                    <FormControl>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Select unit" />
+                        </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                        <SelectItem value="Pieces">Pieces</SelectItem>
+                        <SelectItem value="Box">Box</SelectItem>
+                        <SelectItem value="Kg">Kg</SelectItem>
+                        <SelectItem value="Pair">Pair</SelectItem>
+                    </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="barcode"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Barcode</FormLabel>
+                    <FormControl>
+                    <Input placeholder="Barcode number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <FormField
+                control={form.control}
+                name="minStock"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Min Stock</FormLabel>
+                    <FormControl>
+                    <Input type="number" placeholder="0" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="maxStock"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Max Stock</FormLabel>
+                    <FormControl>
+                    <Input type="number" placeholder="0" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="initialStock"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Initial Stock</FormLabel>
+                    <FormControl>
+                    <Input type="number" placeholder="0" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+        </div>
+        
+        <div className="flex justify-end gap-4 pt-4">
+            <Button type="button" variant="outline" onClick={onCancel}>
+                Cancel
+            </Button>
+            <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                Add Product
+            </Button>
+        </div>
       </form>
     </Form>
   );

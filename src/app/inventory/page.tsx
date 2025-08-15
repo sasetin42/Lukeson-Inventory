@@ -9,8 +9,9 @@ import ProductsTab from "@/components/inventory/products-tab";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AddProductForm } from "@/components/inventory/add-product-form";
 import type { Product } from '@/lib/types';
-import { products as initialProducts } from '@/lib/data';
+import { products as initialProducts, suppliers } from '@/lib/data';
 import { useToast } from "@/hooks/use-toast";
+import { Camera } from 'lucide-react';
 
 
 export default function InventoryPage() {
@@ -18,8 +19,15 @@ export default function InventoryPage() {
   const [isAddProductOpen, setAddProductOpen] = useState(false);
   const { toast } = useToast();
 
-  const handleAddProduct = (newProduct: Product) => {
-    setProducts(prevProducts => [...prevProducts, newProduct]);
+  const handleAddProduct = (newProduct: Omit<Product, 'id' | 'status' | 'tags'>) => {
+    const productToAdd: Product = {
+      ...newProduct,
+      id: `PROD${Date.now()}`,
+      status: newProduct.initialStock > 0 ? (newProduct.initialStock < newProduct.minStock ? 'Low Stock' : 'In Stock') : 'Out of Stock',
+      stock: newProduct.initialStock,
+      tags: [],
+    };
+    setProducts(prevProducts => [...prevProducts, productToAdd]);
     setAddProductOpen(false);
     toast({
         title: "Product Added",
@@ -28,6 +36,7 @@ export default function InventoryPage() {
   };
   
   const uniqueCategories = [...new Set(products.map(p => p.category))];
+  const supplierNames = suppliers.map(s => s.name);
 
   return (
     <div className="flex flex-col gap-6">
@@ -65,14 +74,22 @@ export default function InventoryPage() {
       />
       
       <Dialog open={isAddProductOpen} onOpenChange={setAddProductOpen}>
-        <DialogContent className="sm:max-w-[625px]">
+        <DialogContent className="sm:max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Add a New Product</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Add New Product with Smart Features
+            </DialogTitle>
             <DialogDescription>
-              Fill out the details below to add a new product to your inventory.
+              Create a new product with image upload, automatic compression and intelligent validation
             </DialogDescription>
           </DialogHeader>
-          <AddProductForm onSuccess={handleAddProduct} categories={uniqueCategories} />
+          <AddProductForm 
+            onSuccess={handleAddProduct} 
+            categories={uniqueCategories} 
+            suppliers={supplierNames}
+            onCancel={() => setAddProductOpen(false)}
+          />
         </DialogContent>
       </Dialog>
     </div>
