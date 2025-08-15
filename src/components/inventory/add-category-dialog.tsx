@@ -50,7 +50,7 @@ interface AddCategoryDialogProps {
   onOpenChange: (open: boolean) => void;
   onConfirm: (data: CategoryFormValues) => void;
   isSubmitting?: boolean;
-  existingCategories: Category[];
+  existingCategories?: Category[];
 }
 
 const iconList = Object.keys(LucideIcons).filter(key => 
