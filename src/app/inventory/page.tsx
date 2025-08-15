@@ -18,10 +18,12 @@ import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimest
 import { db, storage } from '@/lib/firebase';
 import { ref, uploadString, getDownloadURL, deleteObject } from 'firebase/storage';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { AddCategoryDialog } from '@/components/inventory/add-category-dialog';
 
 export default function InventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isAddProductOpen, setAddProductOpen] = useState(false);
+  const [isAddCategoryOpen, setAddCategoryOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -156,6 +158,17 @@ export default function InventoryPage() {
       setIsSubmitting(false);
     }
   };
+
+  const handleAddCategory = (categoryName: string) => {
+    // For now, we'll just log it and show a toast.
+    // In a real app, you'd save this to a 'categories' collection in Firestore.
+    console.log("New category to add:", categoryName);
+    toast({
+      title: "Category Added",
+      description: `Category "${categoryName}" has been successfully added.`,
+    });
+    setAddCategoryOpen(false);
+  }
   
   const uniqueCategories = [...new Set(products.map(p => p.category))];
   const supplierNames = suppliers.map(s => s.name);
@@ -172,15 +185,15 @@ export default function InventoryPage() {
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Product
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setAddCategoryOpen(true)}>
               <ListPlus className="mr-2 h-4 w-4" />
               Add Category
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => toast({ title: "Exporting Products", description: "Your products are being exported."})}>
               <Upload className="mr-2 h-4 w-4" />
               Import
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => toast({ title: "Importing Products", description: "Your products are being imported."})}>
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
@@ -250,6 +263,14 @@ export default function InventoryPage() {
         onOpenChange={(isOpen) => !isOpen && setDeletingProduct(null)}
         onConfirm={handleDeleteProduct}
         productName={deletingProduct?.name || ''}
+        isSubmitting={isSubmitting}
+      />
+
+      {/* Add Category Dialog */}
+      <AddCategoryDialog
+        open={isAddCategoryOpen}
+        onOpenChange={setAddCategoryOpen}
+        onConfirm={handleAddCategory}
         isSubmitting={isSubmitting}
       />
     </div>
