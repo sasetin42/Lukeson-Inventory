@@ -140,7 +140,7 @@ export function AddCategoryDialog({
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">No Parent</SelectItem>
-                      {existingCategories.map(cat => (
+                      {existingCategories && existingCategories.map(cat => (
                         <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                       ))}
                     </SelectContent>
