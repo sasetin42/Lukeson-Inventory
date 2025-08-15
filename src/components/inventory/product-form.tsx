@@ -32,7 +32,7 @@ const productSchema = z.object({
   sku: z.string().min(1, 'SKU is required.'),
   description: z.string().optional(),
   category: z.string().min(1, 'Category is required.'),
-  supplier: z.string().min(1, 'Supplier is required.'),
+  supplier: z.string().optional(),
   price: z.coerce.number().min(0, 'Price cannot be negative.'),
   unit: z.string().min(1, 'Unit is required.'),
   barcode: z.string().optional(),
@@ -306,7 +306,7 @@ export function ProductForm({
               name="supplier"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Supplier *</FormLabel>
+                  <FormLabel>Supplier</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
