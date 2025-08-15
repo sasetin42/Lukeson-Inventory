@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,9 +12,11 @@ interface ProductsTabProps {
     products: Product[];
     categories: string[];
     onAddProduct: () => void;
+    onEditProduct: (product: Product) => void;
+    onDeleteProduct: (product: Product) => void;
 }
 
-export default function ProductsTab({ products, categories, onAddProduct }: ProductsTabProps) {
+export default function ProductsTab({ products, categories, onAddProduct, onEditProduct, onDeleteProduct }: ProductsTabProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -74,7 +77,12 @@ export default function ProductsTab({ products, categories, onAddProduct }: Prod
         </div>
       </div>
       <TabsContent value="products" className="mt-4">
-        <InventoryTable products={filteredProducts} onAddProduct={onAddProduct} />
+        <InventoryTable 
+            products={filteredProducts} 
+            onAddProduct={onAddProduct}
+            onEditProduct={onEditProduct}
+            onDeleteProduct={onDeleteProduct}
+        />
       </TabsContent>
       <TabsContent value="categories">
         Categories content

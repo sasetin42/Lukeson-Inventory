@@ -22,9 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Upload, X, Camera, Sparkles, Wand, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Camera, Sparkles, Wand, Image as ImageIcon, Loader2 } from 'lucide-react';
 import type { Product } from '@/lib/types';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 
 const productSchema = z.object({
@@ -44,14 +44,23 @@ const productSchema = z.object({
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
-interface AddProductFormProps {
-  onSuccess: (newProduct: Omit<Product, 'id' | 'status' | 'tags' | 'stock'> & { initialStock: number }) => void;
+interface ProductFormProps {
+  onSuccess: (data: ProductFormValues) => void;
   onCancel: () => void;
   categories: string[];
   suppliers: string[];
+  product?: Product | null;
+  isSubmitting?: boolean;
 }
 
-export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: AddProductFormProps) {
+export function ProductForm({ 
+    onSuccess, 
+    onCancel, 
+    categories, 
+    suppliers, 
+    product,
+    isSubmitting = false 
+}: ProductFormProps) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -72,6 +81,29 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
       initialStock: 0,
     },
   });
+
+  useEffect(() => {
+    if (product) {
+      form.reset({
+        name: product.name,
+        sku: product.sku,
+        description: product.description || '',
+        category: product.category,
+        supplier: product.supplier || '',
+        price: product.price,
+        unit: product.unit || 'Pieces',
+        barcode: product.barcode || '',
+        minStock: product.minStock,
+        maxStock: product.maxStock,
+        initialStock: product.stock,
+      });
+      // Note: Image is not reset as we don't store it back.
+      // A real implementation might fetch the image URL and set it.
+      setImagePreview(null); 
+    } else {
+      form.reset();
+    }
+  }, [product, form]);
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith('image/')) {
@@ -249,6 +281,7 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -276,6 +309,7 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -317,8 +351,9 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
                   <FormItem>
                       <FormLabel>Unit</FormLabel>
                       <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        value={field.value}
                       >
                       <FormControl>
                           <SelectTrigger>
@@ -383,7 +418,7 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
                   name="initialStock"
                   render={({ field }) => (
                   <FormItem>
-                      <FormLabel>Initial Stock</FormLabel>
+                      <FormLabel>{product ? 'Current Stock' : 'Initial Stock'}</FormLabel>
                       <FormControl>
                       <Input type="number" placeholder="0" {...field} />
                       </FormControl>
@@ -395,16 +430,15 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
         </div>
         
         <div className="flex justify-end gap-4 sticky bottom-0 bg-background/95 backdrop-blur-sm p-6 -mx-0">
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
                 Cancel
             </Button>
-            <Button type="submit" className="bg-green-600 hover:bg-green-700">
-                Add Product
+            <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {product ? 'Save Changes' : 'Add Product'}
             </Button>
         </div>
       </form>
     </Form>
   );
 }
-
-    

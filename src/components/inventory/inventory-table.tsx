@@ -1,3 +1,4 @@
+
 'use client';
 import type { Product } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
@@ -9,13 +10,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MoreHorizontal, Package, PlusCircle } from "lucide-react";
+import { MoreHorizontal, Package, PlusCircle, Edit, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
@@ -23,9 +25,11 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 interface InventoryTableProps {
   products: Product[];
   onAddProduct: () => void;
+  onEditProduct: (product: Product) => void;
+  onDeleteProduct: (product: Product) => void;
 }
 
-export default function InventoryTable({ products, onAddProduct }: InventoryTableProps) {
+export default function InventoryTable({ products, onAddProduct, onEditProduct, onDeleteProduct }: InventoryTableProps) {
   const getStatusVariant = (status: string) => {
     switch (status) {
       case "In Stock":
@@ -84,8 +88,18 @@ export default function InventoryTable({ products, onAddProduct }: InventoryTabl
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onEditProduct(product)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          className="text-red-600"
+                          onClick={() => onDeleteProduct(product)}
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
