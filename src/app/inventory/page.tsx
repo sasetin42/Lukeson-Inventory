@@ -75,8 +75,8 @@ export default function InventoryPage() {
       />
       
       <Dialog open={isAddProductOpen} onOpenChange={setAddProductOpen}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="p-6 pb-0">
             <DialogTitle className="flex items-center gap-2">
                 <Camera className="h-5 w-5" />
                 Add New Product with Smart Features
@@ -85,13 +85,15 @@ export default function InventoryPage() {
               Create a new product with image upload, automatic compression and intelligent validation
             </DialogDescription>
           </DialogHeader>
-          <ScrollArea className="flex-grow pr-6 -mr-6">
-            <AddProductForm 
-              onSuccess={handleAddProduct} 
-              categories={uniqueCategories} 
-              suppliers={supplierNames}
-              onCancel={() => setAddProductOpen(false)}
-            />
+          <ScrollArea className="flex-grow pr-1 -mr-1 no-scrollbar">
+            <div className="px-6">
+              <AddProductForm 
+                onSuccess={handleAddProduct} 
+                categories={uniqueCategories} 
+                suppliers={supplierNames}
+                onCancel={() => setAddProductOpen(false)}
+              />
+            </div>
           </ScrollArea>
         </DialogContent>
       </Dialog>

@@ -71,7 +71,7 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div>
           <FormLabel>Product Image</FormLabel>
           <p className="text-sm text-muted-foreground mb-2">Upload a high-quality image of your product. Will be optimized to 800x800px.</p>
@@ -297,7 +297,7 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
             />
         </div>
         
-        <div className="flex justify-end gap-4 sticky bottom-0 bg-background py-4">
+        <div className="flex justify-end gap-4 sticky bottom-0 bg-background py-4 px-6 -mx-6">
             <Button type="button" variant="outline" onClick={onCancel}>
                 Cancel
             </Button>
