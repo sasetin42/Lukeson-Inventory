@@ -21,8 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Upload, X, Camera, Sparkles, Wand } from 'lucide-react';
+import { Upload, X, Camera, Sparkles, Wand, Image as ImageIcon } from 'lucide-react';
 import type { Product } from '@/lib/types';
+import { useState, useRef } from 'react';
+import Image from 'next/image';
 
 const productSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -36,6 +38,7 @@ const productSchema = z.object({
   minStock: z.coerce.number().min(0, 'Min stock cannot be negative.'),
   maxStock: z.coerce.number().min(0, 'Max stock cannot be negative.'),
   initialStock: z.coerce.number().min(0, 'Initial stock cannot be negative.'),
+  image: z.any().optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -48,6 +51,10 @@ interface AddProductFormProps {
 }
 
 export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: AddProductFormProps) {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -65,6 +72,30 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
     },
   });
 
+  const handleFileChange = (file: File | null) => {
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImagePreview(reader.result as string);
+            form.setValue('image', file);
+        };
+        reader.readAsDataURL(file);
+    }
+  }
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0] ?? null;
+    handleFileChange(file);
+  };
+  
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setIsDragging(false);
+      const file = event.dataTransfer.files?.[0] ?? null;
+      handleFileChange(file);
+  };
+
   function onSubmit(data: ProductFormValues) {
     onSuccess(data);
   }
@@ -76,14 +107,49 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
           <div>
             <FormLabel>Product Image</FormLabel>
             <p className="text-sm text-muted-foreground mb-2">Upload a high-quality image of your product. Will be optimized to 800x800px.</p>
-            <div className="flex items-center justify-center w-full">
-                <div className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/80">
+            <div 
+              className={`flex items-center justify-center w-full relative ${isDragging ? 'bg-muted/80' : ''}`}
+              onDragEnter={() => setIsDragging(true)}
+              onDragLeave={() => setIsDragging(false)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={handleDrop}
+            >
+              {imagePreview ? (
+                <div className="relative w-full h-48 rounded-lg overflow-hidden">
+                  <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="contain" />
+                  <Button 
+                    type="button" 
+                    variant="destructive" 
+                    size="icon" 
+                    className="absolute top-2 right-2 h-7 w-7"
+                    onClick={() => {
+                      setImagePreview(null);
+                      form.setValue('image', null);
+                      if(fileInputRef.current) fileInputRef.current.value = '';
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div 
+                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/80"
+                  onClick={() => fileInputRef.current?.click()}
+                >
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
                         <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                         <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, GIF (MAX. 10MB)</p>
                     </div>
+                    <Input 
+                      ref={fileInputRef}
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                    />
                 </div>
+              )}
             </div>
             <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
