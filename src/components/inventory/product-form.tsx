@@ -61,7 +61,7 @@ export function ProductForm({
     product,
     isSubmitting = false 
 }: ProductFormProps) {
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(product?.image || null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -79,6 +79,7 @@ export function ProductForm({
       minStock: 0,
       maxStock: 0,
       initialStock: 0,
+      image: null,
     },
   });
 
@@ -96,12 +97,12 @@ export function ProductForm({
         minStock: product.minStock,
         maxStock: product.maxStock,
         initialStock: product.stock,
+        image: product.image,
       });
-      // Note: Image is not reset as we don't store it back.
-      // A real implementation might fetch the image URL and set it.
-      setImagePreview(null); 
+      setImagePreview(product.image || null);
     } else {
       form.reset();
+      setImagePreview(null);
     }
   }, [product, form]);
 
