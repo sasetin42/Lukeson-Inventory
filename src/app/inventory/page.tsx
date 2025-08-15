@@ -12,6 +12,7 @@ import type { Product } from '@/lib/types';
 import { products as initialProducts, suppliers } from '@/lib/data';
 import { useToast } from "@/hooks/use-toast";
 import { Camera } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 
 export default function InventoryPage() {
@@ -74,7 +75,7 @@ export default function InventoryPage() {
       />
       
       <Dialog open={isAddProductOpen} onOpenChange={setAddProductOpen}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
                 <Camera className="h-5 w-5" />
@@ -84,12 +85,14 @@ export default function InventoryPage() {
               Create a new product with image upload, automatic compression and intelligent validation
             </DialogDescription>
           </DialogHeader>
-          <AddProductForm 
-            onSuccess={handleAddProduct} 
-            categories={uniqueCategories} 
-            suppliers={supplierNames}
-            onCancel={() => setAddProductOpen(false)}
-          />
+          <ScrollArea className="flex-grow pr-6 -mr-6">
+            <AddProductForm 
+              onSuccess={handleAddProduct} 
+              categories={uniqueCategories} 
+              suppliers={supplierNames}
+              onCancel={() => setAddProductOpen(false)}
+            />
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>

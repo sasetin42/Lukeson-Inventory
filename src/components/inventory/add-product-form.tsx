@@ -71,15 +71,15 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <FormLabel>Product Image</FormLabel>
           <p className="text-sm text-muted-foreground mb-2">Upload a high-quality image of your product. Will be optimized to 800x800px.</p>
           <div className="flex items-center justify-center w-full">
-              <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/80">
+              <div className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/80">
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                      <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                      <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
+                      <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                       <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, GIF (MAX. 10MB)</p>
                   </div>
               </div>
@@ -96,7 +96,7 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
             </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="name"
@@ -134,7 +134,7 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
               <FormControl>
                 <Textarea
                   placeholder="Product description..."
-                  className="resize-none"
+                  className="resize-none min-h-[60px]"
                   {...field}
                 />
               </FormControl>
@@ -143,7 +143,7 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
           )}
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="category"
@@ -200,7 +200,7 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
           />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
                 control={form.control}
                 name="price"
@@ -255,7 +255,7 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
             />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
                 control={form.control}
                 name="minStock"
@@ -297,7 +297,7 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
             />
         </div>
         
-        <div className="flex justify-end gap-4 pt-4">
+        <div className="flex justify-end gap-4 sticky bottom-0 bg-background py-4">
             <Button type="button" variant="outline" onClick={onCancel}>
                 Cancel
             </Button>
