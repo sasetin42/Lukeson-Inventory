@@ -92,8 +92,8 @@ interface ProductFormProps {
 }
 
 const getInitialValues = (product: Product | null | undefined): Partial<ProductFormValues> => {
-    const defaults = {
-        productCode: product ? product.productCode : `PRO-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
+    const defaults: Partial<ProductFormValues> & { fields: any } = {
+        productCode: product?.productCode ?? `PRO-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
         name: '',
         sku: '',
         description: '',
@@ -105,8 +105,8 @@ const getInitialValues = (product: Product | null | undefined): Partial<ProductF
         fields: {
             ledQty: undefined,
             voltage: undefined,
-            wattage: 0,
-            meters: 0,
+            wattage: undefined,
+            meters: undefined,
             size: '',
             color: '#000000',
         },
@@ -116,6 +116,8 @@ const getInitialValues = (product: Product | null | undefined): Partial<ProductF
         return {
             ...defaults,
             ...product,
+            stock: product.stock ?? 0,
+            reorderLevel: product.reorderLevel ?? 0,
             fields: {
                 ...defaults.fields,
                 ...(product.fields as any),
@@ -223,7 +225,7 @@ export function ProductForm({
       const initialValues = getInitialValues(product);
       form.reset(initialValues);
       setImagePreview(product?.imageUrl || null);
-  }, [product, form]);
+  }, [product, form.reset]);
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith('image/')) {
@@ -306,78 +308,81 @@ export function ProductForm({
           
 
           {selectedCategory && (
-            <div className="space-y-4">
-                <div className="col-span-full">
-                  <FormLabel>Product Image</FormLabel>
-                  <p className="text-sm text-muted-foreground mb-2">Upload a high-quality image of your product. Will be optimized to 800x800px.</p>
-                  <div 
-                    className={`flex items-center justify-center w-full relative ${isDragging ? 'bg-muted/80' : ''}`}
-                    onDragEnter={() => setIsDragging(true)} onDragLeave={() => setIsDragging(false)}
-                    onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}
-                  >
-                    {imagePreview ? (
-                      <div className="relative w-full h-48 rounded-lg overflow-hidden">
-                        <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="contain" />
-                        <Button 
-                          type="button" variant="destructive" size="icon" 
-                          className="absolute top-2 right-2 h-7 w-7"
-                          onClick={() => {
-                            setImagePreview(null);
-                            form.setValue('image', null);
-                            if(fileInputRef.current) fileInputRef.current.value = '';
-                          }}
-                        ><X className="h-4 w-4" /></Button>
-                      </div>
-                    ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-4">
+                {/* Left Column */}
+                <div className="space-y-4">
+                    <div className="col-span-full">
+                      <FormLabel>Product Image</FormLabel>
+                      <p className="text-sm text-muted-foreground mb-2">Upload a high-quality image of your product. Will be optimized to 800x800px.</p>
                       <div 
-                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/80"
-                        onClick={() => fileInputRef.current?.click()}
+                        className={`flex items-center justify-center w-full relative ${isDragging ? 'bg-muted/80' : ''}`}
+                        onDragEnter={() => setIsDragging(true)} onDragLeave={() => setIsDragging(false)}
+                        onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}
                       >
-                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                              <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                              <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                              <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, GIF (MAX. 10MB)</p>
+                        {imagePreview ? (
+                          <div className="relative w-full h-48 rounded-lg overflow-hidden">
+                            <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="contain" />
+                            <Button 
+                              type="button" variant="destructive" size="icon" 
+                              className="absolute top-2 right-2 h-7 w-7"
+                              onClick={() => {
+                                setImagePreview(null);
+                                form.setValue('image', null);
+                                if(fileInputRef.current) fileInputRef.current.value = '';
+                              }}
+                            ><X className="h-4 w-4" /></Button>
                           </div>
-                          <Input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileSelect} />
+                        ) : (
+                          <div 
+                            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/80"
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                  <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
+                                  <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                  <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, GIF (MAX. 10MB)</p>
+                              </div>
+                              <Input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileSelect} />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1"><Sparkles className="h-3 w-3 text-purple-500" />Auto compression</div>
-                      <div className="flex items-center gap-1"><Wand className="h-3 w-3 text-purple-500" />WebP conversion</div>
-                  </div>
+                      <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1"><Sparkles className="h-3 w-3 text-purple-500" />Auto compression</div>
+                          <div className="flex items-center gap-1"><Wand className="h-3 w-3 text-purple-500" />WebP conversion</div>
+                      </div>
+                    </div>
+                    <FormField control={form.control} name="description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Product description..." className="resize-none" rows={5} {...field} /></FormControl><FormMessage /></FormItem> )} />
                 </div>
+                
+                {/* Right Column */}
+                <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Product Name *</FormLabel><FormControl><Input placeholder="Enter product name" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="sku" render={({ field }) => ( <FormItem><FormLabel>SKU Code</FormLabel><FormControl><Input placeholder="Product SKU" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Product Name *</FormLabel><FormControl><Input placeholder="Enter product name" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                    <FormField control={form.control} name="sku" render={({ field }) => ( <FormItem><FormLabel>SKU Code</FormLabel><FormControl><Input placeholder="Product SKU" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                </div>
-                
-                <FormField control={form.control} name="description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Product description..." className="resize-none" rows={5} {...field} /></FormControl><FormMessage /></FormItem> )} />
-                
-                <div className="grid grid-cols-4 gap-4">
-                    <CategorySpecificFields category={selectedCategory} control={form.control} />
-                </div>
-                
-                <FormField control={form.control} name="supplier" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Supplier</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value || ''}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Select supplier" /></SelectTrigger></FormControl>
-                        <SelectContent>
-                          {suppliers.map((supplier) => ( <SelectItem key={supplier} value={supplier}>{supplier}</SelectItem> ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                )} />
+                    <div className="grid grid-cols-4 gap-4">
+                        <CategorySpecificFields category={selectedCategory} control={form.control} />
+                    </div>
+                    
+                    <FormField control={form.control} name="supplier" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Supplier</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value || ''}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Select supplier" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              {suppliers.map((supplier) => ( <SelectItem key={supplier} value={supplier}>{supplier}</SelectItem> ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                    )} />
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className={`${selectedCategory === 'ALUMINIUM PROFILE' ? 'col-span-2' : 'col-span-4'} grid grid-cols-1 md:grid-cols-3 gap-4`}>
-                    <FormField control={form.control} name="location" render={({ field }) => ( <FormItem><FormLabel>Location *</FormLabel><FormControl><Input placeholder="e.g. Aisle 5, Shelf 3" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                    <FormField control={form.control} name="stock" render={({ field }) => ( <FormItem><FormLabel>Stock Qty *</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                    <FormField control={form.control} name="reorderLevel" render={({ field }) => ( <FormItem><FormLabel>Reorder Level *</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                  </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <FormField control={form.control} name="location" render={({ field }) => ( <FormItem><FormLabel>Location *</FormLabel><FormControl><Input placeholder="e.g. Aisle 5, Shelf 3" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="stock" render={({ field }) => ( <FormItem><FormLabel>Stock Qty *</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                        <FormField control={form.control} name="reorderLevel" render={({ field }) => ( <FormItem><FormLabel>Reorder Level *</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    </div>
                 </div>
             </div>
           )}
@@ -399,3 +404,5 @@ export function ProductForm({
     </Form>
   );
 }
+
+    
