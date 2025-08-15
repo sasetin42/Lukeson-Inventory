@@ -17,7 +17,7 @@ export default function ProductsTab() {
         <div className="flex items-center gap-2">
             <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search products by name or SKU..." className="pl-9" />
+                <Input placeholder="Search products by name or SKU..." className="pl-9 w-80" />
             </div>
             <Select>
                 <SelectTrigger className="w-[180px]">
