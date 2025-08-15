@@ -1,6 +1,6 @@
 
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Download, Upload, ListPlus, Package, Edit, Trash2 } from "lucide-react";
@@ -11,71 +11,144 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ProductForm } from "@/components/inventory/product-form";
 import { DeleteProductDialog } from "@/components/inventory/delete-product-dialog";
 import type { Product } from '@/lib/types';
-import { products as initialProducts, suppliers } from '@/lib/data';
+import { suppliers } from '@/lib/data';
 import { useToast } from "@/hooks/use-toast";
 import { Camera } from 'lucide-react';
+import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { db, storage } from '@/lib/firebase';
+import { ref, uploadString, getDownloadURL, deleteObject } from 'firebase/storage';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function InventoryPage() {
-  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isAddProductOpen, setAddProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleAddProduct = async (newProductData: Omit<Product, 'id' | 'status' | 'tags'>) => {
-    setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-    
-    const productToAdd: Product = {
-      ...newProductData,
-      id: `PROD${Date.now()}`,
-      status: newProductData.initialStock > 0 ? (newProductData.initialStock < newProductData.minStock ? 'Low Stock' : 'In Stock') : 'Out of Stock',
-      stock: newProductData.initialStock,
-      tags: [],
-      image: newProductData.image || `https://placehold.co/40x40.png?text=${newProductData.name.charAt(0)}`,
-    };
-    setProducts(prevProducts => [...prevProducts, productToAdd]);
-    setIsSubmitting(false);
-    setAddProductOpen(false);
-    toast({
-        title: "Product Added",
-        description: `${newProductData.name} has been successfully added to your inventory.`,
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'products'), (snapshot) => {
+      const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      setProducts(productsData);
     });
+    return () => unsubscribe();
+  }, []);
+
+  const handleAddProduct = async (data: any) => {
+    setIsSubmitting(true);
+    try {
+      let imageUrl = '';
+      if (data.image) {
+        const storageRef = ref(storage, `products/${Date.now()}_${data.name.replace(/\s+/g, '-')}.webp`);
+        const snapshot = await uploadString(storageRef, data.image, 'data_url');
+        imageUrl = await getDownloadURL(snapshot.ref);
+      }
+
+      const { image, ...restOfData } = data;
+
+      await addDoc(collection(db, 'products'), {
+        ...restOfData,
+        imageUrl,
+        createdAt: serverTimestamp(),
+      });
+
+      toast({
+        title: "Product Added",
+        description: `${data.name} has been successfully added.`,
+      });
+      setAddProductOpen(false);
+    } catch (error) {
+      console.error("Error adding product: ", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not add the product. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleEditProduct = async (updatedProductData: Omit<Product, 'id' | 'status' | 'tags'> & {image?: string}) => {
+  const handleEditProduct = async (data: any) => {
     if (!editingProduct) return;
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-    
-    setProducts(prevProducts => prevProducts.map(p => p.id === editingProduct.id ? { 
-        ...p, 
-        ...updatedProductData, 
-        stock: updatedProductData.initialStock,
-        image: updatedProductData.image || p.image, // Keep old image if new one not provided
-     } : p));
-    setIsSubmitting(false);
-    setEditingProduct(null);
-    toast({
+    try {
+      let imageUrl = editingProduct.imageUrl || '';
+      // Check if a new image is being uploaded
+      if (data.image && data.image.startsWith('data:image')) {
+        // Delete old image if it exists
+        if (editingProduct.imageUrl) {
+          try {
+            const oldImageRef = ref(storage, editingProduct.imageUrl);
+            await deleteObject(oldImageRef);
+          } catch (storageError) {
+             // If the old image doesn't exist, we can ignore the error and proceed.
+            if ((storageError as any).code !== 'storage/object-not-found') {
+                throw storageError; // Re-throw other errors
+            }
+          }
+        }
+        // Upload new image
+        const storageRef = ref(storage, `products/${Date.now()}_${data.name.replace(/\s+/g, '-')}.webp`);
+        const snapshot = await uploadString(storageRef, data.image, 'data_url');
+        imageUrl = await getDownloadURL(snapshot.ref);
+      }
+
+      const { image, ...restOfData } = data;
+      const productRef = doc(db, 'products', editingProduct.id);
+      
+      await updateDoc(productRef, {
+        ...restOfData,
+        imageUrl,
+      });
+
+      toast({
         title: "Product Updated",
-        description: `${updatedProductData.name} has been successfully updated.`,
-    });
+        description: `${data.name} has been successfully updated.`,
+      });
+      setEditingProduct(null);
+    } catch (error) {
+      console.error("Error updating product: ", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not update the product. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDeleteProduct = async () => {
     if (!deletingProduct) return;
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+    try {
+      // Delete image from storage
+      if (deletingProduct.imageUrl) {
+        const imageRef = ref(storage, deletingProduct.imageUrl);
+        await deleteObject(imageRef);
+      }
 
-    setProducts(prevProducts => prevProducts.filter(p => p.id !== deletingProduct.id));
-    setIsSubmitting(false);
-    setDeletingProduct(null);
-    toast({
+      // Delete product from firestore
+      await deleteDoc(doc(db, 'products', deletingProduct.id));
+
+      toast({
         variant: "destructive",
         title: "Product Deleted",
-        description: `${deletingProduct.name} has been removed from your inventory.`,
-    });
+        description: `${deletingProduct.name} has been removed.`,
+      });
+      setDeletingProduct(null);
+    } catch (error) {
+      console.error("Error deleting product: ", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Could not delete the product. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   const uniqueCategories = [...new Set(products.map(p => p.category))];
@@ -127,18 +200,17 @@ export default function InventoryPage() {
                 Add New Product with Smart Features
             </DialogTitle>
             <DialogDescription>
-              Create a new product with image upload, automatic compression and intelligent validation
+              Select a category to see category-specific fields.
             </DialogDescription>
           </DialogHeader>
-          <div className='flex-grow overflow-y-auto no-scrollbar'>
+          <ScrollArea className='flex-grow overflow-y-auto no-scrollbar pr-2'>
             <ProductForm 
               onSuccess={handleAddProduct} 
               onCancel={() => setAddProductOpen(false)}
-              categories={uniqueCategories} 
               suppliers={supplierNames}
               isSubmitting={isSubmitting}
             />
-          </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
 
@@ -154,16 +226,15 @@ export default function InventoryPage() {
               Update the details of {editingProduct?.name}.
             </DialogDescription>
           </DialogHeader>
-          <div className='flex-grow overflow-y-auto no-scrollbar'>
+          <ScrollArea className='flex-grow overflow-y-auto no-scrollbar pr-2'>
             <ProductForm 
               onSuccess={handleEditProduct} 
               onCancel={() => setEditingProduct(null)}
-              categories={uniqueCategories} 
               suppliers={supplierNames}
               isSubmitting={isSubmitting}
               product={editingProduct}
             />
-          </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
       

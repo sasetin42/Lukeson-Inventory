@@ -21,12 +21,19 @@ export default function ProductsTab({ products, categories, onAddProduct, onEdit
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
 
+    const getStatus = (product: Product) => {
+        if (product.stock <= 0) return "Out of Stock";
+        if (product.stock <= product.reorderLevel) return "Low Stock";
+        return "In Stock";
+    }
+
     const filteredProducts = useMemo(() => {
         return products.filter(product => {
+            const productStatus = getStatus(product);
             const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                                  product.sku.toLowerCase().includes(searchTerm.toLowerCase());
+                                  (product.sku && product.sku.toLowerCase().includes(searchTerm.toLowerCase()));
             const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
-            const matchesStatus = statusFilter === 'all' || product.status === statusFilter;
+            const matchesStatus = statusFilter === 'all' || productStatus === statusFilter;
             
             return matchesSearch && matchesCategory && matchesStatus;
         });
@@ -37,9 +44,9 @@ export default function ProductsTab({ products, categories, onAddProduct, onEdit
       <div className="flex justify-between items-center">
         <TabsList>
           <TabsTrigger value="products">Products ({filteredProducts.length})</TabsTrigger>
-          <TabsTrigger value="categories">Categories (1)</TabsTrigger>
-          <TabsTrigger value="orders">Orders (2)</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="categories">Categories ({categories.length})</TabsTrigger>
+          <TabsTrigger value="orders" disabled>Orders</TabsTrigger>
+          <TabsTrigger value="analytics" disabled>Analytics</TabsTrigger>
         </TabsList>
         <div className="flex items-center gap-2">
             <div className="relative">
@@ -85,13 +92,7 @@ export default function ProductsTab({ products, categories, onAddProduct, onEdit
         />
       </TabsContent>
       <TabsContent value="categories">
-        Categories content
-      </TabsContent>
-      <TabsContent value="orders">
-        Orders content
-      </TabsContent>
-      <TabsContent value="analytics">
-        Analytics content
+        Categories management coming soon.
       </TabsContent>
     </Tabs>
   );

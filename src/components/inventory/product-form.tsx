@@ -22,89 +22,166 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Upload, X, Camera, Sparkles, Wand, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Upload, X, Sparkles, Wand, Loader2 } from 'lucide-react';
 import type { Product } from '@/lib/types';
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 
-const productSchema = z.object({
+const categories = ["Striplight", "Power Supply", "General Lighting", "Aluminium Profile"] as const;
+
+// Base schema for common fields
+const baseSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
-  sku: z.string().min(1, 'SKU is required.'),
+  sku: z.string().optional(),
   description: z.string().optional(),
-  category: z.string().min(1, 'Category is required.'),
   supplier: z.string().optional(),
-  price: z.coerce.number().min(0, 'Price cannot be negative.'),
-  unit: z.string().min(1, 'Unit is required.'),
-  barcode: z.string().optional(),
-  minStock: z.coerce.number().min(0, 'Min stock cannot be negative.'),
-  maxStock: z.coerce.number().min(0, 'Max stock cannot be negative.'),
-  initialStock: z.coerce.number().min(0, 'Initial stock cannot be negative.'),
+  location: z.string().min(1, 'Location is required.'),
+  stock: z.coerce.number().min(0, 'Stock cannot be negative.'),
+  reorderLevel: z.coerce.number().min(0, 'Reorder level cannot be negative.'),
   image: z.any().optional(),
 });
+
+// Category-specific schemas
+const striplightSchema = baseSchema.extend({
+  category: z.literal('Striplight'),
+  fields: z.object({
+    ledQty: z.enum(["240L", "180L", "120L", "72L", "60L"], { required_error: "LED Qty is required." }),
+    voltage: z.enum(["220v", "48v", "24v", "12v"], { required_error: "Voltage is required." }),
+    wattage: z.coerce.number().min(0.1, 'Wattage is required.'),
+    meters: z.coerce.number().min(0.1, 'Meters are required.'),
+  })
+});
+
+const powerSupplySchema = baseSchema.extend({
+  category: z.literal('Power Supply'),
+  fields: z.object({
+    voltage: z.enum(["220v", "48v", "24v", "12v"], { required_error: "Voltage is required." }),
+    wattage: z.coerce.number().min(0.1, 'Wattage is required.'),
+  })
+});
+
+const generalLightingSchema = baseSchema.extend({
+  category: z.literal('General Lighting'),
+  fields: z.object({}) // No specific fields
+});
+
+const aluminiumProfileSchema = baseSchema.extend({
+  category: z.literal('Aluminium Profile'),
+  fields: z.object({
+    size: z.string().min(1, "Size is required."),
+    color: z.string().min(1, "Color is required."),
+  })
+});
+
+const productSchema = z.discriminatedUnion("category", [
+  striplightSchema,
+  powerSupplySchema,
+  generalLightingSchema,
+  aluminiumProfileSchema,
+]);
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
 interface ProductFormProps {
   onSuccess: (data: ProductFormValues) => void;
   onCancel: () => void;
-  categories: string[];
   suppliers: string[];
   product?: Product | null;
   isSubmitting?: boolean;
 }
 
+const CategorySpecificFields = ({ category, control }: { category: string; control: any }) => {
+  switch (category) {
+    case 'Striplight':
+      return (
+        <>
+          <FormField control={control} name="fields.ledQty" render={({ field }) => (
+            <FormItem>
+              <FormLabel>LED Qty *</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Select LED Qty" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  {["240L", "180L", "120L", "72L", "60L"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                </SelectContent>
+              </Select><FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={control} name="fields.voltage" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Voltage *</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Select Voltage" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  {["220v", "48v", "24v", "12v"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                </SelectContent>
+              </Select><FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={control} name="fields.wattage" render={({ field }) => ( <FormItem><FormLabel>Wattage *</FormLabel><FormControl><Input type="number" placeholder="Enter wattage" {...field} /></FormControl><FormMessage /></FormItem> )} />
+          <FormField control={control} name="fields.meters" render={({ field }) => ( <FormItem><FormLabel>Meters *</FormLabel><FormControl><Input type="number" placeholder="Enter meters" {...field} /></FormControl><FormMessage /></FormItem> )} />
+        </>
+      );
+    case 'Power Supply':
+      return (
+        <>
+          <FormField control={control} name="fields.voltage" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Voltage *</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl><SelectTrigger><SelectValue placeholder="Select Voltage" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  {["220v", "48v", "24v", "12v"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                </SelectContent>
+              </Select><FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={control} name="fields.wattage" render={({ field }) => ( <FormItem><FormLabel>Wattage *</FormLabel><FormControl><Input type="number" placeholder="Enter wattage" {...field} /></FormControl><FormMessage /></FormItem> )} />
+        </>
+      );
+    case 'Aluminium Profile':
+        return (
+            <>
+                <FormField control={control} name="fields.size" render={({ field }) => (<FormItem><FormLabel>Size *</FormLabel><FormControl><Input placeholder="e.g., 2 meters" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={control} name="fields.color" render={({ field }) => (<FormItem><FormLabel>Color *</FormLabel><FormControl><Input type="color" {...field} className="p-1 h-10" /></FormControl><FormMessage /></FormItem>)} />
+            </>
+        );
+    default:
+      return null;
+  }
+};
+
 export function ProductForm({ 
     onSuccess, 
     onCancel, 
-    categories, 
     suppliers, 
     product,
     isSubmitting = false 
 }: ProductFormProps) {
-  const [imagePreview, setImagePreview] = useState<string | null>(product?.image || null);
+  const [imagePreview, setImagePreview] = useState<string | null>(product?.imageUrl || null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
-    defaultValues: {
-      name: '',
-      sku: '',
-      category: '',
-      supplier: '',
-      price: 0,
-      unit: 'Pieces',
-      description: '',
-      barcode: '',
-      minStock: 0,
-      maxStock: 0,
-      initialStock: 0,
-      image: null,
-    },
+    defaultValues: product ? {
+        ...product,
+        stock: product.stock || 0,
+        reorderLevel: product.reorderLevel || 0
+    } : undefined,
   });
+
+  const selectedCategory = form.watch('category');
 
   useEffect(() => {
     if (product) {
-      form.reset({
-        name: product.name,
-        sku: product.sku,
-        description: product.description || '',
-        category: product.category,
-        supplier: product.supplier || '',
-        price: product.price,
-        unit: product.unit || 'Pieces',
-        barcode: product.barcode || '',
-        minStock: product.minStock,
-        maxStock: product.maxStock,
-        initialStock: product.stock,
-        image: product.image,
-      });
-      setImagePreview(product.image || null);
+        form.reset(product as ProductFormValues);
+        setImagePreview(product.imageUrl || null);
     } else {
-      form.reset();
-      setImagePreview(null);
+        form.reset();
+        setImagePreview(null);
     }
   }, [product, form]);
+
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith('image/')) {
@@ -164,281 +241,107 @@ export function ProductForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
-        <div className="flex-grow p-6 space-y-6">
-          <div>
-            <FormLabel>Product Image</FormLabel>
-            <p className="text-sm text-muted-foreground mb-2">Upload a high-quality image of your product. Will be optimized to 800x800px.</p>
-            <div 
-              className={`flex items-center justify-center w-full relative ${isDragging ? 'bg-muted/80' : ''}`}
-              onDragEnter={() => setIsDragging(true)}
-              onDragLeave={() => setIsDragging(false)}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={handleDrop}
-            >
-              {imagePreview ? (
-                <div className="relative w-full h-48 rounded-lg overflow-hidden">
-                  <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="contain" />
-                  <Button 
-                    type="button" 
-                    variant="destructive" 
-                    size="icon" 
-                    className="absolute top-2 right-2 h-7 w-7"
-                    onClick={() => {
-                      setImagePreview(null);
-                      form.setValue('image', null);
-                      if(fileInputRef.current) fileInputRef.current.value = '';
-                    }}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div 
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/80"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                        <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                        <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, GIF (MAX. 10MB)</p>
-                    </div>
-                    <Input 
-                      ref={fileInputRef}
-                      type="file" 
-                      className="hidden" 
-                      accept="image/*"
-                      onChange={handleFileSelect}
-                    />
-                </div>
-              )}
-            </div>
-            <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                      <Sparkles className="h-3 w-3 text-purple-500" />
-                      Auto compression
-                  </div>
-                  <div className="flex items-center gap-1">
-                      <Wand className="h-3 w-3 text-purple-500" />
-                      WebP conversion
-                  </div>
-              </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Product Name *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter product name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="sku"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>SKU *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Product SKU" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
+        <div className="flex-grow p-6 space-y-4">
           <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Product description..."
-                    className="resize-none"
-                    rows={3}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
               control={form.control}
               name="category"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category *</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                    </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!!product}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Select a category..." /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
+                      {categories.map((cat) => ( <SelectItem key={cat} value={cat}>{cat}</SelectItem> ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="supplier"
-              render={({ field }) => (
+
+          {selectedCategory && (
+            <>
+            <div>
+              <FormLabel>Product Image</FormLabel>
+              <p className="text-sm text-muted-foreground mb-2">Upload a high-quality image of your product. Will be optimized to 800x800px.</p>
+              <div 
+                className={`flex items-center justify-center w-full relative ${isDragging ? 'bg-muted/80' : ''}`}
+                onDragEnter={() => setIsDragging(true)} onDragLeave={() => setIsDragging(false)}
+                onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}
+              >
+                {imagePreview ? (
+                  <div className="relative w-full h-48 rounded-lg overflow-hidden">
+                    <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="contain" />
+                    <Button 
+                      type="button" variant="destructive" size="icon" 
+                      className="absolute top-2 right-2 h-7 w-7"
+                      onClick={() => {
+                        setImagePreview(null);
+                        form.setValue('image', null);
+                        if(fileInputRef.current) fileInputRef.current.value = '';
+                      }}
+                    ><X className="h-4 w-4" /></Button>
+                  </div>
+                ) : (
+                  <div 
+                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted/80"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
+                          <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                          <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, GIF (MAX. 10MB)</p>
+                      </div>
+                      <Input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleFileSelect} />
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center justify-center gap-4 mt-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1"><Sparkles className="h-3 w-3 text-purple-500" />Auto compression</div>
+                  <div className="flex items-center gap-1"><Wand className="h-3 w-3 text-purple-500" />WebP conversion</div>
+              </div>
+            </div>
+
+            <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Product Name *</FormLabel><FormControl><Input placeholder="Enter product name" {...field} /></FormControl><FormMessage /></FormItem> )} />
+            <FormField control={form.control} name="sku" render={({ field }) => ( <FormItem><FormLabel>SKU Code</FormLabel><FormControl><Input placeholder="Product SKU" {...field} /></FormControl><FormMessage /></FormItem> )} />
+            <FormField control={form.control} name="description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Product description..." className="resize-none" rows={3} {...field} /></FormControl><FormMessage /></FormItem> )} />
+            
+            <CategorySpecificFields category={selectedCategory} control={form.control} />
+
+            <FormField control={form.control} name="supplier" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Supplier</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select supplier" />
-                      </SelectTrigger>
-                    </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value || ''}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Select supplier" /></SelectTrigger></FormControl>
                     <SelectContent>
-                      {suppliers.map((supplier) => (
-                        <SelectItem key={supplier} value={supplier}>
-                          {supplier}
-                        </SelectItem>
-                      ))}
+                      {suppliers.map((supplier) => ( <SelectItem key={supplier} value={supplier}>{supplier}</SelectItem> ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
-              )}
-            />
-          </div>
+            )} />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormField
-                  control={form.control}
-                  name="price"
-                  render={({ field }) => (
-                  <FormItem>
-                      <FormLabel>Unit Price ($) *</FormLabel>
-                      <FormControl>
-                      <Input type="number" placeholder="0.00" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                  </FormItem>
-                  )}
-              />
-              <FormField
-                  control={form.control}
-                  name="unit"
-                  render={({ field }) => (
-                  <FormItem>
-                      <FormLabel>Unit</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        value={field.value}
-                      >
-                      <FormControl>
-                          <SelectTrigger>
-                          <SelectValue placeholder="Select unit" />
-                          </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                          <SelectItem value="Pieces">Pieces</SelectItem>
-                          <SelectItem value="Box">Box</SelectItem>
-                          <SelectItem value="Kg">Kg</SelectItem>
-                          <SelectItem value="Pair">Pair</SelectItem>
-                      </SelectContent>
-                      </Select>
-                      <FormMessage />
-                  </FormItem>
-                  )}
-              />
-              <FormField
-                  control={form.control}
-                  name="barcode"
-                  render={({ field }) => (
-                  <FormItem>
-                      <FormLabel>Barcode</FormLabel>
-                      <FormControl>
-                      <Input placeholder="Barcode number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                  </FormItem>
-                  )}
-              />
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FormField control={form.control} name="location" render={({ field }) => ( <FormItem><FormLabel>Location *</FormLabel><FormControl><Input placeholder="e.g. Aisle 5, Shelf 3" {...field} /></FormControl><FormMessage /></FormItem> )} />
+              <FormField control={form.control} name="stock" render={({ field }) => ( <FormItem><FormLabel>Stock Qty *</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem> )} />
+              <FormField control={form.control} name="reorderLevel" render={({ field }) => ( <FormItem><FormLabel>Reorder Level *</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem> )} />
+            </div>
+            </>
+          )}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <FormField
-                  control={form.control}
-                  name="minStock"
-                  render={({ field }) => (
-                  <FormItem>
-                      <FormLabel>Min Stock</FormLabel>
-                      <FormControl>
-                      <Input type="number" placeholder="0" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                  </FormItem>
-                  )}
-              />
-              <FormField
-                  control={form.control}
-                  name="maxStock"
-                  render={({ field }) => (
-                  <FormItem>
-                      <FormLabel>Max Stock</FormLabel>
-                      <FormControl>
-                      <Input type="number" placeholder="0" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                  </FormItem>
-                  )}
-              />
-              <FormField
-                  control={form.control}
-                  name="initialStock"
-                  render={({ field }) => (
-                  <FormItem>
-                      <FormLabel>{product ? 'Current Stock' : 'Initial Stock'}</FormLabel>
-                      <FormControl>
-                      <Input type="number" placeholder="0" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                  </FormItem>
-                  )}
-              />
-          </div>
         </div>
         
-        <div className="flex justify-end gap-4 sticky bottom-0 bg-background/95 backdrop-blur-sm p-6 -mx-0">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-                Cancel
-            </Button>
-            <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {product ? 'Save Changes' : 'Add Product'}
-            </Button>
-        </div>
+        {selectedCategory && (
+            <div className="flex justify-end gap-4 sticky bottom-0 bg-background/95 backdrop-blur-sm p-4 -mx-0 border-t">
+                <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+                    Cancel
+                </Button>
+                <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={isSubmitting || !form.formState.isValid}>
+                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {product ? 'Save Changes' : 'Add Product'}
+                </Button>
+            </div>
+        )}
       </form>
     </Form>
   );

@@ -1,21 +1,42 @@
+import { Timestamp } from "firebase/firestore";
+
+// Base Product Type
 export type Product = {
   id: string;
   name: string;
-  sku: string;
-  category: string;
-  stock: number;
-  price: number;
-  status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+  sku?: string;
+  category: "Striplight" | "Power Supply" | "General Lighting" | "Aluminium Profile";
   description?: string;
-  tags: string[];
   supplier?: string;
-  unit?: string;
-  barcode?: string;
-  minStock: number;
-  maxStock: number;
-  initialStock: number;
-  image?: string;
+  location: string;
+  stock: number;
+  reorderLevel: number;
+  imageUrl?: string;
+  createdAt: Timestamp;
+  // Category-specific fields
+  fields: StriplightFields | PowerSupplyFields | GeneralLightingFields | AluminiumProfileFields;
 };
+
+// Category-specific field types
+export type StriplightFields = {
+  ledQty: "240L" | "180L" | "120L" | "72L" | "60L";
+  voltage: "220v" | "48v" | "24v" | "12v";
+  wattage: number;
+  meters: number;
+};
+
+export type PowerSupplyFields = {
+  voltage: "220v" | "48v" | "24v" | "12v";
+  wattage: number;
+};
+
+export type GeneralLightingFields = {};
+
+export type AluminiumProfileFields = {
+  size: string;
+  color: string;
+};
+
 
 export type Supplier = {
   id: string;

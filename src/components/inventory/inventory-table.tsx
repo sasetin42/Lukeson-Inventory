@@ -31,18 +31,12 @@ interface InventoryTableProps {
 }
 
 export default function InventoryTable({ products, onAddProduct, onEditProduct, onDeleteProduct }: InventoryTableProps) {
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case "In Stock":
-        return "default";
-      case "Low Stock":
-        return "secondary";
-      case "Out of Stock":
-        return "destructive";
-      default:
-        return "outline";
-    }
-  };
+  
+  const getStatus = (product: Product) => {
+    if (product.stock <= 0) return { text: "Out of Stock", variant: "destructive" };
+    if (product.stock <= product.reorderLevel) return { text: "Low Stock", variant: "secondary" };
+    return { text: "In Stock", variant: "default" };
+  }
 
   return (
     <Card>
@@ -50,7 +44,7 @@ export default function InventoryTable({ products, onAddProduct, onEditProduct, 
         <CardTitle>Products ({products.length})</CardTitle>
         {products.length > 0 && (
           <CardDescription>
-            Click on any widget or use the action buttons above
+            Your current inventory of products.
           </CardDescription>
         )}
       </CardHeader>
@@ -62,8 +56,7 @@ export default function InventoryTable({ products, onAddProduct, onEditProduct, 
                 <TableHead className="w-[80px]">Image</TableHead>
                 <TableHead>Product</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead className="text-center">Stock Level</TableHead>
-                <TableHead className="text-right">Unit Price</TableHead>
+                <TableHead className="text-center">Stock</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>
                   <span className="sr-only">Actions</span>
@@ -71,58 +64,60 @@ export default function InventoryTable({ products, onAddProduct, onEditProduct, 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <Image
-                        src={product.image || 'https://placehold.co/40x40.png'}
-                        alt={product.name}
-                        width={40}
-                        height={40}
-                        className="rounded-md object-cover"
-                        data-ai-hint="product image"
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell className="text-center">{product.stock}</TableCell>
-                  <TableCell className="text-right">₱{product.price.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusVariant(product.status)}>{product.status}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => onEditProduct(product)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          className="text-red-600"
-                          onClick={() => onDeleteProduct(product)}
-                        >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {products.map((product) => {
+                const status = getStatus(product);
+                return (
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <Image
+                          src={product.imageUrl || 'https://placehold.co/40x40.png'}
+                          alt={product.name}
+                          width={40}
+                          height={40}
+                          className="rounded-md object-cover"
+                          data-ai-hint="product image"
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>{product.category}</TableCell>
+                    <TableCell className="text-center">{product.stock}</TableCell>
+                    <TableCell>
+                      <Badge variant={status.variant as any}>{status.text}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => onEditProduct(product)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            className="text-red-600"
+                            onClick={() => onDeleteProduct(product)}
+                          >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         ) : (
           <div className="text-center py-16">
             <Package className="mx-auto h-12 w-12 text-muted-foreground" />
-            <p className="mt-4 text-muted-foreground">No products found matching your filters</p>
+            <p className="mt-4 text-muted-foreground">No products found.</p>
             <Button className="mt-4" onClick={onAddProduct}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add First Product
