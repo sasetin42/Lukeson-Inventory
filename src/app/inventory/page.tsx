@@ -1,6 +1,6 @@
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Download, Upload, ListPlus } from "lucide-react";
+import { PlusCircle, Download, Upload, ListPlus, Package } from "lucide-react";
 import InventoryKpiCards from "@/components/inventory/inventory-kpi-cards";
 import ActionCards from "@/components/inventory/action-cards";
 import ProductsTab from "@/components/inventory/products-tab";
@@ -11,6 +11,7 @@ export default function InventoryPage() {
       <PageHeader 
         title="Inventory Overview" 
         description="Complete inventory management with clickable widgets and analytics"
+        icon={<Package className="h-6 w-6 text-blue-500" />}
         actions={
           <div className="flex items-center gap-2">
             <Button>

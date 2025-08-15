@@ -8,7 +8,8 @@ export default function CategoryPage() {
     <div className="flex flex-col gap-4">
       <PageHeader 
         title="Category Management" 
-        description="Organize your products with hierarchical categories" 
+        description="Organize your products with hierarchical categories"
+        icon={<List className="h-6 w-6 text-orange-500" />}
         actions={
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
