@@ -33,6 +33,7 @@ export default function InventoryPage() {
       status: newProductData.initialStock > 0 ? (newProductData.initialStock < newProductData.minStock ? 'Low Stock' : 'In Stock') : 'Out of Stock',
       stock: newProductData.initialStock,
       tags: [],
+      image: newProductData.image || `https://placehold.co/40x40.png?text=${newProductData.name.charAt(0)}`,
     };
     setProducts(prevProducts => [...prevProducts, productToAdd]);
     setIsSubmitting(false);
@@ -43,12 +44,17 @@ export default function InventoryPage() {
     });
   };
 
-  const handleEditProduct = async (updatedProductData: Omit<Product, 'id' | 'status' | 'tags'>) => {
+  const handleEditProduct = async (updatedProductData: Omit<Product, 'id' | 'status' | 'tags'> & {image?: string}) => {
     if (!editingProduct) return;
     setIsSubmitting(true);
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
     
-    setProducts(prevProducts => prevProducts.map(p => p.id === editingProduct.id ? { ...p, ...updatedProductData, stock: updatedProductData.initialStock } : p));
+    setProducts(prevProducts => prevProducts.map(p => p.id === editingProduct.id ? { 
+        ...p, 
+        ...updatedProductData, 
+        stock: updatedProductData.initialStock,
+        image: updatedProductData.image || p.image, // Keep old image if new one not provided
+     } : p));
     setIsSubmitting(false);
     setEditingProduct(null);
     toast({

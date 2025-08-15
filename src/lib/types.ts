@@ -14,6 +14,7 @@ export type Product = {
   minStock: number;
   maxStock: number;
   initialStock: number;
+  image?: string;
 };
 
 export type Supplier = {

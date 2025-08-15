@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import Image from 'next/image';
 
 interface InventoryTableProps {
   products: Product[];
@@ -58,6 +59,7 @@ export default function InventoryTable({ products, onAddProduct, onEditProduct, 
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[80px]">Image</TableHead>
                 <TableHead>Product</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead className="text-center">Stock Level</TableHead>
@@ -71,6 +73,16 @@ export default function InventoryTable({ products, onAddProduct, onEditProduct, 
             <TableBody>
               {products.map((product) => (
                 <TableRow key={product.id}>
+                  <TableCell>
+                    <Image
+                        src={product.image || 'https://placehold.co/40x40.png'}
+                        alt={product.name}
+                        width={40}
+                        height={40}
+                        className="rounded-md object-cover"
+                        data-ai-hint="product image"
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>{product.category}</TableCell>
                   <TableCell className="text-center">{product.stock}</TableCell>
