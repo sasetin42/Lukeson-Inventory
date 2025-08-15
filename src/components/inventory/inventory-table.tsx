@@ -1,4 +1,5 @@
-import { products } from "@/lib/data";
+'use client';
+import type { Product } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -19,7 +20,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 
-export default function InventoryTable() {
+interface InventoryTableProps {
+  products: Product[];
+  onAddProduct: () => void;
+}
+
+export default function InventoryTable({ products, onAddProduct }: InventoryTableProps) {
   const getStatusVariant = (status: string) => {
     switch (status) {
       case "In Stock":
@@ -91,7 +97,7 @@ export default function InventoryTable() {
           <div className="text-center py-16">
             <Package className="mx-auto h-12 w-12 text-muted-foreground" />
             <p className="mt-4 text-muted-foreground">No products found matching your filters</p>
-            <Button className="mt-4">
+            <Button className="mt-4" onClick={onAddProduct}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add First Product
             </Button>

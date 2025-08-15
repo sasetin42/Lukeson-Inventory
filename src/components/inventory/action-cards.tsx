@@ -1,3 +1,4 @@
+'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, RefreshCw, ShoppingCart, Bell, Zap } from "lucide-react";
@@ -9,7 +10,8 @@ const actionCards = [
         description: "Create new inventory item",
         icon: Plus,
         color: "blue",
-        href: "#"
+        href: "#",
+        action: 'addProduct'
     },
     {
         title: "Adjust Stock",
@@ -58,11 +60,14 @@ const colorClasses = {
 }
 
 
-export default function ActionCards() {
+export default function ActionCards({ onAddProduct }: { onAddProduct: () => void }) {
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {actionCards.map((card, index) => {
                 const colors = colorClasses[card.color as keyof typeof colorClasses];
+                const isAddProduct = card.action === 'addProduct';
+                const CardAction = isAddProduct ? 'button' : Link;
+
                 return (
                     <Card key={card.title} className={`${colors.bg} border-0`}>
                         <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -73,10 +78,16 @@ export default function ActionCards() {
                            <card.icon className={`h-6 w-6 ${colors.icon}`} />
                         </CardHeader>
                         <CardContent>
-                            <Link href={card.href} className={`text-sm font-medium ${colors.link} flex items-center`}>
+                             <CardAction
+                                {...(isAddProduct 
+                                    ? { onClick: onAddProduct }
+                                    : { href: card.href! }
+                                )}
+                                className={`text-sm font-medium ${colors.link} flex items-center cursor-pointer`}
+                            >
                                 <Zap className="mr-2 h-4 w-4"/>
                                 Click to {card.title.split(' ')[0].toLowerCase()}
-                            </Link>
+                            </CardAction>
                         </CardContent>
                     </Card>
                 );
