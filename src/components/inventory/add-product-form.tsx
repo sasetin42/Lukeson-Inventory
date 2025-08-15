@@ -101,8 +101,6 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
           const ctx = canvas.getContext('2d');
           ctx?.drawImage(img, 0, 0, width, height);
           
-          // Here we use toDataURL to get the compressed image. 
-          // The second argument is the quality of the image.
           const dataUrl = canvas.toDataURL('image/webp', 0.8);
           setImagePreview(dataUrl);
           form.setValue('image', dataUrl);
@@ -408,3 +406,5 @@ export function AddProductForm({ onSuccess, onCancel, categories, suppliers }: A
     </Form>
   );
 }
+
+    
