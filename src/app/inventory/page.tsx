@@ -162,7 +162,7 @@ export default function InventoryPage() {
         icon={<Package className="h-6 w-6 text-blue-500" />}
         actions={
           <div className="flex items-center gap-2">
-            <Button onClick={() => setAddProductOpen(true)}>
+            <Button onClick={() => { setEditingProduct(null); setAddProductOpen(true); }}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Product
             </Button>
@@ -182,18 +182,18 @@ export default function InventoryPage() {
         }
       />
       <InventoryKpiCards products={products} />
-      <ActionCards onAddProduct={() => setAddProductOpen(true)} />
+      <ActionCards onAddProduct={() => { setEditingProduct(null); setAddProductOpen(true); }} />
       <ProductsTab 
         products={products}
         categories={uniqueCategories}
-        onAddProduct={() => setAddProductOpen(true)}
+        onAddProduct={() => { setEditingProduct(null); setAddProductOpen(true); }}
         onEditProduct={(product) => setEditingProduct(product)}
         onDeleteProduct={(product) => setDeletingProduct(product)}
       />
       
       {/* Add Product Dialog */}
       <Dialog open={isAddProductOpen} onOpenChange={setAddProductOpen}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col p-0">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col p-0">
           <DialogHeader className="p-6 pb-0">
             <DialogTitle className="flex items-center gap-2">
                 <Camera className="h-5 w-5" />
@@ -216,7 +216,7 @@ export default function InventoryPage() {
 
       {/* Edit Product Dialog */}
       <Dialog open={!!editingProduct} onOpenChange={(isOpen) => !isOpen && setEditingProduct(null)}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col p-0">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col p-0">
           <DialogHeader className="p-6 pb-0">
             <DialogTitle className="flex items-center gap-2">
                 <Edit className="h-5 w-5" />
