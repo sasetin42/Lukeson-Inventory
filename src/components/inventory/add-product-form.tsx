@@ -41,7 +41,7 @@ const productSchema = z.object({
 type ProductFormValues = z.infer<typeof productSchema>;
 
 interface AddProductFormProps {
-  onSuccess: (newProduct: ProductFormValues) => void;
+  onSuccess: (newProduct: Omit<Product, 'id' | 'status' | 'tags' | 'stock'> & { initialStock: number }) => void;
   onCancel: () => void;
   categories: string[];
   suppliers: string[];
