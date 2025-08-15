@@ -10,7 +10,7 @@ import ProductsTab from "@/components/inventory/products-tab";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ProductForm } from "@/components/inventory/product-form";
 import { DeleteProductDialog } from "@/components/inventory/delete-product-dialog";
-import type { Product } from '@/lib/types';
+import type { Product, Category } from '@/lib/types';
 import { suppliers } from '@/lib/data';
 import { useToast } from "@/hooks/use-toast";
 import { Camera } from 'lucide-react';
@@ -22,6 +22,7 @@ import { AddCategoryDialog } from '@/components/inventory/add-category-dialog';
 
 export default function InventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isAddProductOpen, setAddProductOpen] = useState(false);
   const [isAddCategoryOpen, setAddCategoryOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -30,11 +31,20 @@ export default function InventoryPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'products'), (snapshot) => {
+    const unsubscribeProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
       const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
       setProducts(productsData);
     });
-    return () => unsubscribe();
+
+    const unsubscribeCategories = onSnapshot(collection(db, 'categories'), (snapshot) => {
+      const categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+      setCategories(categoriesData);
+    });
+
+    return () => {
+      unsubscribeProducts();
+      unsubscribeCategories();
+    };
   }, []);
 
   const handleAddProduct = async (data: any) => {
@@ -159,15 +169,28 @@ export default function InventoryPage() {
     }
   };
 
-  const handleAddCategory = (categoryName: string) => {
-    // For now, we'll just log it and show a toast.
-    // In a real app, you'd save this to a 'categories' collection in Firestore.
-    console.log("New category to add:", categoryName);
-    toast({
-      title: "Category Added",
-      description: `Category "${categoryName}" has been successfully added.`,
-    });
-    setAddCategoryOpen(false);
+  const handleAddCategory = async (data: Omit<Category, 'id'>) => {
+    setIsSubmitting(true);
+    try {
+        await addDoc(collection(db, 'categories'), {
+            ...data,
+            createdAt: serverTimestamp(),
+        });
+        toast({
+            title: "Category Added",
+            description: `Category "${data.name}" has been successfully added.`,
+        });
+        setAddCategoryOpen(false);
+    } catch (error) {
+        console.error("Error adding category: ", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not add the category. Please try again.",
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
   
   const uniqueCategories = [...new Set(products.map(p => p.category))];
@@ -272,6 +295,7 @@ export default function InventoryPage() {
         onOpenChange={setAddCategoryOpen}
         onConfirm={handleAddCategory}
         isSubmitting={isSubmitting}
+        existingCategories={categories}
       />
     </div>
   );

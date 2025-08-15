@@ -86,3 +86,13 @@ export type InventoryKpi = {
     subtext: string;
     color: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'indigo' | 'cyan' | 'teal';
 };
+
+export type Category = {
+    id: string;
+    name: string;
+    description?: string;
+    parent?: string;
+    color?: string;
+    icon?: string;
+    createdAt?: Timestamp;
+};
