@@ -290,13 +290,15 @@ export default function InventoryPage() {
       />
 
       {/* Add Category Dialog */}
-      <AddCategoryDialog
-          open={isAddCategoryOpen}
-          onOpenChange={setAddCategoryOpen}
-          onConfirm={handleAddCategory}
-          isSubmitting={isSubmitting}
-          existingCategories={categories}
-      />
+      {isAddCategoryOpen && (
+        <AddCategoryDialog
+            open={isAddCategoryOpen}
+            onOpenChange={setAddCategoryOpen}
+            onConfirm={handleAddCategory}
+            isSubmitting={isSubmitting}
+            existingCategories={categories}
+        />
+      )}
     </div>
   );
 }
