@@ -91,7 +91,7 @@ interface ProductFormProps {
   isSubmitting?: boolean;
 }
 
-const getInitialValues = (product: Product | null | undefined): ProductFormValues => {
+const getInitialValues = (product: Product | null | undefined, category: typeof categories[number] = 'STRIPLIGHT'): ProductFormValues => {
     const defaults = {
         productCode: product?.productCode ?? `PRO-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
         name: product?.name ?? '',
@@ -103,56 +103,41 @@ const getInitialValues = (product: Product | null | undefined): ProductFormValue
         reorderLevel: product?.reorderLevel ?? 0,
         image: product?.imageUrl ?? null,
     };
+    
+    const selectedCategory = product?.category || category;
 
-    if (product) {
-        const category = product.category || 'STRIPLIGHT'; // Default to a category if not present
-        const fields = product.fields || {};
-        
-        let typedFields: any = {};
-        switch (category) {
-            case 'STRIPLIGHT':
-                typedFields = {
-                    ledQty: fields.ledQty || null,
-                    voltage: fields.voltage || null,
-                    wattage: fields.wattage || 0,
-                    meters: fields.meters || 0,
-                };
-                break;
-            case 'POWER SUPPLY':
-                typedFields = {
-                    voltage: fields.voltage || null,
-                    wattage: fields.wattage || 0,
-                };
-                break;
-            case 'ALUMINIUM PROFILE':
-                typedFields = {
-                    size: fields.size || '',
-                    color: fields.color || '#000000',
-                };
-                break;
-            case 'GENERAL LIGHTING':
-                typedFields = {};
-                break;
-        }
-
-        return {
-            ...defaults,
-            category: category,
-            fields: typedFields,
-        } as unknown as ProductFormValues;
+    let fields: any = {};
+    switch (selectedCategory) {
+        case 'STRIPLIGHT':
+            fields = {
+                ledQty: product?.fields?.ledQty || null,
+                voltage: product?.fields?.voltage || null,
+                wattage: product?.fields?.wattage || 0,
+                meters: product?.fields?.meters || 0,
+            };
+            break;
+        case 'POWER SUPPLY':
+            fields = {
+                voltage: product?.fields?.voltage || null,
+                wattage: product?.fields?.wattage || 0,
+            };
+            break;
+        case 'ALUMINIUM PROFILE':
+            fields = {
+                size: product?.fields?.size || '',
+                color: product?.fields?.color || '#000000',
+            };
+            break;
+        case 'GENERAL LIGHTING':
+            fields = {};
+            break;
     }
 
-    // Default values for a new product form
     return {
         ...defaults,
-        category: 'STRIPLIGHT',
-        fields: {
-            ledQty: null,
-            voltage: null,
-            wattage: 0,
-            meters: 0,
-        },
-    } as unknown as ProductFormValues;
+        category: selectedCategory,
+        fields,
+    } as ProductFormValues;
 }
 
 const CategorySpecificFields = ({ category, control }: { category: string; control: any }) => {
@@ -234,13 +219,20 @@ export function ProductForm({
   const selectedCategory = useWatch({ control: form.control, name: 'category' });
 
   useEffect(() => {
-    form.reset(getInitialValues(product));
-    if (product) {
-      setImagePreview(product.imageUrl || null);
-    } else {
-        setImagePreview(null);
-    }
-  }, [product, form]);
+      form.reset(getInitialValues(product));
+      if (product) {
+        setImagePreview(product.imageUrl || null);
+      } else {
+          setImagePreview(null);
+      }
+  }, [product, form.reset]);
+  
+  useEffect(() => {
+      // When category changes, reset the form with the new category's defaults
+      const currentValues = form.getValues();
+      const newDefaults = getInitialValues({ ...currentValues } as Product, selectedCategory);
+      form.reset(newDefaults);
+  }, [selectedCategory, form.reset, form.getValues]);
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith('image/')) {
@@ -421,3 +413,5 @@ export function ProductForm({
     </Form>
   );
 }
+
+    
