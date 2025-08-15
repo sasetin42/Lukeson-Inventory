@@ -27,10 +27,11 @@ import type { Product } from '@/lib/types';
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 
-const categories = ["Striplight", "Power Supply", "General Lighting", "Aluminium Profile"] as const;
+const categories = ["STRIPLIGHT", "POWER SUPPLY", "GENERAL LIGHTING", "ALUMINIUM PROFILE"] as const;
 
 // Base schema for common fields
 const baseSchema = z.object({
+  productCode: z.string().optional(),
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   sku: z.string().optional(),
   description: z.string().optional(),
@@ -43,7 +44,7 @@ const baseSchema = z.object({
 
 // Category-specific schemas
 const striplightSchema = baseSchema.extend({
-  category: z.literal('Striplight'),
+  category: z.literal('STRIPLIGHT'),
   fields: z.object({
     ledQty: z.enum(["240L", "180L", "120L", "72L", "60L"], { required_error: "LED Qty is required." }),
     voltage: z.enum(["220v", "48v", "24v", "12v"], { required_error: "Voltage is required." }),
@@ -53,7 +54,7 @@ const striplightSchema = baseSchema.extend({
 });
 
 const powerSupplySchema = baseSchema.extend({
-  category: z.literal('Power Supply'),
+  category: z.literal('POWER SUPPLY'),
   fields: z.object({
     voltage: z.enum(["220v", "48v", "24v", "12v"], { required_error: "Voltage is required." }),
     wattage: z.coerce.number().min(0.1, 'Wattage is required.'),
@@ -61,12 +62,12 @@ const powerSupplySchema = baseSchema.extend({
 });
 
 const generalLightingSchema = baseSchema.extend({
-  category: z.literal('General Lighting'),
+  category: z.literal('GENERAL LIGHTING'),
   fields: z.object({}) // No specific fields
 });
 
 const aluminiumProfileSchema = baseSchema.extend({
-  category: z.literal('Aluminium Profile'),
+  category: z.literal('ALUMINIUM PROFILE'),
   fields: z.object({
     size: z.string().min(1, "Size is required."),
     color: z.string().min(1, "Color is required."),
@@ -92,6 +93,7 @@ interface ProductFormProps {
 
 const getInitialValues = (product: Product | null | undefined): Partial<ProductFormValues> => {
     const defaults = {
+        productCode: product ? product.productCode : `PRO-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
         name: '',
         sku: '',
         description: '',
@@ -123,61 +125,76 @@ const getInitialValues = (product: Product | null | undefined): Partial<ProductF
     return defaults;
 }
 
-
 const CategorySpecificFields = ({ category, control }: { category: string; control: any }) => {
   switch (category) {
-    case 'Striplight':
+    case 'STRIPLIGHT':
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField control={control} name="fields.ledQty" render={({ field }) => (
-            <FormItem>
-              <FormLabel>LED Qty *</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl><SelectTrigger><SelectValue placeholder="Select LED Qty" /></SelectTrigger></FormControl>
-                <SelectContent>
-                  {["240L", "180L", "120L", "72L", "60L"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                </SelectContent>
-              </Select><FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={control} name="fields.voltage" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Voltage *</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl><SelectTrigger><SelectValue placeholder="Select Voltage" /></SelectTrigger></FormControl>
-                <SelectContent>
-                  {["220v", "48v", "24v", "12v"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                </SelectContent>
-              </Select><FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={control} name="fields.wattage" render={({ field }) => ( <FormItem><FormLabel>Wattage *</FormLabel><FormControl><Input type="number" placeholder="Enter wattage" {...field} /></FormControl><FormMessage /></FormItem> )} />
-          <FormField control={control} name="fields.meters" render={({ field }) => ( <FormItem><FormLabel>Meters *</FormLabel><FormControl><Input type="number" placeholder="Enter meters" {...field} /></FormControl><FormMessage /></FormItem> )} />
-        </div>
+        <>
+          <div className="col-span-1">
+            <FormField control={control} name="fields.ledQty" render={({ field }) => (
+              <FormItem>
+                <FormLabel>LED Qty *</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Select LED Qty" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    {["240L", "180L", "120L", "72L", "60L"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                  </SelectContent>
+                </Select><FormMessage />
+              </FormItem>
+            )} />
+          </div>
+          <div className="col-span-1">
+            <FormField control={control} name="fields.voltage" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Voltage *</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Select Voltage" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    {["220v", "48v", "24v", "12v"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                  </SelectContent>
+                </Select><FormMessage />
+              </FormItem>
+            )} />
+          </div>
+          <div className="col-span-1">
+            <FormField control={control} name="fields.wattage" render={({ field }) => ( <FormItem><FormLabel>Wattage *</FormLabel><FormControl><Input type="number" placeholder="Enter wattage" {...field} /></FormControl><FormMessage /></FormItem> )} />
+          </div>
+          <div className="col-span-1">
+            <FormField control={control} name="fields.meters" render={({ field }) => ( <FormItem><FormLabel>Meters *</FormLabel><FormControl><Input type="number" placeholder="Enter meters" {...field} /></FormControl><FormMessage /></FormItem> )} />
+          </div>
+        </>
       );
-    case 'Power Supply':
+    case 'POWER SUPPLY':
       return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField control={control} name="fields.voltage" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Voltage *</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl><SelectTrigger><SelectValue placeholder="Select Voltage" /></SelectTrigger></FormControl>
-                <SelectContent>
-                  {["220v", "48v", "24v", "12v"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                </SelectContent>
-              </Select><FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={control} name="fields.wattage" render={({ field }) => ( <FormItem><FormLabel>Wattage *</FormLabel><FormControl><Input type="number" placeholder="Enter wattage" {...field} /></FormControl><FormMessage /></FormItem> )} />
-        </div>
+        <>
+          <div className="col-span-2">
+            <FormField control={control} name="fields.voltage" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Voltage *</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Select Voltage" /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    {["220v", "48v", "24v", "12v"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                  </SelectContent>
+                </Select><FormMessage />
+              </FormItem>
+            )} />
+          </div>
+          <div className="col-span-2">
+            <FormField control={control} name="fields.wattage" render={({ field }) => ( <FormItem><FormLabel>Wattage *</FormLabel><FormControl><Input type="number" placeholder="Enter wattage" {...field} /></FormControl><FormMessage /></FormItem> )} />
+          </div>
+        </>
       );
-    case 'Aluminium Profile':
+    case 'ALUMINIUM PROFILE':
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField control={control} name="fields.size" render={({ field }) => (<FormItem><FormLabel>Size *</FormLabel><FormControl><Input placeholder="e.g., 2 meters" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="fields.color" render={({ field }) => (<FormItem><FormLabel>Color *</FormLabel><FormControl><Input type="color" {...field} className="p-1 h-10" /></FormControl><FormMessage /></FormItem>)} />
-            </div>
+            <>
+                <div className="col-span-1">
+                    <FormField control={control} name="fields.size" render={({ field }) => (<FormItem><FormLabel>Size *</FormLabel><FormControl><Input placeholder="e.g., 2 meters" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+                <div className="col-span-1">
+                    <FormField control={control} name="fields.color" render={({ field }) => (<FormItem><FormLabel>Color *</FormLabel><FormControl><Input type="color" {...field} className="p-1 h-10" /></FormControl><FormMessage /></FormItem>)} />
+                </div>
+            </>
         );
     default:
       return null;
@@ -267,28 +284,30 @@ export function ProductForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full">
         <div className="flex-grow p-6 space-y-4">
-          <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!!product}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="Select a category..." /></SelectTrigger></FormControl>
-                    <SelectContent>
-                      {categories.map((cat) => ( <SelectItem key={cat} value={cat}>{cat}</SelectItem> ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+                <FormField control={form.control} name="productCode" render={({ field }) => ( <FormItem><FormLabel>Product Code</FormLabel><FormControl><Input placeholder="PRO-2024-001" {...field} readOnly className="bg-muted/50" /></FormControl><FormMessage /></FormItem> )} />
+                <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Category *</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!!product}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Select a category..." /></SelectTrigger></FormControl>
+                            <SelectContent>
+                            {categories.map((cat) => ( <SelectItem key={cat} value={cat}>{cat}</SelectItem> ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+            </div>
+          
 
           {selectedCategory && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-              {/* Left Column */}
-              <div className="space-y-4">
-                <div>
+            <div className="space-y-4">
+                <div className="col-span-full">
                   <FormLabel>Product Image</FormLabel>
                   <p className="text-sm text-muted-foreground mb-2">Upload a high-quality image of your product. Will be optimized to 800x800px.</p>
                   <div 
@@ -328,16 +347,18 @@ export function ProductForm({
                       <div className="flex items-center gap-1"><Wand className="h-3 w-3 text-purple-500" />WebP conversion</div>
                   </div>
                 </div>
-                <FormField control={form.control} name="description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Product description..." className="resize-none" rows={11} {...field} /></FormControl><FormMessage /></FormItem> )} />
-              </div>
 
-              {/* Right Column */}
-              <div className="space-y-4">
-                <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Product Name *</FormLabel><FormControl><Input placeholder="Enter product name" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                <FormField control={form.control} name="sku" render={({ field }) => ( <FormItem><FormLabel>SKU Code</FormLabel><FormControl><Input placeholder="Product SKU" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                <div className="grid grid-cols-2 gap-4">
+                    <FormField control={form.control} name="name" render={({ field }) => ( <FormItem><FormLabel>Product Name *</FormLabel><FormControl><Input placeholder="Enter product name" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="sku" render={({ field }) => ( <FormItem><FormLabel>SKU Code</FormLabel><FormControl><Input placeholder="Product SKU" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                </div>
                 
-                <CategorySpecificFields category={selectedCategory} control={form.control} />
-
+                <FormField control={form.control} name="description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Product description..." className="resize-none" rows={5} {...field} /></FormControl><FormMessage /></FormItem> )} />
+                
+                <div className="grid grid-cols-4 gap-4">
+                    <CategorySpecificFields category={selectedCategory} control={form.control} />
+                </div>
+                
                 <FormField control={form.control} name="supplier" render={({ field }) => (
                     <FormItem>
                       <FormLabel>Supplier</FormLabel>
@@ -351,12 +372,13 @@ export function ProductForm({
                     </FormItem>
                 )} />
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <FormField control={form.control} name="location" render={({ field }) => ( <FormItem><FormLabel>Location *</FormLabel><FormControl><Input placeholder="e.g. Aisle 5, Shelf 3" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                  <FormField control={form.control} name="stock" render={({ field }) => ( <FormItem><FormLabel>Stock Qty *</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem> )} />
-                  <FormField control={form.control} name="reorderLevel" render={({ field }) => ( <FormItem><FormLabel>Reorder Level *</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className={`${selectedCategory === 'ALUMINIUM PROFILE' ? 'col-span-2' : 'col-span-4'} grid grid-cols-1 md:grid-cols-3 gap-4`}>
+                    <FormField control={form.control} name="location" render={({ field }) => ( <FormItem><FormLabel>Location *</FormLabel><FormControl><Input placeholder="e.g. Aisle 5, Shelf 3" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="stock" render={({ field }) => ( <FormItem><FormLabel>Stock Qty *</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                    <FormField control={form.control} name="reorderLevel" render={({ field }) => ( <FormItem><FormLabel>Reorder Level *</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem> )} />
+                  </div>
                 </div>
-              </div>
             </div>
           )}
 

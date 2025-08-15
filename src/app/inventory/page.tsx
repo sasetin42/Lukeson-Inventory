@@ -126,8 +126,14 @@ export default function InventoryPage() {
     try {
       // Delete image from storage
       if (deletingProduct.imageUrl) {
-        const imageRef = ref(storage, deletingProduct.imageUrl);
-        await deleteObject(imageRef);
+        try {
+            const imageRef = ref(storage, deletingProduct.imageUrl);
+            await deleteObject(imageRef);
+        } catch (storageError) {
+             if ((storageError as any).code !== 'storage/object-not-found') {
+                throw storageError;
+            }
+        }
       }
 
       // Delete product from firestore

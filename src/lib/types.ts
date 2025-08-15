@@ -3,9 +3,10 @@ import { Timestamp } from "firebase/firestore";
 // Base Product Type
 export type Product = {
   id: string;
+  productCode?: string;
   name: string;
   sku?: string;
-  category: "Striplight" | "Power Supply" | "General Lighting" | "Aluminium Profile" | "Apparel" | "Electronics" | "Accessories" | "Stationery";
+  category: "STRIPLIGHT" | "POWER SUPPLY" | "GENERAL LIGHTING" | "ALUMINIUM PROFILE" | "Apparel" | "Electronics" | "Accessories" | "Stationery";
   description?: string;
   supplier?: string;
   location?: string;
