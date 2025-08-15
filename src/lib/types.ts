@@ -6,12 +6,12 @@ export type Product = {
   productCode?: string;
   name: string;
   sku?: string;
-  category: "STRIPLIGHT" | "POWER SUPPLY" | "GENERAL LIGHTING" | "ALUMINIUM PROFILE" | "Apparel" | "Electronics" | "Accessories" | "Stationery";
+  category: "STRIPLIGHT" | "POWER SUPPLY" | "GENERAL LIGHTING" | "ALUMINIUM PROFILE";
   description?: string;
   supplier?: string;
   location?: string;
   stock: number;
-  reorderLevel?: number;
+  reorderLevel: number;
   imageUrl?: string;
   createdAt?: Timestamp;
   price?: number;
