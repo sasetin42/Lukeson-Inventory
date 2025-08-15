@@ -5,16 +5,26 @@ export type Product = {
   id: string;
   name: string;
   sku?: string;
-  category: "Striplight" | "Power Supply" | "General Lighting" | "Aluminium Profile";
+  category: "Striplight" | "Power Supply" | "General Lighting" | "Aluminium Profile" | "Apparel" | "Electronics" | "Accessories" | "Stationery";
   description?: string;
   supplier?: string;
-  location: string;
+  location?: string;
   stock: number;
-  reorderLevel: number;
+  reorderLevel?: number;
   imageUrl?: string;
-  createdAt: Timestamp;
+  createdAt?: Timestamp;
+  price?: number;
+  status?: 'In Stock' | 'Low Stock' | 'Out of Stock';
+  tags?: string[];
+  unit?: string;
+  barcode?: string;
+  minStock?: number;
+  maxStock?: number;
+  initialStock?: number;
+  image?: string;
+  lastSoldDate?: string;
   // Category-specific fields
-  fields: StriplightFields | PowerSupplyFields | GeneralLightingFields | AluminiumProfileFields;
+  fields?: StriplightFields | PowerSupplyFields | GeneralLightingFields | AluminiumProfileFields;
 };
 
 // Category-specific field types
