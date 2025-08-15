@@ -105,11 +105,41 @@ const getInitialValues = (product: Product | null | undefined): ProductFormValue
     };
 
     if (product) {
+        const category = product.category || 'STRIPLIGHT'; // Default to a category if not present
+        const fields = product.fields || {};
+        
+        let typedFields: any = {};
+        switch (category) {
+            case 'STRIPLIGHT':
+                typedFields = {
+                    ledQty: fields.ledQty || null,
+                    voltage: fields.voltage || null,
+                    wattage: fields.wattage || 0,
+                    meters: fields.meters || 0,
+                };
+                break;
+            case 'POWER SUPPLY':
+                typedFields = {
+                    voltage: fields.voltage || null,
+                    wattage: fields.wattage || 0,
+                };
+                break;
+            case 'ALUMINIUM PROFILE':
+                typedFields = {
+                    size: fields.size || '',
+                    color: fields.color || '#000000',
+                };
+                break;
+            case 'GENERAL LIGHTING':
+                typedFields = {};
+                break;
+        }
+
         return {
             ...defaults,
-            category: product.category,
-            fields: product.fields as any,
-        };
+            category: category,
+            fields: typedFields,
+        } as unknown as ProductFormValues;
     }
 
     // Default values for a new product form
@@ -117,14 +147,12 @@ const getInitialValues = (product: Product | null | undefined): ProductFormValue
         ...defaults,
         category: 'STRIPLIGHT',
         fields: {
-            ledQty: undefined,
-            voltage: undefined,
+            ledQty: null,
+            voltage: null,
             wattage: 0,
             meters: 0,
-            size: '',
-            color: '#000000',
         },
-    } as any;
+    } as unknown as ProductFormValues;
 }
 
 const CategorySpecificFields = ({ category, control }: { category: string; control: any }) => {
@@ -135,7 +163,7 @@ const CategorySpecificFields = ({ category, control }: { category: string; contr
             <FormField control={control} name="fields.ledQty" render={({ field }) => (
               <FormItem>
                 <FormLabel>LED Qty *</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ''}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Select LED Qty" /></SelectTrigger></FormControl>
                   <SelectContent>
                     {["240L", "180L", "120L", "72L", "60L"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
@@ -146,7 +174,7 @@ const CategorySpecificFields = ({ category, control }: { category: string; contr
             <FormField control={control} name="fields.voltage" render={({ field }) => (
               <FormItem>
                 <FormLabel>Voltage *</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value || ''}>
                   <FormControl><SelectTrigger><SelectValue placeholder="Select Voltage" /></SelectTrigger></FormControl>
                   <SelectContent>
                     {["220v", "48v", "24v", "12v"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
@@ -164,7 +192,7 @@ const CategorySpecificFields = ({ category, control }: { category: string; contr
           <FormField control={control} name="fields.voltage" render={({ field }) => (
             <FormItem>
               <FormLabel>Voltage *</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value || ''}>
                 <FormControl><SelectTrigger><SelectValue placeholder="Select Voltage" /></SelectTrigger></FormControl>
                 <SelectContent>
                   {["220v", "48v", "24v", "12v"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
@@ -178,8 +206,8 @@ const CategorySpecificFields = ({ category, control }: { category: string; contr
     case 'ALUMINIUM PROFILE':
         return (
             <div className="grid grid-cols-2 gap-4 col-span-full">
-                <FormField control={control} name="fields.size" render={({ field }) => (<FormItem><FormLabel>Size *</FormLabel><FormControl><Input placeholder="e.g., 2 meters" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="fields.color" render={({ field }) => (<FormItem><FormLabel>Color *</FormLabel><FormControl><Input type="color" {...field} className="p-1 h-10" /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={control} name="fields.size" render={({ field }) => (<FormItem><FormLabel>Size *</FormLabel><FormControl><Input placeholder="e.g., 2 meters" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={control} name="fields.color" render={({ field }) => (<FormItem><FormLabel>Color *</FormLabel><FormControl><Input type="color" {...field} value={field.value || '#000000'} className="p-1 h-10" /></FormControl><FormMessage /></FormItem>)} />
             </div>
         );
     default:
@@ -206,12 +234,11 @@ export function ProductForm({
   const selectedCategory = useWatch({ control: form.control, name: 'category' });
 
   useEffect(() => {
+    form.reset(getInitialValues(product));
     if (product) {
-      form.reset(getInitialValues(product));
       setImagePreview(product.imageUrl || null);
     } else {
-      form.reset(getInitialValues(null));
-      setImagePreview(null);
+        setImagePreview(null);
     }
   }, [product, form]);
 
@@ -282,7 +309,7 @@ export function ProductForm({
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Category *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={!!product}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={!!product}>
                             <FormControl><SelectTrigger><SelectValue placeholder="Select a category..." /></SelectTrigger></FormControl>
                             <SelectContent>
                             {categories.map((cat) => ( <SelectItem key={cat} value={cat}>{cat}</SelectItem> ))}
