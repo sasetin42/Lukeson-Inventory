@@ -45,7 +45,7 @@ export default function KpiCard({ title, value, icon: Icon, trend, color, subtex
   return (
     <Card className={cn('border-0 shadow-sm', className)} {...props}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium text-muted-foreground whitespace-nowrap">{title}</CardTitle>
         <Icon className={cn('h-5 w-5', iconColorClasses[color])} />
       </CardHeader>
       <CardContent>
