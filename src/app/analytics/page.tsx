@@ -1,10 +1,15 @@
+
 import PageHeader from "@/components/page-header";
-import { BarChart2, DollarSign, Package, ShoppingCart, TrendingUp } from "lucide-react";
+import { BarChart2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import KpiCard from "@/components/kpi-card";
 import RevenueProfitChart from "@/components/analytics/revenue-profit-chart";
 import { analyticsKpiData } from "@/lib/analytics-data";
+import SalesByCustomerChart from "@/components/analytics/sales-by-customer-chart";
+import SalesOverTimeChart from "@/components/analytics/sales-over-time-chart";
+import InventoryValueByCategoryChart from "@/components/analytics/inventory-value-by-category-chart";
+import SupplierPerformanceList from "@/components/analytics/supplier-performance-list";
 
 export default function AnalyticsPage() {
   return (
@@ -41,35 +46,15 @@ export default function AnalyticsPage() {
                 <RevenueProfitChart />
             </div>
         </TabsContent>
-        <TabsContent value="sales">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Sales Analytics</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">Sales analytics content goes here.</p>
-                </CardContent>
-            </Card>
+        <TabsContent value="sales" className="mt-6 grid gap-6 md:grid-cols-2">
+            <SalesByCustomerChart />
+            <SalesOverTimeChart />
         </TabsContent>
-        <TabsContent value="inventory">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Inventory Analysis</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">Inventory analysis content goes here.</p>
-                </CardContent>
-            </Card>
+        <TabsContent value="inventory" className="mt-6">
+            <InventoryValueByCategoryChart />
         </TabsContent>
-        <TabsContent value="suppliers">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Supplier Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">Supplier performance content goes here.</p>
-                </CardContent>
-            </Card>
+        <TabsContent value="suppliers" className="mt-6">
+            <SupplierPerformanceList />
         </TabsContent>
       </Tabs>
     </div>
