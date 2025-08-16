@@ -94,7 +94,10 @@ export default function ProductList({ products }: ProductListProps) {
                         data-ai-hint="product image"
                       />
                     </TableCell>
-                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>
+                        <div className="font-medium">{product.name}</div>
+                        <div className="text-xs text-muted-foreground">{product.productCode}</div>
+                    </TableCell>
                     <TableCell>{product.sku}</TableCell>
                     <TableCell>{categoryMap[product.sku] || 'N/A'}</TableCell>
                     <TableCell>{product.stock}</TableCell>
