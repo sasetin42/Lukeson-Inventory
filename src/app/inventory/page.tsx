@@ -54,11 +54,11 @@ export default function InventoryPage() {
     setIsSubmitting(true);
     try {
       await addProduct(data);
-      setAddProductOpen(false);
       toast({
         title: "Product Added",
         description: `${data.name} has been successfully added.`,
       });
+      setAddProductOpen(false);
     } catch (error: any) {
       console.error("Error adding product: ", error);
       toast({
@@ -76,11 +76,11 @@ export default function InventoryPage() {
     setIsSubmitting(true);
     try {
       await updateProduct(editingProduct.id, { ...editingProduct, ...data });
-      setEditingProduct(null);
       toast({
         title: "Product Updated",
         description: `${data.name} has been successfully updated.`,
       });
+      setEditingProduct(null);
     } catch (error: any) {
       console.error("Error updating product: ", error);
       let description = "An unknown error occurred.";
@@ -103,13 +103,13 @@ export default function InventoryPage() {
     if (!deletingProduct) return;
     setIsSubmitting(true);
     try {
-      await deleteProduct(deletingProduct.id, deletingProduct.imageUrl);
       const productName = deletingProduct.name;
-      setDeletingProduct(null);
+      await deleteProduct(deletingProduct.id, deletingProduct.imageUrl);
       toast({
         title: "Product Deleted",
         description: `${productName} has been successfully deleted.`,
       });
+      setDeletingProduct(null);
     } catch (error: any) {
       console.error("Error deleting product: ", error);
       let description = "An unknown error occurred.";
