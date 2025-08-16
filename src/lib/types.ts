@@ -293,6 +293,8 @@ export type Product = {
     createdAt: string | Timestamp | Date;
     status: 'In Stock' | 'Low Stock' | 'Out of Stock';
     suppliers?: Supplier[];
+    uom: string;
+    expiryDateTracking: boolean;
 };
 
     

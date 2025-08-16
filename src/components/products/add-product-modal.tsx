@@ -22,6 +22,7 @@ import Image from 'next/image';
 import { db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot } from 'firebase/firestore';
+import { Switch } from '../ui/switch';
 
 interface AddProductModalProps {
   children: React.ReactNode;
@@ -48,6 +49,10 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [uom, setUom] = useState('');
+    const [stock, setStock] = useState('');
+    const [reOrderLevel, setReOrderLevel] = useState('');
+    const [expiryDateTracking, setExpiryDateTracking] = useState(false);
 
     useEffect(() => {
         if (open) {
@@ -104,6 +109,10 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
         setImageFile(null);
         setImagePreview(null);
         setIsUploading(false);
+        setUom('');
+        setStock('');
+        setReOrderLevel('');
+        setExpiryDateTracking(false);
     };
 
     const handleSubmit = async () => {
@@ -129,9 +138,11 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             supplier,
             location,
             imageUrl: imageUrl,
-            stock: 0, 
+            stock: Number(stock) || 0, 
             cost: 0,
-            reOrderLevel: 0,
+            reOrderLevel: Number(reOrderLevel) || 0,
+            uom,
+            expiryDateTracking,
         };
         onAddProduct(newProduct);
         setOpen(false);
@@ -251,12 +262,32 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                     <Input id="meters" value={meters} onChange={(e) => setMeters(e.target.value)} placeholder="e.g. 5" />
                 </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="uom">UOM</Label>
+                    <Input id="uom" value={uom} onChange={(e) => setUom(e.target.value)} placeholder="e.g. pcs, box" />
+                </div>
                  <div className="space-y-2">
                     <Label htmlFor="location">Location</Label>
                     <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Warehouse A, Shelf 3" />
                 </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="stock">Stock Quantity</Label>
+                    <Input id="stock" type="number" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="e.g. 100" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="reorder-level">Reorder Level</Label>
+                    <Input id="reorder-level" type="number" value={reOrderLevel} onChange={(e) => setReOrderLevel(e.target.value)} placeholder="e.g. 20" />
+                </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+                <Switch id="expiry-tracking" checked={expiryDateTracking} onCheckedChange={setExpiryDateTracking} />
+                <Label htmlFor="expiry-tracking">Enable Expiry Date Tracking</Label>
             </div>
         </div>
         <DialogFooter>
