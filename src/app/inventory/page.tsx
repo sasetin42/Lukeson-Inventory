@@ -11,65 +11,105 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ProductForm } from "@/components/inventory/product-form";
 import { DeleteProductDialog } from "@/components/inventory/delete-product-dialog";
 import type { Product } from '@/lib/types';
-import { suppliers, products as mockProducts } from '@/lib/data';
+import { suppliers } from '@/lib/data';
 import { useToast } from "@/hooks/use-toast";
 import { Camera } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { addProduct, getProducts, updateProduct, deleteProduct } from '@/lib/firebase/product-service';
 
 export default function InventoryPage() {
-  const [products, setProducts] = useState<Product[]>(mockProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isAddProductOpen, setAddProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const unsubscribe = getProducts((products) => {
+          setProducts(products);
+          setLoading(false);
+        });
+        return () => unsubscribe();
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        toast({
+          variant: "destructive",
+          title: "Error fetching products",
+          description: "Could not load product data. Please check your Firestore connection and rules.",
+        });
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [toast]);
+
   const handleAddProduct = async (data: any) => {
     setIsSubmitting(true);
-    // This is a mock implementation
-    const newProduct: Product = {
-      id: `PROD${Math.floor(Math.random() * 1000)}`,
-      ...data,
-      imageUrl: data.image,
-      createdAt: new Date(),
-    };
-    
-    setProducts(prev => [newProduct, ...prev]);
-
-    toast({
-      title: "Product Added (Mock)",
-      description: `${data.name} has been added to the local list.`,
-    });
-    setAddProductOpen(false);
-    setIsSubmitting(false);
+    try {
+      await addProduct(data);
+      toast({
+        title: "Product Added",
+        description: `${data.name} has been successfully added.`,
+      });
+      setAddProductOpen(false);
+    } catch (error: any) {
+      console.error("Error adding product: ", error);
+      toast({
+        variant: "destructive",
+        title: "Error Adding Product",
+        description: error.message || "An unknown error occurred.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleEditProduct = async (data: any) => {
     if (!editingProduct) return;
     setIsSubmitting(true);
-    
-    setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...p, ...data, imageUrl: data.image || p.imageUrl } : p));
-
-    toast({
-      title: "Product Updated (Mock)",
-      description: `${data.name} has been updated in the local list.`,
-    });
-    setEditingProduct(null);
-    setIsSubmitting(false);
+    try {
+      await updateProduct(editingProduct.id, data);
+      toast({
+        title: "Product Updated",
+        description: `${data.name} has been successfully updated.`,
+      });
+      setEditingProduct(null);
+    } catch (error: any) {
+      console.error("Error updating product: ", error);
+      toast({
+        variant: "destructive",
+        title: "Error Updating Product",
+        description: error.message || "An unknown error occurred.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDeleteProduct = async () => {
     if (!deletingProduct) return;
     setIsSubmitting(true);
-    
-    setProducts(prev => prev.filter(p => p.id !== deletingProduct.id));
-
-    toast({
-      title: "Product Deleted (Mock)",
-      description: `${deletingProduct.name} has been removed from the local list.`,
-    });
-    setDeletingProduct(null);
-    setIsSubmitting(false);
+    try {
+      await deleteProduct(deletingProduct.id, deletingProduct.imageUrl);
+      toast({
+        title: "Product Deleted",
+        description: `${deletingProduct.name} has been successfully deleted.`,
+      });
+      setDeletingProduct(null);
+    } catch (error: any) {
+      console.error("Error deleting product: ", error);
+      toast({
+        variant: "destructive",
+        title: "Error Deleting Product",
+        description: error.message || "An unknown error occurred.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   const supplierNames = suppliers.map(s => s.name);
@@ -167,3 +207,4 @@ export default function InventoryPage() {
     </div>
   );
 }
+

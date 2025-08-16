@@ -1,9 +1,34 @@
 
-import { products, suppliers, invoices } from '@/lib/data';
+'use client';
+import { useState, useEffect } from 'react';
+import { invoices, suppliers } from '@/lib/data';
 import { ShoppingCart, AlertTriangle, DollarSign, Users } from 'lucide-react';
 import KpiCard from '@/components/kpi-card';
+import { getProducts } from '@/lib/firebase/product-service';
+import type { Product } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 export default function OverviewCards() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const unsubscribe = getProducts(
+      (products) => {
+        setProducts(products);
+      },
+      (error) => {
+        console.error('Failed to fetch products for overview:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Could not fetch product data for overview cards.',
+        });
+      }
+    );
+    return () => unsubscribe();
+  }, [toast]);
+
   const lowStockItems = products.filter(p => p.stock > 0 && p.stock <= p.reorderLevel).length;
   const activeSalesOrders = 5; // Mock data
   const totalCustomers = 10; // Mock data

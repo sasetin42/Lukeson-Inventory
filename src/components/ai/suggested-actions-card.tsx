@@ -1,23 +1,53 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Lightbulb, Loader2 } from 'lucide-react';
-import { products, sales, suppliers } from '@/lib/data';
+import { sales, suppliers } from '@/lib/data';
 import { suggestActions, SuggestActionsOutput } from '@/ai/flows/suggested-actions';
 import { useToast } from '@/hooks/use-toast';
+import { getProducts } from '@/lib/firebase/product-service';
+import type { Product } from '@/lib/types';
 
 export default function SuggestedActionsCard() {
   const [suggestions, setSuggestions] = useState<SuggestActionsOutput>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const unsubscribe = getProducts(
+      (products) => {
+        setProducts(products);
+      },
+      (error) => {
+        console.error('Failed to fetch products for suggestions:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Could not fetch product data for AI suggestions.',
+        });
+      }
+    );
+    return () => unsubscribe();
+  }, [toast]);
 
   const handleSuggestActions = async () => {
     setIsLoading(true);
     setSuggestions([]);
     try {
+        if (products.length === 0) {
+            toast({
+                variant: 'destructive',
+                title: 'No product data',
+                description: 'Cannot generate suggestions without product data.',
+            });
+            return;
+        }
+
       const stockLevels = products.reduce((acc, p) => {
         acc[p.id] = p.stock;
         return acc;
@@ -59,7 +89,7 @@ export default function SuggestedActionsCard() {
           <CardTitle>AI Suggested Actions</CardTitle>
           <CardDescription>Get smart recommendations for your inventory.</CardDescription>
         </div>
-        <Button onClick={handleSuggestActions} disabled={isLoading}>
+        <Button onClick={handleSuggestActions} disabled={isLoading || products.length === 0}>
           {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lightbulb className="mr-2 h-4 w-4 text-yellow-400" />}
           Get Suggestions
         </Button>

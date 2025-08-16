@@ -1,9 +1,10 @@
 
+
 import type { Product, Supplier, Invoice, Sales, InventoryKpi } from './types';
 import { Box, DollarSign, Tag, AlertTriangle, XCircle, Star, Clock, Repeat } from 'lucide-react';
 
 export const products: Product[] = [
-  // Striplights
+  // This is now mock data and will not be used if Firestore is connected.
   {
     id: 'PROD001',
     productCode: 'PRO-2024-001',
@@ -22,131 +23,6 @@ export const products: Product[] = [
       meters: 5,
     },
     price: 1200.00,
-    status: 'In Stock',
-  },
-  {
-    id: 'PROD002',
-    productCode: 'PRO-2024-002',
-    name: '120L 12v Flexible LED Striplight',
-    sku: 'SL-120L-12V-RGB',
-    description: 'Versatile RGB flexible LED strip for accent lighting. Comes with an adhesive backing for easy installation.',
-    supplier: 'LED Solutions Inc.',
-    location: 'Aisle 1, Shelf B',
-    stock: 80,
-    reorderLevel: 30,
-    imageUrl: 'https://placehold.co/400x400.png',
-    fields: {
-      ledQty: '120L',
-      voltage: '12v',
-      wattage: 14.4,
-      meters: 5,
-    },
-    price: 950.00,
-    status: 'In Stock',
-  },
-  // Power Supplies
-  {
-    id: 'PROD003',
-    productCode: 'PRO-2024-003',
-    name: '24v 150W Slim Power Supply',
-    sku: 'PS-24V-150W-SL',
-    description: 'Slim and compact 150W power supply for 24v LED systems. Fanless design for silent operation.',
-    supplier: 'Power Systems Ltd.',
-    location: 'Aisle 2, Shelf A',
-    stock: 45,
-    reorderLevel: 20,
-    imageUrl: 'https://placehold.co/400x400.png',
-    fields: {
-      voltage: '24v',
-      wattage: 150,
-    },
-    price: 1800.00,
-    status: 'Low Stock',
-  },
-  {
-    id: 'PROD004',
-    productCode: 'PRO-2024-004',
-    name: '12v 60W Waterproof Power Supply',
-    sku: 'PS-12V-60W-WP',
-    description: 'IP67 rated waterproof power supply suitable for outdoor and bathroom installations.',
-    supplier: 'Power Systems Ltd.',
-    location: 'Aisle 2, Shelf A',
-    stock: 60,
-    reorderLevel: 25,
-    imageUrl: 'https://placehold.co/400x400.png',
-    fields: {
-      voltage: '12v',
-      wattage: 60,
-    },
-    price: 1100.00,
-    status: 'In Stock',
-  },
-  // General Lighting
-  {
-    id: 'PROD005',
-    productCode: 'PRO-2024-005',
-    name: 'Recessed LED Downlight 9W',
-    sku: 'GL-DL-9W-CW',
-    description: 'Modern cool-white recessed LED downlight. Energy efficient with a sleek, minimalist design.',
-    supplier: 'Bright Ideas Lighting',
-    location: 'Aisle 3, Shelf C',
-    stock: 200,
-    reorderLevel: 75,
-    imageUrl: 'https://placehold.co/400x400.png',
-    fields: {},
-    price: 450.00,
-    status: 'In Stock',
-  },
-  {
-    id: 'PROD006',
-    productCode: 'PRO-2024-006',
-    name: 'Surface Mounted Ceiling Light 18W',
-    sku: 'GL-CL-18W-WW',
-    description: '18W warm-white surface-mounted ceiling light. Provides wide and even light distribution.',
-    supplier: 'Bright Ideas Lighting',
-    location: 'Aisle 3, Shelf D',
-    stock: 0,
-    reorderLevel: 60,
-    imageUrl: 'https://placehold.co/400x400.png',
-    fields: {},
-    price: 750.00,
-    status: 'Out of Stock',
-  },
-  // Aluminium Profiles
-  {
-    id: 'PROD007',
-    productCode: 'PRO-2024-007',
-    name: 'Recessed Aluminium Profile 2m',
-    sku: 'AP-REC-2M-SL',
-    description: '2-meter recessed aluminium profile for a clean, flush installation of LED strips. Includes diffuser.',
-    supplier: 'AluExtrude Co.',
-    location: 'Warehouse Bay 1',
-    stock: 300,
-    reorderLevel: 100,
-    imageUrl: 'https://placehold.co/400x400.png',
-    fields: {
-      size: '2 meters',
-      color: '#C0C0C0', // Silver
-    },
-    price: 350.00,
-    status: 'In Stock',
-  },
-  {
-    id: 'PROD008',
-    productCode: 'PRO-2024-008',
-    name: 'Surface Aluminium Profile 2m - Black',
-    sku: 'AP-SUR-2M-BK',
-    description: '2-meter surface-mounted aluminium profile in a matte black finish. Ideal for modern designs.',
-    supplier: 'AluExtrude Co.',
-    location: 'Warehouse Bay 2',
-    stock: 150,
-    reorderLevel: 50,
-    imageUrl: 'https://placehold.co/400x400.png',
-    fields: {
-      size: '2 meters',
-      color: '#000000', // Black
-    },
-    price: 400.00,
     status: 'In Stock',
   }
 ];
