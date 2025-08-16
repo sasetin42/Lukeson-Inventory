@@ -128,7 +128,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="product-code">Product Code</Label>
                     <Input id="product-code" value={productCode} disabled />
@@ -143,6 +143,19 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                             {Object.values(categoryMap).filter((v, i, a) => a.indexOf(v) === i).map(cat => (
                                 <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                             ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="supplier">Supplier</Label>
+                     <Select onValueChange={setSupplier} value={supplier}>
+                        <SelectTrigger id="supplier">
+                            <SelectValue placeholder="Select a supplier" />
+                        </SelectTrigger>
+                        <SelectContent>
+                           {suppliers.map(s => (
+                               <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                           ))}
                         </SelectContent>
                     </Select>
                 </div>
@@ -220,19 +233,6 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             </div>
             
             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="supplier">Supplier</Label>
-                     <Select onValueChange={setSupplier} value={supplier}>
-                        <SelectTrigger id="supplier">
-                            <SelectValue placeholder="Select a supplier" />
-                        </SelectTrigger>
-                        <SelectContent>
-                           {suppliers.map(s => (
-                               <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                           ))}
-                        </SelectContent>
-                    </Select>
-                </div>
                  <div className="space-y-2">
                     <Label htmlFor="location">Location</Label>
                     <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Warehouse A, Shelf 3" />
