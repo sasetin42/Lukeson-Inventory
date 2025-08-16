@@ -19,12 +19,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import ProductDetailsModal from './product-details-modal';
 
 interface ProductListProps {
     products: Product[];
 }
 
 export default function ProductList({ products }: ProductListProps) {
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
     const getStatusVariant = (status: string) => {
         switch (status) {
             case 'In Stock':
@@ -112,7 +115,7 @@ export default function ProductList({ products }: ProductListProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => console.log('View Details:', product.id)}>
+                          <DropdownMenuItem onClick={() => setSelectedProduct(product)}>
                             <Eye className="mr-2 h-4 w-4" />
                             View Details
                           </DropdownMenuItem>
@@ -135,6 +138,11 @@ export default function ProductList({ products }: ProductListProps) {
           </TabsContent>
         </Tabs>
       </CardHeader>
+      <ProductDetailsModal
+        isOpen={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        product={selectedProduct}
+      />
     </Card>
   );
 }
