@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Search, Edit, Trash2, Eye } from "lucide-react";
 import Image from "next/image";
-import { products } from "@/lib/products-data";
+import { Product } from "@/lib/types";
 import { categoryMap } from "@/lib/category-map";
 import {
   DropdownMenu,
@@ -20,7 +20,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-export default function ProductList() {
+interface ProductListProps {
+    products: Product[];
+}
+
+export default function ProductList({ products }: ProductListProps) {
     const getStatusVariant = (status: string) => {
         switch (status) {
             case 'In Stock':

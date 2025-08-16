@@ -1,21 +1,25 @@
 
 'use client';
 
+import { useState } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Package, PlusCircle, Upload, Download, DollarSign, AlertTriangle, XCircle, Star, Clock } from "lucide-react";
 import KpiCard from "@/components/kpi-card";
-import { products } from "@/lib/products-data";
+import { products as initialProducts } from "@/lib/products-data";
 import ActionCard from "@/components/action-card";
 import ProductList from "@/components/products/product-list";
+import { Product } from '@/lib/types';
+import AddProductModal from '@/components/products/add-product-modal';
 
 export default function ProductsPage() {
+    const [products, setProducts] = useState<Product[]>(initialProducts);
+
     const totalProducts = products.length;
     const totalValue = products.reduce((acc, p) => acc + (p.cost * p.stock), 0);
     const lowStock = products.filter(p => p.status === 'Low Stock').length;
     const outOfStock = products.filter(p => p.status === 'Out of Stock').length;
     
-    // Mock data for added this week and pending orders for now
     const addedThisWeek = products.filter(p => {
         const productDate = new Date(p.createdAt);
         const sevenDaysAgo = new Date();
@@ -32,6 +36,16 @@ export default function ProductsPage() {
         { title: "Pending Orders", value: 0, icon: Clock, subtext: "Awaiting fulfillment", color: "orange" as const }
     ];
 
+    const handleAddProduct = (newProduct: Omit<Product, 'id' | 'createdAt' | 'status'>) => {
+        const product: Product = {
+            ...newProduct,
+            id: `PROD${(products.length + 1).toString().padStart(3, '0')}`,
+            createdAt: new Date().toISOString(),
+            status: newProduct.stock === 0 ? 'Out of Stock' : newProduct.stock <= newProduct.reOrderLevel ? 'Low Stock' : 'In Stock',
+        };
+        setProducts(prev => [product, ...prev]);
+    };
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -40,10 +54,12 @@ export default function ProductsPage() {
         icon={<Package className="h-6 w-6" />}
         actions={
           <div className="flex items-center gap-2">
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add Product
-            </Button>
+            <AddProductModal onAddProduct={handleAddProduct}>
+                <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Product
+                </Button>
+            </AddProductModal>
             <Button variant="ghost">
               <Upload className="mr-2 h-4 w-4" />
               Import
@@ -97,7 +113,7 @@ export default function ProductsPage() {
             color="red"
         />
       </div>
-      <ProductList />
+      <ProductList products={products} />
     </div>
   );
 }
