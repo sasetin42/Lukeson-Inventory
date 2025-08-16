@@ -69,6 +69,8 @@ export default function ProductFormModal({
     const [price, setPrice] = useState('');
 
     useEffect(() => {
+        if (!isOpen) return;
+
         const suppliersUnsub = onSnapshot(collection(db, "suppliers"), (snapshot) => {
             const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
             setSuppliers(suppliersData);
@@ -83,7 +85,7 @@ export default function ProductFormModal({
             suppliersUnsub();
             categoriesUnsub();
         }
-    }, []);
+    }, [isOpen]);
 
     useEffect(() => {
         if (isOpen) {
@@ -113,6 +115,8 @@ export default function ProductFormModal({
                 const nextId = (totalProducts + 1).toString().padStart(3, '0');
                 setProductCode(`PRO-${year}-${nextId}`);
             }
+        } else {
+            resetForm();
         }
     }, [isOpen, product, totalProducts]);
     
@@ -157,6 +161,11 @@ export default function ProductFormModal({
         setPrice('');
     };
 
+    const handleClose = () => {
+        resetForm();
+        onClose();
+    }
+
     const handleSubmit = async () => {
         let imageUrl = product?.imageUrl || 'https://placehold.co/48x48.png';
         if (imageFile) {
@@ -197,11 +206,11 @@ export default function ProductFormModal({
         } else {
             await onAddProduct(productData);
         }
-        onClose();
+        handleClose();
     };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{product ? 'Edit Product' : 'Add New Product'}</DialogTitle>
@@ -370,7 +379,7 @@ export default function ProductFormModal({
             </div>
         </div>
         <DialogFooter>
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
+            <Button variant="outline" onClick={handleClose}>Cancel</Button>
             <Button type="submit" onClick={handleSubmit} disabled={isUploading}>
                 {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {product ? 'Save Changes' : 'Add Product'}
@@ -380,3 +389,5 @@ export default function ProductFormModal({
     </Dialog>
   );
 }
+
+    
