@@ -17,7 +17,7 @@ import { Product } from '@/lib/types';
 import { categoryMap } from '@/lib/category-map';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Loader2 } from 'lucide-react';
 import { suppliers } from '@/lib/data';
 import Image from 'next/image';
 
@@ -44,6 +44,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
     const [location, setLocation] = useState('');
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => {
         if (open) {
@@ -59,10 +60,15 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setIsUploading(true);
             setImageFile(file);
             const reader = new FileReader();
+            reader.onloadstart = () => {
+                setIsUploading(true);
+            }
             reader.onloadend = () => {
                 setImagePreview(reader.result as string);
+                setIsUploading(false);
             };
             reader.readAsDataURL(file);
         }
@@ -86,6 +92,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
         setLocation('');
         setImageFile(null);
         setImagePreview(null);
+        setIsUploading(false);
     };
 
     const handleSubmit = () => {
@@ -154,6 +161,11 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                         >
                             <X className="h-4 w-4" />
                         </Button>
+                    </div>
+                ) : isUploading ? (
+                     <div className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg bg-muted">
+                        <Loader2 className="w-8 h-8 mb-4 text-muted-foreground animate-spin" />
+                        <p className="text-sm text-muted-foreground">Optimizing and converting image to WebP...</p>
                     </div>
                 ) : (
                     <div className="flex items-center justify-center w-full">
