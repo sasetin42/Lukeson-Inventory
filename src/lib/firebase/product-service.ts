@@ -82,49 +82,61 @@ export const getProducts = (
 // Add a new product
 export const addProduct = async (productData: Omit<Product, 'id' | 'createdAt'>) => {
   const { image, ...restOfData } = productData;
+  
+  // Create the document first, without the imageUrl
   const docRef = await addDoc(collection(db, PRODUCTS_COLLECTION), {
     ...restOfData,
     createdAt: serverTimestamp(),
     imageUrl: null, // Initially set to null
   });
 
-  let imageUrl = null;
+  // If there's an image, upload it and then update the document with the URL
   if (image) {
-    imageUrl = await uploadImage(docRef.id, image);
+    const imageUrl = await uploadImage(docRef.id, image);
     await updateDoc(docRef, { imageUrl });
+    return { id: docRef.id, imageUrl };
   }
 
-  return { id: docRef.id, imageUrl };
+  // If no image, just return the ID
+  return { id: docRef.id, imageUrl: null };
 };
+
 
 // Update an existing product
 export const updateProduct = async (productId: string, productData: Partial<Product>) => {
     const { image, imageUrl: currentImageUrl, ...restOfData } = productData;
     const productRef = doc(db, PRODUCTS_COLLECTION, productId);
   
-    let newImageUrl = currentImageUrl;
+    let finalImageUrl = currentImageUrl;
   
-    // Check if a new image is being uploaded (it will be a base64 string)
-    if (image && image.startsWith('data:image')) {
-      // A new image is provided
-      // First, delete the old image if it exists and is a valid storage URL
+    // Case 1: A new image is being uploaded (it's a base64 string)
+    if (image && typeof image === 'string' && image.startsWith('data:image')) {
+      // Delete the old image if it exists
       if (currentImageUrl) {
         await deleteImage(currentImageUrl);
       }
-      // Upload the new image and get its URL
-      newImageUrl = await uploadImage(productId, image);
+      // Upload the new image
+      finalImageUrl = await uploadImage(productId, image);
+    } 
+    // Case 2: The image has been removed (image is null) but there was an old one
+    else if (image === null && currentImageUrl) {
+        await deleteImage(currentImageUrl);
+        finalImageUrl = null;
     }
   
+    // Update the document in Firestore
     await updateDoc(productRef, {
       ...restOfData,
-      imageUrl: newImageUrl, // Update with the new URL or keep the old one
+      imageUrl: finalImageUrl, 
     });
 };
 
 // Delete a product
 export const deleteProduct = async (productId: string, imageUrl: string | undefined | null) => {
   // First, delete the image from Storage if it exists
-  await deleteImage(imageUrl);
+  if (imageUrl) {
+    await deleteImage(imageUrl);
+  }
   
   // Then, delete the document from Firestore
   const productRef = doc(db, PRODUCTS_COLLECTION, productId);
