@@ -199,7 +199,7 @@ export default function InventoryPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader 
-        title="Inventory Overview" 
+        title="Products Overview" 
         description="Complete inventory management with clickable widgets and analytics"
         icon={<Package className="h-6 w-6 text-blue-500" />}
         actions={
