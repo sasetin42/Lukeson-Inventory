@@ -1,22 +1,60 @@
 
+'use client'
+
+import { useState } from 'react';
 import { Supplier } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Mail, Phone, MoreVertical } from 'lucide-react';
+import { Mail, Phone, MoreVertical, Edit, Trash2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from '@/hooks/use-toast';
 
 interface SupplierListProps {
     suppliers: Supplier[];
+    onEdit: (supplier: Supplier) => void;
+    onDelete: (supplierId: string) => void;
 }
 
-export default function SupplierList({ suppliers }: SupplierListProps) {
+export default function SupplierList({ suppliers, onEdit, onDelete }: SupplierListProps) {
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [supplierToDelete, setSupplierToDelete] = useState<Supplier | null>(null);
+  const { toast } = useToast();
+  
+  const openDeleteAlert = (supplier: Supplier) => {
+    setSupplierToDelete(supplier);
+    setIsDeleteAlertOpen(true);
+  }
+
+  const handleDelete = async () => {
+    if (!supplierToDelete) return;
+    try {
+        await onDelete(supplierToDelete.id);
+    } catch (error) {
+        toast({ title: "Error", description: "Failed to delete supplier.", variant: "destructive" });
+    } finally {
+        setIsDeleteAlertOpen(false);
+        setSupplierToDelete(null);
+    }
+  };
+
   return (
+    <>
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {suppliers.map((supplier) => (
         <Card key={supplier.id} className="flex flex-col">
@@ -38,9 +76,15 @@ export default function SupplierList({ suppliers }: SupplierListProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>Edit Profile</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onEdit(supplier)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Profile
+                </DropdownMenuItem>
                 <DropdownMenuItem>View Purchase Orders</DropdownMenuItem>
-                <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                <DropdownMenuItem className="text-destructive" onClick={() => openDeleteAlert(supplier)}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </CardHeader>
@@ -65,5 +109,20 @@ export default function SupplierList({ suppliers }: SupplierListProps) {
         </Card>
       ))}
     </div>
+    <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the supplier.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
