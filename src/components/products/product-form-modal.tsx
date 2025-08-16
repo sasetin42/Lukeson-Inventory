@@ -163,6 +163,7 @@ export default function ProductFormModal({
     };
 
     const handleClose = () => {
+        if (isSaving) return;
         resetForm();
         onClose();
     }
@@ -222,7 +223,7 @@ export default function ProductFormModal({
     };
 
   return (
-    <Dialog open={isOpen} onOpenChange={!isSaving ? handleClose : undefined}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{product ? 'Edit Product' : 'Add New Product'}</DialogTitle>
@@ -400,6 +401,3 @@ export default function ProductFormModal({
     </Dialog>
   );
 }
-
-    
-    
