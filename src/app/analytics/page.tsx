@@ -1,6 +1,6 @@
 
 import PageHeader from "@/components/page-header";
-import { BarChart2 } from "lucide-react";
+import { BarChart2, Calendar, Download } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import KpiCard from "@/components/kpi-card";
@@ -15,6 +15,8 @@ import InventoryTurnoverByCategoryChart from "@/components/analytics/inventory-t
 import StockMovementTrendChart from "@/components/analytics/stock-movement-trend-chart";
 import InventoryOptimizationRecommendations from "@/components/analytics/inventory-optimization-recommendations";
 import SupplierOnTimeChart from "@/components/analytics/supplier-on-time-chart";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function AnalyticsPage() {
   return (
@@ -23,6 +25,29 @@ export default function AnalyticsPage() {
         title="Analytics"
         description="Detailed analytics and reports."
         icon={<BarChart2 className="h-6 w-6 text-green-500" />}
+        actions={
+            <div className="flex items-center gap-2">
+                <Select>
+                    <SelectTrigger className="w-[180px]">
+                        <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            <SelectValue placeholder="Last 30 days" />
+                        </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="7">Last 7 days</SelectItem>
+                        <SelectItem value="30">Last 30 days</SelectItem>
+                        <SelectItem value="90">Last 3 months</SelectItem>
+                        <SelectItem value="180">Last 6 months</SelectItem>
+                        <SelectItem value="365">Last year</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Button variant="outline">
+                    <Download className="mr-2 h-4 w-4" />
+                    Export
+                </Button>
+            </div>
+        }
       />
 
       <Tabs defaultValue="overview">
