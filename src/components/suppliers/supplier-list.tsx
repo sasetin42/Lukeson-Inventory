@@ -1,4 +1,5 @@
-import { suppliers } from '@/lib/data';
+
+import { Supplier } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-export default function SupplierList() {
+interface SupplierListProps {
+    suppliers: Supplier[];
+}
+
+export default function SupplierList({ suppliers }: SupplierListProps) {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {suppliers.map((supplier) => (

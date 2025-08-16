@@ -1,14 +1,12 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
-import { BarChart2, Calendar, Download } from "lucide-react";
+import { BarChart2, Calendar, Download, DollarSign, Package, ShoppingCart, TrendingUp } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import KpiCard from "@/components/kpi-card";
 import RevenueProfitChart from "@/components/analytics/revenue-profit-chart";
-import { getAnalyticsKpiData } from "@/lib/analytics-data";
 import SalesByCustomerChart from "@/components/analytics/sales-by-customer-chart";
 import SalesOverTimeChart from "@/components/analytics/sales-over-time-chart";
 import InventoryValueByCategoryChart from "@/components/analytics/inventory-value-by-category-chart";
@@ -17,13 +15,107 @@ import ProductPerformanceDetails from "@/components/analytics/product-performanc
 import InventoryTurnoverByCategoryChart from "@/components/analytics/inventory-turnover-by-category-chart";
 import StockMovementTrendChart from "@/components/analytics/stock-movement-trend-chart";
 import InventoryOptimizationRecommendations from "@/components/analytics/inventory-optimization-recommendations";
-import SupplierOnTimeChart from "@/components/analytics/supplier-on-time-chart";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { Product, Sales, Supplier } from '@/lib/types';
+import SupplierOnTimeChart from '@/components/analytics/supplier-on-time-chart';
 
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState("30");
-  const analyticsKpiData = getAnalyticsKpiData(Number(dateRange));
+  const [products, setProducts] = useState<Product[]>([]);
+  const [sales, setSales] = useState<Sales[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [kpiData, setKpiData] = useState<any[]>([]);
+
+  useEffect(() => {
+    const productsUnsub = onSnapshot(collection(db, "products"), (snapshot) => {
+      const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      setProducts(productsData);
+    });
+
+    const salesUnsub = onSnapshot(collection(db, "sales"), (snapshot) => {
+      const salesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), date: (doc.data().date as Timestamp).toDate() } as unknown as Sales));
+      setSales(salesData);
+    });
+
+    const suppliersUnsub = onSnapshot(collection(db, "suppliers"), (snapshot) => {
+      const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
+      setSuppliers(suppliersData);
+    });
+
+    return () => {
+      productsUnsub();
+      salesUnsub();
+      suppliersUnsub();
+    };
+  }, []);
+
+  useEffect(() => {
+    async function calculateKpis() {
+        const days = Number(dateRange);
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - days);
+
+        const salesQuery = query(collection(db, "sales"), where("date", ">=", cutoffDate));
+        const salesSnapshot = await getDocs(salesQuery);
+        const filteredSales = salesSnapshot.docs.map(doc => doc.data() as Sales);
+        
+        const totalRevenue = filteredSales.reduce((acc, s) => acc + s.total, 0);
+        const unitsSold = filteredSales.reduce((acc, s) => acc + s.quantity, 0);
+        const avgOrderValue = totalRevenue / (filteredSales.length || 1);
+
+        const cogs = filteredSales.reduce((acc, sale) => {
+          const product = products.find(p => p.id === sale.productId);
+          return acc + (product ? product.cost * sale.quantity : 0);
+        }, 0);
+        
+        const avgInventoryValue = products.reduce((acc, p) => acc + p.cost * p.stock, 0) / (products.length || 1);
+        const inventoryTurnover = avgInventoryValue > 0 ? cogs / avgInventoryValue : 0;
+        
+        const baseData = {
+            totalRevenue,
+            unitsSold,
+            avgOrderValue,
+            inventoryTurnover,
+        };
+
+        setKpiData([
+            {
+              title: "Total Revenue",
+              value: `₱${baseData.totalRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
+              icon: DollarSign,
+              trend: `+15.2% from last period`,
+              color: "green"
+            },
+            {
+              title: "Units Sold",
+              value: baseData.unitsSold.toLocaleString(undefined, { maximumFractionDigits: 0 }),
+              icon: Package,
+              trend: `+8.1% from last period`,
+              color: "blue"
+            },
+            {
+              title: "Avg Order Value",
+              value: `₱${baseData.avgOrderValue.toFixed(2)}`,
+              icon: ShoppingCart,
+              trend: `-2.3% from last period`,
+              color: "purple"
+            },
+            {
+              title: "Inventory Turnover",
+              value: baseData.inventoryTurnover.toFixed(1) + 'x',
+              icon: TrendingUp,
+              trend: `+12.5% from last period`,
+              color: "yellow"
+            },
+        ]);
+    }
+    if(sales.length > 0 && products.length > 0){
+        calculateKpis();
+    }
+  }, [dateRange, sales, products]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -65,7 +157,7 @@ export default function AnalyticsPage() {
         </TabsList>
         <TabsContent value="overview" className="mt-4">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                {analyticsKpiData.map((card, index) => (
+                {kpiData.map((card, index) => (
                     <KpiCard
                         key={card.title}
                         title={card.title}
@@ -79,27 +171,27 @@ export default function AnalyticsPage() {
                 ))}
             </div>
             <div className="mt-6">
-                <RevenueProfitChart dateRange={Number(dateRange)} />
+                <RevenueProfitChart sales={sales} products={products} dateRange={Number(dateRange)} />
             </div>
         </TabsContent>
         <TabsContent value="sales" className="mt-4 grid gap-6">
             <div className="grid md:grid-cols-2 gap-6">
-              <SalesByCustomerChart dateRange={Number(dateRange)} />
-              <SalesOverTimeChart dateRange={Number(dateRange)} />
+              <SalesByCustomerChart sales={sales} dateRange={Number(dateRange)} />
+              <SalesOverTimeChart sales={sales} dateRange={Number(dateRange)} />
             </div>
-            <ProductPerformanceDetails dateRange={Number(dateRange)} />
+            <ProductPerformanceDetails products={products} sales={sales} dateRange={Number(dateRange)} />
         </TabsContent>
         <TabsContent value="inventory" className="mt-4 grid gap-6">
             <div className="grid md:grid-cols-2 gap-6">
-              <InventoryValueByCategoryChart />
-              <InventoryTurnoverByCategoryChart dateRange={Number(dateRange)} />
+              <InventoryValueByCategoryChart products={products} />
+              <InventoryTurnoverByCategoryChart products={products} sales={sales} dateRange={Number(dateRange)} />
             </div>
             <StockMovementTrendChart dateRange={Number(dateRange)} />
             <InventoryOptimizationRecommendations />
         </TabsContent>
         <TabsContent value="suppliers" className="mt-4 grid gap-6">
-            <SupplierPerformanceList dateRange={Number(dateRange)} />
-            <SupplierOnTimeChart dateRange={Number(dateRange)} />
+            <SupplierPerformanceList suppliers={suppliers} dateRange={Number(dateRange)} />
+            <SupplierOnTimeChart suppliers={suppliers} dateRange={Number(dateRange)} />
         </TabsContent>
       </Tabs>
     </div>

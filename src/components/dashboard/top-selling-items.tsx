@@ -1,15 +1,20 @@
 
+'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { sales } from "@/lib/data";
-import { products } from "@/lib/products-data";
+import { Sales, Product } from "@/lib/types";
 import Image from "next/image";
 import { TrendingUpIcon } from "../icons/trending-up";
 import { Button } from "../ui/button";
 import { ChevronRight } from "lucide-react";
 import Link from 'next/link';
 
-export default function TopSellingItems() {
+interface TopSellingItemsProps {
+    sales: Sales[];
+    products: Product[];
+}
+
+export default function TopSellingItems({ sales, products }: TopSellingItemsProps) {
   const productSales = sales.reduce((acc, sale) => {
     if (!acc[sale.productId]) {
       acc[sale.productId] = { revenue: 0, unitsSold: 0 };
@@ -20,11 +25,16 @@ export default function TopSellingItems() {
   }, {} as Record<string, { revenue: number, unitsSold: number }>);
 
   const topSelling = Object.entries(productSales)
-    .map(([productId, data]) => ({
-      ...products.find(p => p.id === productId)!,
-      ...data,
-    }))
-    .sort((a, b) => b.revenue - a.revenue)
+    .map(([productId, data]) => {
+      const product = products.find(p => p.id === productId);
+      if (!product) return null;
+      return {
+        ...product,
+        ...data,
+      }
+    })
+    .filter(p => p !== null)
+    .sort((a, b) => b!.revenue - a!.revenue)
     .slice(0, 3);
   
   return (
@@ -46,20 +56,20 @@ export default function TopSellingItems() {
       <CardContent>
         <div className="space-y-4">
           {topSelling.map((item) => (
-            <div key={item.id} className="flex items-center gap-4">
+            <div key={item!.id} className="flex items-center gap-4">
               <Image
-                src={item.imageUrl}
-                alt={item.name}
+                src={item!.imageUrl}
+                alt={item!.name}
                 width={40}
                 height={40}
                 className="rounded-md"
                 data-ai-hint="product image"
               />
               <div className="flex-1">
-                <p className="font-medium text-sm truncate">{item.name}</p>
-                <p className="text-xs text-muted-foreground">{item.unitsSold} units sold</p>
+                <p className="font-medium text-sm truncate">{item!.name}</p>
+                <p className="text-xs text-muted-foreground">{item!.unitsSold} units sold</p>
               </div>
-              <p className="text-sm font-semibold">₱{item.revenue.toLocaleString()}</p>
+              <p className="text-sm font-semibold">₱{item!.revenue.toLocaleString()}</p>
             </div>
           ))}
         </div>

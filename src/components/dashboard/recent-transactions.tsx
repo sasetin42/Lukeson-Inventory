@@ -1,15 +1,20 @@
 
+'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { sales } from '@/lib/data';
+import { Sales } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Activity, ChevronRight } from 'lucide-react';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 
-export default function RecentTransactions() {
+interface RecentTransactionsProps {
+    sales: Sales[];
+}
+
+export default function RecentTransactions({ sales }: RecentTransactionsProps) {
   return (
     <Card>
       <CardHeader>

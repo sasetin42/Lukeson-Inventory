@@ -2,13 +2,14 @@
 'use client';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { sales } from '@/lib/data';
+import { Sales } from '@/lib/types';
 
 interface SalesByCustomerChartProps {
     dateRange: number;
+    sales: Sales[];
 }
 
-export default function SalesByCustomerChart({ dateRange }: SalesByCustomerChartProps) {
+export default function SalesByCustomerChart({ dateRange, sales }: SalesByCustomerChartProps) {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - dateRange);
 

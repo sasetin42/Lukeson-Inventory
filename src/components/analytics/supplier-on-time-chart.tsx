@@ -2,13 +2,14 @@
 'use client';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { suppliers } from '@/lib/data';
+import { Supplier } from '@/lib/types';
 
 interface SupplierOnTimeChartProps {
     dateRange: number;
+    suppliers: Supplier[];
 }
 
-export default function SupplierOnTimeChart({ dateRange }: SupplierOnTimeChartProps) {
+export default function SupplierOnTimeChart({ dateRange, suppliers }: SupplierOnTimeChartProps) {
     // Mocking that performance might change slightly with date range
     const supplierPerformance = suppliers.map(s => ({
         name: s.name,

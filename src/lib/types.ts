@@ -1,11 +1,3 @@
-
-
-
-
-
-
-
-
 import { Timestamp } from "firebase/firestore";
 import type { LucideIcon } from "lucide-react";
 
@@ -258,7 +250,7 @@ export type LowStockAlert = {
 export type Invoice = {
   id: string;
   customerName: string;
-  date: string;
+  date: string | Date;
   amount: number;
   status: 'Paid' | 'Pending' | 'Overdue';
 };
@@ -268,7 +260,7 @@ export type Sales = {
   productId: string;
   productName: string;
   customerName: string;
-  date: string;
+  date: string | Date;
   quantity: number;
   total: number;
 };
@@ -298,6 +290,9 @@ export type Product = {
     stock: number;
     cost: number;
     reOrderLevel: number;
-    createdAt: string | Timestamp;
+    createdAt: string | Timestamp | Date;
     status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+    suppliers?: Supplier[];
 };
+
+    

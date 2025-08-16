@@ -2,15 +2,16 @@
 'use client';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { products } from '@/lib/products-data';
-import { sales } from '@/lib/data';
+import { Product, Sales } from '@/lib/types';
 import { categoryMap } from '@/lib/category-map';
 
 interface InventoryTurnoverByCategoryChartProps {
     dateRange: number;
+    products: Product[];
+    sales: Sales[];
 }
 
-export default function InventoryTurnoverByCategoryChart({ dateRange }: InventoryTurnoverByCategoryChartProps) {
+export default function InventoryTurnoverByCategoryChart({ dateRange, products, sales }: InventoryTurnoverByCategoryChartProps) {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - dateRange);
 
@@ -20,8 +21,8 @@ export default function InventoryTurnoverByCategoryChart({ dateRange }: Inventor
     const product = products.find(p => p.id === sale.productId);
     if (!product) return acc;
     
-    const category = categoryMap[product.sku] || 'Uncategorized';
-    const cost = product.cost * sale.quantity;
+    const category = product.category || 'Uncategorized';
+    const cost = (product.cost || 0) * sale.quantity;
 
     if (!acc[category]) {
       acc[category] = 0;
@@ -31,8 +32,8 @@ export default function InventoryTurnoverByCategoryChart({ dateRange }: Inventor
   }, {} as Record<string, number>);
 
   const categoryInventoryValue = products.reduce((acc, product) => {
-    const category = categoryMap[product.sku] || 'Uncategorized';
-    const value = product.cost * product.stock;
+    const category = product.category || 'Uncategorized';
+    const value = (product.cost || 0) * (product.stock || 0);
     if (!acc[category]) {
       acc[category] = 0;
     }

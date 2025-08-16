@@ -1,9 +1,30 @@
+
+'use client';
+
+import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle } from "lucide-react";
 import InvoiceList from "@/components/invoices/invoice-list";
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { Invoice } from '@/lib/types';
 
 export default function InvoicesPage() {
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "invoices"), (snapshot) => {
+      const invoicesData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        date: doc.data().date.toDate().toLocaleDateString(),
+      } as Invoice));
+      setInvoices(invoicesData);
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -17,7 +38,7 @@ export default function InvoicesPage() {
           </Button>
         }
       />
-      <InvoiceList />
+      <InvoiceList invoices={invoices} />
     </div>
   );
 }

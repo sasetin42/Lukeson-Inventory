@@ -13,15 +13,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Product } from '@/lib/types';
+import { Product, Supplier } from '@/lib/types';
 import { categoryMap } from '@/lib/category-map';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
 import { Upload, X, Loader2 } from 'lucide-react';
-import { suppliers } from '@/lib/data';
 import Image from 'next/image';
-import { storage } from '@/lib/firebase';
+import { db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { collection, onSnapshot } from 'firebase/firestore';
 
 interface AddProductModalProps {
   children: React.ReactNode;
@@ -32,6 +32,7 @@ interface AddProductModalProps {
 export default function AddProductModal({ children, onAddProduct, totalProducts }: AddProductModalProps) {
     const [open, setOpen] = useState(false);
     const [productCode, setProductCode] = useState('');
+    const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     
     // Form state
     const [category, setCategory] = useState('');
@@ -53,6 +54,14 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             const year = new Date().getFullYear();
             const nextId = (totalProducts + 1).toString().padStart(3, '0');
             setProductCode(`PRO-${year}-${nextId}`);
+            
+            const suppliersUnsub = onSnapshot(collection(db, "suppliers"), (snapshot) => {
+                const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
+                setSuppliers(suppliersData);
+            });
+
+            return () => suppliersUnsub();
+
         } else {
             // Reset form on close
             resetForm();
@@ -261,3 +270,5 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
     </Dialog>
   );
 }
+
+    

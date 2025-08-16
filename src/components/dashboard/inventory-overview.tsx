@@ -2,10 +2,14 @@
 'use client';
 import { Package, DollarSign, AlertTriangle, XCircle } from 'lucide-react';
 import KpiCard from '@/components/kpi-card';
-import { products } from '@/lib/products-data';
+import { Product } from '@/lib/types';
 import Link from 'next/link';
 
-export default function InventoryOverview() {
+interface InventoryOverviewProps {
+    products: Product[];
+}
+
+export default function InventoryOverview({ products }: InventoryOverviewProps) {
   const totalProducts = products.length;
   const outOfStock = products.filter(p => p.stock === 0).length;
   const lowStock = products.filter(p => p.stock > 0 && p.stock <= p.reOrderLevel).length;
@@ -16,7 +20,7 @@ export default function InventoryOverview() {
       title: 'Total Products', 
       value: totalProducts,
       icon: Package, 
-      trend: `+${products.filter(p => new Date(p.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length} from last month`,
+      trend: `+${products.filter(p => p.createdAt && new Date(p.createdAt as any) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length} from last month`,
       color: 'blue' as const,
       tooltipText: 'Total number of unique products in your inventory.',
       href: '/products'

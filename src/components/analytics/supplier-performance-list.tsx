@@ -3,15 +3,16 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { suppliers } from '@/lib/data';
+import { Supplier } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Star } from 'lucide-react';
 
 interface SupplierPerformanceListProps {
     dateRange: number;
+    suppliers: Supplier[];
 }
 
-export default function SupplierPerformanceList({ dateRange }: SupplierPerformanceListProps) {
+export default function SupplierPerformanceList({ dateRange, suppliers }: SupplierPerformanceListProps) {
     // Mock performance data that changes with date range
     const supplierPerformance = suppliers.map(s => ({
         ...s,

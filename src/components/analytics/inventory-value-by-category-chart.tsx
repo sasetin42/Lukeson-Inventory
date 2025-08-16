@@ -2,13 +2,16 @@
 'use client';
 import { Pie, PieChart, ResponsiveContainer, Cell, Tooltip, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { products } from '@/lib/products-data';
-import { categoryMap } from '@/lib/category-map';
+import { Product } from '@/lib/types';
 
-export default function InventoryValueByCategoryChart() {
+interface InventoryValueByCategoryChartProps {
+    products: Product[];
+}
+
+export default function InventoryValueByCategoryChart({ products }: InventoryValueByCategoryChartProps) {
   const valueByCategory = products.reduce((acc, product) => {
-    const category = categoryMap[product.sku] || 'Uncategorized';
-    const value = product.cost * product.stock;
+    const category = product.category || 'Uncategorized';
+    const value = (product.cost || 0) * (product.stock || 0);
     if (!acc[category]) {
       acc[category] = 0;
     }

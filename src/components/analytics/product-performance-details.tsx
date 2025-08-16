@@ -3,24 +3,16 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { sales } from '@/lib/data';
-import { products } from '@/lib/products-data';
+import { Sales, Product } from '@/lib/types';
 import { TrendingUpIcon } from '../icons/trending-up';
-
-type ProductPerformance = {
-    id: string;
-    name: string;
-    unitsSold: number;
-    revenue: number;
-    avgPrice: number;
-    trend: number;
-};
 
 interface ProductPerformanceDetailsProps {
     dateRange: number;
+    products: Product[];
+    sales: Sales[];
 }
 
-export default function ProductPerformanceDetails({ dateRange }: ProductPerformanceDetailsProps) {
+export default function ProductPerformanceDetails({ dateRange, products, sales }: ProductPerformanceDetailsProps) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - dateRange);
 
@@ -28,6 +20,8 @@ export default function ProductPerformanceDetails({ dateRange }: ProductPerforma
     
     const productPerformanceData = products.map(product => {
         const productSales = filteredSales.filter(s => s.productId === product.id);
+        if (productSales.length === 0) return null;
+
         const unitsSold = productSales.reduce((acc, s) => acc + s.quantity, 0);
         const revenue = productSales.reduce((acc, s) => acc + s.total, 0);
         const avgPrice = unitsSold > 0 ? revenue / unitsSold : 0;
@@ -40,7 +34,7 @@ export default function ProductPerformanceDetails({ dateRange }: ProductPerforma
             avgPrice,
             trend: Math.floor(Math.random() * 15) + 5, // Mock trend
         };
-    }).filter(p => p.unitsSold > 0).sort((a,b) => b.revenue - a.revenue).slice(0, 5);
+    }).filter(p => p !== null && p.unitsSold > 0).sort((a,b) => b!.revenue - a!.revenue).slice(0, 5);
 
 
     return (
@@ -61,15 +55,15 @@ export default function ProductPerformanceDetails({ dateRange }: ProductPerforma
                     </TableHeader>
                     <TableBody>
                         {productPerformanceData.map((product) => (
-                            <TableRow key={product.id}>
-                                <TableCell className="font-medium">{product.name}</TableCell>
-                                <TableCell className="text-right">{product.unitsSold.toLocaleString()}</TableCell>
-                                <TableCell className="text-right">₱{product.revenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
-                                <TableCell className="text-right">₱{product.avgPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
+                            <TableRow key={product!.id}>
+                                <TableCell className="font-medium">{product!.name}</TableCell>
+                                <TableCell className="text-right">{product!.unitsSold.toLocaleString()}</TableCell>
+                                <TableCell className="text-right">₱{product!.revenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
+                                <TableCell className="text-right">₱{product!.avgPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
                                 <TableCell className="text-right">
                                     <Badge variant="outline" className="flex items-center gap-1 border-green-500/50 bg-green-50 text-green-700">
                                         <TrendingUpIcon className="h-4 w-4" />
-                                        +{product.trend}%
+                                        +{product!.trend}%
                                     </Badge>
                                 </TableCell>
                             </TableRow>

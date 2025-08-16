@@ -1,4 +1,5 @@
-import { invoices } from '@/lib/data';
+
+import { Invoice } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-export default function InvoiceList() {
+interface InvoiceListProps {
+    invoices: Invoice[];
+}
+
+export default function InvoiceList({ invoices }: InvoiceListProps) {
     const getStatusVariant = (status: string) => {
         switch (status) {
             case 'Paid':

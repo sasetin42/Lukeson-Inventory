@@ -1,15 +1,19 @@
 
-
+'use client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { products } from "@/lib/products-data";
-import { sales } from "@/lib/data";
+import { Product, Sales } from "@/lib/types";
 import Image from "next/image";
 import { TrendingDownIcon } from "../icons/trending-down";
 import { Button } from "../ui/button";
 import { ChevronRight } from "lucide-react";
 import Link from 'next/link';
 
-export default function SlowMovingItems() {
+interface SlowMovingItemsProps {
+    products: Product[];
+    sales: Sales[];
+}
+
+export default function SlowMovingItems({ products, sales }: SlowMovingItemsProps) {
   const salesLast90Days = sales.filter(s => new Date(s.date) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
   const soldProductIds = new Set(salesLast90Days.map(s => s.productId));
   const slowMovingProducts = products
@@ -17,7 +21,7 @@ export default function SlowMovingItems() {
     .slice(0, 3)
     .map(p => ({
         ...p,
-        daysInStock: Math.floor((Date.now() - new Date(p.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+        daysInStock: p.createdAt ? Math.floor((Date.now() - (p.createdAt as any).toDate().getTime()) / (1000 * 60 * 60 * 24)) : 0
     }));
 
   return (

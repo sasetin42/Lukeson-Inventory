@@ -1,17 +1,50 @@
 'use client';
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { revenueProfitChartData } from '@/lib/analytics-data';
+import { Sales, Product } from '@/lib/types';
+import { eachDayOfInterval, format, subDays } from 'date-fns';
 
 interface RevenueProfitChartProps {
     dateRange: number;
+    sales: Sales[];
+    products: Product[];
 }
 
-export default function RevenueProfitChart({ dateRange }: RevenueProfitChartProps) {
-  // Filter data based on date range (months)
-  const monthsToShow = Math.ceil(dateRange / 30);
-  const chartData = revenueProfitChartData.slice(-monthsToShow);
+export default function RevenueProfitChart({ dateRange, sales, products }: RevenueProfitChartProps) {
+  const endDate = new Date();
+  const startDate = subDays(endDate, dateRange);
+
+  const filteredSales = sales.filter(s => {
+    const saleDate = new Date(s.date);
+    return saleDate >= startDate && saleDate <= endDate;
+  });
+
+  const dataByDay = eachDayOfInterval({ start: startDate, end: endDate }).map(day => {
+    const formattedDate = format(day, 'MMM d');
+    return {
+      date: formattedDate,
+      revenue: 0,
+      profit: 0
+    };
+  });
+
+  const dataMap = new Map(dataByDay.map(d => [d.date, d]));
+
+  filteredSales.forEach(sale => {
+    const formattedDate = format(new Date(sale.date), 'MMM d');
+    const product = products.find(p => p.id === sale.productId);
+    const cost = product ? product.cost * sale.quantity : 0;
+    const profit = sale.total - cost;
+
+    if (dataMap.has(formattedDate)) {
+      const currentData = dataMap.get(formattedDate)!;
+      currentData.revenue += sale.total;
+      currentData.profit += profit;
+    }
+  });
   
+  const chartData = Array.from(dataMap.values());
+
   return (
     <Card>
       <CardHeader>
@@ -32,7 +65,7 @@ export default function RevenueProfitChart({ dateRange }: RevenueProfitChartProp
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" />
             <XAxis
-              dataKey="month"
+              dataKey="date"
               stroke="#888888"
               fontSize={12}
               tickLine={false}

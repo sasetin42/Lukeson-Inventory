@@ -2,13 +2,14 @@
 'use client';
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { sales } from '@/lib/data';
+import { Sales } from '@/lib/types';
 
 interface SalesOverTimeChartProps {
     dateRange: number;
+    sales: Sales[];
 }
 
-export default function SalesOverTimeChart({ dateRange }: SalesOverTimeChartProps) {
+export default function SalesOverTimeChart({ dateRange, sales }: SalesOverTimeChartProps) {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - dateRange);
   
