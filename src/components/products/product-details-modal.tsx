@@ -210,7 +210,7 @@ export default function ProductDetailsModal({
               <Power className={`h-4 w-4 mr-2 ${isActive ? 'text-orange-500' : 'text-green-500'}`} />
               {isActive ? 'Deactivate' : 'Activate'}
             </Button>
-            <Button variant="destructive" onClick={handleDeleteClick}>
+            <Button variant="destructive" onClick={() => onDelete(product)}>
               <Trash2 className="h-4 w-4 mr-2" />
               Delete
             </Button>

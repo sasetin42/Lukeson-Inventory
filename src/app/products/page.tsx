@@ -87,16 +87,16 @@ export default function ProductsPage() {
         try {
             const productRef = doc(db, 'products', productId);
             
-            let status = updatedProductData.status;
-            if (updatedProductData.stock !== undefined && updatedProductData.reOrderLevel !== undefined) {
-                 status = updatedProductData.stock > 0 
-                    ? (updatedProductData.stock <= updatedProductData.reOrderLevel ? 'Low Stock' : 'In Stock')
-                    : 'Out of Stock';
-            }
+            const stock = updatedProductData.stock ?? 0;
+            const reOrderLevel = updatedProductData.reOrderLevel ?? 0;
+
+            const newStatus = stock > 0
+                ? (stock <= reOrderLevel ? 'Low Stock' : 'In Stock')
+                : 'Out of Stock';
             
             await updateDoc(productRef, {
                 ...updatedProductData,
-                status
+                status: newStatus
             });
             toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
         } catch (error) {
