@@ -136,7 +136,7 @@ export default function RootLayout({
             </SidebarHeader>
             <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
               <div className="flex flex-col gap-2 px-2">
-                <Accordion type="single" collapsible className="w-full" defaultValue={['Overview', 'Inventory'].join(' ')}>
+                <Accordion type="single" collapsible className="w-full">
                   {navGroups.map((group, groupIndex) => (
                     <div key={group.title}>
                       {groupIndex > 0 && <SidebarSeparator className="my-2" />}
