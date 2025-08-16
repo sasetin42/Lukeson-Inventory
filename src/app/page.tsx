@@ -8,7 +8,7 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader 
-        title="Company Dashboard"
+        title="Dashboard"
         description="A real-time overview of your business operations."
         icon={<RocketIcon className="h-6 w-6 text-blue-500" />}
       />
