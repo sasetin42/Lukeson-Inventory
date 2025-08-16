@@ -1,12 +1,13 @@
 
 'use client';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Product } from "@/lib/types";
 import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
-import { LayoutGrid, Truck, DollarSign, Barcode, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, CheckCircle, XCircle, Package, FileText, AlignLeft, Info } from 'lucide-react';
+import { LayoutGrid, Truck, DollarSign, Barcode, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, CheckCircle, XCircle, Package, FileText, AlignLeft, Info, Edit, Trash2 } from 'lucide-react';
+import { Button } from "../ui/button";
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -46,6 +47,8 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
     { label: 'Re-Order Level', value: product.reOrderLevel, icon: AlertTriangle, color: 'text-yellow-500' },
     { label: 'Expiry Tracking', value: product.expiryDateTracking ? 'Enabled' : 'Disabled', icon: CalendarClock, color: 'text-cyan-500', isBool: true },
   ];
+  
+  const isActive = product.status !== 'Discontinued';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -111,6 +114,27 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
             </div>
           </div>
         </div>
+        <DialogFooter className="sm:justify-between">
+            <DialogClose asChild>
+                <Button type="button" variant="secondary">
+                Close
+                </Button>
+            </DialogClose>
+            <div className="flex gap-2">
+                <Button variant="outline">
+                    <Edit className="h-4 w-4 mr-2 text-blue-500" />
+                    Edit
+                </Button>
+                <Button variant="outline">
+                    <Power className={`h-4 w-4 mr-2 ${isActive ? 'text-orange-500' : 'text-green-500'}`} />
+                    {isActive ? 'Deactivate' : 'Activate'}
+                </Button>
+                <Button variant="destructive">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete
+                </Button>
+            </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
