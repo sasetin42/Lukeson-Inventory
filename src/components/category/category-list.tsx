@@ -39,23 +39,11 @@ export default function CategoryList() {
             </div>
             <Card>
                 <CardHeader>
-                    <CardTitle>Categories (1)</CardTitle>
+                    <CardTitle>Categories (0)</CardTitle>
                     <CardDescription>Hierarchical view showing parent-child relationships</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex items-start gap-4 p-4 rounded-md hover:bg-muted/50">
-                       <Checkbox id="cat-1" className="mt-1" />
-                       <div className="grid gap-1.5">
-                            <div className="flex items-center gap-2">
-                                <Tag className="h-4 w-4 text-muted-foreground" />
-                                <Label htmlFor="cat-1" className="font-semibold text-base">Category 1</Label>
-                                <Badge variant="secondary">0 products</Badge>
-                            </div>
-                            <p className="text-muted-foreground">
-                                Create a new product category with customizable options
-                            </p>
-                       </div>
-                    </div>
+                    
                 </CardContent>
             </Card>
         </div>
