@@ -1,18 +1,29 @@
 
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { sales } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Activity } from 'lucide-react';
+import { Activity, ChevronRight } from 'lucide-react';
+import { Button } from '../ui/button';
+import Link from 'next/link';
 
 export default function RecentTransactions() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
-            <CardTitle>Recent Transactions</CardTitle>
+        <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                <CardTitle>Recent Transactions</CardTitle>
+            </div>
+            <Button variant="ghost" size="sm" asChild>
+                <Link href="/sales-orders">
+                    View All
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+            </Button>
         </div>
         <CardDescription>A list of the most recent sales transactions.</CardDescription>
       </CardHeader>

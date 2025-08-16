@@ -1,9 +1,13 @@
 
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { sales } from "@/lib/data";
 import { products } from "@/lib/products-data";
 import Image from "next/image";
 import { TrendingUpIcon } from "../icons/trending-up";
+import { Button } from "../ui/button";
+import { ChevronRight } from "lucide-react";
+import Link from 'next/link';
 
 export default function TopSellingItems() {
   const productSales = sales.reduce((acc, sale) => {
@@ -26,9 +30,17 @@ export default function TopSellingItems() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-            <TrendingUpIcon className="h-5 w-5 text-green-500" />
-            <CardTitle>Top-Selling Items</CardTitle>
+        <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+                <TrendingUpIcon className="h-5 w-5 text-green-500" />
+                <CardTitle>Top-Selling Items</CardTitle>
+            </div>
+            <Button variant="ghost" size="sm" asChild>
+                <Link href="/products">
+                    View All
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+            </Button>
         </div>
       </CardHeader>
       <CardContent>

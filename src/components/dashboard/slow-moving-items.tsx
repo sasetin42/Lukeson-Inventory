@@ -1,9 +1,13 @@
 
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { products } from "@/lib/products-data";
 import { sales } from "@/lib/data";
 import Image from "next/image";
 import { TrendingDownIcon } from "../icons/trending-down";
+import { Button } from "../ui/button";
+import { ChevronRight } from "lucide-react";
+import Link from 'next/link';
 
 export default function SlowMovingItems() {
   const salesLast90Days = sales.filter(s => new Date(s.date) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
@@ -19,9 +23,17 @@ export default function SlowMovingItems() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-            <TrendingDownIcon className="h-5 w-5 text-red-500" />
-            <CardTitle>Slow-Moving Items</CardTitle>
+        <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+                <TrendingDownIcon className="h-5 w-5 text-red-500" />
+                <CardTitle>Slow-Moving Items</CardTitle>
+            </div>
+            <Button variant="ghost" size="sm" asChild>
+                <Link href="/products">
+                    View All
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                </Link>
+            </Button>
         </div>
       </CardHeader>
       <CardContent>

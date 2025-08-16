@@ -3,6 +3,7 @@
 import { Package, DollarSign, AlertTriangle, XCircle } from 'lucide-react';
 import KpiCard from '@/components/kpi-card';
 import { products } from '@/lib/products-data';
+import Link from 'next/link';
 
 export default function InventoryOverview() {
   const totalProducts = products.length;
@@ -17,7 +18,8 @@ export default function InventoryOverview() {
       icon: Package, 
       trend: `+${products.filter(p => new Date(p.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length} from last month`,
       color: 'blue' as const,
-      tooltipText: 'Total number of unique products in your inventory.'
+      tooltipText: 'Total number of unique products in your inventory.',
+      href: '/products'
     },
     { 
       title: 'Total Value (est.)', 
@@ -25,7 +27,8 @@ export default function InventoryOverview() {
       icon: DollarSign, 
       trend: '+8% from last week',
       color: 'green' as const,
-      tooltipText: 'Estimated total value of all items in stock.'
+      tooltipText: 'Estimated total value of all items in stock.',
+      href: '/analytics'
     },
     { 
       title: 'Low Stock', 
@@ -33,7 +36,8 @@ export default function InventoryOverview() {
       icon: AlertTriangle, 
       trend: `Critical items needing attention`,
       color: 'yellow' as const,
-      tooltipText: 'Products that have fallen below their re-order level.'
+      tooltipText: 'Products that have fallen below their re-order level.',
+      href: '/products'
     },
     { 
         title: 'Out of Stock', 
@@ -41,24 +45,26 @@ export default function InventoryOverview() {
         icon: XCircle, 
         trend: 'Items unavailable for sale',
         color: 'red' as const,
-        tooltipText: 'Products with zero stock available.'
+        tooltipText: 'Products with zero stock available.',
+        href: '/products'
     },
   ];
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
       {cardData.map((card, index) => (
-        <KpiCard
-          key={card.title}
-          title={card.title}
-          value={card.value}
-          icon={card.icon}
-          trend={card.trend}
-          color={card.color}
-          tooltipText={card.tooltipText}
-          style={{ animationDelay: `${index * 100}ms` }}
-          className="fade-in-up"
-        />
+        <Link href={card.href} key={card.title}>
+            <KpiCard
+                title={card.title}
+                value={card.value}
+                icon={card.icon}
+                trend={card.trend}
+                color={card.color}
+                tooltipText={card.tooltipText}
+                style={{ animationDelay: `${index * 100}ms` }}
+                className="fade-in-up hover:bg-muted/50 transition-colors"
+            />
+        </Link>
       ))}
     </div>
   );
