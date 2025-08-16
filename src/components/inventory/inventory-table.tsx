@@ -55,7 +55,6 @@ export default function InventoryTable({ products, onAddProduct, onEditProduct, 
               <TableRow>
                 <TableHead className="w-[80px]">Image</TableHead>
                 <TableHead>Product</TableHead>
-                <TableHead>Category</TableHead>
                 <TableHead className="text-center">Stock</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>
@@ -79,7 +78,6 @@ export default function InventoryTable({ products, onAddProduct, onEditProduct, 
                       />
                     </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
                     <TableCell className="text-center">{product.stock}</TableCell>
                     <TableCell>
                       <Badge variant={status.variant as any}>{status.text}</Badge>

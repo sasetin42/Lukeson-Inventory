@@ -1,3 +1,4 @@
+
 import type { Product, Supplier, Invoice, Sales, InventoryKpi } from './types';
 import { Box, DollarSign, Tag, AlertTriangle, XCircle, Star, Clock, Repeat } from 'lucide-react';
 
@@ -8,7 +9,6 @@ export const products: Product[] = [
     productCode: 'PRO-2024-001',
     name: '240L 24v High-Density LED Striplight',
     sku: 'SL-240L-24V-WW',
-    category: 'STRIPLIGHT',
     description: 'Bright warm-white LED striplight for professional installations. High density for smooth, dotless illumination.',
     supplier: 'LED Solutions Inc.',
     location: 'Aisle 1, Shelf A',
@@ -29,7 +29,6 @@ export const products: Product[] = [
     productCode: 'PRO-2024-002',
     name: '120L 12v Flexible LED Striplight',
     sku: 'SL-120L-12V-RGB',
-    category: 'STRIPLIGHT',
     description: 'Versatile RGB flexible LED strip for accent lighting. Comes with an adhesive backing for easy installation.',
     supplier: 'LED Solutions Inc.',
     location: 'Aisle 1, Shelf B',
@@ -51,7 +50,6 @@ export const products: Product[] = [
     productCode: 'PRO-2024-003',
     name: '24v 150W Slim Power Supply',
     sku: 'PS-24V-150W-SL',
-    category: 'POWER SUPPLY',
     description: 'Slim and compact 150W power supply for 24v LED systems. Fanless design for silent operation.',
     supplier: 'Power Systems Ltd.',
     location: 'Aisle 2, Shelf A',
@@ -70,7 +68,6 @@ export const products: Product[] = [
     productCode: 'PRO-2024-004',
     name: '12v 60W Waterproof Power Supply',
     sku: 'PS-12V-60W-WP',
-    category: 'POWER SUPPLY',
     description: 'IP67 rated waterproof power supply suitable for outdoor and bathroom installations.',
     supplier: 'Power Systems Ltd.',
     location: 'Aisle 2, Shelf A',
@@ -90,7 +87,6 @@ export const products: Product[] = [
     productCode: 'PRO-2024-005',
     name: 'Recessed LED Downlight 9W',
     sku: 'GL-DL-9W-CW',
-    category: 'GENERAL LIGHTING',
     description: 'Modern cool-white recessed LED downlight. Energy efficient with a sleek, minimalist design.',
     supplier: 'Bright Ideas Lighting',
     location: 'Aisle 3, Shelf C',
@@ -106,7 +102,6 @@ export const products: Product[] = [
     productCode: 'PRO-2024-006',
     name: 'Surface Mounted Ceiling Light 18W',
     sku: 'GL-CL-18W-WW',
-    category: 'GENERAL LIGHTING',
     description: '18W warm-white surface-mounted ceiling light. Provides wide and even light distribution.',
     supplier: 'Bright Ideas Lighting',
     location: 'Aisle 3, Shelf D',
@@ -123,7 +118,6 @@ export const products: Product[] = [
     productCode: 'PRO-2024-007',
     name: 'Recessed Aluminium Profile 2m',
     sku: 'AP-REC-2M-SL',
-    category: 'ALUMINIUM PROFILE',
     description: '2-meter recessed aluminium profile for a clean, flush installation of LED strips. Includes diffuser.',
     supplier: 'AluExtrude Co.',
     location: 'Warehouse Bay 1',
@@ -142,7 +136,6 @@ export const products: Product[] = [
     productCode: 'PRO-2024-008',
     name: 'Surface Aluminium Profile 2m - Black',
     sku: 'AP-SUR-2M-BK',
-    category: 'ALUMINIUM PROFILE',
     description: '2-meter surface-mounted aluminium profile in a matte black finish. Ideal for modern designs.',
     supplier: 'AluExtrude Co.',
     location: 'Warehouse Bay 2',

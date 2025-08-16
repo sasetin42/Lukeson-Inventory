@@ -219,7 +219,6 @@ export type Product = {
   productCode?: string;
   name: string;
   sku?: string;
-  category: "STRIPLIGHT" | "POWER SUPPLY" | "GENERAL LIGHTING" | "ALUMINIUM PROFILE";
   description?: string;
   supplier?: string;
   location?: string;

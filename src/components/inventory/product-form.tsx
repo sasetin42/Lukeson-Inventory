@@ -27,10 +27,7 @@ import type { Product } from '@/lib/types';
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 
-const categories = ["STRIPLIGHT", "POWER SUPPLY", "GENERAL LIGHTING", "ALUMINIUM PROFILE"] as const;
-
-// Base schema for common fields
-const baseSchema = z.object({
+const productSchema = z.object({
   productCode: z.string().optional(),
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   sku: z.string().optional(),
@@ -40,46 +37,8 @@ const baseSchema = z.object({
   stock: z.coerce.number().min(0, 'Stock cannot be negative.'),
   reorderLevel: z.coerce.number().min(0, 'Reorder level cannot be negative.'),
   image: z.any().optional(),
+  fields: z.any().optional(),
 });
-
-// Category-specific schemas
-const striplightSchema = baseSchema.extend({
-  category: z.literal('STRIPLIGHT'),
-  fields: z.object({
-    ledQty: z.enum(["240L", "180L", "120L", "72L", "60L"], { required_error: "LED Qty is required." }),
-    voltage: z.enum(["220v", "48v", "24v", "12v"], { required_error: "Voltage is required." }),
-    wattage: z.coerce.number().min(0.1, 'Wattage is required.'),
-    meters: z.coerce.number().min(0.1, 'Meters are required.'),
-  })
-});
-
-const powerSupplySchema = baseSchema.extend({
-  category: z.literal('POWER SUPPLY'),
-  fields: z.object({
-    voltage: z.enum(["220v", "48v", "24v", "12v"], { required_error: "Voltage is required." }),
-    wattage: z.coerce.number().min(0.1, 'Wattage is required.'),
-  })
-});
-
-const generalLightingSchema = baseSchema.extend({
-  category: z.literal('GENERAL LIGHTING'),
-  fields: z.object({}) // No specific fields
-});
-
-const aluminiumProfileSchema = baseSchema.extend({
-  category: z.literal('ALUMINIUM PROFILE'),
-  fields: z.object({
-    size: z.string().min(1, "Size is required."),
-    color: z.string().min(1, "Color is required."),
-  })
-});
-
-const productSchema = z.discriminatedUnion("category", [
-  striplightSchema,
-  powerSupplySchema,
-  generalLightingSchema,
-  aluminiumProfileSchema,
-]);
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
@@ -91,8 +50,8 @@ interface ProductFormProps {
   isSubmitting?: boolean;
 }
 
-const getInitialValues = (product: Product | null | undefined, category: typeof categories[number] = 'STRIPLIGHT'): ProductFormValues => {
-    const defaults = {
+const getInitialValues = (product: Product | null | undefined): ProductFormValues => {
+    return {
         productCode: product?.productCode ?? `PRO-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
         name: product?.name ?? '',
         sku: product?.sku ?? '',
@@ -102,103 +61,10 @@ const getInitialValues = (product: Product | null | undefined, category: typeof 
         stock: product?.stock ?? 0,
         reorderLevel: product?.reorderLevel ?? 0,
         image: product?.imageUrl ?? null,
+        fields: product?.fields ?? {},
     };
-    
-    const selectedCategory = product?.category || category;
-
-    let fields: any = {};
-    switch (selectedCategory) {
-        case 'STRIPLIGHT':
-            fields = {
-                ledQty: product?.fields?.ledQty || null,
-                voltage: product?.fields?.voltage || null,
-                wattage: product?.fields?.wattage || 0,
-                meters: product?.fields?.meters || 0,
-            };
-            break;
-        case 'POWER SUPPLY':
-            fields = {
-                voltage: product?.fields?.voltage || null,
-                wattage: product?.fields?.wattage || 0,
-            };
-            break;
-        case 'ALUMINIUM PROFILE':
-            fields = {
-                size: product?.fields?.size || '',
-                color: product?.fields?.color || '#000000',
-            };
-            break;
-        case 'GENERAL LIGHTING':
-            fields = {};
-            break;
-    }
-
-    return {
-        ...defaults,
-        category: selectedCategory,
-        fields,
-    } as ProductFormValues;
 }
 
-const CategorySpecificFields = ({ category, control }: { category: string; control: any }) => {
-  switch (category) {
-    case 'STRIPLIGHT':
-      return (
-        <div className="grid grid-cols-2 gap-4 col-span-full">
-            <FormField control={control} name="fields.ledQty" render={({ field }) => (
-              <FormItem>
-                <FormLabel>LED Qty *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || ''}>
-                  <FormControl><SelectTrigger><SelectValue placeholder="Select LED Qty" /></SelectTrigger></FormControl>
-                  <SelectContent>
-                    {["240L", "180L", "120L", "72L", "60L"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                  </SelectContent>
-                </Select><FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={control} name="fields.voltage" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Voltage *</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || ''}>
-                  <FormControl><SelectTrigger><SelectValue placeholder="Select Voltage" /></SelectTrigger></FormControl>
-                  <SelectContent>
-                    {["220v", "48v", "24v", "12v"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                  </SelectContent>
-                </Select><FormMessage />
-              </FormItem>
-            )} />
-            <FormField control={control} name="fields.wattage" render={({ field }) => ( <FormItem><FormLabel>Wattage *</FormLabel><FormControl><Input type="number" placeholder="Enter wattage" {...field} /></FormControl><FormMessage /></FormItem> )} />
-            <FormField control={control} name="fields.meters" render={({ field }) => ( <FormItem><FormLabel>Meters *</FormLabel><FormControl><Input type="number" placeholder="Enter meters" {...field} /></FormControl><FormMessage /></FormItem> )} />
-        </div>
-      );
-    case 'POWER SUPPLY':
-      return (
-        <div className="grid grid-cols-2 gap-4 col-span-full">
-          <FormField control={control} name="fields.voltage" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Voltage *</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value || ''}>
-                <FormControl><SelectTrigger><SelectValue placeholder="Select Voltage" /></SelectTrigger></FormControl>
-                <SelectContent>
-                  {["220v", "48v", "24v", "12v"].map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                </SelectContent>
-              </Select><FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={control} name="fields.wattage" render={({ field }) => ( <FormItem><FormLabel>Wattage *</FormLabel><FormControl><Input type="number" placeholder="Enter wattage" {...field} /></FormControl><FormMessage /></FormItem> )} />
-        </div>
-      );
-    case 'ALUMINIUM PROFILE':
-        return (
-            <div className="grid grid-cols-2 gap-4 col-span-full">
-                <FormField control={control} name="fields.size" render={({ field }) => (<FormItem><FormLabel>Size *</FormLabel><FormControl><Input placeholder="e.g., 2 meters" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={control} name="fields.color" render={({ field }) => (<FormItem><FormLabel>Color *</FormLabel><FormControl><Input type="color" {...field} value={field.value || '#000000'} className="p-1 h-10" /></FormControl><FormMessage /></FormItem>)} />
-            </div>
-        );
-    default:
-      return null;
-  }
-};
 
 export function ProductForm({ 
     onSuccess, 
@@ -216,8 +82,6 @@ export function ProductForm({
     defaultValues: getInitialValues(product),
   });
 
-  const selectedCategory = useWatch({ control: form.control, name: 'category' });
-
   useEffect(() => {
       form.reset(getInitialValues(product));
       if (product) {
@@ -226,13 +90,6 @@ export function ProductForm({
           setImagePreview(null);
       }
   }, [product, form.reset]);
-  
-  useEffect(() => {
-      // When category changes, reset the form with the new category's defaults
-      const currentValues = form.getValues();
-      const newDefaults = getInitialValues({ ...currentValues } as Product, selectedCategory);
-      form.reset(newDefaults);
-  }, [selectedCategory, form.reset, form.getValues]);
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith('image/')) {
@@ -295,25 +152,8 @@ export function ProductForm({
         <div className="flex-grow p-6 space-y-4">
             <div className="grid grid-cols-2 gap-4">
                 <FormField control={form.control} name="productCode" render={({ field }) => ( <FormItem><FormLabel>Product Code</FormLabel><FormControl><Input placeholder="PRO-2024-001" {...field} readOnly className="bg-muted/50" /></FormControl><FormMessage /></FormItem> )} />
-                <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Category *</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value} disabled={!!product}>
-                            <FormControl><SelectTrigger><SelectValue placeholder="Select a category..." /></SelectTrigger></FormControl>
-                            <SelectContent>
-                            {categories.map((cat) => ( <SelectItem key={cat} value={cat}>{cat}</SelectItem> ))}
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                    />
             </div>
           
-            {selectedCategory && (
               <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                   <div className="col-span-full">
                     <FormLabel>Product Image</FormLabel>
@@ -367,8 +207,6 @@ export function ProductForm({
                       <FormField control={form.control} name="description" render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Product description..." className="resize-none" rows={5} {...field} /></FormControl><FormMessage /></FormItem> )} />
                   </div>
                   
-                  <CategorySpecificFields category={selectedCategory} control={form.control} />
-                  
                   <div className="col-span-1">
                       <FormField control={form.control} name="supplier" render={({ field }) => (
                           <FormItem>
@@ -395,23 +233,18 @@ export function ProductForm({
                       <FormField control={form.control} name="reorderLevel" render={({ field }) => ( <FormItem><FormLabel>Reorder Level *</FormLabel><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage /></FormItem> )} />
                   </div>
               </div>
-            )}
         </div>
         
-        {selectedCategory && (
-            <div className="flex justify-end gap-4 sticky bottom-0 bg-background/95 backdrop-blur-sm p-4 -mx-0 border-t">
-                <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-                    Cancel
-                </Button>
-                <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={isSubmitting || !form.formState.isValid}>
-                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    {product ? 'Save Changes' : 'Add Product'}
-                </Button>
-            </div>
-        )}
+        <div className="flex justify-end gap-4 sticky bottom-0 bg-background/95 backdrop-blur-sm p-4 -mx-0 border-t">
+            <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+                Cancel
+            </Button>
+            <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={isSubmitting || !form.formState.isValid}>
+                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {product ? 'Save Changes' : 'Add Product'}
+            </Button>
+        </div>
       </form>
     </Form>
   );
 }
-
-    

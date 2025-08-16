@@ -10,15 +10,13 @@ import type { Product } from '@/lib/types';
 
 interface ProductsTabProps {
     products: Product[];
-    categories: string[];
     onAddProduct: () => void;
     onEditProduct: (product: Product) => void;
     onDeleteProduct: (product: Product) => void;
 }
 
-export default function ProductsTab({ products, categories, onAddProduct, onEditProduct, onDeleteProduct }: ProductsTabProps) {
+export default function ProductsTab({ products, onAddProduct, onEditProduct, onDeleteProduct }: ProductsTabProps) {
     const [searchTerm, setSearchTerm] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('all');
 
     const getStatus = (product: Product) => {
@@ -32,19 +30,17 @@ export default function ProductsTab({ products, categories, onAddProduct, onEdit
             const productStatus = getStatus(product);
             const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                                   (product.sku && product.sku.toLowerCase().includes(searchTerm.toLowerCase()));
-            const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
             const matchesStatus = statusFilter === 'all' || productStatus === statusFilter;
             
-            return matchesSearch && matchesCategory && matchesStatus;
+            return matchesSearch && matchesStatus;
         });
-    }, [products, searchTerm, categoryFilter, statusFilter]);
+    }, [products, searchTerm, statusFilter]);
     
   return (
     <Tabs defaultValue="products">
       <div className="flex justify-between items-center">
         <TabsList>
           <TabsTrigger value="products">Products ({filteredProducts.length})</TabsTrigger>
-          <TabsTrigger value="categories">Categories ({categories.length})</TabsTrigger>
           <TabsTrigger value="orders" disabled>Orders</TabsTrigger>
           <TabsTrigger value="analytics" disabled>Analytics</TabsTrigger>
         </TabsList>
@@ -58,18 +54,6 @@ export default function ProductsTab({ products, categories, onAddProduct, onEdit
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[180px]">
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {categories.map(category => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="All Status" />
@@ -90,9 +74,6 @@ export default function ProductsTab({ products, categories, onAddProduct, onEdit
             onEditProduct={onEditProduct}
             onDeleteProduct={onDeleteProduct}
         />
-      </TabsContent>
-      <TabsContent value="categories">
-        Categories management coming soon.
       </TabsContent>
     </Tabs>
   );

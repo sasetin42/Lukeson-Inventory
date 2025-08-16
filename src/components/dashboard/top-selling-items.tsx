@@ -37,7 +37,7 @@ export default function TopSellingItems() {
             />
             <div className="grid gap-1 flex-1">
               <p className="text-sm font-medium leading-none truncate">{product.name}</p>
-              <p className="text-xs text-muted-foreground">{product.category}</p>
+              <p className="text-xs text-muted-foreground">{product.sku}</p>
             </div>
             <div className="font-medium">{quantitySold} sold</div>
           </div>

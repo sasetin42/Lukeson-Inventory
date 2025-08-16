@@ -9,7 +9,7 @@ export default function InventoryKpiCards({ products }: { products: Product[] })
   // Note: Total value calculation will be complex due to different fields.
   // This is a simplified placeholder.
   const totalValue = 0; 
-  const categories = new Set(products.map(p => p.category)).size;
+  const categories = 0; // Categories removed
   const lowStock = products.filter(p => p.stock > 0 && p.stock <= p.reorderLevel).length;
   const outOfStock = products.filter(p => p.stock <= 0).length;
   
@@ -31,7 +31,6 @@ export default function InventoryKpiCards({ products }: { products: Product[] })
   const inventoryKpis = [
     { title: 'Total Products', value: totalProducts, icon: Box, subtext: 'Total Products', color: 'blue' },
     { title: 'Total Value', value: 'N/A', icon: DollarSign, subtext: 'Total Value', color: 'green' },
-    { title: 'Categories', value: categories, icon: Tag, subtext: 'Categories', color: 'purple' },
     { title: 'Low Stock', value: lowStock, icon: AlertTriangle, subtext: 'Low Stock', color: 'yellow' },
     { title: 'Out of Stock', value: outOfStock, icon: XCircle, subtext: 'Out of Stock', color: 'red' },
     { title: 'This Week', value: addedThisWeek, icon: Star, subtext: 'Added This Week', color: 'indigo' },
@@ -39,7 +38,7 @@ export default function InventoryKpiCards({ products }: { products: Product[] })
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-7">
+    <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
       {inventoryKpis.map((kpi, index) => (
         <KpiCard
           key={kpi.title}

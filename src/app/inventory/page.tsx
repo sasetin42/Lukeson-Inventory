@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Download, Upload, ListPlus, Package, Edit, Trash2 } from "lucide-react";
+import { PlusCircle, Download, Upload, Package, Edit, Trash2 } from "lucide-react";
 import InventoryKpiCards from "@/components/inventory/inventory-kpi-cards";
 import ActionCards from "@/components/inventory/action-cards";
 import ProductsTab from "@/components/inventory/products-tab";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ProductForm } from "@/components/inventory/product-form";
 import { DeleteProductDialog } from "@/components/inventory/delete-product-dialog";
-import type { Product, Category } from '@/lib/types';
+import type { Product } from '@/lib/types';
 import { suppliers } from '@/lib/data';
 import { useToast } from "@/hooks/use-toast";
 import { Camera } from 'lucide-react';
@@ -18,13 +18,10 @@ import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimest
 import { db, storage } from '@/lib/firebase';
 import { ref, uploadString, getDownloadURL, deleteObject } from 'firebase/storage';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { AddCategoryDialog } from '@/components/inventory/add-category-dialog';
 
 export default function InventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [isAddProductOpen, setAddProductOpen] = useState(false);
-  const [isAddCategoryOpen, setAddCategoryOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,14 +33,8 @@ export default function InventoryPage() {
       setProducts(productsData);
     });
 
-    const unsubscribeCategories = onSnapshot(collection(db, 'categories'), (snapshot) => {
-      const categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
-      setCategories(categoriesData);
-    });
-
     return () => {
       unsubscribeProducts();
-      unsubscribeCategories();
     };
   }, []);
 
@@ -168,32 +159,7 @@ export default function InventoryPage() {
       setIsSubmitting(false);
     }
   };
-
-  const handleAddCategory = async (data: Omit<Category, 'id'>) => {
-    setIsSubmitting(true);
-    try {
-        await addDoc(collection(db, 'categories'), {
-            ...data,
-            createdAt: serverTimestamp(),
-        });
-        toast({
-            title: "Category Added",
-            description: `Category "${data.name}" has been successfully added.`,
-        });
-        setAddCategoryOpen(false);
-    } catch (error) {
-        console.error("Error adding category: ", error);
-        toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Could not add the category. Please try again.",
-        });
-    } finally {
-        setIsSubmitting(false);
-    }
-  }
   
-  const uniqueCategories = [...new Set(products.map(p => p.category))];
   const supplierNames = suppliers.map(s => s.name);
 
   return (
@@ -207,10 +173,6 @@ export default function InventoryPage() {
             <Button onClick={() => { setEditingProduct(null); setAddProductOpen(true); }}>
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Product
-            </Button>
-            <Button variant="outline" onClick={() => setAddCategoryOpen(true)}>
-              <ListPlus className="mr-2 h-4 w-4" />
-              Add Category
             </Button>
             <Button variant="outline" onClick={() => toast({ title: "Exporting Products", description: "Your products are being exported."})}>
               <Upload className="mr-2 h-4 w-4" />
@@ -227,7 +189,6 @@ export default function InventoryPage() {
       <ActionCards onAddProduct={() => { setEditingProduct(null); setAddProductOpen(true); }} />
       <ProductsTab 
         products={products}
-        categories={uniqueCategories}
         onAddProduct={() => { setEditingProduct(null); setAddProductOpen(true); }}
         onEditProduct={(product) => setEditingProduct(product)}
         onDeleteProduct={(product) => setDeletingProduct(product)}
@@ -242,7 +203,7 @@ export default function InventoryPage() {
                 Add New Product with Smart Features
             </DialogTitle>
             <DialogDescription>
-              Select a category to see category-specific fields.
+              Enter product details below.
             </DialogDescription>
           </DialogHeader>
           <ScrollArea className='flex-grow overflow-y-auto no-scrollbar pr-2'>
@@ -288,17 +249,6 @@ export default function InventoryPage() {
         productName={deletingProduct?.name || ''}
         isSubmitting={isSubmitting}
       />
-
-      {/* Add Category Dialog */}
-      {isAddCategoryOpen && (
-        <AddCategoryDialog
-            open={isAddCategoryOpen}
-            onOpenChange={setAddCategoryOpen}
-            onConfirm={handleAddCategory}
-            isSubmitting={isSubmitting}
-            existingCategories={categories}
-        />
-      )}
     </div>
   );
 }
