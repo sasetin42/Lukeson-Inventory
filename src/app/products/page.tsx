@@ -32,7 +32,7 @@ export default function ProductsPage() {
                     createdAt: data.createdAt?.toDate()?.toISOString(),
                 } as Product);
             });
-            setProducts(productsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+            setProducts(productsData.sort((a, b) => new Date(b.createdAt as any).getTime() - new Date(a.createdAt as any).getTime()));
             setLoading(false);
         });
         return () => unsubscribe();
@@ -40,12 +40,12 @@ export default function ProductsPage() {
 
     const totalProducts = products.length;
     const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
-    const lowStock = products.filter(p => p.status === 'Low Stock').length;
-    const outOfStock = products.filter(p => p.status === 'Out of Stock').length;
+    const lowStock = products.filter(p => p.stock > 0 && p.stock <= p.reOrderLevel).length;
+    const outOfStock = products.filter(p => p.stock === 0).length;
     
     const addedThisWeek = products.filter(p => {
         if (!p.createdAt) return false;
-        const productDate = new Date(p.createdAt);
+        const productDate = new Date(p.createdAt as any);
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         return productDate > sevenDaysAgo;
@@ -67,10 +67,14 @@ export default function ProductsPage() {
 
     const handleAddProduct = async (newProductData: Omit<Product, 'id' | 'createdAt' | 'status'>) => {
         try {
+            const stockStatus = newProductData.stock > 0 
+                ? (newProductData.stock <= newProductData.reOrderLevel ? 'Low Stock' : 'In Stock')
+                : 'Out of Stock';
+
             await addDoc(collection(db, "products"), {
                 ...newProductData,
                 createdAt: serverTimestamp(),
-                status: newProductData.stock > 0 ? 'In Stock' : 'Out of Stock',
+                status: stockStatus,
             });
             toast({ title: "Success", description: "Product added successfully." });
         } catch (error) {
@@ -82,7 +86,14 @@ export default function ProductsPage() {
     const handleUpdateProduct = async (productId: string, updatedProductData: Partial<Product>) => {
         try {
             const productRef = doc(db, 'products', productId);
-            const status = updatedProductData.stock ? (updatedProductData.stock > 0 ? 'In Stock' : 'Out of Stock') : 'Out of Stock';
+            
+            let status = updatedProductData.status;
+            if (updatedProductData.stock !== undefined && updatedProductData.reOrderLevel !== undefined) {
+                 status = updatedProductData.stock > 0 
+                    ? (updatedProductData.stock <= updatedProductData.reOrderLevel ? 'Low Stock' : 'In Stock')
+                    : 'Out of Stock';
+            }
+            
             await updateDoc(productRef, {
                 ...updatedProductData,
                 status

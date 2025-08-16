@@ -64,6 +64,7 @@ export default function ProductFormModal({
     const [isUploading, setIsUploading] = useState(false);
     const [uom, setUom] = useState('');
     const [stock, setStock] = useState('');
+    const [cost, setCost] = useState('');
     const [reOrderLevel, setReOrderLevel] = useState('');
     const [expiryDateTracking, setExpiryDateTracking] = useState(false);
     const [price, setPrice] = useState('');
@@ -105,6 +106,7 @@ export default function ProductFormModal({
                 setImagePreview(product.imageUrl || null);
                 setUom(product.uom || '');
                 setStock(product.stock?.toString() || '');
+                setCost(product.cost?.toString() || '');
                 setReOrderLevel(product.reOrderLevel?.toString() || '');
                 setExpiryDateTracking(product.expiryDateTracking || false);
                 setPrice(product.price?.toString() || '');
@@ -156,6 +158,7 @@ export default function ProductFormModal({
         setIsUploading(false);
         setUom('');
         setStock('');
+        setCost('');
         setReOrderLevel('');
         setExpiryDateTracking(false);
         setPrice('');
@@ -179,8 +182,7 @@ export default function ProductFormModal({
             } finally {
                 setIsUploading(false);
             }
-        } else if (!imagePreview && product?.imageUrl) {
-            // Image was removed but not replaced
+        } else if (!imagePreview) {
             imageUrl = '';
         }
         
@@ -198,6 +200,7 @@ export default function ProductFormModal({
             location,
             imageUrl,
             stock: Number(stock) || 0,
+            cost: Number(cost) || 0,
             price: Number(price) || 0,
             reOrderLevel: Number(reOrderLevel) || 0,
             uom,
@@ -298,9 +301,13 @@ export default function ProductFormModal({
                     <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 150.00" />
                 </div>
                 <div className="space-y-2" style={{width: '25%'}}>
-                    <Label htmlFor="sku" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
-                    <Input id="sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. LED-HD-240-24" />
+                    <Label htmlFor="cost" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-orange-500" /> Cost</Label>
+                    <Input id="cost" type="number" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="e.g. 100.00" />
                 </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="sku" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
+                <Input id="sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. LED-HD-240-24" />
             </div>
 
             <div className="space-y-2">
@@ -392,7 +399,3 @@ export default function ProductFormModal({
     </Dialog>
   );
 }
-
-    
-
-    

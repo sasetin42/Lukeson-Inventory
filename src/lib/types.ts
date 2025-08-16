@@ -281,7 +281,7 @@ export type Product = {
     id: string;
     productCode: string;
     category: string;
-    imageUrl: string;
+    imageUrl?: string;
     name: string;
     sku: string;
     description: string;
@@ -292,6 +292,7 @@ export type Product = {
     supplier: string;
     location: string;
     stock: number;
+    cost: number;
     price: number;
     reOrderLevel: number;
     createdAt: string | Timestamp | Date;
