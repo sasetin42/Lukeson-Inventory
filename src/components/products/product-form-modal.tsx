@@ -13,8 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Product, Supplier } from '@/lib/types';
-import { categoryMap } from '@/lib/category-map';
+import { Product, Supplier, ItemCategory } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
 import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock } from 'lucide-react';
@@ -46,6 +45,7 @@ export default function ProductFormModal({
     totalProducts 
 }: ProductFormModalProps) {
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+    const [categories, setCategories] = useState<ItemCategory[]>([]);
     
     // Form state
     const [productCode, setProductCode] = useState('');
@@ -73,8 +73,16 @@ export default function ProductFormModal({
             const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
             setSuppliers(suppliersData);
         });
+        
+        const categoriesUnsub = onSnapshot(collection(db, "categories"), (snapshot) => {
+            const categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
+            setCategories(categoriesData);
+        });
 
-        return () => suppliersUnsub();
+        return () => {
+            suppliersUnsub();
+            categoriesUnsub();
+        }
     }, []);
 
     useEffect(() => {
@@ -177,7 +185,7 @@ export default function ProductFormModal({
             supplier,
             location,
             imageUrl,
-            stock: Number(stock) || 0, 
+            stock: Number(stock) || 0,
             price: Number(price) || 0,
             reOrderLevel: Number(reOrderLevel) || 0,
             uom,
@@ -214,8 +222,8 @@ export default function ProductFormModal({
                             <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                         <SelectContent>
-                            {Object.values(categoryMap).filter((v, i, a) => a.indexOf(v) === i).map(cat => (
-                                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            {categories.map(cat => (
+                                <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>

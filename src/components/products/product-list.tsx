@@ -1,6 +1,6 @@
 
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Search, Edit, Trash2, Eye } from "lucide-react";
 import Image from "next/image";
-import { Product } from "@/lib/types";
-import { categoryMap } from "@/lib/category-map";
+import { Product, ItemCategory } from "@/lib/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,8 +19,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import ProductDetailsModal from './product-details-modal';
-import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -33,6 +30,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface ProductListProps {
     products: Product[];
@@ -44,7 +43,17 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+    const [categories, setCategories] = useState<ItemCategory[]>([]);
     const { toast } = useToast();
+
+    useEffect(() => {
+        const categoriesUnsub = onSnapshot(collection(db, "categories"), (snapshot) => {
+            const categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
+            setCategories(categoriesData);
+        });
+
+        return () => categoriesUnsub();
+    }, []);
 
     const getStatusVariant = (status: string) => {
         switch (status) {
@@ -99,8 +108,8 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
                     </SelectTrigger>
                     <SelectContent>
                     <SelectItem value="all">All Categories</SelectItem>
-                    {Object.values(categoryMap).filter((v, i, a) => a.indexOf(v) === i).map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    {categories.map(cat => (
+                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                     ))}
                     </SelectContent>
                 </Select>
