@@ -30,6 +30,8 @@ interface AddProductModalProps {
   totalProducts: number;
 }
 
+const uomOptions = ["pcs", "box", "roll", "m", "kg", "pack"];
+
 export default function AddProductModal({ children, onAddProduct, totalProducts }: AddProductModalProps) {
     const [open, setOpen] = useState(false);
     const [productCode, setProductCode] = useState('');
@@ -266,7 +268,16 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="uom">UOM</Label>
-                    <Input id="uom" value={uom} onChange={(e) => setUom(e.target.value)} placeholder="e.g. pcs, box" />
+                    <Select onValueChange={setUom} value={uom}>
+                        <SelectTrigger id="uom">
+                            <SelectValue placeholder="Select a UOM" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {uomOptions.map(opt => (
+                                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
                  <div className="space-y-2">
                     <Label htmlFor="location">Location</Label>
