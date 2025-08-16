@@ -82,13 +82,27 @@ export default function ProductsPage() {
     const handleUpdateProduct = async (productId: string, updatedProductData: Partial<Product>) => {
         try {
             const productRef = doc(db, 'products', productId);
-            await updateDoc(productRef, updatedProductData);
+            const status = updatedProductData.stock ? (updatedProductData.stock > 0 ? 'In Stock' : 'Out of Stock') : 'Out of Stock';
+            await updateDoc(productRef, {
+                ...updatedProductData,
+                status
+            });
             toast({ title: "Success", description: "Product updated successfully." });
         } catch (error) {
             console.error("Error updating document: ", error);
             toast({ title: "Error", description: "Failed to update product.", variant: "destructive" });
         }
     };
+
+    const handleDeleteProduct = async (product: Product) => {
+        try {
+            await deleteDoc(doc(db, "products", product.id));
+            toast({ title: "Success", description: "Product deleted successfully." });
+        } catch (error) {
+            console.error("Error deleting document: ", error);
+            toast({ title: "Error", description: "Failed to delete product.", variant: "destructive" });
+        }
+    }
 
   return (
     <div className="flex flex-col gap-4">
@@ -155,7 +169,7 @@ export default function ProductsPage() {
             color="red"
         />
       </div>
-      <ProductList products={products} onEdit={handleOpenModal} />
+      <ProductList products={products} onEdit={handleOpenModal} onDelete={handleDeleteProduct} />
 
       <ProductFormModal 
         isOpen={isModalOpen}

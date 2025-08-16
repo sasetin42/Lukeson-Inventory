@@ -37,9 +37,10 @@ import {
 interface ProductListProps {
     products: Product[];
     onEdit: (product: Product) => void;
+    onDelete: (product: Product) => void;
 }
 
-export default function ProductList({ products, onEdit }: ProductListProps) {
+export default function ProductList({ products, onEdit, onDelete }: ProductListProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
@@ -67,8 +68,7 @@ export default function ProductList({ products, onEdit }: ProductListProps) {
     const handleDelete = async () => {
         if (!productToDelete) return;
         try {
-            await deleteDoc(doc(db, "products", productToDelete.id));
-            toast({ title: "Success", description: "Product deleted successfully." });
+            await onDelete(productToDelete);
         } catch (error) {
             toast({ title: "Error", description: "Failed to delete product.", variant: "destructive" });
         } finally {
