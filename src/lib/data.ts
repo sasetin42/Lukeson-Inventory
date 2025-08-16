@@ -18,11 +18,14 @@ export const invoices: Invoice[] = [
 ];
 
 export const sales: Sales[] = [
-  { id: 'SALE001', productName: '240L 24v High-Density LED Striplight', customerName: 'Alice Johnson', date: '2024-05-28', quantity: 2, total: 2400.00 },
-  { id: 'SALE002', productName: '24v 150W Slim Power Supply', customerName: 'Diana Prince', date: '2024-05-27', quantity: 1, total: 1800.00 },
-  { id: 'SALE003', productName: 'Recessed LED Downlight 9W', customerName: 'Bob Williams', date: '2024-05-26', quantity: 3, total: 1350.00 },
-  { id: 'SALE004', productName: 'Recessed Aluminium Profile 2m', customerName: 'Frank Martin', date: '2024-05-25', quantity: 10, total: 3500.00 },
-  { id: 'SALE005', productName: '120L 12v Flexible LED Striplight', customerName: 'Grace Lee', date: '2024-05-24', quantity: 5, total: 4750.00 },
-  { id: 'SALE006', productName: '240L 24v High-Density LED Striplight', customerName: 'Heidi Klum', date: '2024-05-23', quantity: 1, total: 1200.00 },
-  { id: 'SALE007', productName: 'Surface Aluminium Profile 2m - Black', customerName: 'Ivan Drago', date: '2024-05-22', quantity: 4, total: 1600.00 },
+  { id: 'SALE001', productId: 'PROD001', productName: '240L 24v High-Density LED Striplight', customerName: 'Alice Johnson', date: '2024-05-28', quantity: 2, total: 2400.00 },
+  { id: 'SALE002', productId: 'PROD007', productName: '24v 150W Slim Power Supply', customerName: 'Diana Prince', date: '2024-05-27', quantity: 1, total: 1800.00 },
+  { id: 'SALE003', productId: 'PROD003', productName: 'Recessed LED Downlight 9W', customerName: 'Bob Williams', date: '2024-05-26', quantity: 3, total: 1350.00 },
+  { id: 'SALE004', productId: 'PROD008', productName: 'Recessed Aluminium Profile 2m', customerName: 'Frank Martin', date: '2024-05-25', quantity: 10, total: 3500.00 },
+  { id: 'SALE005', productId: 'PROD002', productName: '120L 12v Flexible LED Striplight', customerName: 'Grace Lee', date: '2024-05-24', quantity: 5, total: 4750.00 },
+  { id: 'SALE006', productId: 'PROD001', productName: '240L 24v High-Density LED Striplight', customerName: 'Heidi Klum', date: '2024-05-23', quantity: 1, total: 1200.00 },
+  { id: 'SALE007', productId: 'PROD009', productName: 'Surface Aluminium Profile 2m - Black', customerName: 'Ivan Drago', date: '2024-05-22', quantity: 4, total: 1600.00 },
+  { id: 'SALE008', productId: 'PROD001', productName: '240L 24v High-Density LED Striplight', customerName: 'Alice Johnson', date: '2024-05-21', quantity: 5, total: 6000.00 },
+  { id: 'SALE009', productId: 'PROD003', productName: 'Recessed LED Downlight 9W', customerName: 'John Doe', date: '2024-05-20', quantity: 10, total: 4500.00 },
+  { id: 'SALE010', productId: 'PROD002', productName: '120L 12v Flexible LED Striplight', customerName: 'Jane Doe', date: '2024-05-19', quantity: 8, total: 7600.00 },
 ];

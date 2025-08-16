@@ -1,10 +1,21 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { slowMovingItems } from "@/lib/dashboard-data";
+import { products } from "@/lib/products-data";
+import { sales } from "@/lib/data";
 import Image from "next/image";
 import { TrendingDownIcon } from "../icons/trending-down";
 
 export default function SlowMovingItems() {
+  const salesLast90Days = sales.filter(s => new Date(s.date) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
+  const soldProductIds = new Set(salesLast90Days.map(s => s.productId));
+  const slowMovingProducts = products
+    .filter(p => !soldProductIds.has(p.id) && p.stock > 0)
+    .slice(0, 3)
+    .map(p => ({
+        ...p,
+        daysInStock: Math.floor((Date.now() - new Date(p.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+    }));
+
   return (
     <Card>
       <CardHeader>
@@ -15,7 +26,7 @@ export default function SlowMovingItems() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {slowMovingItems.map((item) => (
+          {slowMovingProducts.map((item) => (
             <div key={item.id} className="flex items-center gap-4">
               <Image
                 src={item.imageUrl}
@@ -37,4 +48,3 @@ export default function SlowMovingItems() {
     </Card>
   );
 }
-

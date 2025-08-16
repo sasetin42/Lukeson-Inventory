@@ -6,21 +6,22 @@ import { products } from '@/lib/products-data';
 
 export default function InventoryOverview() {
   const totalProducts = products.length;
-  const outOfStock = products.filter(p => p.status === 'Out of Stock').length;
-  const lowStock = products.filter(p => p.status === 'Low Stock').length;
+  const outOfStock = products.filter(p => p.stock === 0).length;
+  const lowStock = products.filter(p => p.stock > 0 && p.stock <= p.reOrderLevel).length;
+  const totalValue = products.reduce((acc, p) => acc + (p.cost * p.stock), 0);
   
   const cardData = [
     { 
       title: 'Total Products', 
       value: totalProducts,
       icon: Package, 
-      trend: '+5 from last month',
+      trend: `+${products.filter(p => new Date(p.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length} from last month`,
       color: 'blue' as const,
       tooltipText: 'Total number of unique products in your inventory.'
     },
     { 
       title: 'Total Value (est.)', 
-      value: "₱1.2M", 
+      value: `₱${(totalValue / 1000000).toFixed(2)}M`, 
       icon: DollarSign, 
       trend: '+8% from last week',
       color: 'green' as const,

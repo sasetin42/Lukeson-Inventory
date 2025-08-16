@@ -1,10 +1,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { lowStockAlerts } from "@/lib/dashboard-data";
+import { products } from "@/lib/products-data";
 import { AlertTriangle, ChevronRight } from "lucide-react";
 import { Button } from "../ui/button";
 
 export default function LowStockAlerts() {
+  const lowStockProducts = products.filter(p => p.stock > 0 && p.stock <= p.reOrderLevel);
+
   return (
     <Card>
       <CardHeader>
@@ -24,7 +26,7 @@ export default function LowStockAlerts() {
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {lowStockAlerts.map((item) => (
+          {lowStockProducts.map((item) => (
             <div key={item.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
               <div>
                 <p className="font-medium text-sm">{item.name}</p>

@@ -1,10 +1,28 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { topSellingItems } from "@/lib/dashboard-data";
+import { sales } from "@/lib/data";
+import { products } from "@/lib/products-data";
 import Image from "next/image";
 import { TrendingUpIcon } from "../icons/trending-up";
 
 export default function TopSellingItems() {
+  const productSales = sales.reduce((acc, sale) => {
+    if (!acc[sale.productId]) {
+      acc[sale.productId] = { revenue: 0, unitsSold: 0 };
+    }
+    acc[sale.productId].revenue += sale.total;
+    acc[sale.productId].unitsSold += sale.quantity;
+    return acc;
+  }, {} as Record<string, { revenue: number, unitsSold: number }>);
+
+  const topSelling = Object.entries(productSales)
+    .map(([productId, data]) => ({
+      ...products.find(p => p.id === productId)!,
+      ...data,
+    }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 3);
+  
   return (
     <Card>
       <CardHeader>
@@ -15,7 +33,7 @@ export default function TopSellingItems() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {topSellingItems.map((item) => (
+          {topSelling.map((item) => (
             <div key={item.id} className="flex items-center gap-4">
               <Image
                 src={item.imageUrl}

@@ -2,6 +2,7 @@
 
 
 
+
 import { Timestamp } from "firebase/firestore";
 import type { LucideIcon } from "lucide-react";
 
@@ -261,6 +262,7 @@ export type Invoice = {
 
 export type Sales = {
   id: string;
+  productId: string;
   productName: string;
   customerName: string;
   date: string;
@@ -278,8 +280,12 @@ export type ProductKpi = {
 
 export type Product = {
     id: string;
+    sku: string;
     name: string;
     imageUrl: string;
     stock: number;
+    cost: number;
+    reOrderLevel: number;
+    createdAt: string;
     status: 'In Stock' | 'Low Stock' | 'Out of Stock';
 };
