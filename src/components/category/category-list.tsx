@@ -6,8 +6,9 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import type { Category } from "@/lib/types";
 
-export default function CategoryList() {
+export default function CategoryList({ categories = [] }: { categories: Category[] }) {
     return (
         <div className="flex flex-col gap-6">
             <div className="flex items-center justify-between">
@@ -39,7 +40,7 @@ export default function CategoryList() {
             </div>
             <Card>
                 <CardHeader>
-                    <CardTitle>Categories (0)</CardTitle>
+                    <CardTitle>Categories ({categories.length})</CardTitle>
                     <CardDescription>Hierarchical view showing parent-child relationships</CardDescription>
                 </CardHeader>
                 <CardContent>
