@@ -9,13 +9,17 @@ import KpiCard from "@/components/kpi-card";
 import ActionCard from "@/components/action-card";
 import ProductList from "@/components/products/product-list";
 import { Product } from '@/lib/types';
-import AddProductModal from '@/components/products/add-product-modal';
+import ProductFormModal from '@/components/products/product-form-modal';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, onSnapshot } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const { toast } = useToast();
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
@@ -25,18 +29,14 @@ export default function ProductsPage() {
                 productsData.push({ 
                     id: doc.id, 
                     ...data,
-                    // Convert Firestore Timestamp to a format that can be serialized
-                    createdAt: data.createdAt?.toDate().toISOString(),
+                    createdAt: data.createdAt?.toDate()?.toISOString(),
                 } as Product);
             });
             setProducts(productsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
             setLoading(false);
         });
-
-        // Cleanup subscription on unmount
         return () => unsubscribe();
     }, []);
-
 
     const totalProducts = products.length;
     const totalValue = products.reduce((acc, p) => acc + (p.cost * p.stock), 0);
@@ -60,6 +60,11 @@ export default function ProductsPage() {
         { title: "Pending Orders", value: 0, icon: Clock, subtext: "Awaiting fulfillment", color: "orange" as const }
     ];
 
+    const handleOpenModal = (product: Product | null) => {
+        setEditingProduct(product);
+        setIsModalOpen(true);
+    };
+
     const handleAddProduct = async (newProductData: Omit<Product, 'id' | 'createdAt' | 'status'>) => {
         try {
             await addDoc(collection(db, "products"), {
@@ -67,8 +72,21 @@ export default function ProductsPage() {
                 createdAt: serverTimestamp(),
                 status: newProductData.stock > 0 ? 'In Stock' : 'Out of Stock',
             });
+            toast({ title: "Success", description: "Product added successfully." });
         } catch (error) {
             console.error("Error adding document: ", error);
+            toast({ title: "Error", description: "Failed to add product.", variant: "destructive" });
+        }
+    };
+
+    const handleUpdateProduct = async (productId: string, updatedProductData: Partial<Product>) => {
+        try {
+            const productRef = doc(db, 'products', productId);
+            await updateDoc(productRef, updatedProductData);
+            toast({ title: "Success", description: "Product updated successfully." });
+        } catch (error) {
+            console.error("Error updating document: ", error);
+            toast({ title: "Error", description: "Failed to update product.", variant: "destructive" });
         }
     };
 
@@ -80,12 +98,10 @@ export default function ProductsPage() {
         icon={<Package className="h-6 w-6" />}
         actions={
           <div className="flex items-center gap-2">
-            <AddProductModal onAddProduct={handleAddProduct} totalProducts={products.length}>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Product
-                </Button>
-            </AddProductModal>
+            <Button onClick={() => handleOpenModal(null)}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Product
+            </Button>
             <Button variant="ghost">
               <Upload className="mr-2 h-4 w-4" />
               Import
@@ -114,7 +130,7 @@ export default function ProductsPage() {
             title="Add Product" 
             description="Create new inventory item" 
             icon="plus"
-            href="#"
+            onClick={() => handleOpenModal(null)}
             color="blue"
         />
         <ActionCard 
@@ -139,7 +155,16 @@ export default function ProductsPage() {
             color="red"
         />
       </div>
-      <ProductList products={products} />
+      <ProductList products={products} onEdit={handleOpenModal} />
+
+      <ProductFormModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onAddProduct={handleAddProduct}
+        onUpdateProduct={handleUpdateProduct}
+        product={editingProduct}
+        totalProducts={products.length}
+      />
     </div>
   );
 }

@@ -1,35 +1,104 @@
 
 'use client';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Product } from "@/lib/types";
-import Image from "next/image";
-import { Badge } from "../ui/badge";
-import { Separator } from "../ui/separator";
-import { LayoutGrid, Truck, DollarSign, Barcode, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, CheckCircle, XCircle, Package, FileText, AlignLeft, Info, Edit, Trash2 } from 'lucide-react';
-import { Button } from "../ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Product } from '@/lib/types';
+import Image from 'next/image';
+import { Badge } from '../ui/badge';
+import { Separator } from '../ui/separator';
+import {
+  LayoutGrid,
+  Truck,
+  DollarSign,
+  Barcode,
+  Lightbulb,
+  Zap,
+  Power,
+  Ruler,
+  Scaling,
+  MapPin,
+  Warehouse,
+  AlertTriangle,
+  CalendarClock,
+  CheckCircle,
+  XCircle,
+  Package,
+  FileText,
+  AlignLeft,
+  Info,
+  Edit,
+  Trash2,
+} from 'lucide-react';
+import { Button } from '../ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface ProductDetailsModalProps {
   product: Product | null;
   isOpen: boolean;
   onClose: () => void;
+  onEdit: (product: Product) => void;
+  onDelete: (product: Product) => void;
 }
 
-export default function ProductDetailsModal({ product, isOpen, onClose }: ProductDetailsModalProps) {
+export default function ProductDetailsModal({
+  product,
+  isOpen,
+  onClose,
+  onEdit,
+  onDelete,
+}: ProductDetailsModalProps) {
+  const { toast } = useToast();
+  const [isDeactivateAlertOpen, setDeactivateAlertOpen] = useState(false);
+
   if (!product) return null;
 
   const getStatusVariant = (status: string) => {
     switch (status) {
-        case 'In Stock':
-            return 'default';
-        case 'Low Stock':
-            return 'secondary';
-        case 'Out of Stock':
-            return 'destructive';
-        default:
-            return 'outline';
+      case 'In Stock':
+        return 'default';
+      case 'Low Stock':
+        return 'secondary';
+      case 'Out of Stock':
+      case 'Discontinued':
+        return 'destructive';
+      default:
+        return 'outline';
     }
   };
+  
+  const handleToggleStatus = async () => {
+      const newStatus = product.status === 'Discontinued' ? 'In Stock' : 'Discontinued';
+      try {
+        const productRef = doc(db, 'products', product.id);
+        await updateDoc(productRef, { status: newStatus });
+        toast({ title: 'Success', description: `Product has been ${newStatus === 'Discontinued' ? 'deactivated' : 'activated'}.` });
+        onClose();
+      } catch (error) {
+          toast({ title: 'Error', description: 'Failed to update product status.', variant: 'destructive'});
+      } finally {
+        setDeactivateAlertOpen(false);
+      }
+  }
 
   const details = [
     { label: 'SKU', value: product.sku, icon: Barcode, color: 'text-indigo-500' },
@@ -51,17 +120,18 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
   const isActive = product.status !== 'Discontinued';
 
   return (
+    <>
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
-            <div className="flex items-center gap-2">
-                <Package className="h-6 w-6 text-blue-500" />
-                <DialogTitle>{product.name}</DialogTitle>
-            </div>
-            <div className="flex items-center gap-2 ml-8 text-muted-foreground">
-                <FileText className="h-4 w-4 text-gray-400" />
-                <DialogDescription>{product.productCode}</DialogDescription>
-            </div>
+          <div className="flex items-center gap-2">
+            <Package className="h-6 w-6 text-blue-500" />
+            <DialogTitle>{product.name}</DialogTitle>
+          </div>
+          <div className="flex items-center gap-2 ml-8 text-muted-foreground">
+            <FileText className="h-4 w-4 text-gray-400" />
+            <DialogDescription>{product.productCode}</DialogDescription>
+          </div>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
           <div className="md:col-span-1">
@@ -80,57 +150,84 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
                 <AlignLeft className="h-5 w-5 text-gray-500" />
                 Description
               </h4>
-              <p className="text-sm text-muted-foreground pl-7">{product.description || 'No description available.'}</p>
+              <p className="text-sm text-muted-foreground pl-7">
+                {product.description || 'No description available.'}
+              </p>
             </div>
             <Separator />
             <div>
-                <h4 className="font-semibold mb-2 flex items-center gap-2">
-                    <Info className="h-5 w-5 text-blue-500" />
-                    Details
-                </h4>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] pl-7">
-                    {details.map(detail => {
-                        const Icon = detail.icon;
-                        return (
-                            <div key={detail.label} className="flex items-center justify-between">
-                                <span className="flex items-center gap-2 text-muted-foreground">
-                                    <Icon className={`h-4 w-4 ${detail.color}`} />
-                                    {detail.label}
-                                </span>
-                                {detail.label === 'Stock' ? (
-                                   <Badge variant={getStatusVariant(detail.status as string)}>{detail.value} ({detail.status})</Badge>
-                                ) : detail.isBool ? (
-                                   <span className={`flex items-center gap-1 font-medium ${product.expiryDateTracking ? 'text-green-600' : 'text-red-600'}`}>
-                                       {product.expiryDateTracking ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-                                       {detail.value}
-                                   </span>
-                                ) : (
-                                    <span className="font-medium">{detail.value}</span>
-                                )}
-                            </div>
-                        )
-                    })}
-                </div>
+              <h4 className="font-semibold mb-2 flex items-center gap-2">
+                <Info className="h-5 w-5 text-blue-500" />
+                Details
+              </h4>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] pl-7">
+                {details.map((detail) => {
+                  const Icon = detail.icon;
+                  return (
+                    <div key={detail.label} className="flex items-center justify-between">
+                      <span className="flex items-center gap-2 text-muted-foreground">
+                        <Icon className={`h-4 w-4 ${detail.color}`} />
+                        {detail.label}
+                      </span>
+                      {detail.label === 'Stock' ? (
+                        <Badge variant={getStatusVariant(detail.status as string)}>
+                          {detail.value} ({detail.status})
+                        </Badge>
+                      ) : detail.isBool ? (
+                        <span
+                          className={`flex items-center gap-1 font-medium ${
+                            product.expiryDateTracking ? 'text-green-600' : 'text-red-600'
+                          }`}
+                        >
+                          {product.expiryDateTracking ? (
+                            <CheckCircle className="h-4 w-4" />
+                          ) : (
+                            <XCircle className="h-4 w-4" />
+                          )}
+                          {detail.value}
+                        </span>
+                      ) : (
+                        <span className="font-medium">{detail.value}</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
         <DialogFooter className="sm:justify-end">
-            <div className="flex gap-2">
-                <Button variant="outline">
-                    <Edit className="h-4 w-4 mr-2 text-blue-500" />
-                    Edit
-                </Button>
-                <Button variant="outline">
-                    <Power className={`h-4 w-4 mr-2 ${isActive ? 'text-orange-500' : 'text-green-500'}`} />
-                    {isActive ? 'Deactivate' : 'Activate'}
-                </Button>
-                <Button variant="destructive">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                </Button>
-            </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => { onEdit(product); onClose(); }}>
+              <Edit className="h-4 w-4 mr-2 text-blue-500" />
+              Edit
+            </Button>
+            <Button variant="outline" onClick={() => setDeactivateAlertOpen(true)}>
+              <Power className={`h-4 w-4 mr-2 ${isActive ? 'text-orange-500' : 'text-green-500'}`} />
+              {isActive ? 'Deactivate' : 'Activate'}
+            </Button>
+            <Button variant="destructive" onClick={() => { onDelete(product); onClose(); }}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    <AlertDialog open={isDeactivateAlertOpen} onOpenChange={setDeactivateAlertOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure you want to {isActive ? 'deactivate' : 'activate'} this product?</AlertDialogTitle>
+            <AlertDialogDescription>
+                {isActive ? 'Deactivating this product will make it unavailable for sale.' : 'Activating this product will make it available for sale again.'}
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleToggleStatus}>{isActive ? 'Deactivate' : 'Activate'}</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

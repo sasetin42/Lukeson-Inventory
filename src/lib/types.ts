@@ -1,3 +1,4 @@
+
 import { Timestamp } from "firebase/firestore";
 import type { LucideIcon } from "lucide-react";
 
@@ -292,10 +293,8 @@ export type Product = {
     price: number;
     reOrderLevel: number;
     createdAt: string | Timestamp | Date;
-    status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+    status: 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Discontinued';
     suppliers?: Supplier[];
     uom: string;
     expiryDateTracking: boolean;
 };
-
-    

@@ -20,13 +20,30 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import ProductDetailsModal from './product-details-modal';
+import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface ProductListProps {
     products: Product[];
+    onEdit: (product: Product) => void;
 }
 
-export default function ProductList({ products }: ProductListProps) {
+export default function ProductList({ products, onEdit }: ProductListProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+    const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+    const { toast } = useToast();
 
     const getStatusVariant = (status: string) => {
         switch (status) {
@@ -35,114 +52,152 @@ export default function ProductList({ products }: ProductListProps) {
             case 'Low Stock':
                 return 'secondary';
             case 'Out of Stock':
+            case 'Discontinued':
                 return 'destructive';
             default:
                 return 'outline';
         }
     };
+    
+    const openDeleteAlert = (product: Product) => {
+        setProductToDelete(product);
+        setIsDeleteAlertOpen(true);
+    }
+
+    const handleDelete = async () => {
+        if (!productToDelete) return;
+        try {
+            await deleteDoc(doc(db, "products", productToDelete.id));
+            toast({ title: "Success", description: "Product deleted successfully." });
+        } catch (error) {
+            toast({ title: "Error", description: "Failed to delete product.", variant: "destructive" });
+        } finally {
+            setIsDeleteAlertOpen(false);
+            setProductToDelete(null);
+        }
+    };
   
     return (
-    <Card>
-      <CardHeader>
-        <Tabs defaultValue="products">
-          <div className="flex justify-between items-center">
-            <TabsList>
-              <TabsTrigger value="products">Products ({products.length})</TabsTrigger>
-              <TabsTrigger value="orders">Orders</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            </TabsList>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search products by name or SKU..." className="pl-10 w-64" />
-              </div>
-              <Select>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {Object.values(categoryMap).filter((v, i, a) => a.indexOf(v) === i).map(cat => (
-                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+    <>
+        <Card>
+        <CardHeader>
+            <Tabs defaultValue="products">
+            <div className="flex justify-between items-center">
+                <TabsList>
+                <TabsTrigger value="products">Products ({products.length})</TabsTrigger>
+                <TabsTrigger value="orders">Orders</TabsTrigger>
+                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+                </TabsList>
+                <div className="flex items-center gap-4">
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Search products by name or SKU..." className="pl-10 w-64" />
+                </div>
+                <Select>
+                    <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {Object.values(categoryMap).filter((v, i, a) => a.indexOf(v) === i).map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                    </SelectContent>
+                </Select>
+                </div>
             </div>
-          </div>
-          <TabsContent value="products" className="mt-6">
-            <CardTitle>Products ({products.length})</CardTitle>
-            <CardDescription>Your current inventory of products.</CardDescription>
-            <Table className="mt-4">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[80px]">Image</TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Stock</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {products.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      <Image 
-                        src={product.imageUrl || 'https://placehold.co/48x48.png'} 
-                        alt={product.name} 
-                        width={48} 
-                        height={48} 
-                        className="rounded-md"
-                        data-ai-hint="product image"
-                      />
-                    </TableCell>
-                    <TableCell>
-                        <div className="font-medium">{product.name}</div>
-                        <div className="text-xs text-muted-foreground">{product.productCode}</div>
-                    </TableCell>
-                    <TableCell>{product.sku}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell>{product.stock}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusVariant(product.status)}>{product.status}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setSelectedProduct(product)}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => console.log('Edit:', product.id)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-destructive" onClick={() => console.log('Delete:', product.id)}>
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TabsContent>
-        </Tabs>
-      </CardHeader>
-      <ProductDetailsModal
-        isOpen={!!selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-        product={selectedProduct}
-      />
-    </Card>
+            <TabsContent value="products" className="mt-6">
+                <CardTitle>Products ({products.length})</CardTitle>
+                <CardDescription>Your current inventory of products.</CardDescription>
+                <Table className="mt-4">
+                <TableHeader>
+                    <TableRow>
+                    <TableHead className="w-[80px]">Image</TableHead>
+                    <TableHead>Product</TableHead>
+                    <TableHead>SKU</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Stock</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {products.map((product) => (
+                    <TableRow key={product.id}>
+                        <TableCell>
+                        <Image 
+                            src={product.imageUrl || 'https://placehold.co/48x48.png'} 
+                            alt={product.name} 
+                            width={48} 
+                            height={48} 
+                            className="rounded-md"
+                            data-ai-hint="product image"
+                        />
+                        </TableCell>
+                        <TableCell>
+                            <div className="font-medium">{product.name}</div>
+                            <div className="text-xs text-muted-foreground">{product.productCode}</div>
+                        </TableCell>
+                        <TableCell>{product.sku}</TableCell>
+                        <TableCell>{product.category}</TableCell>
+                        <TableCell>{product.stock}</TableCell>
+                        <TableCell>
+                        <Badge variant={getStatusVariant(product.status)}>{product.status}</Badge>
+                        </TableCell>
+                        <TableCell>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setSelectedProduct(product)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onEdit(product)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive" onClick={() => openDeleteAlert(product)}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                            </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        </TableCell>
+                    </TableRow>
+                    ))}
+                </TableBody>
+                </Table>
+            </TabsContent>
+            </Tabs>
+        </CardHeader>
+        <ProductDetailsModal
+            isOpen={!!selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+            product={selectedProduct}
+            onEdit={onEdit}
+            onDelete={openDeleteAlert}
+        />
+        </Card>
+        <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the product
+                    and remove its data from our servers.
+                </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    </>
   );
 }

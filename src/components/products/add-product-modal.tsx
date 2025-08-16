@@ -1,5 +1,6 @@
 
 'use client';
+
 import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +10,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,22 +24,31 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 
-interface AddProductModalProps {
-  children: React.ReactNode;
-  onAddProduct: (product: Omit<Product, 'id' | 'createdAt' | 'status'>) => void;
+interface ProductFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAddProduct: (product: Omit<Product, 'id' | 'createdAt' | 'status'>) => Promise<void>;
+  onUpdateProduct: (productId: string, product: Partial<Product>) => Promise<void>;
+  product: Product | null;
   totalProducts: number;
 }
 
 const uomOptions = ["pcs", "box", "roll", "m", "kg", "pack"];
-const ledQtyOptions = ["240L", "180L", "120L", "72L", "60L"];
-const voltageOptions = ["220v", "24v", "12v"];
+const ledQtyOptions = ["240", "180", "120", "72", "60"];
+const voltageOptions = ["220", "24", "12"];
 
-export default function AddProductModal({ children, onAddProduct, totalProducts }: AddProductModalProps) {
-    const [open, setOpen] = useState(false);
-    const [productCode, setProductCode] = useState('');
+export default function ProductFormModal({ 
+    isOpen, 
+    onClose, 
+    onAddProduct, 
+    onUpdateProduct,
+    product, 
+    totalProducts 
+}: ProductFormModalProps) {
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     
     // Form state
+    const [productCode, setProductCode] = useState('');
     const [category, setCategory] = useState('');
     const [productName, setProductName] = useState('');
     const [sku, setSku] = useState('');
@@ -55,38 +64,58 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
     const [isUploading, setIsUploading] = useState(false);
     const [uom, setUom] = useState('');
     const [stock, setStock] = useState('');
+    const [cost, setCost] = useState('');
     const [reOrderLevel, setReOrderLevel] = useState('');
     const [expiryDateTracking, setExpiryDateTracking] = useState(false);
     const [price, setPrice] = useState('');
 
     useEffect(() => {
-        if (open) {
-            const year = new Date().getFullYear();
-            const nextId = (totalProducts + 1).toString().padStart(3, '0');
-            setProductCode(`PRO-${year}-${nextId}`);
-            
-            const suppliersUnsub = onSnapshot(collection(db, "suppliers"), (snapshot) => {
-                const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
-                setSuppliers(suppliersData);
-            });
+        const suppliersUnsub = onSnapshot(collection(db, "suppliers"), (snapshot) => {
+            const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
+            setSuppliers(suppliersData);
+        });
 
-            return () => suppliersUnsub();
+        return () => suppliersUnsub();
+    }, []);
 
-        } else {
-            // Reset form on close
-            resetForm();
+    useEffect(() => {
+        if (isOpen) {
+            if (product) {
+                // Editing existing product
+                setProductCode(product.productCode || '');
+                setCategory(product.category || '');
+                setProductName(product.name || '');
+                setSku(product.sku || '');
+                setDescription(product.description || '');
+                setLedQty(product.ledQty?.toString() || '');
+                setVoltage(product.voltage?.toString() || '');
+                setWattage(product.wattage?.toString() || '');
+                setMeters(product.meters?.toString() || '');
+                setSupplier(product.supplier || '');
+                setLocation(product.location || '');
+                setImagePreview(product.imageUrl || null);
+                setUom(product.uom || '');
+                setStock(product.stock?.toString() || '');
+                setCost(product.cost?.toString() || '');
+                setReOrderLevel(product.reOrderLevel?.toString() || '');
+                setExpiryDateTracking(product.expiryDateTracking || false);
+                setPrice(product.price?.toString() || '');
+            } else {
+                // Adding new product
+                resetForm();
+                const year = new Date().getFullYear();
+                const nextId = (totalProducts + 1).toString().padStart(3, '0');
+                setProductCode(`PRO-${year}-${nextId}`);
+            }
         }
-    }, [open, totalProducts]);
-
+    }, [isOpen, product, totalProducts]);
+    
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setIsUploading(true);
             setImageFile(file);
             const reader = new FileReader();
-            reader.onloadstart = () => {
-                setIsUploading(true);
-            }
+            reader.onloadstart = () => setIsUploading(true);
             reader.onloadend = () => {
                 setImagePreview(reader.result as string);
                 setIsUploading(false);
@@ -101,6 +130,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
     };
     
     const resetForm = () => {
+        setProductCode('');
         setCategory('');
         setProductName('');
         setSku('');
@@ -116,22 +146,28 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
         setIsUploading(false);
         setUom('');
         setStock('');
+        setCost('');
         setReOrderLevel('');
         setExpiryDateTracking(false);
         setPrice('');
     };
 
     const handleSubmit = async () => {
-        let imageUrl = 'https://placehold.co/48x48.png';
+        let imageUrl = product?.imageUrl || 'https://placehold.co/48x48.png';
         if (imageFile) {
             setIsUploading(true);
             const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-            await uploadBytes(storageRef, imageFile);
-            imageUrl = await getDownloadURL(storageRef);
-            setIsUploading(false);
+            try {
+                await uploadBytes(storageRef, imageFile);
+                imageUrl = await getDownloadURL(storageRef);
+            } catch (error) {
+                console.error("Image upload failed", error);
+            } finally {
+                setIsUploading(false);
+            }
         }
         
-        const newProduct: Omit<Product, 'id' | 'createdAt' | 'status'> = {
+        const productData = {
             productCode,
             name: productName,
             sku,
@@ -143,26 +179,30 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             meters: Number(meters) || 0,
             supplier,
             location,
-            imageUrl: imageUrl,
+            imageUrl,
             stock: Number(stock) || 0, 
-            cost: 0,
+            cost: Number(cost) || 0,
             price: Number(price) || 0,
             reOrderLevel: Number(reOrderLevel) || 0,
             uom,
             expiryDateTracking,
         };
-        onAddProduct(newProduct);
-        setOpen(false);
+
+        if (product) {
+            await onUpdateProduct(product.id, productData);
+        } else {
+            await onAddProduct(productData);
+        }
+        onClose();
     };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Product</DialogTitle>
+          <DialogTitle>{product ? 'Edit Product' : 'Add New Product'}</DialogTitle>
           <DialogDescription>
-            Fill in the details below to add a new product to your inventory.
+            {product ? 'Update the details of this product.' : 'Fill in the details below to add a new product.'}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
@@ -216,7 +256,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                 ) : isUploading ? (
                      <div className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg bg-muted">
                         <Loader2 className="w-8 h-8 mb-4 text-muted-foreground animate-spin" />
-                        <p className="text-sm text-muted-foreground">Optimizing and converting image to WebP...</p>
+                        <p className="text-sm text-muted-foreground">Uploading image...</p>
                     </div>
                 ) : (
                     <div className="flex items-center justify-center w-full">
@@ -224,7 +264,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                 <Upload className="w-8 h-8 mb-4 text-primary" />
                                 <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                <p className="text-xs text-muted-foreground">All images uploaded to the entire system will be optimized and automatically converted into WebP.</p>
+                                <p className="text-xs text-muted-foreground">Recommended size: 800x800px</p>
                             </div>
                             <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
                         </label>
@@ -241,10 +281,14 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                     <Label htmlFor="price" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
                     <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 150.00" />
                 </div>
-                <div className="space-y-2" style={{width: '20%'}}>
-                    <Label htmlFor="sku" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
-                    <Input id="sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. LED-HD-240-24" />
+                <div className="space-y-2" style={{width: '25%'}}>
+                    <Label htmlFor="cost" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-orange-500" /> Cost</Label>
+                    <Input id="cost" type="number" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="e.g. 100.00" />
                 </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="sku" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
+                <Input id="sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. LED-HD-240-24" />
             </div>
 
             <div className="space-y-2">
@@ -261,7 +305,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                         </SelectTrigger>
                         <SelectContent>
                             {ledQtyOptions.map(opt => (
-                                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                <SelectItem key={opt} value={opt}>{opt}L</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
@@ -274,7 +318,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                         </SelectTrigger>
                         <SelectContent>
                             {voltageOptions.map(opt => (
-                                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                                <SelectItem key={opt} value={opt}>{opt}v</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
@@ -326,17 +370,13 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             </div>
         </div>
         <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={onClose}>Cancel</Button>
             <Button type="submit" onClick={handleSubmit} disabled={isUploading}>
                 {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Add Product
+                {product ? 'Save Changes' : 'Add Product'}
             </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-
-    
-
-    

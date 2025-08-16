@@ -7,7 +7,8 @@ import { cn } from '@/lib/utils';
 type ActionCardProps = {
   title: string;
   description: string;
-  href: string;
+  href?: string;
+  onClick?: () => void;
   icon: 'plus' | 'repeat' | 'cart' | 'alert';
   color?: 'blue' | 'green' | 'purple' | 'red';
 };
@@ -39,13 +40,13 @@ const colorClasses = {
 };
 
 
-export default function ActionCard({ title, description, href, icon, color = 'blue' }: ActionCardProps) {
+export default function ActionCard({ title, description, href, onClick, icon, color = 'blue' }: ActionCardProps) {
   const Icon = iconMap[icon];
   const classes = colorClasses[color];
 
-  return (
-    <Card className={cn("transition-all", classes.background)}>
-        <Link href={href} className="block h-full">
+  const CardBody = (
+    <Card className={cn("transition-all h-full", classes.background)}>
+        <div className="block h-full">
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <div>
@@ -63,7 +64,14 @@ export default function ActionCard({ title, description, href, icon, color = 'bl
                     Click to {title.split(' ')[0].toLowerCase()}
                 </div>
             </CardContent>
-        </Link>
+        </div>
     </Card>
   );
+  
+  if (href) {
+    return <Link href={href}>{CardBody}</Link>
+  }
+  
+  return <button onClick={onClick} className="text-left w-full h-full">{CardBody}</button>;
+
 }
