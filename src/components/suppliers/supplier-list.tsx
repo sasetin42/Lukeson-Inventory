@@ -54,7 +54,7 @@ export default function SupplierList() {
                 </div>
             </div>
             <div className="text-xs text-muted-foreground pt-2 border-t mt-2">
-                Contract: {supplier.contractTerms} • {supplier.productsSupplied} products supplied
+                Contract: {supplier.contractTerms}
             </div>
           </CardContent>
         </Card>

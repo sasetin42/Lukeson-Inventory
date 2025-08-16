@@ -41,10 +41,13 @@ export type Customer = {
 export type Supplier = {
     id: string;
     name: string;
-    tin?: string;
+    contact: {
+        name: string;
+        email: string;
+        phone: string;
+    };
     address: string;
-    termsDays: number;
-    balance: number;
+    contractTerms: string;
 };
 
 // Inventory and Warehousing
@@ -213,32 +216,7 @@ export type Return = {
     }[];
 };
 
-// DEPRECATED TYPES - To be removed later
-export type Product = {
-  id: string;
-  productCode?: string;
-  name: string;
-  sku?: string;
-  description?: string;
-  supplier?: string;
-  location?: string;
-  stock: number;
-  reorderLevel: number;
-  imageUrl?: string;
-  createdAt?: Timestamp;
-  price?: number;
-  status?: 'In Stock' | 'Low Stock' | 'Out of Stock';
-  tags?: string[];
-  unit?: string;
-  barcode?: string;
-  minStock?: number;
-  maxStock?: number;
-  initialStock?: number;
-  image?: string;
-  lastSoldDate?: string;
-  fields?: any;
-};
-
+// DEPRECATED / MOCK TYPES
 export type Invoice = {
   id: string;
   customerName: string;
@@ -254,22 +232,4 @@ export type Sales = {
   date: string;
   quantity: number;
   total: number;
-};
-
-export type InventoryKpi = {
-    title: string;
-    value: string | number;
-    icon: any;
-    subtext: string;
-    color: 'blue' | 'green' | 'purple' | 'yellow' | 'red' | 'indigo' | 'cyan' | 'teal';
-};
-
-export type Category = {
-    id: string;
-    name: string;
-    description?: string;
-    parent?: string;
-    color?: string;
-    icon?: string;
-    createdAt?: Timestamp;
 };

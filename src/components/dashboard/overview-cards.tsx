@@ -19,28 +19,28 @@ export default function OverviewCards() {
       value: `₱${monthlyRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
       icon: DollarSign, 
       trend: '+15% from last month',
-      color: 'purple'
+      color: 'purple' as const
     },
     { 
       title: 'Active Sales Orders', 
       value: activeSalesOrders, 
       icon: ShoppingCart, 
       trend: '+8% from last week',
-      color: 'green'
+      color: 'green' as const
     },
     { 
       title: 'Pending Bills', 
       value: 3, 
       icon: AlertTriangle, 
       trend: `2 are overdue`,
-      color: 'yellow'
+      color: 'yellow' as const
     },
     { 
         title: 'Total Customers', 
         value: totalCustomers, 
         icon: Users, 
         trend: '+2 this month',
-        color: 'blue'
+        color: 'blue' as const
     },
   ];
 
@@ -53,7 +53,7 @@ export default function OverviewCards() {
           value={card.value}
           icon={card.icon}
           trend={card.trend}
-          color={card.color as any}
+          color={card.color}
           style={{ animationDelay: `${index * 100}ms` }}
           className="fade-in-up"
         />

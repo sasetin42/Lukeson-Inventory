@@ -1,3 +1,4 @@
+
 import PageHeader from "@/components/page-header";
 import { List } from "lucide-react";
 
@@ -6,12 +7,12 @@ export default function ItemMasterListPage() {
     <div className="flex flex-col gap-4">
       <PageHeader 
         title="Item Master List" 
-        description="Manage the item master list." 
+        description="This page has been removed." 
         icon={<List className="h-6 w-6 text-red-500" />}
       />
       <div className="p-4">
-        <h2 className="text-lg font-semibold">Item Master List Page</h2>
-        <p className="text-muted-foreground">Content for the item master list goes here.</p>
+        <h2 className="text-lg font-semibold">Page Removed</h2>
+        <p className="text-muted-foreground">This feature is no longer available.</p>
       </div>
     </div>
   );

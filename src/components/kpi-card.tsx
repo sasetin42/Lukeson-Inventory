@@ -8,7 +8,7 @@ type KpiCardProps = {
   value: string | number;
   icon: LucideIcon;
   trend?: string;
-  color: 'blue' | 'green' | 'yellow' | 'purple' | 'red' | 'indigo' | 'cyan' | 'orange' | 'pink' | 'teal';
+  color?: 'blue' | 'green' | 'yellow' | 'purple' | 'red' | 'indigo' | 'cyan' | 'orange' | 'pink' | 'teal';
   subtext?: string;
 } & React.HTMLAttributes<HTMLDivElement>;
 
@@ -25,20 +25,7 @@ const colorClasses = {
   teal: 'text-teal-500'
 };
 
-const iconColorClasses = {
-  blue: 'text-blue-500',
-  green: 'text-green-500',
-  yellow: 'text-yellow-500',
-  purple: 'text-purple-500',
-  red: 'text-red-500',
-  indigo: 'text-indigo-500',
-  cyan: 'text-cyan-500',
-  orange: 'text-orange-500',
-  pink: 'text-pink-500',
-  teal: 'text-teal-500'
-}
-
-export default function KpiCard({ title, value, icon: Icon, trend, color, subtext, className, ...props }: KpiCardProps) {
+export default function KpiCard({ title, value, icon: Icon, trend, color = 'blue', subtext, className, ...props }: KpiCardProps) {
   const isPositive = trend && !trend.startsWith('-');
   const TrendIcon = isPositive ? ArrowUp : ArrowDown;
   
@@ -46,7 +33,7 @@ export default function KpiCard({ title, value, icon: Icon, trend, color, subtex
     <Card className={cn('border-0 shadow-sm', className)} {...props}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground whitespace-nowrap">{title}</CardTitle>
-        <Icon className={cn('h-5 w-5', iconColorClasses[color])} />
+        <Icon className={cn('h-5 w-5', colorClasses[color])} />
       </CardHeader>
       <CardContent>
         <div className={cn("text-3xl font-bold", color === 'yellow' ? 'text-yellow-600' : 'text-foreground')}>
