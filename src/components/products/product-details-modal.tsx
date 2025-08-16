@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Product } from "@/lib/types";
 import Image from "next/image";
 import { Badge } from "../ui/badge";
@@ -114,12 +114,7 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
             </div>
           </div>
         </div>
-        <DialogFooter className="sm:justify-between">
-            <DialogClose asChild>
-                <Button type="button" variant="secondary">
-                Close
-                </Button>
-            </DialogClose>
+        <DialogFooter className="sm:justify-end">
             <div className="flex gap-2">
                 <Button variant="outline">
                     <Edit className="h-4 w-4 mr-2 text-blue-500" />
