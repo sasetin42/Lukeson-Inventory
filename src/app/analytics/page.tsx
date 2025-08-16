@@ -32,7 +32,7 @@ export default function AnalyticsPage() {
           <TabsTrigger value="inventory">Inventory Analysis</TabsTrigger>
           <TabsTrigger value="suppliers">Supplier Performance</TabsTrigger>
         </TabsList>
-        <TabsContent value="overview" className="mt-6">
+        <TabsContent value="overview" className="mt-4">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {analyticsKpiData.map((card, index) => (
                     <KpiCard
@@ -51,14 +51,14 @@ export default function AnalyticsPage() {
                 <RevenueProfitChart />
             </div>
         </TabsContent>
-        <TabsContent value="sales" className="mt-6 grid gap-6">
+        <TabsContent value="sales" className="mt-4 grid gap-6">
             <div className="grid md:grid-cols-2 gap-6">
               <SalesByCustomerChart />
               <SalesOverTimeChart />
             </div>
             <ProductPerformanceDetails />
         </TabsContent>
-        <TabsContent value="inventory" className="mt-6 grid gap-6">
+        <TabsContent value="inventory" className="mt-4 grid gap-6">
             <div className="grid md:grid-cols-2 gap-6">
               <InventoryValueByCategoryChart />
               <InventoryTurnoverByCategoryChart />
@@ -66,7 +66,7 @@ export default function AnalyticsPage() {
             <StockMovementTrendChart />
             <InventoryOptimizationRecommendations />
         </TabsContent>
-        <TabsContent value="suppliers" className="mt-6 grid gap-6">
+        <TabsContent value="suppliers" className="mt-4 grid gap-6">
             <SupplierPerformanceList />
             <SupplierOnTimeChart />
         </TabsContent>
