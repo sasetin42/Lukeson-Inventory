@@ -87,7 +87,7 @@ const navGroups = [
             { href: '/reports/sales-by-customer', icon: BarChart3, label: 'Sales by Customer', color: 'text-green-500' },
             { href: '/reports/sales-by-item', icon: BarChart3, label: 'Sales by Item', color: 'text-blue-500' },
             { href: '/reports/purchase-analysis', icon: BarChart3, label: 'Purchase Analysis', color: 'text-purple-500' },
-            { href: '/reports/audit-trail', icon: BarChart3, label: 'Audit Trail', color: 'text-red-500' },
+            { href: '/reports/audit-trail', icon: BarChart3, label: 'System Security', color: 'text-red-500' },
             { href: '/reports/cash-flow-statement', icon: BarChart3, label: 'Cash Flow Statement', color: 'text-orange-500' },
         ],
       },
