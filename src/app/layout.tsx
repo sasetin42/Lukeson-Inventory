@@ -34,7 +34,6 @@ const navGroups = [
       {
         title: 'Inventory',
         links: [
-          { href: '/inventory', icon: Package, label: 'Products', color: 'text-blue-500' },
           { href: '/warehouses', icon: Warehouse, label: 'Warehouses', color: 'text-green-500' },
         ],
       },
