@@ -86,7 +86,7 @@ export default function ProductList({ products }: ProductListProps) {
                   <TableRow key={product.id}>
                     <TableCell>
                       <Image 
-                        src={product.imageUrl} 
+                        src={product.imageUrl || 'https://placehold.co/48x48.png'} 
                         alt={product.name} 
                         width={48} 
                         height={48} 
