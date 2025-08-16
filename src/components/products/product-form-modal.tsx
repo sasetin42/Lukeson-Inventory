@@ -167,7 +167,7 @@ export default function ProductFormModal({
     }
 
     const handleSubmit = async () => {
-        let imageUrl = product?.imageUrl || 'https://placehold.co/48x48.png';
+        let imageUrl = product?.imageUrl || '';
         if (imageFile) {
             setIsUploading(true);
             const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
@@ -179,6 +179,9 @@ export default function ProductFormModal({
             } finally {
                 setIsUploading(false);
             }
+        } else if (!imagePreview && product?.imageUrl) {
+            // Image was removed but not replaced
+            imageUrl = '';
         }
         
         const productData = {
@@ -389,5 +392,7 @@ export default function ProductFormModal({
     </Dialog>
   );
 }
+
+    
 
     
