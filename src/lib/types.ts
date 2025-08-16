@@ -1,6 +1,219 @@
+
 import { Timestamp } from "firebase/firestore";
 
-// Base Product Type
+// Main Company Information
+export type Company = {
+    id: string;
+    name: string;
+    tin?: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    logoUrl?: string;
+    timezone: string; // e.g., 'Asia/Manila'
+    currency: string; // e.g., 'PHP'
+    currencySymbol: string; // e.g., '₱'
+    taxDefault: number; // e.g., 0.12 for 12%
+};
+
+// User and Role Management
+export type User = {
+    id: string;
+    name: string;
+    email: string;
+    role: 'Admin' | 'Inventory Manager' | 'Sales' | 'Purchasing' | 'Finance' | 'Auditor';
+    status: 'active' | 'inactive';
+    lastLoginAt: Timestamp;
+};
+
+// Contacts
+export type Customer = {
+    id: string;
+    name: string;
+    tin?: string;
+    billingAddress: string;
+    shippingAddress?: string;
+    termsDays: number;
+    creditLimit: number;
+    balance: number;
+};
+
+export type Supplier = {
+    id: string;
+    name: string;
+    tin?: string;
+    address: string;
+    termsDays: number;
+    balance: number;
+};
+
+// Inventory and Warehousing
+export type Warehouse = {
+    id: string;
+    name: string;
+    code: string;
+    address: string;
+    isPrimary: boolean;
+};
+
+export type Item = {
+    id: string;
+    sku: string;
+    name: string;
+    categoryId: string;
+    uom: string; // Unit of Measure
+    barcode?: string;
+    brand?: string;
+    cost: number;
+    price: number;
+    vatType: 'VATABLE' | 'VAT-EXEMPT' | 'ZERO-RATED';
+    reOrderLevel: number;
+    status: 'active' | 'discontinued';
+    imageUrl?: string;
+};
+
+export type ItemCategory = {
+    id: string;
+    name: string;
+    parentId?: string;
+};
+
+export type Stock = {
+    id: string; // Composite key: `${itemId}_${warehouseId}`
+    itemId: string;
+    warehouseId: string;
+    onHand: number;
+    committed: number;
+    ordered: number;
+};
+
+// Transaction Line Item (used across multiple documents)
+export type DocumentLine = {
+    id: string;
+    itemId: string;
+    description: string;
+    quantity: number;
+    uom: string;
+    unitPrice: number;
+    discount?: number; // as a percentage
+    taxRate: number;
+    total: number;
+};
+
+
+// Sales Documents
+export type Quotation = {
+    id: string; // QTN-YYYY-XXXX
+    customerId: string;
+    qtnDate: Timestamp;
+    expiryDate: Timestamp;
+    status: 'Draft' | 'Sent' | 'Accepted' | 'Expired';
+    totalAmount: number;
+    lines: DocumentLine[];
+};
+
+export type SalesOrder = {
+    id: string; // SO-YYYY-XXXX
+    customerId: string;
+    orderDate: Timestamp;
+    status: 'Draft' | 'Confirmed' | 'Fulfilled' | 'Invoiced' | 'Cancelled';
+    totalAmount: number;
+    lines: DocumentLine[];
+};
+
+export type SalesInvoice = {
+    id:string; // INV-YYYY-XXXX
+    salesOrderId: string;
+    invoiceDate: Timestamp;
+    dueDate: Timestamp;
+    status: 'Draft' | 'Posted' | 'Paid' | 'Overdue';
+    totalAmount: number;
+    paidAmount: number;
+    balance: number;
+    lines: DocumentLine[];
+};
+
+export type Payment = {
+    id: string;
+    invoiceId: string;
+    paymentDate: Timestamp;
+    amount: number;
+    paymentMethod: string;
+};
+
+
+// Purchasing Documents
+export type PurchaseOrder = {
+    id: string; // PO-YYYY-XXXX
+    supplierId: string;
+    orderDate: Timestamp;
+    expectedDeliveryDate: Timestamp;
+    status: 'Draft' | 'Sent' | 'Confirmed' | 'Partially Received' | 'Received' | 'Billed' | 'Cancelled';
+    totalAmount: number;
+    lines: DocumentLine[];
+};
+
+export type GoodsReceipt = {
+    id: string; // GRN-YYYY-XXXX
+    purchaseOrderId: string;
+    receiptDate: Timestamp;
+    warehouseId: string;
+    lines: {
+        id: string;
+        itemId: string;
+        orderedQty: number;
+        receivedQty: number;
+    }[];
+};
+
+export type Bill = {
+    id: string;
+    goodsReceiptId: string;
+    billDate: Timestamp;
+    dueDate: Timestamp;
+    status: 'Draft' | 'Posted' | 'Paid' | 'Overdue';
+    totalAmount: number;
+    paidAmount: number;
+    balance: number;
+    lines: DocumentLine[];
+};
+
+export type SupplierPayment = {
+    id: string;
+    billId: string;
+    paymentDate: Timestamp;
+    amount: number;
+    paymentMethod: string;
+};
+
+
+// Stock Movement & Returns
+export type StockMovement = {
+    id: string;
+    moveDate: Timestamp;
+    type: 'Transfer' | 'Adjustment-In' | 'Adjustment-Out';
+    fromWarehouseId?: string;
+    toWarehouseId?: string;
+    itemId: string;
+    quantity: number;
+    reason: string;
+};
+
+export type Return = {
+    id: string; // RA-YYYY-XXXX
+    type: 'Sales Return' | 'Purchase Return';
+    documentId: string; // SalesInvoiceId or GoodsReceiptId
+    returnDate: Timestamp;
+    status: 'Pending' | 'Approved' | 'Rejected';
+    lines: {
+        id: string;
+        itemId: string;
+        quantity: number;
+        reason: string;
+    }[];
+};
+
+// DEPRECATED TYPES - To be removed later
 export type Product = {
   id: string;
   productCode?: string;
@@ -24,42 +237,7 @@ export type Product = {
   initialStock?: number;
   image?: string;
   lastSoldDate?: string;
-  // Category-specific fields
-  fields?: StriplightFields | PowerSupplyFields | GeneralLightingFields | AluminiumProfileFields;
-};
-
-// Category-specific field types
-export type StriplightFields = {
-  ledQty: "240L" | "180L" | "120L" | "72L" | "60L";
-  voltage: "220v" | "48v" | "24v" | "12v";
-  wattage: number;
-  meters: number;
-};
-
-export type PowerSupplyFields = {
-  voltage: "220v" | "48v" | "24v" | "12v";
-  wattage: number;
-};
-
-export type GeneralLightingFields = {};
-
-export type AluminiumProfileFields = {
-  size: string;
-  color: string;
-};
-
-
-export type Supplier = {
-  id: string;
-  name:string;
-  contact: {
-    name: string;
-    email: string;
-    phone: string;
-  };
-  address: string;
-  contractTerms: string;
-  productsSupplied: number;
+  fields?: any;
 };
 
 export type Invoice = {

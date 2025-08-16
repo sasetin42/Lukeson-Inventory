@@ -1,3 +1,4 @@
+
 import OverviewCards from "@/components/dashboard/overview-cards";
 import RecentTransactions from "@/components/dashboard/recent-transactions";
 import StockChart from "@/components/dashboard/stock-chart";
@@ -11,8 +12,8 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader 
-        title="Dashboard Overview"
-        description="Enhanced inventory management with grouped navigation and smart button interactions"
+        title="Company Dashboard"
+        description="A real-time overview of your business operations."
         icon={<RocketIcon className="h-6 w-6 text-blue-500" />}
       />
       <div className="grid gap-6">

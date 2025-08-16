@@ -1,41 +1,44 @@
+
 import { products, suppliers, invoices } from '@/lib/data';
-import { Package, ShoppingCart, AlertTriangle, DollarSign, ArrowUp } from 'lucide-react';
+import { Package, ShoppingCart, AlertTriangle, DollarSign, ArrowUp, Users, Truck } from 'lucide-react';
 import KpiCard from '@/components/kpi-card';
 
 export default function OverviewCards() {
   const totalProducts = products.length;
   const lowStockItems = products.filter(p => p.status === 'Low Stock').length;
-  const activeOrders = invoices.filter(i => i.status === 'Pending').length;
+  const activeSalesOrders = 5; // Mock data
+  const totalCustomers = 10; // Mock data
+  const totalSuppliers = 4; // Mock data
   const monthlyRevenue = invoices.filter(i => i.status === 'Paid').reduce((acc, i) => acc + i.amount, 0);
 
   const cardData = [
     { 
-      title: 'Total Products', 
-      value: totalProducts, 
-      icon: Package, 
-      trend: '+12% from last month',
-      color: 'blue'
+      title: 'Total Revenue', 
+      value: `₱${monthlyRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
+      icon: DollarSign, 
+      trend: '+15% from last month',
+      color: 'purple'
     },
     { 
-      title: 'Active Orders', 
-      value: activeOrders, 
+      title: 'Active Sales Orders', 
+      value: activeSalesOrders, 
       icon: ShoppingCart, 
       trend: '+8% from last week',
       color: 'green'
     },
     { 
-      title: 'Low Stock Alerts', 
+      title: 'Low Stock Items', 
       value: lowStockItems, 
       icon: AlertTriangle, 
-      trend: '3 new this week',
+      trend: '3 items need reordering',
       color: 'yellow'
     },
     { 
-      title: 'Monthly Revenue', 
-      value: `₱${monthlyRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
-      icon: DollarSign, 
-      trend: '+15% from last month',
-      color: 'purple'
+        title: 'Total Customers', 
+        value: totalCustomers, 
+        icon: Users, 
+        trend: '+2 this month',
+        color: 'blue'
     },
   ];
 

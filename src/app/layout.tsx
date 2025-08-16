@@ -1,10 +1,11 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Home, Package, FileText, Users, LogOut, Settings, LifeBuoy, BarChart3, List, FilePlus, FileMinus, Goal, Building, ChevronDown, LayoutGrid, BarChart2, ShoppingCart, ShoppingBag, FileCode, Warehouse, Truck, Users2, File, FileCog, Shield, DatabaseBackup } from 'lucide-react';
+import { Home, Package, FileText, Users, LogOut, Settings, LifeBuoy, BarChart3, List, FilePlus, FileMinus, Goal, Building, ChevronDown, LayoutGrid, BarChart2, ShoppingCart, ShoppingBag, FileCode, Warehouse, Truck, Users2, File, FileCog, Shield, DatabaseBackup, Banknote, Briefcase } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from '@/components/icons/logo';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, SidebarContent, SidebarSeparator } from '@/components/ui/sidebar';
@@ -14,7 +15,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 
 
 export const metadata: Metadata = {
-  title: 'ARKSHEETS - All-in-One Business Management',
+  title: 'IMIS Pro - All-in-One Business Management',
   description: 'A comprehensive, all-in-one business management system tailored for businesses in the Philippines.',
 };
 
@@ -33,54 +34,55 @@ const navGroups = [
       {
         title: 'Inventory',
         links: [
-          { href: '/inventory', icon: Package, label: 'Product', color: 'text-blue-500' },
-          { href: '/category', icon: List, label: 'Category', color: 'text-orange-500' },
-          { href: '/variations', icon: FileText, label: 'Variations', color: 'text-purple-500' },
+          { href: '/inventory', icon: Package, label: 'Items', color: 'text-blue-500' },
+          { href: '/category', icon: List, label: 'Categories', color: 'text-orange-500' },
+          { href: '/warehouses', icon: Warehouse, label: 'Warehouses', color: 'text-green-500' },
         ],
       },
       {
-        title: 'Product Catalog',
+        title: 'Sales',
         links: [
-          { href: '/item-master-list', icon: List, label: 'Item Master List', color: 'text-red-500' },
-          { href: '/sku-management', icon: FileText, label: 'SKU Management', color: 'text-yellow-500' },
-          { href: '/barcode-qr-code', icon: BarChart3, label: 'Barcode / QR Code', color: 'text-indigo-500' },
+            { href: '/quotations', icon: FileText, label: 'Quotations', color: 'text-purple-500' },
+            { href: '/sales-orders', icon: ShoppingCart, label: 'Sales Orders', color: 'text-red-500' },
+            { href: '/invoices', icon: FileCog, label: 'Sales Invoices', color: 'text-yellow-500' },
+            { href: '/payments', icon: Banknote, label: 'Payments', color: 'text-indigo-500' },
         ],
       },
       {
-        title: 'Warehousing',
+        title: 'Purchasing',
         links: [
-          { href: '/inbound-operations', icon: FilePlus, label: 'Inbound Operations', color: 'text-pink-500' },
-          { href: '/outbound-operations', icon: FileMinus, label: 'Outbound Operations', color: 'text-sky-500' },
-          { href: '/bin-rack-locations', icon: Warehouse, label: 'Bin / Rack Locations', color: 'text-green-500' },
-          { href: '/warehouse-map', icon: Building, label: 'Warehouse Map', color: 'text-blue-500' },
-          { href: '/replenishment-planning', icon: Goal, label: 'Replenishment Planning', color: 'text-orange-500' },
+            { href: '/purchase-requests', icon: ShoppingBag, label: 'Purchase Orders', color: 'text-blue-500' },
+            { href: '/goods-receipts', icon: File, label: 'Goods Receipts', color: 'text-purple-500' },
+            { href: '/bills', icon: FilePlus, label: 'Bills', color: 'text-pink-500' },
+        ],
+      },
+      {
+        title: 'Contacts',
+        links: [
+            { href: '/customer', icon: Users, label: 'Customers', color: 'text-purple-500' },
+            { href: '/suppliers', icon: Truck, label: 'Suppliers', color: 'text-green-500' },
         ],
       },
     ],
   },
   {
-    title: 'OPERATIONS',
+    title: 'FINANCE',
     color: 'text-green-500',
     items: [
       {
-        title: 'Sales and CRM',
+        title: 'Accounting',
         links: [
-            { href: '/customer', icon: Users, label: 'Customer', color: 'text-purple-500' },
-            { href: '/sales-orders', icon: ShoppingCart, label: 'Sales Orders', color: 'text-red-500' },
-            { href: '/invoicing', icon: FileText, label: 'Invoicing', color: 'text-yellow-500' },
-            { href: '/payments', icon: FilePlus, label: 'Payments', color: 'text-indigo-500' },
-            { href: '/invoice-templates', icon: FileCog, label: 'Invoice Templates', color: 'text-pink-500' },
-            { href: '/sales-reports', icon: BarChart3, label: 'Reports & Analytics', color: 'text-sky-500' },
+            { href: '/chart-of-accounts', icon: Briefcase, label: 'Chart of Accounts', color: 'text-sky-500' },
+            { href: '/journals', icon: FileCode, label: 'Journal Entries', color: 'text-red-500' },
         ],
       },
       {
-        title: 'Procurement',
+        title: 'Reports',
         links: [
-            { href: '/suppliers', icon: Truck, label: 'Supplier', color: 'text-green-500' },
-            { href: '/purchase-requests', icon: ShoppingBag, label: 'Purchase Requests', color: 'text-blue-500' },
-            { href: '/purchase-orders', icon: ShoppingCart, label: 'Purchase Orders', color: 'text-orange-500' },
-            { href: '/goods-receipts', icon: File, label: 'Goods Receipts', color: 'text-purple-500' },
-            { href: '/procurement-reports', icon: BarChart3, label: 'Reports', color: 'text-red-500' },
+            { href: '/reports/ar-aging', icon: BarChart3, label: 'AR/AP Aging', color: 'text-yellow-500' },
+            { href: '/reports/inventory-valuation', icon: BarChart3, label: 'Inventory Valuation', color: 'text-indigo-500' },
+            { href: '/reports/pnl', icon: BarChart3, label: 'Profit & Loss', color: 'text-pink-500' },
+            { href: '/reports/balance-sheet', icon: BarChart3, label: 'Balance Sheet', color: 'text-sky-500' },
         ],
       },
     ],
@@ -93,8 +95,8 @@ const navGroups = [
         title: 'System Settings',
         links: [
             { href: '/settings', icon: Settings, label: 'General Settings', color: 'text-yellow-500' },
-            { href: '/users-management', icon: Users2, label: 'Users Management', color: 'text-indigo-500' },
-            { href: '/security', icon: Shield, label: 'Security', color: 'text-pink-500' },
+            { href: '/users-management', icon: Users2, label: 'Users & Roles', color: 'text-indigo-500' },
+            { href: '/security', icon: Shield, label: 'Audit Trail', color: 'text-pink-500' },
             { href: '/system-backup', icon: DatabaseBackup, label: 'System Backup', color: 'text-sky-500' },
         ],
       },
@@ -121,14 +123,14 @@ export default function RootLayout({
               <div className="flex items-center gap-3">
                 <Logo className="size-9 text-primary" />
                 <div className="flex flex-col">
-                  <h1 className="text-xl font-bold tracking-tight text-foreground">StockPilot</h1>
+                  <h1 className="text-xl font-bold tracking-tight text-foreground">IMIS Pro</h1>
                   <p className="text-sm text-muted-foreground">Workspace</p>
                 </div>
               </div>
             </SidebarHeader>
             <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
               <div className="flex flex-col gap-2 px-2">
-                <Accordion type="multiple" defaultValue={['Overview', 'Inventory']} className="w-full">
+                <Accordion type="multiple" defaultValue={['Overview', 'Inventory', 'Sales', 'Purchasing', 'Contacts']} className="w-full">
                   {navGroups.map((group, groupIndex) => (
                     <div key={group.title}>
                       {groupIndex > 0 && <SidebarSeparator className="my-2" />}
@@ -172,7 +174,7 @@ export default function RootLayout({
                     </Avatar>
                     <div className="text-left">
                       <p className="text-sm font-medium text-foreground">Admin</p>
-                      <p className="text-xs text-muted-foreground">admin@stockpilot.com</p>
+                      <p className="text-xs text-muted-foreground">admin@imis-pro.com</p>
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
