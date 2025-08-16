@@ -289,7 +289,6 @@ export type Product = {
     supplier: string;
     location: string;
     stock: number;
-    cost: number;
     price: number;
     reOrderLevel: number;
     createdAt: string | Timestamp | Date;

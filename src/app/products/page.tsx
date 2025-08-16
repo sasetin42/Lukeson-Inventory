@@ -39,7 +39,7 @@ export default function ProductsPage() {
     }, []);
 
     const totalProducts = products.length;
-    const totalValue = products.reduce((acc, p) => acc + (p.cost * p.stock), 0);
+    const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
     const lowStock = products.filter(p => p.status === 'Low Stock').length;
     const outOfStock = products.filter(p => p.status === 'Out of Stock').length;
     

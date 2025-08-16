@@ -116,6 +116,7 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
                     <TableHead>Product</TableHead>
                     <TableHead>SKU</TableHead>
                     <TableHead>Category</TableHead>
+                    <TableHead>Price</TableHead>
                     <TableHead>Stock</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
@@ -140,6 +141,7 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
                         </TableCell>
                         <TableCell>{product.sku}</TableCell>
                         <TableCell>{product.category}</TableCell>
+                        <TableCell>₱{product.price.toFixed(2)}</TableCell>
                         <TableCell>{product.stock}</TableCell>
                         <TableCell>
                         <Badge variant={getStatusVariant(product.status)}>{product.status}</Badge>

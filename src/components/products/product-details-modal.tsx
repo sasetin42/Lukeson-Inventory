@@ -105,7 +105,6 @@ export default function ProductDetailsModal({
     { label: 'Category', value: product.category, icon: LayoutGrid, color: 'text-red-500' },
     { label: 'Supplier', value: product.supplier, icon: Truck, color: 'text-green-500' },
     { label: 'Price', value: `₱${(product.price || 0).toFixed(2)}`, icon: DollarSign, color: 'text-green-500' },
-    { label: 'Cost', value: `₱${(product.cost || 0).toFixed(2)}`, icon: DollarSign, color: 'text-orange-500' },
     { label: 'UOM', value: product.uom, icon: Scaling, color: 'text-purple-500' },
     { label: 'LED Qty', value: product.ledQty ? `${product.ledQty}L` : 'N/A', icon: Lightbulb, color: 'text-yellow-500' },
     { label: 'Voltage', value: product.voltage ? `${product.voltage}v` : 'N/A', icon: Zap, color: 'text-orange-500' },
