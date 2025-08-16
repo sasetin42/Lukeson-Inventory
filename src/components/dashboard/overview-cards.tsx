@@ -1,14 +1,12 @@
 
 import { products, suppliers, invoices } from '@/lib/data';
-import { Package, ShoppingCart, AlertTriangle, DollarSign, ArrowUp, Users, Truck } from 'lucide-react';
+import { ShoppingCart, AlertTriangle, DollarSign, Users } from 'lucide-react';
 import KpiCard from '@/components/kpi-card';
 
 export default function OverviewCards() {
-  const totalProducts = products.length;
-  const lowStockItems = products.filter(p => p.status === 'Low Stock').length;
+  const lowStockItems = products.filter(p => p.stock > 0 && p.stock <= p.reorderLevel).length;
   const activeSalesOrders = 5; // Mock data
   const totalCustomers = 10; // Mock data
-  const totalSuppliers = 4; // Mock data
   const monthlyRevenue = invoices.filter(i => i.status === 'Paid').reduce((acc, i) => acc + i.amount, 0);
 
   const cardData = [
@@ -30,7 +28,7 @@ export default function OverviewCards() {
       title: 'Low Stock Items', 
       value: lowStockItems, 
       icon: AlertTriangle, 
-      trend: '3 items need reordering',
+      trend: `${lowStockItems} items need reordering`,
       color: 'yellow'
     },
     { 

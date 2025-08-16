@@ -11,166 +11,65 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { ProductForm } from "@/components/inventory/product-form";
 import { DeleteProductDialog } from "@/components/inventory/delete-product-dialog";
 import type { Product } from '@/lib/types';
-import { suppliers } from '@/lib/data';
+import { suppliers, products as mockProducts } from '@/lib/data';
 import { useToast } from "@/hooks/use-toast";
 import { Camera } from 'lucide-react';
-import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { db, storage } from '@/lib/firebase';
-import { ref, uploadString, getDownloadURL, deleteObject } from 'firebase/storage';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function InventoryPage() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(mockProducts);
   const [isAddProductOpen, setAddProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const unsubscribeProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
-      const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-      setProducts(productsData);
-    });
-
-    return () => {
-      unsubscribeProducts();
-    };
-  }, []);
-
   const handleAddProduct = async (data: any) => {
     setIsSubmitting(true);
-    try {
-      let imageUrl = '';
-      if (data.image && typeof data.image === 'string' && data.image.startsWith('data:image')) {
-        const storageRef = ref(storage, `products/${Date.now()}_${data.name.replace(/\s+/g, '-')}.webp`);
-        const snapshot = await uploadString(storageRef, data.image, 'data_url');
-        imageUrl = await getDownloadURL(snapshot.ref);
-      }
+    // This is a mock implementation
+    const newProduct: Product = {
+      id: `PROD${Math.floor(Math.random() * 1000)}`,
+      ...data,
+      imageUrl: data.image,
+      createdAt: new Date(),
+    };
+    
+    setProducts(prev => [newProduct, ...prev]);
 
-      const { image, ...restOfData } = data;
-
-      await addDoc(collection(db, 'products'), {
-        ...restOfData,
-        imageUrl,
-        createdAt: serverTimestamp(),
-      });
-
-      toast({
-        title: "Product Added",
-        description: `${data.name} has been successfully added.`,
-      });
-      setAddProductOpen(false);
-    } catch (error: any) {
-      console.error("Error adding product: ", error);
-      let description = "Could not add the product. Please try again.";
-      if (error.code?.includes('storage')) {
-        description = "Could not upload image. Check your internet connection and Firebase Storage rules.";
-      }
-      toast({
-        variant: "destructive",
-        title: "Error adding product",
-        description: description,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    toast({
+      title: "Product Added (Mock)",
+      description: `${data.name} has been added to the local list.`,
+    });
+    setAddProductOpen(false);
+    setIsSubmitting(false);
   };
 
   const handleEditProduct = async (data: any) => {
     if (!editingProduct) return;
     setIsSubmitting(true);
-    try {
-      let imageUrl = editingProduct.imageUrl || '';
-      // Check if a new image is being uploaded
-      if (data.image && data.image.startsWith('data:image')) {
-        // Delete old image if it exists and is a firebase URL
-        if (editingProduct.imageUrl && editingProduct.imageUrl.includes('firebasestorage')) {
-          try {
-            const oldImageRef = ref(storage, editingProduct.imageUrl);
-            await deleteObject(oldImageRef);
-          } catch (storageError: any) {
-             // If the old image doesn't exist, we can ignore the error and proceed.
-            if (storageError.code !== 'storage/object-not-found') {
-                console.error("Could not delete old image:", storageError);
-                // Non-critical, so we don't re-throw, just log it.
-            }
-          }
-        }
-        // Upload new image
-        const storageRef = ref(storage, `products/${Date.now()}_${data.name.replace(/\s+/g, '-')}.webp`);
-        const snapshot = await uploadString(storageRef, data.image, 'data_url');
-        imageUrl = await getDownloadURL(snapshot.ref);
-      }
+    
+    setProducts(prev => prev.map(p => p.id === editingProduct.id ? { ...p, ...data, imageUrl: data.image || p.imageUrl } : p));
 
-      const { image, ...restOfData } = data;
-      const productRef = doc(db, 'products', editingProduct.id);
-      
-      await updateDoc(productRef, {
-        ...restOfData,
-        imageUrl,
-      });
-
-      toast({
-        title: "Product Updated",
-        description: `${data.name} has been successfully updated.`,
-      });
-      setEditingProduct(null);
-    } catch (error: any) {
-      console.error("Error updating product: ", error);
-      let description = "Could not update the product. Please try again.";
-      if (error.code?.includes('storage')) {
-        description = "Could not upload new image. Check your internet connection and Firebase Storage rules.";
-      }
-      toast({
-        variant: "destructive",
-        title: "Error updating product",
-        description: description,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    toast({
+      title: "Product Updated (Mock)",
+      description: `${data.name} has been updated in the local list.`,
+    });
+    setEditingProduct(null);
+    setIsSubmitting(false);
   };
 
   const handleDeleteProduct = async () => {
     if (!deletingProduct) return;
     setIsSubmitting(true);
-    try {
-      // Delete image from storage if it exists and is a Firebase URL
-      if (deletingProduct.imageUrl && deletingProduct.imageUrl.includes('firebasestorage')) {
-        try {
-            const imageRef = ref(storage, deletingProduct.imageUrl);
-            await deleteObject(imageRef);
-        } catch (storageError: any) {
-             if (storageError.code !== 'storage/object-not-found') {
-                console.error("Could not delete product image:", storageError);
-                // Don't block product deletion if image deletion fails. Log and continue.
-             }
-        }
-      }
+    
+    setProducts(prev => prev.filter(p => p.id !== deletingProduct.id));
 
-      // Delete product from firestore
-      await deleteDoc(doc(db, 'products', deletingProduct.id));
-
-      toast({
-        title: "Product Deleted",
-        description: `${deletingProduct.name} has been removed.`,
-      });
-      setDeletingProduct(null);
-    } catch (error: any) {
-      console.error("Error deleting product: ", error);
-      let description = "Could not delete the product. Please try again.";
-      if (error.code?.includes('storage')) {
-        description = "Product data deleted, but could not delete image. Check Firebase Storage permissions.";
-      }
-      toast({
-        variant: "destructive",
-        title: "Error deleting product",
-        description: description,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    toast({
+      title: "Product Deleted (Mock)",
+      description: `${deletingProduct.name} has been removed from the local list.`,
+    });
+    setDeletingProduct(null);
+    setIsSubmitting(false);
   };
   
   const supplierNames = suppliers.map(s => s.name);
@@ -207,7 +106,6 @@ export default function InventoryPage() {
         onDeleteProduct={(product) => setDeletingProduct(product)}
       />
       
-      {/* Add Product Dialog */}
        {isAddProductOpen && (
         <Dialog open={isAddProductOpen} onOpenChange={setAddProductOpen}>
           <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col p-0">
@@ -233,28 +131,30 @@ export default function InventoryPage() {
       )}
 
       {/* Edit Product Dialog */}
-      <Dialog open={!!editingProduct} onOpenChange={(isOpen) => !isOpen && setEditingProduct(null)}>
-        <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col p-0">
-          <DialogHeader className="p-6 pb-0">
-            <DialogTitle className="flex items-center gap-2">
-                <Edit className="h-5 w-5" />
-                Edit Product
-            </DialogTitle>
-            <DialogDescription>
-              Update the details of {editingProduct?.name}.
-            </DialogDescription>
-          </DialogHeader>
-          <ScrollArea className='flex-grow overflow-y-auto no-scrollbar pr-2'>
-            <ProductForm 
-              onSuccess={handleEditProduct} 
-              onCancel={() => setEditingProduct(null)}
-              suppliers={supplierNames}
-              isSubmitting={isSubmitting}
-              product={editingProduct}
-            />
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
+      {editingProduct && (
+        <Dialog open={!!editingProduct} onOpenChange={(isOpen) => !isOpen && setEditingProduct(null)}>
+          <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col p-0">
+            <DialogHeader className="p-6 pb-0">
+              <DialogTitle className="flex items-center gap-2">
+                  <Edit className="h-5 w-5" />
+                  Edit Product
+              </DialogTitle>
+              <DialogDescription>
+                Update the details of {editingProduct?.name}.
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className='flex-grow overflow-y-auto no-scrollbar pr-2'>
+              <ProductForm 
+                onSuccess={handleEditProduct} 
+                onCancel={() => setEditingProduct(null)}
+                suppliers={supplierNames}
+                isSubmitting={isSubmitting}
+                product={editingProduct}
+              />
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+      )}
       
       {/* Delete Product Dialog */}
       <DeleteProductDialog
