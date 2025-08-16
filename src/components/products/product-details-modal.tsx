@@ -69,9 +69,9 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
             <Separator />
             <div>
                 <h4 className="font-semibold mb-2">Details</h4>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[13px]">
                     {details.map(detail => (
-                        <div key={detail.label} className="flex justify-between">
+                        <div key={detail.label} className="flex justify-between items-center">
                             <span className="text-muted-foreground">{detail.label}</span>
                             {detail.label === 'Stock' ? (
                                <Badge variant={detail.variant as any}>{product.status}</Badge>
