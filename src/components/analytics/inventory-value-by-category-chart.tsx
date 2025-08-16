@@ -3,20 +3,7 @@
 import { Pie, PieChart, ResponsiveContainer, Cell, Tooltip, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { products } from '@/lib/products-data';
-
-// This is a mock mapping. In a real app, this would come from your categories data.
-const categoryMap: Record<string, string> = {
-    "LED-HD-240-24": "LED Striplights",
-    "LED-FLEX-120-12": "LED Striplights",
-    "LED-DL-R-9W": "Downlights",
-    "CTRL-RGB-REM": "Controllers",
-    "LED-FL-50W": "Floodlights",
-    "PL-COP-E27": "Fixtures",
-    "PS-24-150-SL": "Power Supplies",
-    "AP-R-2M": "Profiles",
-    "AP-S-2M-BLK": "Profiles",
-    "LED-Panel-6060": "Panel Lights",
-};
+import { categoryMap } from '@/lib/category-map';
 
 export default function InventoryValueByCategoryChart() {
   const valueByCategory = products.reduce((acc, product) => {
@@ -39,7 +26,7 @@ export default function InventoryValueByCategoryChart() {
         <CardTitle>Inventory Value by Category</CardTitle>
         <CardDescription>Total cost value of stock for each product category.</CardDescription>
       </CardHeader>
-      <CardContent className="h-[400px] w-full flex items-center justify-center">
+      <CardContent className="h-[300px] w-full flex items-center justify-center">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -47,7 +34,7 @@ export default function InventoryValueByCategoryChart() {
               cx="50%"
               cy="50%"
               labelLine={false}
-              outerRadius={150}
+              outerRadius={120}
               fill="#8884d8"
               dataKey="value"
               nameKey="name"
