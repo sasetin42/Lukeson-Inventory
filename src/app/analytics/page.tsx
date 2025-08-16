@@ -10,6 +10,7 @@ import SalesByCustomerChart from "@/components/analytics/sales-by-customer-chart
 import SalesOverTimeChart from "@/components/analytics/sales-over-time-chart";
 import InventoryValueByCategoryChart from "@/components/analytics/inventory-value-by-category-chart";
 import SupplierPerformanceList from "@/components/analytics/supplier-performance-list";
+import ProductPerformanceDetails from "@/components/analytics/product-performance-details";
 
 export default function AnalyticsPage() {
   return (
@@ -46,9 +47,12 @@ export default function AnalyticsPage() {
                 <RevenueProfitChart />
             </div>
         </TabsContent>
-        <TabsContent value="sales" className="mt-6 grid gap-6 md:grid-cols-2">
-            <SalesByCustomerChart />
-            <SalesOverTimeChart />
+        <TabsContent value="sales" className="mt-6 grid gap-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <SalesByCustomerChart />
+              <SalesOverTimeChart />
+            </div>
+            <ProductPerformanceDetails />
         </TabsContent>
         <TabsContent value="inventory" className="mt-6">
             <InventoryValueByCategoryChart />
