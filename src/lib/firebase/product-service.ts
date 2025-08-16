@@ -99,17 +99,17 @@ export const addProduct = async (productData: Omit<Product, 'id' | 'createdAt'>)
 
 // Update an existing product
 export const updateProduct = async (productId: string, productData: Partial<Product>) => {
-    const { image, ...restOfData } = productData;
+    const { image, imageUrl: currentImageUrl, ...restOfData } = productData;
     const productRef = doc(db, PRODUCTS_COLLECTION, productId);
   
-    let newImageUrl = productData.imageUrl;
+    let newImageUrl = currentImageUrl;
   
-    // Check if a new image is being uploaded
+    // Check if a new image is being uploaded (it will be a base64 string)
     if (image && image.startsWith('data:image')) {
-      // A new image is provided (base64 string)
-      // First, delete the old image if it exists
-      if (productData.imageUrl) {
-        await deleteImage(productData.imageUrl);
+      // A new image is provided
+      // First, delete the old image if it exists and is a valid storage URL
+      if (currentImageUrl) {
+        await deleteImage(currentImageUrl);
       }
       // Upload the new image and get its URL
       newImageUrl = await uploadImage(productId, image);
@@ -123,7 +123,7 @@ export const updateProduct = async (productId: string, productData: Partial<Prod
 
 // Delete a product
 export const deleteProduct = async (productId: string, imageUrl: string | undefined | null) => {
-  // First, delete the image from Storage
+  // First, delete the image from Storage if it exists
   await deleteImage(imageUrl);
   
   // Then, delete the document from Firestore

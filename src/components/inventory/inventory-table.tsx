@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { MoreHorizontal, Package, PlusCircle, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, Package, PlusCircle, Edit, Trash2, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,9 +28,10 @@ interface InventoryTableProps {
   onAddProduct: () => void;
   onEditProduct: (product: Product) => void;
   onDeleteProduct: (product: Product) => void;
+  loading?: boolean;
 }
 
-export default function InventoryTable({ products, onAddProduct, onEditProduct, onDeleteProduct }: InventoryTableProps) {
+export default function InventoryTable({ products, onAddProduct, onEditProduct, onDeleteProduct, loading = false }: InventoryTableProps) {
   
   const getStatus = (product: Product) => {
     if (product.stock <= 0) return { text: "Out of Stock", variant: "destructive" };
@@ -38,19 +39,31 @@ export default function InventoryTable({ products, onAddProduct, onEditProduct, 
     return { text: "In Stock", variant: "default" };
   }
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Products ({products.length})</CardTitle>
-        {products.length > 0 && (
-          <CardDescription>
-            Your current inventory of products.
-          </CardDescription>
-        )}
-      </CardHeader>
-      <CardContent>
-        {products.length > 0 ? (
-          <Table>
+  const renderContent = () => {
+    if (loading) {
+        return (
+            <div className="text-center py-16">
+                <Loader2 className="mx-auto h-12 w-12 text-muted-foreground animate-spin" />
+                <p className="mt-4 text-muted-foreground">Loading products...</p>
+            </div>
+        )
+    }
+
+    if (products.length === 0) {
+        return (
+            <div className="text-center py-16">
+                <Package className="mx-auto h-12 w-12 text-muted-foreground" />
+                <p className="mt-4 text-muted-foreground">No products found.</p>
+                <Button className="mt-4" onClick={onAddProduct}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add First Product
+                </Button>
+            </div>
+        )
+    }
+
+    return (
+        <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[80px]">Image</TableHead>
@@ -112,16 +125,21 @@ export default function InventoryTable({ products, onAddProduct, onEditProduct, 
               })}
             </TableBody>
           </Table>
-        ) : (
-          <div className="text-center py-16">
-            <Package className="mx-auto h-12 w-12 text-muted-foreground" />
-            <p className="mt-4 text-muted-foreground">No products found.</p>
-            <Button className="mt-4" onClick={onAddProduct}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add First Product
-            </Button>
-          </div>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Products ({products.length})</CardTitle>
+        {products.length > 0 && (
+          <CardDescription>
+            Your current inventory of products.
+          </CardDescription>
         )}
+      </CardHeader>
+      <CardContent>
+        {renderContent()}
       </CardContent>
     </Card>
   );

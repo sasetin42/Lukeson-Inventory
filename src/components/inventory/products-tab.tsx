@@ -13,9 +13,10 @@ interface ProductsTabProps {
     onAddProduct: () => void;
     onEditProduct: (product: Product) => void;
     onDeleteProduct: (product: Product) => void;
+    loading?: boolean;
 }
 
-export default function ProductsTab({ products, onAddProduct, onEditProduct, onDeleteProduct }: ProductsTabProps) {
+export default function ProductsTab({ products, onAddProduct, onEditProduct, onDeleteProduct, loading = false }: ProductsTabProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
 
@@ -73,6 +74,7 @@ export default function ProductsTab({ products, onAddProduct, onEditProduct, onD
             onAddProduct={onAddProduct}
             onEditProduct={onEditProduct}
             onDeleteProduct={onDeleteProduct}
+            loading={loading}
         />
       </TabsContent>
     </Tabs>

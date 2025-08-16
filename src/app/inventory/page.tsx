@@ -27,24 +27,27 @@ export default function InventoryPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const unsubscribe = getProducts((products) => {
-          setProducts(products);
-          setLoading(false);
-        });
-        return () => unsubscribe();
-      } catch (error) {
+    const unsubscribe = getProducts(
+      (products) => {
+        setProducts(products);
+        setLoading(false);
+      },
+      (error) => {
         console.error("Error fetching products:", error);
+        let description = "Could not load product data. Please try again later.";
+        if (error.message.includes("permission-denied")) {
+          description = "Permission Denied: Please check your Firestore security rules. For development, you can allow read/write access. See console for details.";
+        }
         toast({
           variant: "destructive",
-          title: "Error fetching products",
-          description: "Could not load product data. Please check your Firestore connection and rules.",
+          title: "Error Fetching Products",
+          description: description,
+          duration: 9000,
         });
         setLoading(false);
       }
-    };
-    fetchProducts();
+    );
+    return () => unsubscribe();
   }, [toast]);
 
   const handleAddProduct = async (data: any) => {
@@ -72,7 +75,7 @@ export default function InventoryPage() {
     if (!editingProduct) return;
     setIsSubmitting(true);
     try {
-      await updateProduct(editingProduct.id, data);
+      await updateProduct(editingProduct.id, { ...editingProduct, ...data });
       toast({
         title: "Product Updated",
         description: `${data.name} has been successfully updated.`,
@@ -80,10 +83,16 @@ export default function InventoryPage() {
       setEditingProduct(null);
     } catch (error: any) {
       console.error("Error updating product: ", error);
+      let description = "An unknown error occurred.";
+      if (error.code === 'storage/object-not-found') {
+        description = "Could not update image. The old image was not found.";
+      } else if (error.code === 'storage/retry-limit-exceeded') {
+        description = "Network timeout: Could not save image. Please check your connection and Firebase Storage setup.";
+      }
       toast({
         variant: "destructive",
         title: "Error Updating Product",
-        description: error.message || "An unknown error occurred.",
+        description: description,
       });
     } finally {
       setIsSubmitting(false);
@@ -102,10 +111,14 @@ export default function InventoryPage() {
       setDeletingProduct(null);
     } catch (error: any) {
       console.error("Error deleting product: ", error);
+      let description = "An unknown error occurred.";
+      if (error.code === 'storage/retry-limit-exceeded') {
+        description = "Network timeout: Could not delete image. Please check your connection and Firebase Storage setup.";
+      }
       toast({
         variant: "destructive",
         title: "Error Deleting Product",
-        description: error.message || "An unknown error occurred.",
+        description: description,
       });
     } finally {
       setIsSubmitting(false);
@@ -144,6 +157,7 @@ export default function InventoryPage() {
         onAddProduct={() => { setEditingProduct(null); setAddProductOpen(true); }}
         onEditProduct={(product) => setEditingProduct(product)}
         onDeleteProduct={(product) => setDeletingProduct(product)}
+        loading={loading}
       />
       
        {isAddProductOpen && (
@@ -207,4 +221,3 @@ export default function InventoryPage() {
     </div>
   );
 }
-
