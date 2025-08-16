@@ -30,10 +30,10 @@ export default function OverviewCards() {
       color: 'green' as const
     },
     { 
-      title: 'Pending Bills', 
-      value: 3, 
+      title: 'Low Stock Alert', 
+      value: 0, 
       icon: AlertTriangle, 
-      trend: `2 are overdue`,
+      trend: `No items are low on stock`,
       color: 'yellow' as const
     },
     { 
