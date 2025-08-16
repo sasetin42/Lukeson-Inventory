@@ -1,5 +1,5 @@
 
-import type { TopSellingItem, SlowMovingItem } from './types';
+import type { TopSellingItem, SlowMovingItem, QuickStat, LowStockAlert } from './types';
 
 export const topSellingItems: TopSellingItem[] = [
     {
@@ -47,4 +47,17 @@ export const slowMovingItems: SlowMovingItem[] = [
         daysInStock: 82,
         stock: 15,
     }
+];
+
+export const quickStats: QuickStat[] = [
+    { label: "New Customers", value: "12" },
+    { label: "Pending Orders", value: "5" },
+    { label: "Open Invoices", value: "8" },
+    { label: "Fulfilled Orders", value: "128" },
+];
+
+export const lowStockAlerts: LowStockAlert[] = [
+    { id: "PROD007", name: "24v 150W Slim Power Supply", sku: "PS-24-150-SL", stock: 8, reOrderLevel: 10 },
+    { id: "PROD008", name: "Recessed Aluminium Profile 2m", sku: "AP-R-2M", stock: 12, reOrderLevel: 20 },
+    { id: "PROD009", name: "Surface Aluminium Profile 2m - Black", sku: "AP-S-2M-BLK", stock: 5, reOrderLevel: 10 },
 ];

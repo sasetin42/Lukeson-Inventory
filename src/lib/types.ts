@@ -1,6 +1,7 @@
 
 
 
+
 import { Timestamp } from "firebase/firestore";
 import type { LucideIcon } from "lucide-react";
 
@@ -236,6 +237,18 @@ export type SlowMovingItem = {
     stock: number;
 };
 
+export type QuickStat = {
+    label: string;
+    value: string | number;
+};
+
+export type LowStockAlert = {
+    id: string;
+    name: string;
+    sku: string;
+    stock: number;
+    reOrderLevel: number;
+};
 
 // DEPRECATED / MOCK TYPES
 export type Invoice = {
