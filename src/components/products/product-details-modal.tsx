@@ -36,7 +36,7 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
     { label: 'Location', value: product.location },
     { label: 'Stock', value: product.stock, variant: getStatusVariant(product.status) },
     { label: 'Re-Order Level', value: product.reOrderLevel },
-    { label: 'Cost', value: `₱${product.cost.toFixed(2)}` },
+    { label: 'Cost', value: `₱${(product.cost || 0).toFixed(2)}` },
     { label: 'LED Qty', value: product.ledQty },
     { label: 'Voltage', value: `${product.voltage}v` },
     { label: 'Wattage', value: `${product.wattage}w` },
