@@ -76,7 +76,7 @@ export default function ProductsPage() {
                 createdAt: serverTimestamp(),
                 status: stockStatus,
             });
-            toast({ title: "Success", description: "Product added successfully." });
+            toast({ title: "Success", description: "Product added successfully.", variant: "success" });
         } catch (error) {
             console.error("Error adding document: ", error);
             toast({ title: "Error", description: "Failed to add product.", variant: "destructive" });
@@ -98,7 +98,7 @@ export default function ProductsPage() {
                 ...updatedProductData,
                 status
             });
-            toast({ title: "Success", description: "Product updated successfully." });
+            toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
         } catch (error) {
             console.error("Error updating document: ", error);
             toast({ title: "Error", description: "Failed to update product.", variant: "destructive" });
@@ -108,7 +108,7 @@ export default function ProductsPage() {
     const handleDeleteProduct = async (product: Product) => {
         try {
             await deleteDoc(doc(db, "products", product.id));
-            toast({ title: "Success", description: "Product deleted successfully." });
+            toast({ title: "Success", description: "Product deleted successfully.", variant: "success" });
         } catch (error) {
             console.error("Error deleting document: ", error);
             toast({ title: "Error", description: "Failed to delete product.", variant: "destructive" });
@@ -193,5 +193,3 @@ export default function ProductsPage() {
     </div>
   );
 }
-
-    

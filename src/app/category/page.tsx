@@ -43,7 +43,7 @@ export default function CategoryPage() {
         ...newCategoryData,
         createdAt: serverTimestamp(),
       });
-      toast({ title: "Success", description: "Category added successfully." });
+      toast({ title: "Success", description: "Category added successfully.", variant: "success" });
     } catch (error) {
       console.error("Error adding document: ", error);
       toast({ title: "Error", description: "Failed to add category.", variant: "destructive" });
@@ -57,7 +57,7 @@ export default function CategoryPage() {
           ...updatedCategoryData,
           parentId: updatedCategoryData.parentId === 'none' ? null : updatedCategoryData.parentId
       });
-      toast({ title: "Success", description: "Category updated successfully." });
+      toast({ title: "Success", description: "Category updated successfully.", variant: "success" });
     } catch (error) {
       console.error("Error updating document: ", error);
       toast({ title: "Error", description: "Failed to update category.", variant: "destructive" });
@@ -78,7 +78,7 @@ export default function CategoryPage() {
 
     try {
       await deleteDoc(doc(db, "categories", category.id));
-      toast({ title: "Success", description: "Category deleted successfully." });
+      toast({ title: "Success", description: "Category deleted successfully.", variant: "success" });
     } catch (error) {
       console.error("Error deleting document: ", error);
       toast({ title: "Error", description: "Failed to delete category.", variant: "destructive" });

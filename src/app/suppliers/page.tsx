@@ -37,7 +37,7 @@ export default function SuppliersPage() {
         ...newSupplierData,
         createdAt: serverTimestamp(),
       });
-      toast({ title: "Success", description: "Supplier added successfully." });
+      toast({ title: "Success", description: "Supplier added successfully.", variant: "success" });
     } catch (error) {
       console.error("Error adding document: ", error);
       toast({ title: "Error", description: "Failed to add supplier.", variant: "destructive" });
@@ -48,7 +48,7 @@ export default function SuppliersPage() {
     try {
       const supplierRef = doc(db, 'suppliers', supplierId);
       await updateDoc(supplierRef, updatedSupplierData);
-      toast({ title: "Success", description: "Supplier updated successfully." });
+      toast({ title: "Success", description: "Supplier updated successfully.", variant: "success" });
     } catch (error) {
       console.error("Error updating document: ", error);
       toast({ title: "Error", description: "Failed to update supplier.", variant: "destructive" });
@@ -58,7 +58,7 @@ export default function SuppliersPage() {
   const handleDeleteSupplier = async (supplierId: string) => {
     try {
       await deleteDoc(doc(db, "suppliers", supplierId));
-      toast({ title: "Success", description: "Supplier deleted successfully." });
+      toast({ title: "Success", description: "Supplier deleted successfully.", variant: "success" });
     } catch (error) {
       console.error("Error deleting document: ", error);
       toast({ title: "Error", description: "Failed to delete supplier.", variant: "destructive" });
