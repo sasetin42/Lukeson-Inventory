@@ -2,23 +2,24 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { invoices, suppliers } from '@/lib/data';
-import { ShoppingCart, AlertTriangle, DollarSign, Users } from 'lucide-react';
+import { ShoppingCart, AlertTriangle, DollarSign, Users, Package } from 'lucide-react';
 import KpiCard from '@/components/kpi-card';
 import { useToast } from '@/hooks/use-toast';
+import { products } from '@/lib/products-data';
 
 export default function OverviewCards() {
   const { toast } = useToast();
 
   const activeSalesOrders = 5; // Mock data
   const totalCustomers = 10; // Mock data
-  const monthlyRevenue = invoices.filter(i => i.status === 'Paid').reduce((acc, i) => acc + i.amount, 0);
+  const totalProducts = products.length;
 
   const cardData = [
     { 
-      title: 'Total Revenue', 
-      value: `₱${monthlyRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 
-      icon: DollarSign, 
-      trend: '+15% from last month',
+      title: 'Total Products', 
+      value: totalProducts,
+      icon: Package, 
+      trend: '+5 from last month',
       color: 'purple' as const
     },
     { 
