@@ -1,19 +1,42 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Package, PlusCircle, Upload, Download, DollarSign, AlertTriangle, XCircle, Star, Clock } from "lucide-react";
 import KpiCard from "@/components/kpi-card";
-import { products as initialProducts } from "@/lib/products-data";
 import ActionCard from "@/components/action-card";
 import ProductList from "@/components/products/product-list";
 import { Product } from '@/lib/types';
 import AddProductModal from '@/components/products/add-product-modal';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp, onSnapshot } from "firebase/firestore";
 
 export default function ProductsPage() {
-    const [products, setProducts] = useState<Product[]>(initialProducts);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
+            const productsData: Product[] = [];
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                productsData.push({ 
+                    id: doc.id, 
+                    ...data,
+                    // Convert Firestore Timestamp to a format that can be serialized
+                    createdAt: data.createdAt?.toDate().toISOString(),
+                } as Product);
+            });
+            setProducts(productsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+            setLoading(false);
+        });
+
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
+    }, []);
+
 
     const totalProducts = products.length;
     const totalValue = products.reduce((acc, p) => acc + (p.cost * p.stock), 0);
@@ -21,6 +44,7 @@ export default function ProductsPage() {
     const outOfStock = products.filter(p => p.status === 'Out of Stock').length;
     
     const addedThisWeek = products.filter(p => {
+        if (!p.createdAt) return false;
         const productDate = new Date(p.createdAt);
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -36,14 +60,16 @@ export default function ProductsPage() {
         { title: "Pending Orders", value: 0, icon: Clock, subtext: "Awaiting fulfillment", color: "orange" as const }
     ];
 
-    const handleAddProduct = (newProductData: Omit<Product, 'id' | 'createdAt' | 'status'>) => {
-        const newProduct: Product = {
-            ...newProductData,
-            id: `PROD${(products.length + 1).toString().padStart(3, '0')}`,
-            createdAt: new Date().toISOString(),
-            status: newProductData.stock > 0 ? 'In Stock' : 'Out of Stock',
-        };
-        setProducts(prev => [newProduct, ...prev]);
+    const handleAddProduct = async (newProductData: Omit<Product, 'id' | 'createdAt' | 'status'>) => {
+        try {
+            await addDoc(collection(db, "products"), {
+                ...newProductData,
+                createdAt: serverTimestamp(),
+                status: newProductData.stock > 0 ? 'In Stock' : 'Out of Stock',
+            });
+        } catch (error) {
+            console.error("Error adding document: ", error);
+        }
     };
 
   return (

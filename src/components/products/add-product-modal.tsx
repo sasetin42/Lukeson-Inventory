@@ -20,6 +20,8 @@ import { Textarea } from '../ui/textarea';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { suppliers } from '@/lib/data';
 import Image from 'next/image';
+import { storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 interface AddProductModalProps {
   children: React.ReactNode;
@@ -95,7 +97,16 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
         setIsUploading(false);
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        let imageUrl = 'https://placehold.co/48x48.png';
+        if (imageFile) {
+            setIsUploading(true);
+            const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
+            await uploadBytes(storageRef, imageFile);
+            imageUrl = await getDownloadURL(storageRef);
+            setIsUploading(false);
+        }
+        
         const newProduct: Omit<Product, 'id' | 'createdAt' | 'status'> = {
             productCode,
             name: productName,
@@ -108,7 +119,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             meters: Number(meters) || 0,
             supplier,
             location,
-            imageUrl: imagePreview || 'https://placehold.co/48x48.png',
+            imageUrl: imageUrl,
             stock: 0, 
             cost: 0,
             reOrderLevel: 0,
@@ -241,7 +252,10 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
         </div>
         <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" onClick={handleSubmit}>Add Product</Button>
+            <Button type="submit" onClick={handleSubmit} disabled={isUploading}>
+                {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Add Product
+            </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
