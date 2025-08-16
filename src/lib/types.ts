@@ -1,5 +1,6 @@
 
 
+
 import { Timestamp } from "firebase/firestore";
 import type { LucideIcon } from "lucide-react";
 
@@ -217,6 +218,24 @@ export type Return = {
         reason: string;
     }[];
 };
+
+// Dashboard Types
+export type TopSellingItem = {
+    id: string;
+    name: string;
+    imageUrl: string;
+    unitsSold: number;
+    revenue: number;
+};
+
+export type SlowMovingItem = {
+    id: string;
+    name: string;
+    imageUrl: string;
+    daysInStock: number;
+    stock: number;
+};
+
 
 // DEPRECATED / MOCK TYPES
 export type Invoice = {

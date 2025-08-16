@@ -1,47 +1,42 @@
 
 'use client';
-import { useState, useEffect } from 'react';
-import { invoices, suppliers } from '@/lib/data';
-import { ShoppingCart, AlertTriangle, DollarSign, Users, Package } from 'lucide-react';
+import { Package, DollarSign, AlertTriangle, XCircle } from 'lucide-react';
 import KpiCard from '@/components/kpi-card';
-import { useToast } from '@/hooks/use-toast';
 import { products } from '@/lib/products-data';
 
-export default function OverviewCards() {
-  const { toast } = useToast();
-
-  const activeSalesOrders = 5; // Mock data
-  const totalCustomers = 10; // Mock data
+export default function InventoryOverview() {
   const totalProducts = products.length;
-
+  const outOfStock = products.filter(p => p.status === 'Out of Stock').length;
+  const lowStock = products.filter(p => p.status === 'Low Stock').length;
+  
   const cardData = [
     { 
       title: 'Total Products', 
       value: totalProducts,
       icon: Package, 
       trend: '+5 from last month',
-      color: 'purple' as const
+      color: 'blue' as const
     },
     { 
-      title: 'Active Sales Orders', 
-      value: activeSalesOrders, 
-      icon: ShoppingCart, 
+      title: 'Total Value (est.)', 
+      value: "₱1.2M", 
+      icon: DollarSign, 
       trend: '+8% from last week',
       color: 'green' as const
     },
     { 
-      title: 'Low Stock Alert', 
-      value: 0, 
+      title: 'Low Stock', 
+      value: lowStock, 
       icon: AlertTriangle, 
-      trend: `No items are low on stock`,
+      trend: `Critical items needing attention`,
       color: 'yellow' as const
     },
     { 
-        title: 'Total Customers', 
-        value: totalCustomers, 
-        icon: Users, 
-        trend: '+2 this month',
-        color: 'blue' as const
+        title: 'Out of Stock', 
+        value: outOfStock, 
+        icon: XCircle, 
+        trend: 'Items unavailable for sale',
+        color: 'red' as const
     },
   ];
 
