@@ -84,6 +84,11 @@ const navGroups = [
             { href: '/reports/inventory-valuation', icon: BarChart3, label: 'Inventory Valuation', color: 'text-indigo-500' },
             { href: '/reports/pnl', icon: BarChart3, label: 'Profit & Loss', color: 'text-pink-500' },
             { href: '/reports/balance-sheet', icon: BarChart3, label: 'Balance Sheet', color: 'text-sky-500' },
+            { href: '/reports/sales-by-customer', icon: BarChart3, label: 'Sales by Customer', color: 'text-green-500' },
+            { href: '/reports/sales-by-item', icon: BarChart3, label: 'Sales by Item', color: 'text-blue-500' },
+            { href: '/reports/purchase-analysis', icon: BarChart3, label: 'Purchase Analysis', color: 'text-purple-500' },
+            { href: '/reports/audit-trail', icon: BarChart3, label: 'Audit Trail', color: 'text-red-500' },
+            { href: '/reports/cash-flow-statement', icon: BarChart3, label: 'Cash Flow Statement', color: 'text-orange-500' },
         ],
       },
     ],
@@ -131,7 +136,7 @@ export default function RootLayout({
             </SidebarHeader>
             <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
               <div className="flex flex-col gap-2 px-2">
-                <Accordion type="multiple" defaultValue={['Overview', 'Inventory', 'Sales', 'Purchasing', 'Contacts']} className="w-full">
+                <Accordion type="multiple" defaultValue={['Overview', 'Inventory', 'Sales', 'Purchasing', 'Contacts', 'Reports']} className="w-full">
                   {navGroups.map((group, groupIndex) => (
                     <div key={group.title}>
                       {groupIndex > 0 && <SidebarSeparator className="my-2" />}
