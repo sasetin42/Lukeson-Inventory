@@ -79,6 +79,8 @@ export type Item = {
 export type ItemCategory = {
     id: string;
     name: string;
+    description?: string;
+    imageUrl?: string;
     parentId?: string;
     createdAt: string | Timestamp | Date;
 };

@@ -25,7 +25,7 @@ export default function CategoryPage() {
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate()?.toISOString(),
-      } as ItemCategory)).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      } as ItemCategory)).sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
       setCategories(categoriesData);
       setLoading(false);
     });
@@ -53,7 +53,10 @@ export default function CategoryPage() {
   const handleUpdateCategory = async (categoryId: string, updatedCategoryData: Partial<ItemCategory>) => {
     try {
       const categoryRef = doc(db, 'categories', categoryId);
-      await updateDoc(categoryRef, updatedCategoryData);
+      await updateDoc(categoryRef, {
+          ...updatedCategoryData,
+          parentId: updatedCategoryData.parentId === 'none' ? null : updatedCategoryData.parentId
+      });
       toast({ title: "Success", description: "Category updated successfully." });
     } catch (error) {
       console.error("Error updating document: ", error);
@@ -62,6 +65,17 @@ export default function CategoryPage() {
   };
 
   const handleDeleteCategory = async (category: ItemCategory) => {
+    // Check if category is a parent to any other category
+    const isParent = categories.some(c => c.parentId === category.id);
+    if (isParent) {
+      toast({
+        title: "Deletion Failed",
+        description: "Cannot delete a category that is a parent to other categories.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       await deleteDoc(doc(db, "categories", category.id));
       toast({ title: "Success", description: "Category deleted successfully." });
