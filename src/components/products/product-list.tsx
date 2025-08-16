@@ -99,7 +99,7 @@ export default function ProductList({ products }: ProductListProps) {
                         <div className="text-xs text-muted-foreground">{product.productCode}</div>
                     </TableCell>
                     <TableCell>{product.sku}</TableCell>
-                    <TableCell>{categoryMap[product.sku] || 'N/A'}</TableCell>
+                    <TableCell>{product.category}</TableCell>
                     <TableCell>{product.stock}</TableCell>
                     <TableCell>
                       <Badge variant={getStatusVariant(product.status)}>{product.status}</Badge>
