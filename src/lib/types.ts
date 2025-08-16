@@ -1,4 +1,5 @@
 
+
 import { Timestamp } from "firebase/firestore";
 import type { LucideIcon } from "lucide-react";
 
@@ -68,7 +69,6 @@ export type Item = {
     uom: string; // Unit of Measure
     barcode?: string;
     brand?: string;
-    cost: number;
     price: number;
     vatType: 'VATABLE' | 'VAT-EXEMPT' | 'ZERO-RATED';
     reOrderLevel: number;
@@ -80,6 +80,7 @@ export type ItemCategory = {
     id: string;
     name: string;
     parentId?: string;
+    createdAt: string | Timestamp | Date;
 };
 
 export type Stock = {
