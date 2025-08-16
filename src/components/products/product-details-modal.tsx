@@ -6,6 +6,7 @@ import { Product } from "@/lib/types";
 import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
+import { LayoutGrid, Truck, DollarSign, Barcode, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, CheckCircle, XCircle } from 'lucide-react';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -30,18 +31,20 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
   };
 
   const details = [
-    { label: 'SKU', value: product.sku },
-    { label: 'Category', value: product.category },
-    { label: 'Supplier', value: product.supplier },
-    { label: 'Location', value: product.location },
-    { label: 'Stock', value: product.stock, variant: getStatusVariant(product.status) },
-    { label: 'Re-Order Level', value: product.reOrderLevel },
-    { label: 'Cost', value: `₱${(product.cost || 0).toFixed(2)}` },
-    { label: 'Price', value: `₱${(product.price || 0).toFixed(2)}` },
-    { label: 'LED Qty', value: product.ledQty },
-    { label: 'Voltage', value: `${product.voltage}v` },
-    { label: 'Wattage', value: `${product.wattage}w` },
-    { label: 'Meters', value: `${product.meters}m` },
+    { label: 'SKU', value: product.sku, icon: Barcode, color: 'text-indigo-500' },
+    { label: 'Category', value: product.category, icon: LayoutGrid, color: 'text-red-500' },
+    { label: 'Supplier', value: product.supplier, icon: Truck, color: 'text-green-500' },
+    { label: 'Price', value: `₱${(product.price || 0).toFixed(2)}`, icon: DollarSign, color: 'text-green-500' },
+    { label: 'Cost', value: `₱${(product.cost || 0).toFixed(2)}`, icon: DollarSign, color: 'text-orange-500' },
+    { label: 'UOM', value: product.uom, icon: Scaling, color: 'text-purple-500' },
+    { label: 'LED Qty', value: product.ledQty ? `${product.ledQty}L` : 'N/A', icon: Lightbulb, color: 'text-yellow-500' },
+    { label: 'Voltage', value: product.voltage ? `${product.voltage}v` : 'N/A', icon: Zap, color: 'text-orange-500' },
+    { label: 'Wattage', value: product.wattage ? `${product.wattage}w` : 'N/A', icon: Power, color: 'text-red-500' },
+    { label: 'Meters', value: product.meters ? `${product.meters}m` : 'N/A', icon: Ruler, color: 'text-blue-500' },
+    { label: 'Location', value: product.location, icon: MapPin, color: 'text-pink-500' },
+    { label: 'Stock', value: product.stock, icon: Warehouse, color: 'text-green-500', status: product.status },
+    { label: 'Re-Order Level', value: product.reOrderLevel, icon: AlertTriangle, color: 'text-yellow-500' },
+    { label: 'Expiry Tracking', value: product.expiryDateTracking ? 'Enabled' : 'Disabled', icon: CalendarClock, color: 'text-cyan-500', isBool: true },
   ];
 
   return (
@@ -70,17 +73,28 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
             <Separator />
             <div>
                 <h4 className="font-semibold mb-2">Details</h4>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[13px]">
-                    {details.map(detail => (
-                        <div key={detail.label} className="flex justify-between items-center">
-                            <span className="text-muted-foreground">{detail.label}</span>
-                            {detail.label === 'Stock' ? (
-                               <Badge variant={detail.variant as any}>{product.status}</Badge>
-                            ) : (
-                                <span className="font-medium">{detail.value}</span>
-                            )}
-                        </div>
-                    ))}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px]">
+                    {details.map(detail => {
+                        const Icon = detail.icon;
+                        return (
+                            <div key={detail.label} className="flex items-center justify-between">
+                                <span className="flex items-center gap-2 text-muted-foreground">
+                                    <Icon className={`h-4 w-4 ${detail.color}`} />
+                                    {detail.label}
+                                </span>
+                                {detail.label === 'Stock' ? (
+                                   <Badge variant={getStatusVariant(detail.status as string)}>{detail.value} ({detail.status})</Badge>
+                                ) : detail.isBool ? (
+                                   <span className={`flex items-center gap-1 font-medium ${product.expiryDateTracking ? 'text-green-600' : 'text-red-600'}`}>
+                                       {product.expiryDateTracking ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+                                       {detail.value}
+                                   </span>
+                                ) : (
+                                    <span className="font-medium">{detail.value}</span>
+                                )}
+                            </div>
+                        )
+                    })}
                 </div>
             </div>
           </div>
@@ -89,3 +103,4 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
     </Dialog>
   );
 }
+
