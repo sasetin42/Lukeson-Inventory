@@ -1,5 +1,7 @@
 
+
 import { Timestamp } from "firebase/firestore";
+import type { LucideIcon } from "lucide-react";
 
 // Main Company Information
 export type Company = {
@@ -232,4 +234,20 @@ export type Sales = {
   date: string;
   quantity: number;
   total: number;
+};
+
+export type ProductKpi = {
+    title: string;
+    value: string | number;
+    icon: LucideIcon;
+    subtext: string;
+    color: 'blue' | 'green' | 'yellow' | 'purple' | 'red' | 'indigo' | 'cyan' | 'orange' | 'pink' | 'teal';
+};
+
+export type Product = {
+    id: string;
+    name: string;
+    imageUrl: string;
+    stock: number;
+    status: 'In Stock' | 'Low Stock' | 'Out of Stock';
 };
