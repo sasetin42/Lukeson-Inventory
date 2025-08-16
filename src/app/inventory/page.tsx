@@ -61,12 +61,16 @@ export default function InventoryPage() {
         description: `${data.name} has been successfully added.`,
       });
       setAddProductOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding product: ", error);
+      let description = "Could not add the product. Please try again.";
+      if (error.code?.includes('storage')) {
+        description = "Could not upload image. Please check your Firebase Storage configuration and permissions.";
+      }
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Could not add the product. Please try again.",
+        description: description,
       });
     } finally {
       setIsSubmitting(false);
@@ -85,9 +89,9 @@ export default function InventoryPage() {
           try {
             const oldImageRef = ref(storage, editingProduct.imageUrl);
             await deleteObject(oldImageRef);
-          } catch (storageError) {
+          } catch (storageError: any) {
              // If the old image doesn't exist, we can ignore the error and proceed.
-            if ((storageError as any).code !== 'storage/object-not-found') {
+            if (storageError.code !== 'storage/object-not-found') {
                 throw storageError; // Re-throw other errors
             }
           }
@@ -111,12 +115,16 @@ export default function InventoryPage() {
         description: `${data.name} has been successfully updated.`,
       });
       setEditingProduct(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating product: ", error);
+      let description = "Could not update the product. Please try again.";
+      if (error.code?.includes('storage')) {
+        description = "Could not upload image. Please check your Firebase Storage configuration and permissions.";
+      }
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Could not update the product. Please try again.",
+        description: description,
       });
     } finally {
       setIsSubmitting(false);
@@ -132,8 +140,8 @@ export default function InventoryPage() {
         try {
             const imageRef = ref(storage, deletingProduct.imageUrl);
             await deleteObject(imageRef);
-        } catch (storageError) {
-             if ((storageError as any).code !== 'storage/object-not-found') {
+        } catch (storageError: any) {
+             if (storageError.code !== 'storage/object-not-found') {
                 throw storageError;
             }
         }
@@ -143,17 +151,20 @@ export default function InventoryPage() {
       await deleteDoc(doc(db, 'products', deletingProduct.id));
 
       toast({
-        variant: "destructive",
         title: "Product Deleted",
         description: `${deletingProduct.name} has been removed.`,
       });
       setDeletingProduct(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting product: ", error);
+      let description = "Could not delete the product. Please try again.";
+      if (error.code?.includes('storage')) {
+        description = "Could not delete image. Please check your Firebase Storage configuration and permissions.";
+      }
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Could not delete the product. Please try again.",
+        description: description,
       });
     } finally {
       setIsSubmitting(false);
@@ -195,27 +206,29 @@ export default function InventoryPage() {
       />
       
       {/* Add Product Dialog */}
-      <Dialog open={isAddProductOpen} onOpenChange={setAddProductOpen}>
-        <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col p-0">
-          <DialogHeader className="p-6 pb-0">
-            <DialogTitle className="flex items-center gap-2">
-                <Camera className="h-5 w-5" />
-                Add New Product with Smart Features
-            </DialogTitle>
-            <DialogDescription>
-              Enter product details below.
-            </DialogDescription>
-          </DialogHeader>
-          <ScrollArea className='flex-grow overflow-y-auto no-scrollbar pr-2'>
-            <ProductForm 
-              onSuccess={handleAddProduct} 
-              onCancel={() => setAddProductOpen(false)}
-              suppliers={supplierNames}
-              isSubmitting={isSubmitting}
-            />
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
+       {isAddProductOpen && (
+        <Dialog open={isAddProductOpen} onOpenChange={setAddProductOpen}>
+          <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col p-0">
+            <DialogHeader className="p-6 pb-0">
+              <DialogTitle className="flex items-center gap-2">
+                  <Camera className="h-5 w-5" />
+                  Add New Product with Smart Features
+              </DialogTitle>
+              <DialogDescription>
+                Enter product details below.
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className='flex-grow overflow-y-auto no-scrollbar pr-2'>
+              <ProductForm 
+                onSuccess={handleAddProduct} 
+                onCancel={() => setAddProductOpen(false)}
+                suppliers={supplierNames}
+                isSubmitting={isSubmitting}
+              />
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Edit Product Dialog */}
       <Dialog open={!!editingProduct} onOpenChange={(isOpen) => !isOpen && setEditingProduct(null)}>
