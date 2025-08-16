@@ -65,11 +65,11 @@ export default function InventoryPage() {
       console.error("Error adding product: ", error);
       let description = "Could not add the product. Please try again.";
       if (error.code?.includes('storage')) {
-        description = "Could not upload image. Please check your Firebase Storage configuration and permissions.";
+        description = "Could not upload image. Check your internet connection and Firebase Storage rules.";
       }
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Error adding product",
         description: description,
       });
     } finally {
@@ -84,15 +84,16 @@ export default function InventoryPage() {
       let imageUrl = editingProduct.imageUrl || '';
       // Check if a new image is being uploaded
       if (data.image && data.image.startsWith('data:image')) {
-        // Delete old image if it exists
-        if (editingProduct.imageUrl) {
+        // Delete old image if it exists and is a firebase URL
+        if (editingProduct.imageUrl && editingProduct.imageUrl.includes('firebasestorage')) {
           try {
             const oldImageRef = ref(storage, editingProduct.imageUrl);
             await deleteObject(oldImageRef);
           } catch (storageError: any) {
              // If the old image doesn't exist, we can ignore the error and proceed.
             if (storageError.code !== 'storage/object-not-found') {
-                throw storageError; // Re-throw other errors
+                console.error("Could not delete old image:", storageError);
+                // Non-critical, so we don't re-throw, just log it.
             }
           }
         }
@@ -119,11 +120,11 @@ export default function InventoryPage() {
       console.error("Error updating product: ", error);
       let description = "Could not update the product. Please try again.";
       if (error.code?.includes('storage')) {
-        description = "Could not upload image. Please check your Firebase Storage configuration and permissions.";
+        description = "Could not upload new image. Check your internet connection and Firebase Storage rules.";
       }
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Error updating product",
         description: description,
       });
     } finally {
@@ -135,15 +136,16 @@ export default function InventoryPage() {
     if (!deletingProduct) return;
     setIsSubmitting(true);
     try {
-      // Delete image from storage
-      if (deletingProduct.imageUrl) {
+      // Delete image from storage if it exists and is a Firebase URL
+      if (deletingProduct.imageUrl && deletingProduct.imageUrl.includes('firebasestorage')) {
         try {
             const imageRef = ref(storage, deletingProduct.imageUrl);
             await deleteObject(imageRef);
         } catch (storageError: any) {
              if (storageError.code !== 'storage/object-not-found') {
-                throw storageError;
-            }
+                console.error("Could not delete product image:", storageError);
+                // Don't block product deletion if image deletion fails. Log and continue.
+             }
         }
       }
 
@@ -159,11 +161,11 @@ export default function InventoryPage() {
       console.error("Error deleting product: ", error);
       let description = "Could not delete the product. Please try again.";
       if (error.code?.includes('storage')) {
-        description = "Could not delete image. Please check your Firebase Storage configuration and permissions.";
+        description = "Product data deleted, but could not delete image. Check Firebase Storage permissions.";
       }
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Error deleting product",
         description: description,
       });
     } finally {
