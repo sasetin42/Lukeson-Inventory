@@ -31,6 +31,8 @@ interface AddProductModalProps {
 }
 
 const uomOptions = ["pcs", "box", "roll", "m", "kg", "pack"];
+const ledQtyOptions = ["240L", "180L", "120L", "72L", "60L"];
+const voltageOptions = ["220v", "24v", "12v"];
 
 export default function AddProductModal({ children, onAddProduct, totalProducts }: AddProductModalProps) {
     const [open, setOpen] = useState(false);
@@ -133,8 +135,8 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             sku,
             category,
             description,
-            ledQty: Number(ledQty) || 0,
-            voltage: Number(voltage) || 0,
+            ledQty: parseInt(ledQty) || 0,
+            voltage: parseInt(voltage) || 0,
             wattage: Number(wattage) || 0,
             meters: Number(meters) || 0,
             supplier,
@@ -246,11 +248,29 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="led-qty">LED Qty</Label>
-                    <Input id="led-qty" value={ledQty} onChange={(e) => setLedQty(e.target.value)} placeholder="e.g. 240" />
+                    <Select onValueChange={setLedQty} value={ledQty}>
+                        <SelectTrigger id="led-qty">
+                            <SelectValue placeholder="Select LED Qty" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {ledQtyOptions.map(opt => (
+                                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
                  <div className="space-y-2">
                     <Label htmlFor="voltage">Voltage</Label>
-                    <Input id="voltage" value={voltage} onChange={(e) => setVoltage(e.target.value)} placeholder="e.g. 24v" />
+                    <Select onValueChange={setVoltage} value={voltage}>
+                        <SelectTrigger id="voltage">
+                            <SelectValue placeholder="Select Voltage" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {voltageOptions.map(opt => (
+                                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
 
