@@ -49,7 +49,7 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>{product.name}</DialogTitle>
           <DialogDescription>{product.productCode}</DialogDescription>
