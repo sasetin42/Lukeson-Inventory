@@ -269,7 +269,7 @@ export default function ProductFormModal({
                 <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4 text-purple-500" /> Product Image</Label>
                 {imagePreview ? (
                     <div className="relative w-full h-48 rounded-lg overflow-hidden">
-                        <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="cover" />
+                        <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="cover" data-ai-hint="product image" />
                         <Button
                             variant="destructive"
                             size="icon"
