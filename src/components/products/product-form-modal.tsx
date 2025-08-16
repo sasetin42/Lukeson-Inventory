@@ -22,6 +22,7 @@ import { db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -44,10 +45,12 @@ export default function ProductFormModal({
     product, 
     totalProducts 
 }: ProductFormModalProps) {
+    const { toast } = useToast();
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [categories, setCategories] = useState<ItemCategory[]>([]);
     
     // Form state
+    const [isSaving, setIsSaving] = useState(false);
     const [productCode, setProductCode] = useState('');
     const [category, setCategory] = useState('');
     const [productName, setProductName] = useState('');
@@ -61,7 +64,6 @@ export default function ProductFormModal({
     const [location, setLocation] = useState('');
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
     const [uom, setUom] = useState('');
     const [stock, setStock] = useState('');
     const [cost, setCost] = useState('');
@@ -117,8 +119,6 @@ export default function ProductFormModal({
                 const nextId = (totalProducts + 1).toString().padStart(3, '0');
                 setProductCode(`PRO-${year}-${nextId}`);
             }
-        } else {
-            resetForm();
         }
     }, [isOpen, product, totalProducts]);
     
@@ -127,10 +127,8 @@ export default function ProductFormModal({
         if (file) {
             setImageFile(file);
             const reader = new FileReader();
-            reader.onloadstart = () => setIsUploading(true);
             reader.onloadend = () => {
                 setImagePreview(reader.result as string);
-                setIsUploading(false);
             };
             reader.readAsDataURL(file);
         }
@@ -155,7 +153,7 @@ export default function ProductFormModal({
         setLocation('');
         setImageFile(null);
         setImagePreview(null);
-        setIsUploading(false);
+        setIsSaving(false);
         setUom('');
         setStock('');
         setCost('');
@@ -170,53 +168,61 @@ export default function ProductFormModal({
     }
 
     const handleSubmit = async () => {
-        let imageUrl = product?.imageUrl || '';
-        if (imageFile) {
-            setIsUploading(true);
-            const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-            try {
+        if (isSaving) return;
+        setIsSaving(true);
+    
+        try {
+            let finalImageUrl = product?.imageUrl || '';
+    
+            if (imageFile) {
+                const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
                 await uploadBytes(storageRef, imageFile);
-                imageUrl = await getDownloadURL(storageRef);
-            } catch (error) {
-                console.error("Image upload failed", error);
-            } finally {
-                setIsUploading(false);
+                finalImageUrl = await getDownloadURL(storageRef);
+            } else if (!imagePreview) {
+                finalImageUrl = '';
             }
-        } else if (!imagePreview) {
-            imageUrl = '';
+    
+            const productData = {
+                productCode,
+                name: productName,
+                sku,
+                category,
+                description,
+                ledQty: parseInt(ledQty) || 0,
+                voltage: parseInt(voltage) || 0,
+                wattage: Number(wattage) || 0,
+                meters: Number(meters) || 0,
+                supplier,
+                location,
+                imageUrl: finalImageUrl,
+                stock: Number(stock) || 0,
+                cost: Number(cost) || 0,
+                price: Number(price) || 0,
+                reOrderLevel: Number(reOrderLevel) || 0,
+                uom,
+                expiryDateTracking,
+            };
+    
+            if (product) {
+                await onUpdateProduct(product.id, productData);
+            } else {
+                await onAddProduct(productData as Omit<Product, 'id' | 'createdAt' | 'status'>);
+            }
+            handleClose();
+        } catch (error) {
+            console.error("Operation failed", error);
+            toast({
+                title: "Error",
+                description: "Failed to save product. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSaving(false);
         }
-        
-        const productData = {
-            productCode,
-            name: productName,
-            sku,
-            category,
-            description,
-            ledQty: parseInt(ledQty) || 0,
-            voltage: parseInt(voltage) || 0,
-            wattage: Number(wattage) || 0,
-            meters: Number(meters) || 0,
-            supplier,
-            location,
-            imageUrl,
-            stock: Number(stock) || 0,
-            cost: Number(cost) || 0,
-            price: Number(price) || 0,
-            reOrderLevel: Number(reOrderLevel) || 0,
-            uom,
-            expiryDateTracking,
-        };
-
-        if (product) {
-            await onUpdateProduct(product.id, productData);
-        } else {
-            await onAddProduct(productData);
-        }
-        handleClose();
     };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={!isSaving ? handleClose : undefined}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{product ? 'Edit Product' : 'Add New Product'}</DialogTitle>
@@ -271,11 +277,6 @@ export default function ProductFormModal({
                         >
                             <X className="h-4 w-4" />
                         </Button>
-                    </div>
-                ) : isUploading ? (
-                     <div className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg bg-muted">
-                        <Loader2 className="w-8 h-8 mb-4 text-muted-foreground animate-spin" />
-                        <p className="text-sm text-muted-foreground">Uploading image...</p>
                     </div>
                 ) : (
                     <div className="flex items-center justify-center w-full">
@@ -389,9 +390,9 @@ export default function ProductFormModal({
             </div>
         </div>
         <DialogFooter>
-            <Button variant="outline" onClick={handleClose}>Cancel</Button>
-            <Button type="submit" onClick={handleSubmit} disabled={isUploading}>
-                {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button variant="outline" onClick={handleClose} disabled={isSaving}>Cancel</Button>
+            <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {product ? 'Save Changes' : 'Add Product'}
             </Button>
         </DialogFooter>
@@ -399,3 +400,5 @@ export default function ProductFormModal({
     </Dialog>
   );
 }
+
+    
