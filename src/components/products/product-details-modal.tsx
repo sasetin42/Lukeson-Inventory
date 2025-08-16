@@ -6,7 +6,7 @@ import { Product } from "@/lib/types";
 import Image from "next/image";
 import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
-import { LayoutGrid, Truck, DollarSign, Barcode, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, CheckCircle, XCircle } from 'lucide-react';
+import { LayoutGrid, Truck, DollarSign, Barcode, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, CheckCircle, XCircle, Package, FileText, AlignLeft, Info } from 'lucide-react';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -51,8 +51,14 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
-          <DialogTitle>{product.name}</DialogTitle>
-          <DialogDescription>{product.productCode}</DialogDescription>
+            <div className="flex items-center gap-2">
+                <Package className="h-6 w-6 text-blue-500" />
+                <DialogTitle>{product.name}</DialogTitle>
+            </div>
+            <div className="flex items-center gap-2 ml-8 text-muted-foreground">
+                <FileText className="h-4 w-4 text-gray-400" />
+                <DialogDescription>{product.productCode}</DialogDescription>
+            </div>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
           <div className="md:col-span-1">
@@ -67,13 +73,19 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
           </div>
           <div className="md:col-span-2 space-y-4">
             <div>
-              <h4 className="font-semibold mb-2">Description</h4>
-              <p className="text-sm text-muted-foreground">{product.description || 'No description available.'}</p>
+              <h4 className="font-semibold mb-2 flex items-center gap-2">
+                <AlignLeft className="h-5 w-5 text-gray-500" />
+                Description
+              </h4>
+              <p className="text-sm text-muted-foreground pl-7">{product.description || 'No description available.'}</p>
             </div>
             <Separator />
             <div>
-                <h4 className="font-semibold mb-2">Details</h4>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px]">
+                <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    <Info className="h-5 w-5 text-blue-500" />
+                    Details
+                </h4>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] pl-7">
                     {details.map(detail => {
                         const Icon = detail.icon;
                         return (
@@ -103,4 +115,3 @@ export default function ProductDetailsModal({ product, isOpen, onClose }: Produc
     </Dialog>
   );
 }
-
