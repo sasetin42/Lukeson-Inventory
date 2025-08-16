@@ -4,6 +4,7 @@
 
 
 
+
 import { Timestamp } from "firebase/firestore";
 import type { LucideIcon } from "lucide-react";
 
@@ -281,9 +282,18 @@ export type ProductKpi = {
 
 export type Product = {
     id: string;
-    sku: string;
-    name: string;
+    productCode: string;
+    category: string;
     imageUrl: string;
+    name: string;
+    sku: string;
+    description: string;
+    ledQty: number;
+    voltage: number;
+    wattage: number;
+    meters: number;
+    supplier: string;
+    location: string;
     stock: number;
     cost: number;
     reOrderLevel: number;

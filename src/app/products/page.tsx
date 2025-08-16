@@ -36,14 +36,14 @@ export default function ProductsPage() {
         { title: "Pending Orders", value: 0, icon: Clock, subtext: "Awaiting fulfillment", color: "orange" as const }
     ];
 
-    const handleAddProduct = (newProduct: Omit<Product, 'id' | 'createdAt' | 'status'>) => {
-        const product: Product = {
-            ...newProduct,
+    const handleAddProduct = (newProductData: Omit<Product, 'id' | 'createdAt' | 'status'>) => {
+        const newProduct: Product = {
+            ...newProductData,
             id: `PROD${(products.length + 1).toString().padStart(3, '0')}`,
             createdAt: new Date().toISOString(),
-            status: newProduct.stock === 0 ? 'Out of Stock' : newProduct.stock <= newProduct.reOrderLevel ? 'Low Stock' : 'In Stock',
+            status: newProductData.stock > 0 ? 'In Stock' : 'Out of Stock',
         };
-        setProducts(prev => [product, ...prev]);
+        setProducts(prev => [newProduct, ...prev]);
     };
 
   return (
@@ -54,7 +54,7 @@ export default function ProductsPage() {
         icon={<Package className="h-6 w-6" />}
         actions={
           <div className="flex items-center gap-2">
-            <AddProductModal onAddProduct={handleAddProduct}>
+            <AddProductModal onAddProduct={handleAddProduct} totalProducts={products.length}>
                 <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Add Product
