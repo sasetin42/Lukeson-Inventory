@@ -58,7 +58,7 @@ export default function TopSellingItems({ sales, products }: TopSellingItemsProp
           {topSelling.map((item) => (
             <div key={item!.id} className="flex items-center gap-4">
               <Image
-                src={item!.imageUrl}
+                src={item!.imageUrl || 'https://placehold.co/40x40.png'}
                 alt={item!.name}
                 width={40}
                 height={40}
