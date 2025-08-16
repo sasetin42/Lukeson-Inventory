@@ -289,6 +289,7 @@ export type Product = {
     location: string;
     stock: number;
     cost: number;
+    price: number;
     reOrderLevel: number;
     createdAt: string | Timestamp | Date;
     status: 'In Stock' | 'Low Stock' | 'Out of Stock';

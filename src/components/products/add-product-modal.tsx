@@ -57,6 +57,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
     const [stock, setStock] = useState('');
     const [reOrderLevel, setReOrderLevel] = useState('');
     const [expiryDateTracking, setExpiryDateTracking] = useState(false);
+    const [price, setPrice] = useState('');
 
     useEffect(() => {
         if (open) {
@@ -117,6 +118,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
         setStock('');
         setReOrderLevel('');
         setExpiryDateTracking(false);
+        setPrice('');
     };
 
     const handleSubmit = async () => {
@@ -144,6 +146,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             imageUrl: imageUrl,
             stock: Number(stock) || 0, 
             cost: 0,
+            price: Number(price) || 0,
             reOrderLevel: Number(reOrderLevel) || 0,
             uom,
             expiryDateTracking,
@@ -229,12 +232,16 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                 )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-2">
+            <div className="flex gap-4">
+                 <div className="space-y-2" style={{width: '50%'}}>
                     <Label htmlFor="product-name">Product Name</Label>
                     <Input id="product-name" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="e.g. High-Density LED Striplight" />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2" style={{width: '25%'}}>
+                    <Label htmlFor="price">Price</Label>
+                    <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 150.00" />
+                </div>
+                <div className="space-y-2" style={{width: '20%'}}>
                     <Label htmlFor="sku">SKU Code</Label>
                     <Input id="sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. LED-HD-240-24" />
                 </div>
@@ -277,11 +284,11 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="wattage">Wattage</Label>
-                    <Input id="wattage" value={wattage} onChange={(e) => setWattage(e.target.value)} placeholder="e.g. 19.2w" />
+                    <Input id="wattage" type="number" value={wattage} onChange={(e) => setWattage(e.target.value)} placeholder="e.g. 19.2" />
                 </div>
                  <div className="space-y-2">
                     <Label htmlFor="meters">Meters</Label>
-                    <Input id="meters" value={meters} onChange={(e) => setMeters(e.target.value)} placeholder="e.g. 5" />
+                    <Input id="meters" type="number" value={meters} onChange={(e) => setMeters(e.target.value)} placeholder="e.g. 5" />
                 </div>
             </div>
 
