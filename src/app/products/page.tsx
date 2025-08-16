@@ -24,7 +24,7 @@ export default function ProductsPage() {
     }).length;
 
     const productKpis = [
-        { title: "Total Products", value: totalProducts, icon: Box, subtext: "Total unique items", color: "blue" as const },
+        { title: "Total Products", value: totalProducts, icon: Package, subtext: "Total unique items", color: "blue" as const },
         { title: "Total Value", value: `₱${totalValue.toLocaleString()}`, icon: DollarSign, subtext: "Value of all stock", color: "green" as const },
         { title: "Low Stock", value: lowStock, icon: AlertTriangle, subtext: "Items needing reorder", color: "yellow" as const },
         { title: "Out of Stock", value: outOfStock, icon: XCircle, subtext: "Items unavailable", color: "red" as const },
