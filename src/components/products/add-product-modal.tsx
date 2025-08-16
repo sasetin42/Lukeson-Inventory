@@ -17,7 +17,7 @@ import { Product, Supplier } from '@/lib/types';
 import { categoryMap } from '@/lib/category-map';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
-import { Upload, X, Loader2 } from 'lucide-react';
+import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock } from 'lucide-react';
 import Image from 'next/image';
 import { db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -168,11 +168,11 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
         <div className="grid gap-6 py-4">
             <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="product-code">Product Code</Label>
+                    <Label htmlFor="product-code" className="flex items-center gap-2"><FileText className="h-4 w-4 text-gray-500" /> Product Code</Label>
                     <Input id="product-code" value={productCode} disabled />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="category">Product Category</Label>
+                    <Label htmlFor="category" className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-red-500" /> Product Category</Label>
                     <Select onValueChange={setCategory} value={category}>
                         <SelectTrigger id="category">
                             <SelectValue placeholder="Select a category" />
@@ -185,7 +185,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                     </Select>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="supplier">Supplier</Label>
+                    <Label htmlFor="supplier" className="flex items-center gap-2"><Truck className="h-4 w-4 text-green-500" /> Supplier</Label>
                      <Select onValueChange={setSupplier} value={supplier}>
                         <SelectTrigger id="supplier">
                             <SelectValue placeholder="Select a supplier" />
@@ -200,7 +200,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             </div>
             
             <div className="space-y-2">
-                <Label>Product Image</Label>
+                <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4 text-purple-500" /> Product Image</Label>
                 {imagePreview ? (
                     <div className="relative w-full h-48 rounded-lg overflow-hidden">
                         <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="cover" />
@@ -234,27 +234,27 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
 
             <div className="flex gap-4">
                  <div className="space-y-2" style={{width: '50%'}}>
-                    <Label htmlFor="product-name">Product Name</Label>
+                    <Label htmlFor="product-name" className="flex items-center gap-2"><Package className="h-4 w-4 text-blue-500" /> Product Name</Label>
                     <Input id="product-name" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="e.g. High-Density LED Striplight" />
                 </div>
                 <div className="space-y-2" style={{width: '25%'}}>
-                    <Label htmlFor="price">Price</Label>
+                    <Label htmlFor="price" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
                     <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 150.00" />
                 </div>
                 <div className="space-y-2" style={{width: '20%'}}>
-                    <Label htmlFor="sku">SKU Code</Label>
+                    <Label htmlFor="sku" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
                     <Input id="sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. LED-HD-240-24" />
                 </div>
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description" className="flex items-center gap-2"><AlignLeft className="h-4 w-4 text-gray-500" /> Description</Label>
                 <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter product description" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="led-qty">LED Qty</Label>
+                    <Label htmlFor="led-qty" className="flex items-center gap-2"><Lightbulb className="h-4 w-4 text-yellow-500" /> LED Qty</Label>
                     <Select onValueChange={setLedQty} value={ledQty}>
                         <SelectTrigger id="led-qty">
                             <SelectValue placeholder="Select LED Qty" />
@@ -267,7 +267,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                     </Select>
                 </div>
                  <div className="space-y-2">
-                    <Label htmlFor="voltage">Voltage</Label>
+                    <Label htmlFor="voltage" className="flex items-center gap-2"><Zap className="h-4 w-4 text-orange-500" /> Voltage</Label>
                     <Select onValueChange={setVoltage} value={voltage}>
                         <SelectTrigger id="voltage">
                             <SelectValue placeholder="Select Voltage" />
@@ -283,18 +283,18 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="wattage">Wattage</Label>
+                    <Label htmlFor="wattage" className="flex items-center gap-2"><Power className="h-4 w-4 text-red-500" /> Wattage</Label>
                     <Input id="wattage" type="number" value={wattage} onChange={(e) => setWattage(e.target.value)} placeholder="e.g. 19.2" />
                 </div>
                  <div className="space-y-2">
-                    <Label htmlFor="meters">Meters</Label>
+                    <Label htmlFor="meters" className="flex items-center gap-2"><Ruler className="h-4 w-4 text-blue-500" /> Meters</Label>
                     <Input id="meters" type="number" value={meters} onChange={(e) => setMeters(e.target.value)} placeholder="e.g. 5" />
                 </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="uom">UOM</Label>
+                    <Label htmlFor="uom" className="flex items-center gap-2"><Scaling className="h-4 w-4 text-purple-500" /> UOM</Label>
                     <Select onValueChange={setUom} value={uom}>
                         <SelectTrigger id="uom">
                             <SelectValue placeholder="Select a UOM" />
@@ -307,25 +307,25 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                     </Select>
                 </div>
                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
+                    <Label htmlFor="location" className="flex items-center gap-2"><MapPin className="h-4 w-4 text-pink-500" /> Location</Label>
                     <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Warehouse A, Shelf 3" />
                 </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="stock">Stock Quantity</Label>
+                    <Label htmlFor="stock" className="flex items-center gap-2"><Warehouse className="h-4 w-4 text-green-500" /> Stock Quantity</Label>
                     <Input id="stock" type="number" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="e.g. 100" />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="reorder-level">Reorder Level</Label>
+                    <Label htmlFor="reorder-level" className="flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-yellow-500" /> Reorder Level</Label>
                     <Input id="reorder-level" type="number" value={reOrderLevel} onChange={(e) => setReOrderLevel(e.target.value)} placeholder="e.g. 20" />
                 </div>
             </div>
 
             <div className="flex items-center space-x-2">
                 <Switch id="expiry-tracking" checked={expiryDateTracking} onCheckedChange={setExpiryDateTracking} />
-                <Label htmlFor="expiry-tracking">Enable Expiry Date Tracking</Label>
+                <Label htmlFor="expiry-tracking" className="flex items-center gap-2"><CalendarClock className="h-4 w-4 text-cyan-500" /> Enable Expiry Date Tracking</Label>
             </div>
         </div>
         <DialogFooter>
