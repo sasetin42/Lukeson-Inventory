@@ -14,6 +14,7 @@ import ProductPerformanceDetails from "@/components/analytics/product-performanc
 import InventoryTurnoverByCategoryChart from "@/components/analytics/inventory-turnover-by-category-chart";
 import StockMovementTrendChart from "@/components/analytics/stock-movement-trend-chart";
 import InventoryOptimizationRecommendations from "@/components/analytics/inventory-optimization-recommendations";
+import SupplierOnTimeChart from "@/components/analytics/supplier-on-time-chart";
 
 export default function AnalyticsPage() {
   return (
@@ -65,8 +66,9 @@ export default function AnalyticsPage() {
             <StockMovementTrendChart />
             <InventoryOptimizationRecommendations />
         </TabsContent>
-        <TabsContent value="suppliers" className="mt-6">
+        <TabsContent value="suppliers" className="mt-6 grid gap-6">
             <SupplierPerformanceList />
+            <SupplierOnTimeChart />
         </TabsContent>
       </Tabs>
     </div>
