@@ -5,44 +5,44 @@ import type { ProductKpi, Product } from "./types";
 export const productKpis: ProductKpi[] = [
     {
         title: "Total Products",
-        value: 8,
+        value: 10,
         icon: Box,
-        subtext: "Total Products",
+        subtext: "Total unique items",
         color: "blue"
     },
     {
         title: "Total Value",
-        value: "N/A",
+        value: "₱1,059,250",
         icon: DollarSign,
-        subtext: "Total Value",
+        subtext: "Value of all stock",
         color: "green"
     },
     {
         title: "Low Stock",
-        value: 0,
+        value: 3,
         icon: AlertTriangle,
-        subtext: "Low Stock",
+        subtext: "Items needing reorder",
         color: "yellow"
     },
     {
         title: "Out of Stock",
         value: 1,
         icon: XCircle,
-        subtext: "Out of Stock",
+        subtext: "Items unavailable",
         color: "red"
     },
     {
-        title: "This Week",
-        value: 0,
+        title: "Added This Week",
+        value: 2,
         icon: Star,
-        subtext: "Added This Week",
+        subtext: "New products onboarded",
         color: "purple"
     },
     {
         title: "Pending Orders",
         value: 0,
         icon: Clock,
-        subtext: "Pending Orders",
+        subtext: "Awaiting fulfillment",
         color: "orange"
     }
 ];

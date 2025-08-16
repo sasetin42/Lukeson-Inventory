@@ -1,13 +1,37 @@
 
+'use client';
+
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { Package, PlusCircle, Upload, Download } from "lucide-react";
+import { Package, PlusCircle, Upload, Download, DollarSign, AlertTriangle, XCircle, Star, Clock } from "lucide-react";
 import KpiCard from "@/components/kpi-card";
-import { productKpis } from "@/lib/products-data";
+import { products } from "@/lib/products-data";
 import ActionCard from "@/components/action-card";
 import ProductList from "@/components/products/product-list";
 
 export default function ProductsPage() {
+    const totalProducts = products.length;
+    const totalValue = products.reduce((acc, p) => acc + (p.cost * p.stock), 0);
+    const lowStock = products.filter(p => p.status === 'Low Stock').length;
+    const outOfStock = products.filter(p => p.status === 'Out of Stock').length;
+    
+    // Mock data for added this week and pending orders for now
+    const addedThisWeek = products.filter(p => {
+        const productDate = new Date(p.createdAt);
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        return productDate > sevenDaysAgo;
+    }).length;
+
+    const productKpis = [
+        { title: "Total Products", value: totalProducts, icon: Box, subtext: "Total unique items", color: "blue" as const },
+        { title: "Total Value", value: `₱${totalValue.toLocaleString()}`, icon: DollarSign, subtext: "Value of all stock", color: "green" as const },
+        { title: "Low Stock", value: lowStock, icon: AlertTriangle, subtext: "Items needing reorder", color: "yellow" as const },
+        { title: "Out of Stock", value: outOfStock, icon: XCircle, subtext: "Items unavailable", color: "red" as const },
+        { title: "Added This Week", value: addedThisWeek, icon: Star, subtext: "New products onboarded", color: "purple" as const },
+        { title: "Pending Orders", value: 0, icon: Clock, subtext: "Awaiting fulfillment", color: "orange" as const }
+    ];
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -39,7 +63,7 @@ export default function ProductsPage() {
             value={kpi.value}
             icon={kpi.icon}
             subtext={kpi.subtext}
-            color={kpi.color as any}
+            color={kpi.color}
           />
         ))}
       </div>
@@ -67,7 +91,7 @@ export default function ProductsPage() {
         />
         <ActionCard 
             title="Stock Alerts" 
-            description="0 active alerts" 
+            description={`${lowStock} active alerts`} 
             icon="alert"
             href="#"
             color="red"
