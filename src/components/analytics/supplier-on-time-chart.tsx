@@ -4,10 +4,15 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, Cart
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { suppliers } from '@/lib/data';
 
-export default function SupplierOnTimeChart() {
+interface SupplierOnTimeChartProps {
+    dateRange: number;
+}
+
+export default function SupplierOnTimeChart({ dateRange }: SupplierOnTimeChartProps) {
+    // Mocking that performance might change slightly with date range
     const supplierPerformance = suppliers.map(s => ({
         name: s.name,
-        onTimeRate: Math.floor(Math.random() * 11) + 90, // 90% - 100%
+        onTimeRate: Math.floor(Math.random() * (5 + dateRange/30)) + (90 - dateRange/30), 
     })).sort((a, b) => b.onTimeRate - a.onTimeRate);
 
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];

@@ -3,7 +3,15 @@ import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, Ca
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { revenueProfitChartData } from '@/lib/analytics-data';
 
-export default function RevenueProfitChart() {
+interface RevenueProfitChartProps {
+    dateRange: number;
+}
+
+export default function RevenueProfitChart({ dateRange }: RevenueProfitChartProps) {
+  // Filter data based on date range (months)
+  const monthsToShow = Math.ceil(dateRange / 30);
+  const chartData = revenueProfitChartData.slice(-monthsToShow);
+  
   return (
     <Card>
       <CardHeader>
@@ -11,7 +19,7 @@ export default function RevenueProfitChart() {
       </CardHeader>
       <CardContent className="h-[350px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={revenueProfitChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>

@@ -1,35 +1,47 @@
 import { DollarSign, Package, ShoppingCart, TrendingUp } from "lucide-react";
 
-export const analyticsKpiData = [
-    {
-      title: "Total Revenue",
-      value: "₱328,000",
-      icon: DollarSign,
-      trend: "+15.2% from last month",
-      color: "green"
-    },
-    {
-      title: "Units Sold",
-      value: "4,890",
-      icon: Package,
-      trend: "+8.1% from last month",
-      color: "blue"
-    },
-    {
-      title: "Avg Order Value",
-      value: "₱67.12",
-      icon: ShoppingCart,
-      trend: "-2.3% from last month",
-      color: "purple"
-    },
-    {
-      title: "Inventory Turnover",
-      value: "6.8x",
-      icon: TrendingUp,
-      trend: "+12.5% from last month",
-      color: "yellow"
-    },
-  ];
+const baseData = {
+  totalRevenue: 328000,
+  unitsSold: 4890,
+  avgOrderValue: 67.12,
+  inventoryTurnover: 6.8,
+};
+
+// Function to get dynamically generated data based on date range
+export const getAnalyticsKpiData = (days: number) => {
+    const factor = days / 30; // Scale data based on a 30-day baseline
+    return [
+        {
+          title: "Total Revenue",
+          value: `₱${(baseData.totalRevenue * factor).toLocaleString(undefined, { maximumFractionDigits: 0 })}`,
+          icon: DollarSign,
+          trend: `+${(15.2 * factor).toFixed(1)}% from last period`,
+          color: "green"
+        },
+        {
+          title: "Units Sold",
+          value: (baseData.unitsSold * factor).toLocaleString(undefined, { maximumFractionDigits: 0 }),
+          icon: Package,
+          trend: `+${(8.1 * factor).toFixed(1)}% from last period`,
+          color: "blue"
+        },
+        {
+          title: "Avg Order Value",
+          value: `₱${(baseData.avgOrderValue * (1 + (factor - 1) * 0.1)).toFixed(2)}`, // Less volatile
+          icon: ShoppingCart,
+          trend: `${(factor > 1 ? '+' : '')}${( -2.3 * factor).toFixed(1)}% from last period`,
+          color: "purple"
+        },
+        {
+          title: "Inventory Turnover",
+          value: `${(baseData.inventoryTurnover * factor).toFixed(1)}x`,
+          icon: TrendingUp,
+          trend: `+${(12.5 * factor).toFixed(1)}% from last period`,
+          color: "yellow"
+        },
+    ];
+}
+
 
 export const revenueProfitChartData = [
     { month: "Jan", revenue: 45000, profit: 10000 },

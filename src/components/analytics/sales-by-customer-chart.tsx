@@ -4,8 +4,17 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } fro
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { sales } from '@/lib/data';
 
-export default function SalesByCustomerChart() {
-  const salesByCustomer = sales.reduce((acc, sale) => {
+interface SalesByCustomerChartProps {
+    dateRange: number;
+}
+
+export default function SalesByCustomerChart({ dateRange }: SalesByCustomerChartProps) {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - dateRange);
+
+  const filteredSales = sales.filter(s => new Date(s.date) >= cutoffDate);
+  
+  const salesByCustomer = filteredSales.reduce((acc, sale) => {
     if (!acc[sale.customerName]) {
       acc[sale.customerName] = 0;
     }

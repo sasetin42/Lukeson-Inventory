@@ -16,9 +16,18 @@ type ProductPerformance = {
     trend: number;
 };
 
-export default function ProductPerformanceDetails() {
+interface ProductPerformanceDetailsProps {
+    dateRange: number;
+}
+
+export default function ProductPerformanceDetails({ dateRange }: ProductPerformanceDetailsProps) {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - dateRange);
+
+    const filteredSales = sales.filter(s => new Date(s.date) >= cutoffDate);
+    
     const productPerformanceData = products.map(product => {
-        const productSales = sales.filter(s => s.productId === product.id);
+        const productSales = filteredSales.filter(s => s.productId === product.id);
         const unitsSold = productSales.reduce((acc, s) => acc + s.quantity, 0);
         const revenue = productSales.reduce((acc, s) => acc + s.total, 0);
         const avgPrice = unitsSold > 0 ? revenue / unitsSold : 0;

@@ -1,11 +1,14 @@
 
+'use client';
+
+import { useState } from 'react';
 import PageHeader from "@/components/page-header";
 import { BarChart2, Calendar, Download } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import KpiCard from "@/components/kpi-card";
 import RevenueProfitChart from "@/components/analytics/revenue-profit-chart";
-import { analyticsKpiData } from "@/lib/analytics-data";
+import { getAnalyticsKpiData } from "@/lib/analytics-data";
 import SalesByCustomerChart from "@/components/analytics/sales-by-customer-chart";
 import SalesOverTimeChart from "@/components/analytics/sales-over-time-chart";
 import InventoryValueByCategoryChart from "@/components/analytics/inventory-value-by-category-chart";
@@ -19,6 +22,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function AnalyticsPage() {
+  const [dateRange, setDateRange] = useState("30");
+  const analyticsKpiData = getAnalyticsKpiData(Number(dateRange));
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -27,7 +33,7 @@ export default function AnalyticsPage() {
         icon={<BarChart2 className="h-6 w-6 text-green-500" />}
         actions={
             <div className="flex items-center gap-2">
-                <Select>
+                <Select value={dateRange} onValueChange={setDateRange}>
                     <SelectTrigger className="w-[180px]">
                         <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4" />
@@ -73,27 +79,27 @@ export default function AnalyticsPage() {
                 ))}
             </div>
             <div className="mt-6">
-                <RevenueProfitChart />
+                <RevenueProfitChart dateRange={Number(dateRange)} />
             </div>
         </TabsContent>
         <TabsContent value="sales" className="mt-4 grid gap-6">
             <div className="grid md:grid-cols-2 gap-6">
-              <SalesByCustomerChart />
-              <SalesOverTimeChart />
+              <SalesByCustomerChart dateRange={Number(dateRange)} />
+              <SalesOverTimeChart dateRange={Number(dateRange)} />
             </div>
-            <ProductPerformanceDetails />
+            <ProductPerformanceDetails dateRange={Number(dateRange)} />
         </TabsContent>
         <TabsContent value="inventory" className="mt-4 grid gap-6">
             <div className="grid md:grid-cols-2 gap-6">
               <InventoryValueByCategoryChart />
-              <InventoryTurnoverByCategoryChart />
+              <InventoryTurnoverByCategoryChart dateRange={Number(dateRange)} />
             </div>
-            <StockMovementTrendChart />
+            <StockMovementTrendChart dateRange={Number(dateRange)} />
             <InventoryOptimizationRecommendations />
         </TabsContent>
         <TabsContent value="suppliers" className="mt-4 grid gap-6">
-            <SupplierPerformanceList />
-            <SupplierOnTimeChart />
+            <SupplierPerformanceList dateRange={Number(dateRange)} />
+            <SupplierOnTimeChart dateRange={Number(dateRange)} />
         </TabsContent>
       </Tabs>
     </div>

@@ -4,8 +4,17 @@ import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, Ca
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { sales } from '@/lib/data';
 
-export default function SalesOverTimeChart() {
-  const salesByDate = sales.reduce((acc, sale) => {
+interface SalesOverTimeChartProps {
+    dateRange: number;
+}
+
+export default function SalesOverTimeChart({ dateRange }: SalesOverTimeChartProps) {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - dateRange);
+  
+  const filteredSales = sales.filter(s => new Date(s.date) >= cutoffDate);
+
+  const salesByDate = filteredSales.reduce((acc, sale) => {
     const date = new Date(sale.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     if (!acc[date]) {
       acc[date] = 0;
@@ -22,7 +31,7 @@ export default function SalesOverTimeChart() {
     <Card>
       <CardHeader>
         <CardTitle>Sales Over Time</CardTitle>
-        <CardDescription>Daily sales revenue for the last 10 days.</CardDescription>
+        <CardDescription>Daily sales revenue for the selected period.</CardDescription>
       </CardHeader>
       <CardContent className="h-[300px] w-full">
         <ResponsiveContainer width="100%" height="100%">

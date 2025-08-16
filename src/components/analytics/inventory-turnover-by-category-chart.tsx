@@ -6,8 +6,17 @@ import { products } from '@/lib/products-data';
 import { sales } from '@/lib/data';
 import { categoryMap } from '@/lib/category-map';
 
-export default function InventoryTurnoverByCategoryChart() {
-  const categoryCogs = sales.reduce((acc, sale) => {
+interface InventoryTurnoverByCategoryChartProps {
+    dateRange: number;
+}
+
+export default function InventoryTurnoverByCategoryChart({ dateRange }: InventoryTurnoverByCategoryChartProps) {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - dateRange);
+
+  const filteredSales = sales.filter(s => new Date(s.date) >= cutoffDate);
+  
+  const categoryCogs = filteredSales.reduce((acc, sale) => {
     const product = products.find(p => p.id === sale.productId);
     if (!product) return acc;
     
@@ -34,7 +43,10 @@ export default function InventoryTurnoverByCategoryChart() {
   const chartData = Object.keys(categoryCogs).map(category => {
     const cogs = categoryCogs[category];
     const avgInventory = categoryInventoryValue[category];
-    const turnover = avgInventory > 0 ? (cogs / avgInventory) : 0;
+    // Scale COGS by the period to annualize it for a more standard turnover ratio
+    const annualizationFactor = 365 / dateRange;
+    const annualizedCogs = cogs * annualizationFactor;
+    const turnover = avgInventory > 0 ? (annualizedCogs / avgInventory) : 0;
     return {
       name: category,
       turnover: parseFloat(turnover.toFixed(2)),

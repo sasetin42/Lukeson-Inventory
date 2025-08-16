@@ -7,17 +7,20 @@ import { suppliers } from '@/lib/data';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Star } from 'lucide-react';
 
-// Mock performance data
-const supplierPerformance = suppliers.map(s => ({
-    ...s,
-    orderCount: Math.floor(Math.random() * 20) + 5,
-    onTimeRate: Math.floor(Math.random() * 11) + 90, // 90% - 100%
-    qualityRating: parseFloat((Math.random() * 1.5 + 3.5).toFixed(2)), // 3.5 - 5.0
-    performance: ['Excellent', 'Good', 'Average'][Math.floor(Math.random() * 3)]
-}));
+interface SupplierPerformanceListProps {
+    dateRange: number;
+}
 
+export default function SupplierPerformanceList({ dateRange }: SupplierPerformanceListProps) {
+    // Mock performance data that changes with date range
+    const supplierPerformance = suppliers.map(s => ({
+        ...s,
+        orderCount: Math.floor((Math.random() * 20 + 5) * (dateRange/30)),
+        onTimeRate: Math.floor(Math.random() * 11) + 90, // 90% - 100%
+        qualityRating: parseFloat((Math.random() * 1.5 + 3.5).toFixed(2)), // 3.5 - 5.0
+        performance: ['Excellent', 'Good', 'Average'][Math.floor(Math.random() * 3)]
+    }));
 
-export default function SupplierPerformanceList() {
     const getPerformanceBadgeVariant = (performance: string) => {
         if (performance === 'Excellent') return 'default';
         if (performance === 'Good') return 'secondary';

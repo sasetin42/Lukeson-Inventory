@@ -3,26 +3,34 @@
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
-// Mock data for stock movement
-const stockMovementData = [
-  { date: 'May 20', inbound: 120, outbound: 90 },
-  { date: 'May 21', inbound: 150, outbound: 110 },
-  { date: 'May 22', inbound: 80, outbound: 130 },
-  { date: 'May 23', inbound: 200, outbound: 150 },
-  { date: 'May 24', inbound: 180, outbound: 160 },
-  { date: 'May 25', inbound: 130, outbound: 140 },
-  { date: 'May 26', inbound: 250, outbound: 180 },
-  { date: 'May 27', inbound: 190, outbound: 200 },
-  { date: 'May 28', inbound: 220, outbound: 210 },
-  { date: 'May 29', inbound: 160, outbound: 170 },
-];
+interface StockMovementTrendChartProps {
+    dateRange: number;
+}
 
-export default function StockMovementTrendChart() {
+// Mock data generation for stock movement
+const generateStockMovementData = (days: number) => {
+    const data = [];
+    let date = new Date();
+    date.setDate(date.getDate() - days);
+    for (let i = 0; i < days; i++) {
+        date.setDate(date.getDate() + 1);
+        data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            inbound: 100 + Math.floor(Math.random() * 150),
+            outbound: 80 + Math.floor(Math.random() * 150),
+        });
+    }
+    return data;
+};
+
+export default function StockMovementTrendChart({ dateRange }: StockMovementTrendChartProps) {
+  const stockMovementData = generateStockMovementData(dateRange);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Stock Movement Trend</CardTitle>
-        <CardDescription>Daily inbound vs. outbound stock volume over the last 10 days.</CardDescription>
+        <CardDescription>Daily inbound vs. outbound stock volume.</CardDescription>
       </CardHeader>
       <CardContent className="h-[350px] w-full">
         <ResponsiveContainer width="100%" height="100%">
