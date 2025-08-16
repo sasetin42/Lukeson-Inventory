@@ -102,7 +102,7 @@ const navGroups = [
         links: [
             { href: '/settings', icon: Settings, label: 'General Settings', color: 'text-yellow-500' },
             { href: '/users-management', icon: Users2, label: 'Users & Roles', color: 'text-indigo-500' },
-            { href: '/security', icon: Shield, label: 'Audit Trail', color: 'text-pink-500' },
+            { href: '/security', icon: Shield, label: 'System Security', color: 'text-pink-500' },
             { href: '/system-backup', icon: DatabaseBackup, label: 'System Backup', color: 'text-sky-500' },
         ],
       },
