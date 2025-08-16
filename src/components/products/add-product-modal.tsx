@@ -281,7 +281,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="wattage" className="flex items-center gap-2"><Power className="h-4 w-4 text-red-500" /> Wattage</Label>
                     <Input id="wattage" type="number" value={wattage} onChange={(e) => setWattage(e.target.value)} placeholder="e.g. 19.2" />
@@ -290,9 +290,6 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                     <Label htmlFor="meters" className="flex items-center gap-2"><Ruler className="h-4 w-4 text-blue-500" /> Meters</Label>
                     <Input id="meters" type="number" value={meters} onChange={(e) => setMeters(e.target.value)} placeholder="e.g. 5" />
                 </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="uom" className="flex items-center gap-2"><Scaling className="h-4 w-4 text-purple-500" /> UOM</Label>
                     <Select onValueChange={setUom} value={uom}>
@@ -306,10 +303,11 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
                         </SelectContent>
                     </Select>
                 </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="location" className="flex items-center gap-2"><MapPin className="h-4 w-4 text-pink-500" /> Location</Label>
-                    <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Warehouse A, Shelf 3" />
-                </div>
+            </div>
+            
+            <div className="space-y-2">
+                <Label htmlFor="location" className="flex items-center gap-2"><MapPin className="h-4 w-4 text-pink-500" /> Location</Label>
+                <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Warehouse A, Shelf 3" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -339,5 +337,7 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
     </Dialog>
   );
 }
+
+    
 
     
