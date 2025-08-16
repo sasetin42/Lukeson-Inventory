@@ -17,8 +17,9 @@ import { Product } from '@/lib/types';
 import { categoryMap } from '@/lib/category-map';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
-import { Upload } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
 import { suppliers } from '@/lib/data';
+import Image from 'next/image';
 
 interface AddProductModalProps {
   children: React.ReactNode;
@@ -41,14 +42,51 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
     const [meters, setMeters] = useState('');
     const [supplier, setSupplier] = useState('');
     const [location, setLocation] = useState('');
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     useEffect(() => {
         if (open) {
             const year = new Date().getFullYear();
             const nextId = (totalProducts + 1).toString().padStart(3, '0');
             setProductCode(`PRO-${year}-${nextId}`);
+        } else {
+            // Reset form on close
+            resetForm();
         }
     }, [open, totalProducts]);
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = () => {
+        setImageFile(null);
+        setImagePreview(null);
+    };
+    
+    const resetForm = () => {
+        setCategory('');
+        setProductName('');
+        setSku('');
+        setDescription('');
+        setLedQty('');
+        setVoltage('');
+        setWattage('');
+        setMeters('');
+        setSupplier('');
+        setLocation('');
+        setImageFile(null);
+        setImagePreview(null);
+    };
 
     const handleSubmit = () => {
         const newProduct: Omit<Product, 'id' | 'createdAt' | 'status'> = {
@@ -63,25 +101,13 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             meters: Number(meters) || 0,
             supplier,
             location,
-            // Default values for fields not in the form
-            imageUrl: 'https://placehold.co/48x48.png',
+            imageUrl: imagePreview || 'https://placehold.co/48x48.png',
             stock: 0, 
             cost: 0,
             reOrderLevel: 0,
         };
         onAddProduct(newProduct);
         setOpen(false);
-        // Reset form
-        setCategory('');
-        setProductName('');
-        setSku('');
-        setDescription('');
-        setLedQty('');
-        setVoltage('');
-        setWattage('');
-        setMeters('');
-        setSupplier('');
-        setLocation('');
     };
 
   return (
@@ -117,16 +143,30 @@ export default function AddProductModal({ children, onAddProduct, totalProducts 
             
             <div className="space-y-2">
                 <Label>Product Image</Label>
-                <div className="flex items-center justify-center w-full">
-                    <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                            <p className="text-xs text-muted-foreground">All image uploaded to the entire system will be optimize and automate converted into WebP.</p>
-                        </div>
-                        <Input id="dropzone-file" type="file" className="hidden" />
-                    </label>
-                </div> 
+                {imagePreview ? (
+                    <div className="relative w-full h-48 rounded-lg overflow-hidden">
+                        <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="cover" />
+                        <Button
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-2 right-2 h-7 w-7"
+                            onClick={removeImage}
+                        >
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-center w-full">
+                        <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                <p className="text-xs text-muted-foreground">All image uploaded to the entire system will be optimize and automate converted into WebP.</p>
+                            </div>
+                            <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
+                        </label>
+                    </div> 
+                )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
