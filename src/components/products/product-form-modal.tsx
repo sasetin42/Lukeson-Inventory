@@ -180,7 +180,11 @@ export default function ProductFormModal({
                 await uploadBytes(storageRef, imageFile);
                 finalImageUrl = await getDownloadURL(storageRef);
             } else if (!imagePreview) {
-                finalImageUrl = '';
+                 if (!product) { // New product without an image
+                    finalImageUrl = 'https://placehold.co/800x800.png';
+                } else { // Existing product with image removed
+                    finalImageUrl = '';
+                }
             }
     
             const productData = {
