@@ -218,7 +218,7 @@ export default function ProductFormModal({
             console.error("Operation failed", error);
             toast({
                 title: "Error",
-                description: "Failed to save product. Please try again.",
+                description: `Failed to save product. ${error instanceof Error ? error.message : 'Please try again.'}`,
                 variant: "destructive",
             });
         } finally {
