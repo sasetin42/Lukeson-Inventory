@@ -23,6 +23,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import imageCompression from 'browser-image-compression';
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -172,13 +173,19 @@ export default function ProductFormModal({
 
         try {
             if (imageFile) {
+                toast({ title: 'Compressing Image...', description: 'Please wait...' });
+                const compressedFile = await imageCompression(imageFile, {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1920,
+                    useWebWorker: true,
+                });
+
                 toast({ title: 'Uploading Image...', description: 'Please wait...' });
-                const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-                const uploadTask = await uploadBytes(storageRef, imageFile);
-                finalImageUrl = await getDownloadURL(uploadTask.ref);
+                const storageRef = ref(storage, `products/${Date.now()}_${compressedFile.name}`);
+                await uploadBytes(storageRef, compressedFile);
+                finalImageUrl = await getDownloadURL(storageRef);
                 toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
-            } else if (!imagePreview) {
-                // This case handles when an existing image is removed
+            } else if (!imagePreview && product?.imageUrl) {
                 finalImageUrl = '';
             }
 
@@ -315,7 +322,7 @@ export default function ProductFormModal({
                 </div>
             </div>
 
-             <div className="space-y-2">
+            <div className="space-y-2">
                 <Label htmlFor="price" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
                 <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 150.00" />
             </div>
