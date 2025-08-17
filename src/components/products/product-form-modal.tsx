@@ -28,8 +28,8 @@ import imageCompression from 'browser-image-compression';
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddProduct: (product: Omit<Product, 'id' | 'createdAt' | 'status'>) => Promise<void>;
-  onUpdateProduct: (productId: string, product: Partial<Product>) => Promise<void>;
+  onAddProduct: (product: Omit<Product, 'id' | 'createdAt' | 'status'>) => Promise<any>;
+  onUpdateProduct: (productId: string, product: Partial<Product>) => Promise<any>;
   product: Product | null;
   totalProducts: number;
 }
@@ -212,8 +212,10 @@ export default function ProductFormModal({
     
             if (product) {
                 await onUpdateProduct(product.id, productData);
+                toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
             } else {
                 await onAddProduct(productData as Omit<Product, 'id' | 'createdAt' | 'status'>);
+                toast({ title: "Success", description: "Product added successfully.", variant: "success" });
             }
             handleClose();
 
