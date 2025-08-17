@@ -203,7 +203,7 @@ export default function ProductFormModal({
         setIsSaving(true);
     
         try {
-            let imageUrl = product?.imageUrl || 'https://placehold.co/800x800.png';
+            let imageUrl = product?.imageUrl || '';
 
             if (imageFile) {
                 toast({ title: 'Uploading Image...', description: 'This may take a moment...' });
@@ -211,8 +211,10 @@ export default function ProductFormModal({
                 const uploadTask = await uploadBytes(storageRef, imageFile);
                 imageUrl = await getDownloadURL(uploadTask.ref);
                 toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
-            } else if (!imagePreview) { 
+            } else if (!imagePreview && !product?.imageUrl) { 
                  imageUrl = 'https://placehold.co/800x800.png';
+            } else if (!imagePreview && product?.imageUrl) {
+                imageUrl = '';
             }
 
             const productData = {
@@ -433,8 +435,8 @@ export default function ProductFormModal({
         <DialogFooter>
             <Button variant="outline" onClick={handleClose} disabled={isSaving || isUploading}>Cancel</Button>
             <Button type="submit" onClick={handleSubmit} disabled={isSaving || isUploading}>
-                {(isSaving) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSaving ? 'Saving...' : (product ? 'Save Changes' : 'Add Product')}
+                {(isSaving || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSaving ? 'Saving...' : (isUploading ? 'Uploading...' : (product ? 'Save Changes' : 'Add Product'))}
             </Button>
         </DialogFooter>
       </DialogContent>
