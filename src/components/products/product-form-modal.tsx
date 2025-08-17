@@ -203,20 +203,18 @@ export default function ProductFormModal({
         setIsSaving(true);
     
         try {
-            let imageUrl = product?.imageUrl || '';
+            let imageUrl = product?.imageUrl || 'https://placehold.co/800x800.png';
 
-            // Step 1: Upload image if a new one is selected
             if (imageFile) {
                 toast({ title: 'Uploading Image...', description: 'This may take a moment...' });
                 const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
                 const uploadTask = await uploadBytes(storageRef, imageFile);
                 imageUrl = await getDownloadURL(uploadTask.ref);
                 toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
-            } else if (!imagePreview) { // If image was removed
-                 imageUrl = '';
+            } else if (!imagePreview) { 
+                 imageUrl = 'https://placehold.co/800x800.png';
             }
 
-            // Step 2: Prepare product data with the correct image URL
             const productData = {
                 productCode,
                 name: productName,
@@ -238,7 +236,6 @@ export default function ProductFormModal({
                 expiryDateTracking,
             };
     
-            // Step 3: Save data to Firestore
             if (product) {
                 await onUpdateProduct(product.id, productData);
             } else {
