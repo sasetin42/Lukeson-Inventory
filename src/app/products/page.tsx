@@ -65,7 +65,7 @@ export default function ProductsPage() {
         setIsModalOpen(true);
     };
 
-    const handleAddProduct = async (newProductData: Omit<Product, 'id' | 'createdAt' | 'status'>) => {
+    const handleAddProduct = (newProductData: Omit<Product, 'id' | 'createdAt' | 'status'>) => {
         const stockStatus = newProductData.stock > 0
             ? (newProductData.stock <= newProductData.reOrderLevel ? 'Low Stock' : 'In Stock')
             : 'Out of Stock';
@@ -77,7 +77,7 @@ export default function ProductsPage() {
         });
     };
 
-    const handleUpdateProduct = async (productId: string, updatedProductData: Partial<Product>) => {
+    const handleUpdateProduct = (productId: string, updatedProductData: Partial<Product>) => {
         const productRef = doc(db, 'products', productId);
         
         const currentProduct = products.find(p => p.id === productId);
