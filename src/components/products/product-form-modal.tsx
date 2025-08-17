@@ -23,6 +23,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import imageCompression from 'browser-image-compression';
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -122,15 +123,38 @@ export default function ProductFormModal({
         }
     }, [isOpen, product, totalProducts]);
     
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setImageFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+            try {
+                setIsSaving(true);
+                toast({ title: 'Compressing...', description: 'Please wait while the image is being optimized.' });
+
+                const options = {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 800,
+                    useWebWorker: true,
+                    fileType: 'image/webp',
+                };
+                const compressedFile = await imageCompression(file, options);
+                setImageFile(compressedFile);
+
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setImagePreview(reader.result as string);
+                    setIsSaving(false);
+                    toast({ title: 'Success', description: 'Image ready for upload.', variant: 'success' });
+                };
+                reader.readAsDataURL(compressedFile);
+            } catch (error) {
+                console.error('Image compression failed:', error);
+                toast({
+                    title: "Compression Failed",
+                    description: "Could not compress the image. Please try a different one.",
+                    variant: "destructive",
+                });
+                setIsSaving(false);
+            }
         }
     };
 
@@ -179,12 +203,10 @@ export default function ProductFormModal({
                 const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
                 await uploadBytes(storageRef, imageFile);
                 finalImageUrl = await getDownloadURL(storageRef);
-            } else if (!imagePreview) {
-                if (!product) { // New product without an image
-                    finalImageUrl = 'https://placehold.co/800x800.png';
-                } else { // Existing product with image removed
-                    finalImageUrl = '';
-                }
+            } else if (!imagePreview && !product) { 
+                finalImageUrl = 'https://placehold.co/800x800.png';
+            } else if (!imagePreview && product) {
+                 finalImageUrl = '';
             }
     
             const productData = {
@@ -289,7 +311,7 @@ export default function ProductFormModal({
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                 <Upload className="w-8 h-8 mb-4 text-primary" />
                                 <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                <p className="text-xs text-muted-foreground">Recommended size: 800x800px</p>
+                                <p className="text-xs text-muted-foreground">WEBP, JPG, PNG (Max 1MB, 800x800px)</p>
                             </div>
                             <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
                         </label>

@@ -21,6 +21,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot } from 'firebase/firestore';
+import imageCompression from 'browser-image-compression';
+import { useToast } from '@/hooks/use-toast';
 
 interface CategoryFormModalProps {
   isOpen: boolean;
@@ -44,6 +46,7 @@ export default function CategoryFormModal({
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [allCategories, setAllCategories] = useState<ItemCategory[]>([]);
+    const { toast } = useToast();
 
     useEffect(() => {
         if (!isOpen) return;
@@ -80,17 +83,37 @@ export default function CategoryFormModal({
         setImagePreview(null);
     }
     
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setImageFile(file);
-            const reader = new FileReader();
-            reader.onloadstart = () => setIsSaving(true);
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
+            try {
+                setIsSaving(true);
+                toast({ title: 'Compressing...', description: 'Please wait while the image is being optimized.' });
+                const options = {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 800,
+                    useWebWorker: true,
+                    fileType: 'image/webp',
+                };
+                const compressedFile = await imageCompression(file, options);
+                setImageFile(compressedFile);
+
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setImagePreview(reader.result as string);
+                    setIsSaving(false);
+                    toast({ title: 'Success', description: 'Image ready for upload.', variant: 'success' });
+                };
+                reader.readAsDataURL(compressedFile);
+            } catch (error) {
+                console.error('Image compression failed:', error);
+                toast({
+                    title: "Compression Failed",
+                    description: "Could not compress the image. Please try a different one.",
+                    variant: "destructive",
+                });
                 setIsSaving(false);
-            };
-            reader.readAsDataURL(file);
+            }
         }
     };
     
@@ -110,13 +133,16 @@ export default function CategoryFormModal({
                 imageUrl = await getDownloadURL(storageRef);
             } catch (error) {
                 console.error("Image upload failed", error);
+                toast({ title: "Error", description: "Failed to upload image.", variant: "destructive" });
+                setIsSaving(false);
+                return;
             }
         }
         
         const categoryData = {
             name,
             description,
-            parentId: parentId || null,
+            parentId: parentId === 'none' ? null : parentId,
             imageUrl,
         };
 
@@ -129,6 +155,7 @@ export default function CategoryFormModal({
             onClose();
         } catch (error) {
             console.error("Failed to save category", error);
+            toast({ title: "Error", description: "Failed to save category.", variant: "destructive" });
         } finally {
             setIsSaving(false);
         }
@@ -161,12 +188,12 @@ export default function CategoryFormModal({
                             </div>
                         ) : (
                             <div className="flex items-center justify-center w-full">
-                                <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                <label htmlFor="dropzone-file-category" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                         <Upload className="w-8 h-8 mb-4 text-primary" />
                                         <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                                     </div>
-                                    <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
+                                    <Input id="dropzone-file-category" type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
                                 </label>
                             </div> 
                         )}
@@ -199,7 +226,7 @@ export default function CategoryFormModal({
 
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose}>Cancel</Button>
+                    <Button variant="outline" onClick={onClose} disabled={isSaving}>Cancel</Button>
                     <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {category ? 'Save Changes' : 'Add Category'}
