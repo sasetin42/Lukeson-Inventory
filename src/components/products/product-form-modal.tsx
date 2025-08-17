@@ -23,7 +23,6 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import imageCompression from 'browser-image-compression';
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -68,9 +67,9 @@ export default function ProductFormModal({
     const [uom, setUom] = useState('');
     const [stock, setStock] = useState('');
     const [cost, setCost] = useState('');
+    const [price, setPrice] = useState('');
     const [reOrderLevel, setReOrderLevel] = useState('');
     const [expiryDateTracking, setExpiryDateTracking] = useState(false);
-    const [price, setPrice] = useState('');
 
     useEffect(() => {
         if (!isOpen) return;
@@ -110,9 +109,9 @@ export default function ProductFormModal({
                 setUom(product.uom || '');
                 setStock(product.stock?.toString() || '');
                 setCost(product.cost?.toString() || '');
+                setPrice(product.price?.toString() || '0');
                 setReOrderLevel(product.reOrderLevel?.toString() || '');
                 setExpiryDateTracking(product.expiryDateTracking || false);
-                setPrice(product.price?.toString() || '');
             } else {
                 // Adding new product
                 resetForm();
@@ -156,9 +155,9 @@ export default function ProductFormModal({
         setUom('');
         setStock('');
         setCost('');
+        setPrice('');
         setReOrderLevel('');
         setExpiryDateTracking(false);
-        setPrice('');
     };
 
     const handleClose = () => {
@@ -169,23 +168,17 @@ export default function ProductFormModal({
 
     const handleSubmit = async () => {
         setIsSaving(true);
-        try {
-            let finalImageUrl = product?.imageUrl || '';
+        let finalImageUrl = product?.imageUrl || '';
 
+        try {
             if (imageFile) {
                 toast({ title: 'Uploading Image...', description: 'Please wait...' });
-                const options = {
-                    maxSizeMB: 1,
-                    maxWidthOrHeight: 800,
-                    useWebWorker: true,
-                    fileType: 'image/webp',
-                };
-                const compressedFile = await imageCompression(imageFile, options);
-                const storageRef = ref(storage, `products/${Date.now()}_${compressedFile.name}`);
-                const uploadTask = await uploadBytes(storageRef, compressedFile);
+                const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
+                const uploadTask = await uploadBytes(storageRef, imageFile);
                 finalImageUrl = await getDownloadURL(uploadTask.ref);
                 toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
             } else if (!imagePreview) {
+                // This case handles when an existing image is removed
                 finalImageUrl = '';
             }
 
@@ -300,7 +293,6 @@ export default function ProductFormModal({
                                 <p className="mb-2 text-sm text-muted-foreground">
                                     {isSaving ? 'Processing...' : <><span className="font-semibold">Click to upload</span> or drag and drop</>}
                                 </p>
-                                <p className="text-xs text-muted-foreground">WEBP, JPG, PNG (Max 1MB, optimized to 800px)</p>
                             </div>
                             <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isSaving}/>
                         </label>
@@ -321,6 +313,11 @@ export default function ProductFormModal({
                     <Label htmlFor="sku" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
                     <Input id="sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. LED-HD-240-24" />
                 </div>
+            </div>
+
+             <div className="space-y-2">
+                <Label htmlFor="price" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
+                <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 150.00" />
             </div>
 
             <div className="space-y-2">
