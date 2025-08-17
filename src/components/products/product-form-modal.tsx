@@ -52,7 +52,6 @@ export default function ProductFormModal({
     
     // Form state
     const [isSaving, setIsSaving] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
     const [productCode, setProductCode] = useState('');
     const [category, setCategory] = useState('');
     const [productName, setProductName] = useState('');
@@ -127,33 +126,8 @@ export default function ProductFormModal({
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setIsUploading(true);
-            toast({ title: 'Processing Image...', description: 'Please wait while the image is being optimized.' });
-            try {
-                const options = {
-                    maxSizeMB: 1,
-                    maxWidthOrHeight: 800,
-                    useWebWorker: true,
-                    fileType: 'image/webp',
-                };
-                const compressedFile = await imageCompression(file, options);
-                
-                setImageFile(compressedFile);
-                setImagePreview(URL.createObjectURL(compressedFile));
-                
-                toast({ title: 'Success', description: 'Image is ready for upload.', variant: 'success' });
-            } catch (error) {
-                console.error('Image compression failed:', error);
-                toast({
-                    title: "Image Processing Failed",
-                    description: "Could not process the image. Please try a different one.",
-                    variant: "destructive",
-                });
-                setImageFile(null);
-                setImagePreview(null);
-            } finally {
-                setIsUploading(false);
-            }
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
         }
     };
 
@@ -179,7 +153,6 @@ export default function ProductFormModal({
         setSupplier('');
         setLocation('');
         setIsSaving(false);
-        setIsUploading(false);
         setUom('');
         setStock('');
         setCost('');
@@ -189,31 +162,31 @@ export default function ProductFormModal({
     };
 
     const handleClose = () => {
-        if (isSaving || isUploading) return;
+        if (isSaving) return;
         resetForm();
         onClose();
     }
 
     const handleSubmit = async () => {
-        if (isUploading) {
-            toast({ title: "Please wait", description: "Image is still processing.", variant: "destructive" });
-            return;
-        }
-        
         setIsSaving(true);
-    
-        try {
-            let imageUrl = product?.imageUrl || '';
+        let imageUrl = product?.imageUrl || '';
 
+        try {
             if (imageFile) {
-                toast({ title: 'Uploading Image...', description: 'This may take a moment...' });
-                const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-                const uploadTask = await uploadBytes(storageRef, imageFile);
+                toast({ title: 'Uploading Image...', description: 'Please wait...' });
+                const options = {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 800,
+                    useWebWorker: true,
+                    fileType: 'image/webp',
+                };
+                const compressedFile = await imageCompression(imageFile, options);
+                const storageRef = ref(storage, `products/${Date.now()}_${compressedFile.name}`);
+                const uploadTask = await uploadBytes(storageRef, compressedFile);
                 imageUrl = await getDownloadURL(uploadTask.ref);
                 toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
-            } else if (!imagePreview && !product?.imageUrl) { 
-                 imageUrl = 'https://placehold.co/800x800.png';
             } else if (!imagePreview && product?.imageUrl) {
+                // This means the image was removed
                 imageUrl = '';
             }
 
@@ -244,6 +217,7 @@ export default function ProductFormModal({
                 await onAddProduct(productData as Omit<Product, 'id' | 'createdAt' | 'status'>);
             }
             handleClose();
+
         } catch (error) {
             console.error("Operation failed", error);
             const errorMessage = error instanceof Error ? error.message : 'Please try again.';
@@ -310,50 +284,50 @@ export default function ProductFormModal({
                             size="icon"
                             className="absolute top-2 right-2 h-7 w-7"
                             onClick={removeImage}
-                            disabled={isSaving || isUploading}
+                            disabled={isSaving}
                         >
                             <X className="h-4 w-4" />
                         </Button>
                     </div>
                 ) : (
                     <div className="flex items-center justify-center w-full">
-                        <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isUploading ? 'cursor-not-allowed bg-muted/50' : 'cursor-pointer bg-muted hover:bg-muted/80'}`}>
+                        <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isSaving ? 'cursor-not-allowed bg-muted/50' : 'cursor-pointer bg-muted hover:bg-muted/80'}`}>
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                {isUploading ? (
+                                {isSaving ? (
                                     <Loader2 className="w-8 h-8 mb-4 text-primary animate-spin" />
                                 ) : (
                                     <Upload className="w-8 h-8 mb-4 text-primary" />
                                 )}
                                 <p className="mb-2 text-sm text-muted-foreground">
-                                    {isUploading ? 'Processing...' : <><span className="font-semibold">Click to upload</span> or drag and drop</>}
+                                    {isSaving ? 'Processing...' : <><span className="font-semibold">Click to upload</span> or drag and drop</>}
                                 </p>
                                 <p className="text-xs text-muted-foreground">WEBP, JPG, PNG (Max 1MB, optimized to 800px)</p>
                             </div>
-                            <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isUploading || isSaving}/>
+                            <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isSaving}/>
                         </label>
                     </div> 
                 )}
             </div>
 
-            <div className="flex gap-4">
-                 <div className="space-y-2" style={{width: '50%'}}>
+            <div className="flex gap-4 items-end">
+                <div className="space-y-2" style={{width: '50%'}}>
                     <Label htmlFor="product-name" className="flex items-center gap-2"><Package className="h-4 w-4 text-blue-500" /> Product Name</Label>
                     <Input id="product-name" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="e.g. High-Density LED Striplight" />
-                </div>
-                <div className="space-y-2" style={{width: '25%'}}>
-                    <Label htmlFor="price" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
-                    <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 150.00" />
                 </div>
                 <div className="space-y-2" style={{width: '25%'}}>
                     <Label htmlFor="cost" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-orange-500" /> Cost</Label>
                     <Input id="cost" type="number" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="e.g. 100.00" />
                 </div>
+                <div className="space-y-2" style={{width: '25%'}}>
+                    <Label htmlFor="sku" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
+                    <Input id="sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. LED-HD-240-24" />
+                </div>
             </div>
              <div className="space-y-2">
-                <Label htmlFor="sku" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
-                <Input id="sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. LED-HD-240-24" />
+                <Label htmlFor="price" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
+                <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 150.00" />
             </div>
-
+            
             <div className="space-y-2">
                 <Label htmlFor="description" className="flex items-center gap-2"><AlignLeft className="h-4 w-4 text-gray-500" /> Description</Label>
                 <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter product description" />
@@ -433,10 +407,10 @@ export default function ProductFormModal({
             </div>
         </div>
         <DialogFooter>
-            <Button variant="outline" onClick={handleClose} disabled={isSaving || isUploading}>Cancel</Button>
-            <Button type="submit" onClick={handleSubmit} disabled={isSaving || isUploading}>
-                {(isSaving || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSaving ? 'Saving...' : (isUploading ? 'Uploading...' : (product ? 'Save Changes' : 'Add Product'))}
+            <Button variant="outline" onClick={handleClose} disabled={isSaving}>Cancel</Button>
+            <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSaving ? 'Saving...' : (product ? 'Save Changes' : 'Add Product')}
             </Button>
         </DialogFooter>
       </DialogContent>
