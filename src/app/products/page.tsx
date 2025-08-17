@@ -67,7 +67,7 @@ export default function ProductsPage() {
 
     const handleAddProduct = async (newProductData: Omit<Product, 'id' | 'createdAt' | 'status'>) => {
         try {
-            const stockStatus = newProductData.stock > 0 
+            const stockStatus = newProductData.stock > 0
                 ? (newProductData.stock <= newProductData.reOrderLevel ? 'Low Stock' : 'In Stock')
                 : 'Out of Stock';
 

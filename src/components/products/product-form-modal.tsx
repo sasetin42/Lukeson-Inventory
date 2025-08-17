@@ -186,7 +186,6 @@ export default function ProductFormModal({
                 imageUrl = await getDownloadURL(uploadTask.ref);
                 toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
             } else if (!imagePreview && product?.imageUrl) {
-                // This means the image was removed
                 imageUrl = '';
             }
 
