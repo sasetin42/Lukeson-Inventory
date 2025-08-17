@@ -65,35 +65,49 @@ export default function ProductsPage() {
         setIsModalOpen(true);
     };
 
-    const handleAddProduct = (newProductData: Omit<Product, 'id' | 'createdAt' | 'status'>) => {
-        const stockStatus = newProductData.stock > 0
-            ? (newProductData.stock <= newProductData.reOrderLevel ? 'Low Stock' : 'In Stock')
-            : 'Out of Stock';
-        
-        return addDoc(collection(db, "products"), {
-            ...newProductData,
-            createdAt: serverTimestamp(),
-            status: stockStatus,
-        });
+    const handleAddProduct = async (newProductData: Omit<Product, 'id' | 'createdAt' | 'status'>) => {
+        try {
+            const stockStatus = newProductData.stock > 0
+                ? (newProductData.stock <= newProductData.reOrderLevel ? 'Low Stock' : 'In Stock')
+                : 'Out of Stock';
+            
+            await addDoc(collection(db, "products"), {
+                ...newProductData,
+                createdAt: serverTimestamp(),
+                status: stockStatus,
+            });
+            toast({ title: "Success", description: "Product added successfully.", variant: "success" });
+        } catch (error) {
+            console.error("Error adding product: ", error);
+            toast({ title: "Error", description: "Failed to add product.", variant: "destructive" });
+            throw error;
+        }
     };
 
-    const handleUpdateProduct = (productId: string, updatedProductData: Partial<Product>) => {
-        const productRef = doc(db, 'products', productId);
-        
-        const currentProduct = products.find(p => p.id === productId);
-        if (!currentProduct) throw new Error("Product not found");
+    const handleUpdateProduct = async (productId: string, updatedProductData: Partial<Product>) => {
+        try {
+            const productRef = doc(db, 'products', productId);
+            
+            const currentProduct = products.find(p => p.id === productId);
+            if (!currentProduct) throw new Error("Product not found");
 
-        const stock = updatedProductData.stock ?? currentProduct.stock;
-        const reOrderLevel = updatedProductData.reOrderLevel ?? currentProduct.reOrderLevel;
+            const stock = updatedProductData.stock ?? currentProduct.stock;
+            const reOrderLevel = updatedProductData.reOrderLevel ?? currentProduct.reOrderLevel;
 
-        const newStatus = stock > 0
-            ? (stock <= reOrderLevel ? 'Low Stock' : 'In Stock')
-            : 'Out of Stock';
-        
-        return updateDoc(productRef, {
-            ...updatedProductData,
-            status: updatedProductData.status || newStatus
-        });
+            const newStatus = stock > 0
+                ? (stock <= reOrderLevel ? 'Low Stock' : 'In Stock')
+                : 'Out of Stock';
+            
+            await updateDoc(productRef, {
+                ...updatedProductData,
+                status: updatedProductData.status || newStatus
+            });
+            toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
+        } catch (error) {
+            console.error("Error updating product: ", error);
+            toast({ title: "Error", description: "Failed to update product.", variant: "destructive" });
+            throw error;
+        }
     };
 
     const handleDeleteProduct = async (product: Product) => {

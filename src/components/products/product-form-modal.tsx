@@ -169,7 +169,7 @@ export default function ProductFormModal({
 
     const handleSubmit = async () => {
         setIsSaving(true);
-        let imageUrl = product?.imageUrl || '';
+        let finalImageUrl = product?.imageUrl || '';
 
         try {
             if (imageFile) {
@@ -183,10 +183,10 @@ export default function ProductFormModal({
                 const compressedFile = await imageCompression(imageFile, options);
                 const storageRef = ref(storage, `products/${Date.now()}_${compressedFile.name}`);
                 const uploadTask = await uploadBytes(storageRef, compressedFile);
-                imageUrl = await getDownloadURL(uploadTask.ref);
+                finalImageUrl = await getDownloadURL(uploadTask.ref);
                 toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
-            } else if (!imagePreview && product?.imageUrl) {
-                imageUrl = '';
+            } else if (!imagePreview) {
+                finalImageUrl = '';
             }
 
             const productData = {
@@ -201,7 +201,7 @@ export default function ProductFormModal({
                 meters: Number(meters) || 0,
                 supplier,
                 location,
-                imageUrl,
+                imageUrl: finalImageUrl,
                 stock: Number(stock) || 0,
                 cost: Number(cost) || 0,
                 price: Number(price) || 0,
@@ -212,10 +212,8 @@ export default function ProductFormModal({
     
             if (product) {
                 await onUpdateProduct(product.id, productData);
-                toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
             } else {
                 await onAddProduct(productData as Omit<Product, 'id' | 'createdAt' | 'status'>);
-                toast({ title: "Success", description: "Product added successfully.", variant: "success" });
             }
             handleClose();
 
@@ -309,7 +307,7 @@ export default function ProductFormModal({
                     </div> 
                 )}
             </div>
-
+            
             <div className="flex gap-4 items-end">
                 <div className="space-y-2" style={{width: '50%'}}>
                     <Label htmlFor="product-name" className="flex items-center gap-2"><Package className="h-4 w-4 text-blue-500" /> Product Name</Label>
