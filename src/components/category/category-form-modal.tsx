@@ -132,9 +132,10 @@ export default function CategoryFormModal({
             return;
         }
         setIsSaving(true);
-        let imageUrl = category?.imageUrl || '';
-
+        
         try {
+            let imageUrl = category?.imageUrl || '';
+
             if (imageFile) {
                 const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
                 await uploadBytes(storageRef, imageFile);
@@ -238,8 +239,8 @@ export default function CategoryFormModal({
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose} disabled={isSaving || isUploading}>Cancel</Button>
                     <Button type="submit" onClick={handleSubmit} disabled={isSaving || isUploading}>
-                        {(isSaving || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isSaving ? 'Saving...' : isUploading ? 'Uploading...' : (category ? 'Save Changes' : 'Add Category')}
+                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {isSaving ? 'Saving...' : (category ? 'Save Changes' : 'Add Category')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

@@ -199,23 +199,22 @@ export default function ProductFormModal({
             toast({ title: "Please wait", description: "Image is still processing.", variant: "destructive" });
             return;
         }
+        
         setIsSaving(true);
     
         try {
-            let finalImageUrl = product?.imageUrl || '';
+            let imageUrl = product?.imageUrl || '';
 
             if (imageFile) {
-                toast({ title: 'Uploading Image...', description: 'Please wait.' });
+                toast({ title: 'Uploading Image...', description: 'This may take a moment...' });
                 const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
                 await uploadBytes(storageRef, imageFile);
-                finalImageUrl = await getDownloadURL(storageRef);
-                toast({ title: 'Upload Successful', description: 'Image saved.', variant: 'success' });
-            } else if (!imagePreview && !product) { 
-                finalImageUrl = 'https://placehold.co/800x800.png';
-            } else if (!imagePreview) {
-                 finalImageUrl = '';
+                imageUrl = await getDownloadURL(storageRef);
+                toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
+            } else if (!imagePreview && !product?.imageUrl) {
+                 imageUrl = '';
             }
-    
+
             const productData = {
                 productCode,
                 name: productName,
@@ -228,7 +227,7 @@ export default function ProductFormModal({
                 meters: Number(meters) || 0,
                 supplier,
                 location,
-                imageUrl: finalImageUrl,
+                imageUrl,
                 stock: Number(stock) || 0,
                 cost: Number(cost) || 0,
                 price: Number(price) || 0,
@@ -434,8 +433,8 @@ export default function ProductFormModal({
         <DialogFooter>
             <Button variant="outline" onClick={handleClose} disabled={isSaving || isUploading}>Cancel</Button>
             <Button type="submit" onClick={handleSubmit} disabled={isSaving || isUploading}>
-                {(isSaving || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSaving ? 'Saving...' : isUploading ? 'Uploading...' : (product ? 'Save Changes' : 'Add Product')}
+                {(isSaving) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSaving ? 'Saving...' : (product ? 'Save Changes' : 'Add Product')}
             </Button>
         </DialogFooter>
       </DialogContent>
