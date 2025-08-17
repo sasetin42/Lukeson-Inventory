@@ -205,16 +205,18 @@ export default function ProductFormModal({
         try {
             let imageUrl = product?.imageUrl || '';
 
+            // Step 1: Upload image if a new one is selected
             if (imageFile) {
                 toast({ title: 'Uploading Image...', description: 'This may take a moment...' });
                 const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-                await uploadBytes(storageRef, imageFile);
-                imageUrl = await getDownloadURL(storageRef);
+                const uploadTask = await uploadBytes(storageRef, imageFile);
+                imageUrl = await getDownloadURL(uploadTask.ref);
                 toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
-            } else if (!imagePreview && !product?.imageUrl) {
+            } else if (!imagePreview) { // If image was removed
                  imageUrl = '';
             }
 
+            // Step 2: Prepare product data with the correct image URL
             const productData = {
                 productCode,
                 name: productName,
@@ -236,6 +238,7 @@ export default function ProductFormModal({
                 expiryDateTracking,
             };
     
+            // Step 3: Save data to Firestore
             if (product) {
                 await onUpdateProduct(product.id, productData);
             } else {
