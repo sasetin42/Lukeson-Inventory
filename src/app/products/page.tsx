@@ -87,8 +87,11 @@ export default function ProductsPage() {
         try {
             const productRef = doc(db, 'products', productId);
             
-            const stock = updatedProductData.stock ?? 0;
-            const reOrderLevel = updatedProductData.reOrderLevel ?? 0;
+            const currentProduct = products.find(p => p.id === productId);
+            if (!currentProduct) throw new Error("Product not found");
+
+            const stock = updatedProductData.stock ?? currentProduct.stock;
+            const reOrderLevel = updatedProductData.reOrderLevel ?? currentProduct.reOrderLevel;
 
             const newStatus = stock > 0
                 ? (stock <= reOrderLevel ? 'Low Stock' : 'In Stock')
@@ -96,7 +99,7 @@ export default function ProductsPage() {
             
             await updateDoc(productRef, {
                 ...updatedProductData,
-                status: newStatus
+                status: updatedProductData.status || newStatus
             });
             toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
         } catch (error) {

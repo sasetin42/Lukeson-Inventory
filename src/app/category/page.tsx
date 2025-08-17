@@ -8,7 +8,7 @@ import { LayoutGrid, PlusCircle } from "lucide-react";
 import CategoryList from "@/components/category/category-list";
 import CategoryFormModal from "@/components/category/category-form-modal";
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc, deleteDoc, getDocs, query, where } from "firebase/firestore";
 import { useToast } from '@/hooks/use-toast';
 import type { ItemCategory } from '@/lib/types';
 
@@ -74,6 +74,18 @@ export default function CategoryPage() {
         variant: "destructive",
       });
       return;
+    }
+
+    // Check if any product is using this category
+    const productsQuery = query(collection(db, 'products'), where('category', '==', category.name));
+    const productSnap = await getDocs(productsQuery);
+    if (!productSnap.empty) {
+        toast({
+            title: "Deletion Failed",
+            description: `Cannot delete category. It is being used by ${productSnap.size} product(s).`,
+            variant: "destructive"
+        });
+        return;
     }
 
     try {

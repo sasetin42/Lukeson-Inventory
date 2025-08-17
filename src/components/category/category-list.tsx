@@ -37,7 +37,6 @@ interface CategoryListProps {
 export default function CategoryList({ categories, onEdit, onDelete, loading }: CategoryListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState<ItemCategory | null>(null);
-    const { toast } = useToast();
 
     const openDeleteAlert = (category: ItemCategory) => {
         setCategoryToDelete(category);
@@ -46,14 +45,9 @@ export default function CategoryList({ categories, onEdit, onDelete, loading }: 
 
     const handleDelete = async () => {
         if (!categoryToDelete) return;
-        try {
-            await onDelete(categoryToDelete);
-        } catch (error) {
-            toast({ title: "Error", description: "Failed to delete category.", variant: "destructive" });
-        } finally {
-            setIsDeleteAlertOpen(false);
-            setCategoryToDelete(null);
-        }
+        onDelete(categoryToDelete);
+        setIsDeleteAlertOpen(false);
+        setCategoryToDelete(null);
     };
   
     const getParentCategoryName = (parentId: string | undefined) => {
