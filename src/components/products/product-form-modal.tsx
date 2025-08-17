@@ -126,10 +126,9 @@ export default function ProductFormModal({
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setIsSaving(true);
+            toast({ title: 'Processing Image...', description: 'Please wait while the image is being optimized.' });
             try {
-                setIsSaving(true);
-                toast({ title: 'Compressing...', description: 'Please wait while the image is being optimized.' });
-
                 const options = {
                     maxSizeMB: 1,
                     maxWidthOrHeight: 800,
@@ -137,33 +136,36 @@ export default function ProductFormModal({
                     fileType: 'image/webp',
                 };
                 const compressedFile = await imageCompression(file, options);
+                
                 setImageFile(compressedFile);
-
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setImagePreview(reader.result as string);
-                    setIsSaving(false);
-                    toast({ title: 'Success', description: 'Image ready for upload.', variant: 'success' });
-                };
-                reader.readAsDataURL(compressedFile);
+                setImagePreview(URL.createObjectURL(compressedFile));
+                
+                toast({ title: 'Success', description: 'Image is ready for upload.', variant: 'success' });
             } catch (error) {
                 console.error('Image compression failed:', error);
                 toast({
-                    title: "Compression Failed",
-                    description: "Could not compress the image. Please try a different one.",
+                    title: "Image Processing Failed",
+                    description: "Could not process the image. Please try a different one.",
                     variant: "destructive",
                 });
+                setImageFile(null);
+                setImagePreview(null);
+            } finally {
                 setIsSaving(false);
             }
         }
     };
 
     const removeImage = () => {
+        if (imagePreview) {
+            URL.revokeObjectURL(imagePreview);
+        }
         setImageFile(null);
         setImagePreview(null);
     };
     
     const resetForm = () => {
+        removeImage();
         setProductCode('');
         setCategory('');
         setProductName('');
@@ -175,8 +177,6 @@ export default function ProductFormModal({
         setMeters('');
         setSupplier('');
         setLocation('');
-        setImageFile(null);
-        setImagePreview(null);
         setIsSaving(false);
         setUom('');
         setStock('');
@@ -198,14 +198,16 @@ export default function ProductFormModal({
     
         try {
             let finalImageUrl = product?.imageUrl || '';
-    
+
             if (imageFile) {
+                toast({ title: 'Uploading Image...', description: 'Please wait.' });
                 const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
                 await uploadBytes(storageRef, imageFile);
                 finalImageUrl = await getDownloadURL(storageRef);
+                toast({ title: 'Upload Successful', description: 'Image saved.', variant: 'success' });
             } else if (!imagePreview && !product) { 
                 finalImageUrl = 'https://placehold.co/800x800.png';
-            } else if (!imagePreview && product) {
+            } else if (!imagePreview) {
                  finalImageUrl = '';
             }
     
@@ -238,9 +240,10 @@ export default function ProductFormModal({
             handleClose();
         } catch (error) {
             console.error("Operation failed", error);
+            const errorMessage = error instanceof Error ? error.message : 'Please try again.';
             toast({
-                title: "Error",
-                description: `Failed to save product. ${error instanceof Error ? error.message : 'Please try again.'}`,
+                title: "Error Saving Product",
+                description: `Failed to save product. ${errorMessage}`,
                 variant: "destructive",
             });
         } finally {
@@ -301,6 +304,7 @@ export default function ProductFormModal({
                             size="icon"
                             className="absolute top-2 right-2 h-7 w-7"
                             onClick={removeImage}
+                            disabled={isSaving}
                         >
                             <X className="h-4 w-4" />
                         </Button>
@@ -311,9 +315,9 @@ export default function ProductFormModal({
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                 <Upload className="w-8 h-8 mb-4 text-primary" />
                                 <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                <p className="text-xs text-muted-foreground">WEBP, JPG, PNG (Max 1MB, 800x800px)</p>
+                                <p className="text-xs text-muted-foreground">WEBP, JPG, PNG (Max 1MB, optimized to 800px)</p>
                             </div>
-                            <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
+                            <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isSaving}/>
                         </label>
                     </div> 
                 )}

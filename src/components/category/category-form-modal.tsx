@@ -76,19 +76,19 @@ export default function CategoryFormModal({
     }, [isOpen, category]);
 
     const resetForm = () => {
+        removeImage();
         setName('');
         setDescription('');
         setParentId('');
-        setImageFile(null);
-        setImagePreview(null);
+        setIsSaving(false);
     }
     
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setIsSaving(true);
+            toast({ title: 'Processing Image...', description: 'Please wait while the image is being optimized.' });
             try {
-                setIsSaving(true);
-                toast({ title: 'Compressing...', description: 'Please wait while the image is being optimized.' });
                 const options = {
                     maxSizeMB: 1,
                     maxWidthOrHeight: 800,
@@ -96,28 +96,30 @@ export default function CategoryFormModal({
                     fileType: 'image/webp',
                 };
                 const compressedFile = await imageCompression(file, options);
-                setImageFile(compressedFile);
 
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setImagePreview(reader.result as string);
-                    setIsSaving(false);
-                    toast({ title: 'Success', description: 'Image ready for upload.', variant: 'success' });
-                };
-                reader.readAsDataURL(compressedFile);
+                setImageFile(compressedFile);
+                setImagePreview(URL.createObjectURL(compressedFile));
+
+                toast({ title: 'Success', description: 'Image ready for upload.', variant: 'success' });
             } catch (error) {
                 console.error('Image compression failed:', error);
                 toast({
-                    title: "Compression Failed",
-                    description: "Could not compress the image. Please try a different one.",
+                    title: "Image Processing Failed",
+                    description: "Could not process the image. Please try a different one.",
                     variant: "destructive",
                 });
+                setImageFile(null);
+                setImagePreview(null);
+            } finally {
                 setIsSaving(false);
             }
         }
     };
     
     const removeImage = () => {
+        if (imagePreview) {
+            URL.revokeObjectURL(imagePreview);
+        }
         setImageFile(null);
         setImagePreview(null);
     };
@@ -126,27 +128,22 @@ export default function CategoryFormModal({
         setIsSaving(true);
         let imageUrl = category?.imageUrl || '';
 
-        if (imageFile) {
-            const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
-            try {
+        try {
+            if (imageFile) {
+                const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
                 await uploadBytes(storageRef, imageFile);
                 imageUrl = await getDownloadURL(storageRef);
-            } catch (error) {
-                console.error("Image upload failed", error);
-                toast({ title: "Error", description: "Failed to upload image.", variant: "destructive" });
-                setIsSaving(false);
-                return;
+            } else if (!imagePreview) {
+                imageUrl = '';
             }
-        }
-        
-        const categoryData = {
-            name,
-            description,
-            parentId: parentId === 'none' ? null : parentId,
-            imageUrl,
-        };
+            
+            const categoryData = {
+                name,
+                description,
+                parentId: parentId === 'none' ? null : parentId,
+                imageUrl,
+            };
 
-        try {
             if (category) {
                 await onUpdateCategory(category.id, categoryData);
             } else {
@@ -162,7 +159,7 @@ export default function CategoryFormModal({
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>{category ? 'Edit Category' : 'Add New Category'}</DialogTitle>
@@ -182,6 +179,7 @@ export default function CategoryFormModal({
                                     size="icon"
                                     className="absolute top-2 right-2 h-7 w-7"
                                     onClick={removeImage}
+                                    disabled={isSaving}
                                 >
                                     <X className="h-4 w-4" />
                                 </Button>
@@ -193,7 +191,7 @@ export default function CategoryFormModal({
                                         <Upload className="w-8 h-8 mb-4 text-primary" />
                                         <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                                     </div>
-                                    <Input id="dropzone-file-category" type="file" className="hidden" onChange={handleImageChange} accept="image/*" />
+                                    <Input id="dropzone-file-category" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isSaving}/>
                                 </label>
                             </div> 
                         )}
