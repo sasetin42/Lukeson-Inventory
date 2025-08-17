@@ -21,7 +21,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot } from 'firebase/firestore';
-import imageCompression from 'browser-image-compression';
 import { useToast } from '@/hooks/use-toast';
 
 interface CategoryFormModalProps {
@@ -88,33 +87,8 @@ export default function CategoryFormModal({
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setIsUploading(true);
-            toast({ title: 'Processing Image...', description: 'Please wait while the image is being optimized.' });
-            try {
-                const options = {
-                    maxSizeMB: 1,
-                    maxWidthOrHeight: 800,
-                    useWebWorker: true,
-                    fileType: 'image/webp',
-                };
-                const compressedFile = await imageCompression(file, options);
-
-                setImageFile(compressedFile);
-                setImagePreview(URL.createObjectURL(compressedFile));
-
-                toast({ title: 'Success', description: 'Image ready for upload.', variant: 'success' });
-            } catch (error) {
-                console.error('Image compression failed:', error);
-                toast({
-                    title: "Image Processing Failed",
-                    description: "Could not process the image. Please try a different one.",
-                    variant: "destructive",
-                });
-                setImageFile(null);
-                setImagePreview(null);
-            } finally {
-                setIsUploading(false);
-            }
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
         }
     };
     
