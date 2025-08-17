@@ -169,9 +169,9 @@ export default function ProductFormModal({
 
     const handleSubmit = async () => {
         setIsSaving(true);
-        let finalImageUrl = product?.imageUrl || '';
-
         try {
+            let finalImageUrl = product?.imageUrl || '';
+
             if (imageFile) {
                 toast({ title: 'Uploading Image...', description: 'Please wait...' });
                 const options = {
@@ -231,7 +231,7 @@ export default function ProductFormModal({
     };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{product ? 'Edit Product' : 'Add New Product'}</DialogTitle>
