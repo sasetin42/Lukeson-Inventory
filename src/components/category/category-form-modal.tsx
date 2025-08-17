@@ -45,6 +45,7 @@ export default function CategoryFormModal({
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
     const [allCategories, setAllCategories] = useState<ItemCategory[]>([]);
     const { toast } = useToast();
 
@@ -81,12 +82,13 @@ export default function CategoryFormModal({
         setDescription('');
         setParentId('');
         setIsSaving(false);
+        setIsUploading(false);
     }
     
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setIsSaving(true);
+            setIsUploading(true);
             toast({ title: 'Processing Image...', description: 'Please wait while the image is being optimized.' });
             try {
                 const options = {
@@ -111,7 +113,7 @@ export default function CategoryFormModal({
                 setImageFile(null);
                 setImagePreview(null);
             } finally {
-                setIsSaving(false);
+                setIsUploading(false);
             }
         }
     };
@@ -125,6 +127,10 @@ export default function CategoryFormModal({
     };
 
     const handleSubmit = async () => {
+        if (isUploading) {
+            toast({ title: "Please wait", description: "Image is still processing.", variant: "destructive" });
+            return;
+        }
         setIsSaving(true);
         let imageUrl = category?.imageUrl || '';
 
@@ -179,19 +185,25 @@ export default function CategoryFormModal({
                                     size="icon"
                                     className="absolute top-2 right-2 h-7 w-7"
                                     onClick={removeImage}
-                                    disabled={isSaving}
+                                    disabled={isSaving || isUploading}
                                 >
                                     <X className="h-4 w-4" />
                                 </Button>
                             </div>
                         ) : (
                             <div className="flex items-center justify-center w-full">
-                                <label htmlFor="dropzone-file-category" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                <label htmlFor="dropzone-file-category" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isUploading ? 'cursor-not-allowed bg-muted/50' : 'cursor-pointer bg-muted hover:bg-muted/80'}`}>
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                        <Upload className="w-8 h-8 mb-4 text-primary" />
-                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                        {isUploading ? (
+                                            <Loader2 className="w-8 h-8 mb-4 text-primary animate-spin" />
+                                        ) : (
+                                            <Upload className="w-8 h-8 mb-4 text-primary" />
+                                        )}
+                                        <p className="mb-2 text-sm text-muted-foreground">
+                                            {isUploading ? 'Processing...' : <><span className="font-semibold">Click to upload</span> or drag and drop</>}
+                                        </p>
                                     </div>
-                                    <Input id="dropzone-file-category" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isSaving}/>
+                                    <Input id="dropzone-file-category" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isUploading || isSaving}/>
                                 </label>
                             </div> 
                         )}
@@ -224,10 +236,10 @@ export default function CategoryFormModal({
 
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose} disabled={isSaving}>Cancel</Button>
-                    <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
-                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {category ? 'Save Changes' : 'Add Category'}
+                    <Button variant="outline" onClick={onClose} disabled={isSaving || isUploading}>Cancel</Button>
+                    <Button type="submit" onClick={handleSubmit} disabled={isSaving || isUploading}>
+                        {(isSaving || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {isSaving ? 'Saving...' : isUploading ? 'Uploading...' : (category ? 'Save Changes' : 'Add Category')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

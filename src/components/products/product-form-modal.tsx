@@ -52,6 +52,7 @@ export default function ProductFormModal({
     
     // Form state
     const [isSaving, setIsSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
     const [productCode, setProductCode] = useState('');
     const [category, setCategory] = useState('');
     const [productName, setProductName] = useState('');
@@ -126,7 +127,7 @@ export default function ProductFormModal({
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            setIsSaving(true);
+            setIsUploading(true);
             toast({ title: 'Processing Image...', description: 'Please wait while the image is being optimized.' });
             try {
                 const options = {
@@ -151,7 +152,7 @@ export default function ProductFormModal({
                 setImageFile(null);
                 setImagePreview(null);
             } finally {
-                setIsSaving(false);
+                setIsUploading(false);
             }
         }
     };
@@ -178,6 +179,7 @@ export default function ProductFormModal({
         setSupplier('');
         setLocation('');
         setIsSaving(false);
+        setIsUploading(false);
         setUom('');
         setStock('');
         setCost('');
@@ -187,13 +189,16 @@ export default function ProductFormModal({
     };
 
     const handleClose = () => {
-        if (isSaving) return;
+        if (isSaving || isUploading) return;
         resetForm();
         onClose();
     }
 
     const handleSubmit = async () => {
-        if (isSaving) return;
+        if (isUploading) {
+            toast({ title: "Please wait", description: "Image is still processing.", variant: "destructive" });
+            return;
+        }
         setIsSaving(true);
     
         try {
@@ -304,20 +309,26 @@ export default function ProductFormModal({
                             size="icon"
                             className="absolute top-2 right-2 h-7 w-7"
                             onClick={removeImage}
-                            disabled={isSaving}
+                            disabled={isSaving || isUploading}
                         >
                             <X className="h-4 w-4" />
                         </Button>
                     </div>
                 ) : (
                     <div className="flex items-center justify-center w-full">
-                        <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                        <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isUploading ? 'cursor-not-allowed bg-muted/50' : 'cursor-pointer bg-muted hover:bg-muted/80'}`}>
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <Upload className="w-8 h-8 mb-4 text-primary" />
-                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                {isUploading ? (
+                                    <Loader2 className="w-8 h-8 mb-4 text-primary animate-spin" />
+                                ) : (
+                                    <Upload className="w-8 h-8 mb-4 text-primary" />
+                                )}
+                                <p className="mb-2 text-sm text-muted-foreground">
+                                    {isUploading ? 'Processing...' : <><span className="font-semibold">Click to upload</span> or drag and drop</>}
+                                </p>
                                 <p className="text-xs text-muted-foreground">WEBP, JPG, PNG (Max 1MB, optimized to 800px)</p>
                             </div>
-                            <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isSaving}/>
+                            <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isUploading || isSaving}/>
                         </label>
                     </div> 
                 )}
@@ -421,10 +432,10 @@ export default function ProductFormModal({
             </div>
         </div>
         <DialogFooter>
-            <Button variant="outline" onClick={handleClose} disabled={isSaving}>Cancel</Button>
-            <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
-                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {product ? 'Save Changes' : 'Add Product'}
+            <Button variant="outline" onClick={handleClose} disabled={isSaving || isUploading}>Cancel</Button>
+            <Button type="submit" onClick={handleSubmit} disabled={isSaving || isUploading}>
+                {(isSaving || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSaving ? 'Saving...' : isUploading ? 'Uploading...' : (product ? 'Save Changes' : 'Add Product')}
             </Button>
         </DialogFooter>
       </DialogContent>
