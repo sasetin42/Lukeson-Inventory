@@ -19,7 +19,7 @@ import { Textarea } from '../ui/textarea';
 import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, Building2, Percent } from 'lucide-react';
 import Image from 'next/image';
 import { db, storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
@@ -175,6 +175,44 @@ export default function ProductFormModal({
         setBarcode('');
     };
 
+    const uploadImageWithRetry = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const storageRef = ref(storage, `products/${Date.now()}_${file.name}`);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+
+            uploadTask.on('state_changed',
+                null, // We don't need to observe progress for this implementation
+                (error) => {
+                    console.error("Image upload failed:", error);
+                    if (error.code === 'storage/retry-limit-exceeded') {
+                         toast({
+                            title: "Image Upload Failed",
+                            description: "Max retry time exceeded. Please check your network connection and try again.",
+                            variant: "destructive",
+                        });
+                    } else {
+                        toast({
+                            title: "Image Upload Failed",
+                            description: `An unknown error occurred during image upload: ${error.message}`,
+                            variant: "destructive",
+                        });
+                    }
+                    reject(error);
+                },
+                async () => {
+                    try {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        resolve(downloadURL);
+                    } catch (error) {
+                        console.error("Failed to get download URL:", error);
+                        reject(error);
+                    }
+                }
+            );
+        });
+    };
+
+
     const handleSubmit = async () => {
         if (!productName) {
             toast({ title: "Validation Error", description: "Product name is required.", variant: "destructive" });
@@ -187,20 +225,7 @@ export default function ProductFormModal({
         try {
             // 1. Handle Image Upload
             if (imageFile) {
-                try {
-                    const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-                    await uploadBytes(storageRef, imageFile);
-                    finalProductImage = await getDownloadURL(storageRef);
-                } catch (uploadError: any) {
-                    console.error("Image upload failed:", uploadError);
-                    toast({
-                        title: "Image Upload Failed",
-                        description: `Could not upload image to Firebase Storage. ${uploadError.message}`,
-                        variant: "destructive",
-                    });
-                    setIsSaving(false);
-                    return; 
-                }
+                finalProductImage = await uploadImageWithRetry(imageFile);
             } else if (!imagePreview) {
                 finalProductImage = '';
             }
@@ -254,12 +279,16 @@ export default function ProductFormModal({
             onSuccess();
 
         } catch (error: any) {
-             console.error("Failed to save product:", error);
-             toast({
-                title: "ERROR Saving Product",
-                description: `Failed to save product. ${error.message}`,
-                variant: "destructive",
-            });
+             // Errors from uploadImageWithRetry are already toasted.
+             // We only toast here if the error is from something else, e.g. Firestore.
+            if (!String(error.code).startsWith('storage/')) {
+                console.error("Failed to save product:", error);
+                toast({
+                    title: "ERROR Saving Product",
+                    description: `Failed to save product data to the database. ${error.message}`,
+                    variant: "destructive",
+                });
+            }
         } finally {
             setIsSaving(false);
         }
