@@ -68,7 +68,7 @@ export default function CategoryFormModal({
                 setName(category.name || '');
                 setDescription(category.description || '');
                 setParentId(category.parentId || '');
-                setImagePreview(category.imageUrl || null);
+                setImagePreview(category.imageUploadUrl || null);
             } else {
                 resetForm();
             }
@@ -108,21 +108,21 @@ export default function CategoryFormModal({
         setIsSaving(true);
         
         try {
-            let imageUrl = category?.imageUrl || '';
+            let imageUploadUrl = category?.imageUploadUrl || '';
 
             if (imageFile) {
                 const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
                 await uploadBytes(storageRef, imageFile);
-                imageUrl = await getDownloadURL(storageRef);
+                imageUploadUrl = await getDownloadURL(storageRef);
             } else if (!imagePreview) {
-                imageUrl = '';
+                imageUploadUrl = '';
             }
             
             const categoryData = {
                 name,
                 description,
                 parentId: parentId === 'none' ? null : parentId,
-                imageUrl,
+                imageUploadUrl,
             };
 
             if (category) {
