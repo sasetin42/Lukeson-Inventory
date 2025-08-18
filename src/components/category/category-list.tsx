@@ -89,7 +89,7 @@ export default function CategoryList({ categories, onEdit, onDelete, loading }: 
                         <TableRow key={category.id}>
                             <TableCell>
                                 <Image 
-                                    src={category.imageUploadUrl || 'https://placehold.co/40x40.png'} 
+                                    src={category.productImage || 'https://placehold.co/40x40.png'} 
                                     alt={category.name} 
                                     width={40} 
                                     height={40} 

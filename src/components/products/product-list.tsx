@@ -152,7 +152,7 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
                     <TableRow key={product.id}>
                         <TableCell>
                         <Image 
-                            src={product.imageUploadUrl || 'https://placehold.co/48x48.png'} 
+                            src={product.productImage || 'https://placehold.co/48x48.png'} 
                             alt={product.name} 
                             width={48} 
                             height={48} 

@@ -68,7 +68,7 @@ export default function CategoryFormModal({
                 setName(category.name || '');
                 setDescription(category.description || '');
                 setParentId(category.parentId || '');
-                setImagePreview(category.imageUploadUrl || null);
+                setImagePreview(category.productImage || null);
             } else {
                 resetForm();
             }
@@ -108,21 +108,21 @@ export default function CategoryFormModal({
         setIsSaving(true);
         
         try {
-            let imageUploadUrl = category?.imageUploadUrl || '';
+            let productImage = category?.productImage || '';
 
             if (imageFile) {
                 const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
                 await uploadBytes(storageRef, imageFile);
-                imageUploadUrl = await getDownloadURL(storageRef);
+                productImage = await getDownloadURL(storageRef);
             } else if (!imagePreview) {
-                imageUploadUrl = '';
+                productImage = '';
             }
             
             const categoryData = {
                 name,
                 description,
                 parentId: parentId === 'none' ? null : parentId,
-                imageUploadUrl,
+                productImage,
             };
 
             if (category) {

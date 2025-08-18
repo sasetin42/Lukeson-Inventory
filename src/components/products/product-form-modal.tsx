@@ -112,7 +112,7 @@ export default function ProductFormModal({
                 setMeters(product.meters?.toString() || '');
                 setSupplier(product.supplier || '');
                 setLocation(product.location || '');
-                setImagePreview(product.imageUploadUrl || null);
+                setImagePreview(product.productImage || null);
                 setImageFile(null);
                 setUom(product.uom || '');
                 setStock(product.stock?.toString() || '');
@@ -183,13 +183,13 @@ export default function ProductFormModal({
         setIsSaving(true);
         
         try {
-            let finalImageUploadUrl = product?.imageUploadUrl || '';
+            let finalProductImage = product?.productImage || '';
 
             if (imageFile) {
                 try {
                     const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
                     await uploadBytes(storageRef, imageFile);
-                    finalImageUploadUrl = await getDownloadURL(storageRef);
+                    finalProductImage = await getDownloadURL(storageRef);
                 } catch (uploadError) {
                     console.error("Image upload failed", uploadError);
                     toast({ title: 'Image Upload Failed', description: 'Could not upload the image. Please try again.', variant: 'destructive' });
@@ -197,7 +197,7 @@ export default function ProductFormModal({
                     return;
                 }
             } else if (!imagePreview) {
-                finalImageUploadUrl = '';
+                finalProductImage = '';
             }
 
             const stockNum = Number(stock) || 0;
@@ -218,7 +218,7 @@ export default function ProductFormModal({
                 meters: Number(meters) || 0,
                 supplier,
                 location,
-                imageUploadUrl: finalImageUploadUrl,
+                productImage: finalProductImage,
                 stock: stockNum,
                 cost: Number(cost) || 0,
                 price: Number(price) || 0,
