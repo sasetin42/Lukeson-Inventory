@@ -23,6 +23,8 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import imageCompression from 'browser-image-compression';
+
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -133,7 +135,7 @@ export default function ProductFormModal({
         }
     }, [isOpen, product, products]);
     
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             setImageFile(file);
@@ -186,16 +188,17 @@ export default function ProductFormModal({
             let finalProductImage = product?.productImage || '';
 
             if (imageFile) {
-                try {
-                    const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-                    await uploadBytes(storageRef, imageFile);
-                    finalProductImage = await getDownloadURL(storageRef);
-                } catch (uploadError) {
-                    console.error("Image upload failed", uploadError);
-                    toast({ title: 'Image Upload Failed', description: 'Could not upload the image. Please try again.', variant: 'destructive' });
-                    setIsSaving(false);
-                    return;
+                const options = {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1920,
+                    useWebWorker: true,
                 }
+                const compressedFile = await imageCompression(imageFile, options);
+
+                const storageRef = ref(storage, `products/${Date.now()}_${compressedFile.name}`);
+                await uploadBytes(storageRef, compressedFile);
+                finalProductImage = await getDownloadURL(storageRef);
+
             } else if (!imagePreview) {
                 finalProductImage = '';
             }
