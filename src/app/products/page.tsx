@@ -11,7 +11,7 @@ import ProductList from "@/components/products/product-list";
 import { Product } from '@/lib/types';
 import ProductFormModal from '@/components/products/product-form-modal';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import { useToast } from '@/hooks/use-toast';
 
 export default function ProductsPage() {
@@ -64,51 +64,11 @@ export default function ProductsPage() {
         setEditingProduct(product);
         setIsModalOpen(true);
     };
-
-    const handleAddProduct = async (newProductData: Omit<Product, 'id' | 'createdAt' | 'status'>) => {
-        try {
-            const stockStatus = newProductData.stock > 0
-                ? (newProductData.stock <= newProductData.reOrderLevel ? 'Low Stock' : 'In Stock')
-                : 'Out of Stock';
-            
-            await addDoc(collection(db, "products"), {
-                ...newProductData,
-                createdAt: serverTimestamp(),
-                status: stockStatus,
-            });
-            toast({ title: "Success", description: "Product added successfully.", variant: "success" });
-        } catch (error) {
-            console.error("Error adding product: ", error);
-            toast({ title: "Error", description: "Failed to add product.", variant: "destructive" });
-            throw error;
-        }
-    };
-
-    const handleUpdateProduct = async (productId: string, updatedProductData: Partial<Product>) => {
-        try {
-            const productRef = doc(db, 'products', productId);
-            
-            const currentProduct = products.find(p => p.id === productId);
-            if (!currentProduct) throw new Error("Product not found");
-
-            const stock = updatedProductData.stock ?? currentProduct.stock;
-            const reOrderLevel = updatedProductData.reOrderLevel ?? currentProduct.reOrderLevel;
-
-            const newStatus = stock > 0
-                ? (stock <= reOrderLevel ? 'Low Stock' : 'In Stock')
-                : 'Out of Stock';
-            
-            await updateDoc(productRef, {
-                ...updatedProductData,
-                status: updatedProductData.status || newStatus
-            });
-            toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
-        } catch (error) {
-            console.error("Error updating product: ", error);
-            toast({ title: "Error", description: "Failed to update product.", variant: "destructive" });
-            throw error;
-        }
-    };
+    
+    const handleFormSuccess = () => {
+        setIsModalOpen(false);
+        setEditingProduct(null);
+    }
 
     const handleDeleteProduct = async (product: Product) => {
         try {
@@ -187,14 +147,18 @@ export default function ProductsPage() {
       </div>
       <ProductList products={products} onEdit={handleOpenModal} onDelete={handleDeleteProduct} />
 
-      <ProductFormModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onAddProduct={handleAddProduct}
-        onUpdateProduct={handleUpdateProduct}
-        product={editingProduct}
-        totalProducts={products.length}
-      />
+      {isModalOpen && (
+          <ProductFormModal 
+            isOpen={isModalOpen}
+            onClose={() => {
+                setIsModalOpen(false);
+                setEditingProduct(null);
+            }}
+            onSuccess={handleFormSuccess}
+            product={editingProduct}
+            totalProducts={products.length}
+          />
+      )}
     </div>
   );
 }

@@ -20,15 +20,14 @@ import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Pa
 import Image from 'next/image';
 import { db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddProduct: (product: Omit<Product, 'id' | 'createdAt' | 'status'>) => Promise<any>;
-  onUpdateProduct: (productId: string, product: Partial<Product>) => Promise<any>;
+  onSuccess: () => void;
   product: Product | null;
   totalProducts: number;
 }
@@ -40,8 +39,7 @@ const voltageOptions = ["220", "24", "12"];
 export default function ProductFormModal({ 
     isOpen, 
     onClose, 
-    onAddProduct, 
-    onUpdateProduct,
+    onSuccess,
     product, 
     totalProducts 
 }: ProductFormModalProps) {
@@ -106,6 +104,7 @@ export default function ProductFormModal({
                 setSupplier(product.supplier || '');
                 setLocation(product.location || '');
                 setImagePreview(product.imageUrl || null);
+                setImageFile(null);
                 setUom(product.uom || '');
                 setStock(product.stock?.toString() || '');
                 setCost(product.cost?.toString() || '');
@@ -122,7 +121,7 @@ export default function ProductFormModal({
         }
     }, [isOpen, product, totalProducts]);
     
-    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             setImageFile(file);
@@ -160,30 +159,32 @@ export default function ProductFormModal({
         setExpiryDateTracking(false);
     };
 
-    const handleClose = () => {
-        if (isSaving) return;
-        resetForm();
-        onClose();
-    }
-
     const handleSubmit = async () => {
+        if (!productName) {
+            toast({ title: "Validation Error", description: "Product name is required.", variant: "destructive" });
+            return;
+        }
+
         setIsSaving(true);
         let finalImageUrl = product?.imageUrl || '';
 
         try {
-            // Step 1: Handle image upload if a new image file is selected
             if (imageFile) {
                 toast({ title: 'Uploading Image...', description: 'Please wait...' });
                 const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-                await uploadBytes(storageRef, imageFile);
-                finalImageUrl = await getDownloadURL(storageRef);
+                const uploadTask = await uploadBytes(storageRef, imageFile);
+                finalImageUrl = await getDownloadURL(uploadTask.ref);
                 toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
-            } else if (!imagePreview) {
-                // This means the user removed an existing image
-                finalImageUrl = '';
+            } else if (!imagePreview && product?.imageUrl) {
+                 finalImageUrl = '';
             }
 
-            // Step 2: Prepare product data object
+            const stockNum = Number(stock) || 0;
+            const reOrderLevelNum = Number(reOrderLevel) || 0;
+            const stockStatus = stockNum > 0
+                ? (stockNum <= reOrderLevelNum ? 'Low Stock' : 'In Stock')
+                : 'Out of Stock';
+
             const productData = {
                 productCode,
                 name: productName,
@@ -197,38 +198,42 @@ export default function ProductFormModal({
                 supplier,
                 location,
                 imageUrl: finalImageUrl,
-                stock: Number(stock) || 0,
+                stock: stockNum,
                 cost: Number(cost) || 0,
                 price: Number(price) || 0,
-                reOrderLevel: Number(reOrderLevel) || 0,
+                reOrderLevel: reOrderLevelNum,
                 uom,
                 expiryDateTracking,
+                status: stockStatus,
             };
-    
-            // Step 3: Add or Update the product in Firestore
-            if (product) {
-                await onUpdateProduct(product.id, productData);
-            } else {
-                await onAddProduct(productData as Omit<Product, 'id' | 'createdAt' | 'status'>);
-            }
-            handleClose();
 
-        } catch (error) {
+            if (product) {
+                const productRef = doc(db, 'products', product.id);
+                await updateDoc(productRef, productData);
+                toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
+            } else {
+                await addDoc(collection(db, "products"), {
+                    ...productData,
+                    createdAt: serverTimestamp(),
+                });
+                toast({ title: "Success", description: "Product added successfully.", variant: "success" });
+            }
+            onSuccess();
+        } catch (error: any) {
             console.error("Operation failed", error);
-            const errorMessage = error instanceof Error ? error.message : 'Please try again.';
+            const errorMessage = error.message || 'Please try again.';
             toast({
                 title: "Error Saving Product",
                 description: `Failed to save product. ${errorMessage}`,
                 variant: "destructive",
             });
         } finally {
-            // Step 4: Always reset the saving state
             setIsSaving(false);
         }
     };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{product ? 'Edit Product' : 'Add New Product'}</DialogTitle>
@@ -403,7 +408,7 @@ export default function ProductFormModal({
             </div>
         </div>
         <DialogFooter>
-            <Button variant="outline" onClick={handleClose} disabled={isSaving}>Cancel</Button>
+            <Button variant="outline" onClick={onClose} disabled={isSaving}>Cancel</Button>
             <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isSaving ? 'Saving...' : (product ? 'Save Changes' : 'Add Product')}
@@ -413,5 +418,3 @@ export default function ProductFormModal({
     </Dialog>
   );
 }
-
-    
