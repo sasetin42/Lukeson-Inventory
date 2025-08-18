@@ -182,10 +182,9 @@ export default function ProductFormModal({
         }
 
         setIsSaving(true);
+        let finalProductImage = product?.productImage || '';
         
         try {
-            let finalProductImage = product?.productImage || '';
-
             // 1. Handle Image Upload
             if (imageFile) {
                 try {
@@ -489,5 +488,3 @@ export default function ProductFormModal({
     </Dialog>
   );
 }
-
-    
