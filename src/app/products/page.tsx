@@ -156,7 +156,6 @@ export default function ProductsPage() {
             }}
             onSuccess={handleFormSuccess}
             product={editingProduct}
-            totalProducts={products.length}
           />
       )}
     </div>

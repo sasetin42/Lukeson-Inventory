@@ -29,7 +29,6 @@ interface ProductFormModalProps {
   onClose: () => void;
   onSuccess: () => void;
   product: Product | null;
-  totalProducts: number;
 }
 
 const uomOptions = ["pcs", "box", "roll", "m", "kg", "pack"];
@@ -41,11 +40,11 @@ export default function ProductFormModal({
     onClose, 
     onSuccess,
     product, 
-    totalProducts 
 }: ProductFormModalProps) {
     const { toast } = useToast();
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [categories, setCategories] = useState<ItemCategory[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     
     // Form state
     const [isSaving, setIsSaving] = useState(false);
@@ -82,9 +81,15 @@ export default function ProductFormModal({
             setCategories(categoriesData);
         });
 
+        const productsUnsub = onSnapshot(collection(db, "products"), (snapshot) => {
+            const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+            setProducts(productsData);
+        });
+
         return () => {
             suppliersUnsub();
             categoriesUnsub();
+            productsUnsub();
         }
     }, [isOpen]);
 
@@ -115,11 +120,11 @@ export default function ProductFormModal({
                 // Adding new product
                 resetForm();
                 const year = new Date().getFullYear();
-                const nextId = (totalProducts + 1).toString().padStart(3, '0');
+                const nextId = (products.length + 1).toString().padStart(3, '0');
                 setProductCode(`PRO-${year}-${nextId}`);
             }
         }
-    }, [isOpen, product, totalProducts]);
+    }, [isOpen, product, products]);
     
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -171,19 +176,19 @@ export default function ProductFormModal({
         try {
             if (imageFile) {
                 toast({ title: 'Uploading Image...', description: 'Please wait...' });
-                 try {
+                try {
                     const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
                     const uploadTask = await uploadBytes(storageRef, imageFile);
                     finalImageUrl = await getDownloadURL(uploadTask.ref);
                     toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
-                } catch (error) {
-                    console.error("Image upload failed", error);
+                } catch (uploadError) {
+                    console.error("Image upload failed", uploadError);
                     toast({ title: 'Image Upload Failed', description: 'Could not upload the image. Please try again.', variant: 'destructive' });
                     setIsSaving(false);
                     return;
                 }
-            } else if (!imagePreview && product?.imageUrl) {
-                 finalImageUrl = '';
+            } else if (!imagePreview) { // Image was removed
+                finalImageUrl = '';
             }
 
             const stockNum = Number(stock) || 0;
@@ -213,7 +218,7 @@ export default function ProductFormModal({
                 expiryDateTracking,
                 status: product?.status === 'Discontinued' ? product.status : stockStatus,
             };
-            
+
             if (product) {
                 const productRef = doc(db, 'products', product.id);
                 await updateDoc(productRef, productData);
@@ -228,10 +233,9 @@ export default function ProductFormModal({
             onSuccess();
         } catch (error: any) {
             console.error("Operation failed", error);
-            const errorMessage = error.message || 'Please try again.';
             toast({
                 title: "Error Saving Product",
-                description: `Failed to save product data to the database. ${errorMessage}`,
+                description: `Failed to save product. ${error.message}`,
                 variant: "destructive",
             });
         } finally {
@@ -425,4 +429,3 @@ export default function ProductFormModal({
     </Dialog>
   );
 }
-
