@@ -23,7 +23,6 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import imageCompression from 'browser-image-compression';
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -172,23 +171,19 @@ export default function ProductFormModal({
         let finalImageUrl = product?.imageUrl || '';
 
         try {
+            // Step 1: Handle image upload if a new image file is selected
             if (imageFile) {
-                toast({ title: 'Compressing Image...', description: 'Please wait...' });
-                const compressedFile = await imageCompression(imageFile, {
-                    maxSizeMB: 1,
-                    maxWidthOrHeight: 1920,
-                    useWebWorker: true,
-                });
-
                 toast({ title: 'Uploading Image...', description: 'Please wait...' });
-                const storageRef = ref(storage, `products/${Date.now()}_${compressedFile.name}`);
-                await uploadBytes(storageRef, compressedFile);
+                const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
+                await uploadBytes(storageRef, imageFile);
                 finalImageUrl = await getDownloadURL(storageRef);
                 toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
-            } else if (!imagePreview && product?.imageUrl) {
+            } else if (!imagePreview) {
+                // This means the user removed an existing image
                 finalImageUrl = '';
             }
 
+            // Step 2: Prepare product data object
             const productData = {
                 productCode,
                 name: productName,
@@ -210,6 +205,7 @@ export default function ProductFormModal({
                 expiryDateTracking,
             };
     
+            // Step 3: Add or Update the product in Firestore
             if (product) {
                 await onUpdateProduct(product.id, productData);
             } else {
@@ -226,6 +222,7 @@ export default function ProductFormModal({
                 variant: "destructive",
             });
         } finally {
+            // Step 4: Always reset the saving state
             setIsSaving(false);
         }
     };
@@ -416,3 +413,5 @@ export default function ProductFormModal({
     </Dialog>
   );
 }
+
+    
