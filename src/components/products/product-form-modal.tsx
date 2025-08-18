@@ -181,23 +181,22 @@ export default function ProductFormModal({
         }
 
         setIsSaving(true);
-        let finalImageUrl = product?.imageUrl || '';
-
+        
         try {
+            let finalImageUrl = product?.imageUrl || '';
+
             if (imageFile) {
-                toast({ title: 'Uploading Image...', description: 'Please wait...' });
                 try {
                     const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-                    const uploadTask = await uploadBytes(storageRef, imageFile);
-                    finalImageUrl = await getDownloadURL(uploadTask.ref);
-                    toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
+                    await uploadBytes(storageRef, imageFile);
+                    finalImageUrl = await getDownloadURL(storageRef);
                 } catch (uploadError) {
                     console.error("Image upload failed", uploadError);
                     toast({ title: 'Image Upload Failed', description: 'Could not upload the image. Please try again.', variant: 'destructive' });
                     setIsSaving(false);
                     return;
                 }
-            } else if (!imagePreview) { // Image was removed
+            } else if (!imagePreview) {
                 finalImageUrl = '';
             }
 
