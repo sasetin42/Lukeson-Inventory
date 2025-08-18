@@ -9,7 +9,8 @@ const firebaseConfig = {
   "storageBucket": "lukeson-inventory.appspot.com",
   "apiKey": "AIzaSyBsmEybb-ASyKOifiWleLs9kZsy2NMwAJQ",
   "authDomain": "lukeson-inventory.firebaseapp.com",
-  "messagingSenderId": "365879575919"
+  "messagingSenderId": "365879575919",
+  "measurementId": "G-XXXXXXXXXX"
 };
 
 // Initialize Firebase

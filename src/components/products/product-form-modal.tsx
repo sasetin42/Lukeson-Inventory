@@ -240,33 +240,24 @@ export default function ProductFormModal({
             };
 
             // 2. Handle Firestore Operation
-            try {
-                if (product) {
-                    const productRef = doc(db, 'products', product.id);
-                    await updateDoc(productRef, productData);
-                    toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
-                } else {
-                    await addDoc(collection(db, "products"), {
-                        ...productData,
-                        createdAt: serverTimestamp(),
-                    });
-                    toast({ title: "Success", description: "Product added successfully.", variant: "success" });
-                }
-                onSuccess();
-            } catch (dbError: any) {
-                 console.error("Firestore operation failed:", dbError);
-                 toast({
-                    title: "Database Error",
-                    description: `Failed to save product data. ${dbError.message}`,
-                    variant: "destructive",
+            if (product) {
+                const productRef = doc(db, 'products', product.id);
+                await updateDoc(productRef, productData);
+                toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
+            } else {
+                await addDoc(collection(db, "products"), {
+                    ...productData,
+                    createdAt: serverTimestamp(),
                 });
+                toast({ title: "Success", description: "Product added successfully.", variant: "success" });
             }
+            onSuccess();
 
         } catch (error: any) {
-            console.error("General error in handleSubmit:", error);
-            toast({
-                title: "An Unexpected Error Occurred",
-                description: error.message,
+             console.error("Failed to save product:", error);
+             toast({
+                title: "ERROR Saving Product",
+                description: `Failed to save product. ${error.message}`,
                 variant: "destructive",
             });
         } finally {
