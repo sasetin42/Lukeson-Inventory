@@ -186,10 +186,22 @@ export default function ProductFormModal({
         try {
             let finalProductImage = product?.productImage || '';
 
+            // 1. Handle Image Upload
             if (imageFile) {
-                const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-                await uploadBytes(storageRef, imageFile);
-                finalProductImage = await getDownloadURL(storageRef);
+                try {
+                    const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
+                    await uploadBytes(storageRef, imageFile);
+                    finalProductImage = await getDownloadURL(storageRef);
+                } catch (uploadError: any) {
+                    console.error("Image upload failed:", uploadError);
+                    toast({
+                        title: "Image Upload Failed",
+                        description: `Could not upload image to Firebase Storage. ${uploadError.message}`,
+                        variant: "destructive",
+                    });
+                    setIsSaving(false);
+                    return; 
+                }
             } else if (!imagePreview) {
                 finalProductImage = '';
             }
@@ -228,23 +240,34 @@ export default function ProductFormModal({
                 barcode,
             };
 
-            if (product) {
-                const productRef = doc(db, 'products', product.id);
-                await updateDoc(productRef, productData);
-                toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
-            } else {
-                await addDoc(collection(db, "products"), {
-                    ...productData,
-                    createdAt: serverTimestamp(),
+            // 2. Handle Firestore Operation
+            try {
+                if (product) {
+                    const productRef = doc(db, 'products', product.id);
+                    await updateDoc(productRef, productData);
+                    toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
+                } else {
+                    await addDoc(collection(db, "products"), {
+                        ...productData,
+                        createdAt: serverTimestamp(),
+                    });
+                    toast({ title: "Success", description: "Product added successfully.", variant: "success" });
+                }
+                onSuccess();
+            } catch (dbError: any) {
+                 console.error("Firestore operation failed:", dbError);
+                 toast({
+                    title: "Database Error",
+                    description: `Failed to save product data. ${dbError.message}`,
+                    variant: "destructive",
                 });
-                toast({ title: "Success", description: "Product added successfully.", variant: "success" });
             }
-            onSuccess();
+
         } catch (error: any) {
-            console.error("Operation failed", error);
+            console.error("General error in handleSubmit:", error);
             toast({
-                title: "ERROR Saving Product",
-                description: `Failed to save product because of the uploaded image. ${error.message}`,
+                title: "An Unexpected Error Occurred",
+                description: error.message,
                 variant: "destructive",
             });
         } finally {
