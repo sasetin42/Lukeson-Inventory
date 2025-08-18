@@ -171,10 +171,17 @@ export default function ProductFormModal({
         try {
             if (imageFile) {
                 toast({ title: 'Uploading Image...', description: 'Please wait...' });
-                const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-                const uploadTask = await uploadBytes(storageRef, imageFile);
-                finalImageUrl = await getDownloadURL(uploadTask.ref);
-                toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
+                 try {
+                    const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
+                    const uploadTask = await uploadBytes(storageRef, imageFile);
+                    finalImageUrl = await getDownloadURL(uploadTask.ref);
+                    toast({ title: 'Upload Successful', description: 'Image has been saved.', variant: 'success' });
+                } catch (error) {
+                    console.error("Image upload failed", error);
+                    toast({ title: 'Image Upload Failed', description: 'Could not upload the image. Please try again.', variant: 'destructive' });
+                    setIsSaving(false);
+                    return;
+                }
             } else if (!imagePreview && product?.imageUrl) {
                  finalImageUrl = '';
             }
@@ -204,9 +211,9 @@ export default function ProductFormModal({
                 reOrderLevel: reOrderLevelNum,
                 uom,
                 expiryDateTracking,
-                status: stockStatus,
+                status: product?.status === 'Discontinued' ? product.status : stockStatus,
             };
-
+            
             if (product) {
                 const productRef = doc(db, 'products', product.id);
                 await updateDoc(productRef, productData);
@@ -224,7 +231,7 @@ export default function ProductFormModal({
             const errorMessage = error.message || 'Please try again.';
             toast({
                 title: "Error Saving Product",
-                description: `Failed to save product. ${errorMessage}`,
+                description: `Failed to save product data to the database. ${errorMessage}`,
                 variant: "destructive",
             });
         } finally {
@@ -418,3 +425,4 @@ export default function ProductFormModal({
     </Dialog>
   );
 }
+
