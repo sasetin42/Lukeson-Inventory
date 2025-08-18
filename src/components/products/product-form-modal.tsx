@@ -23,7 +23,6 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import imageCompression from 'browser-image-compression';
 
 
 interface ProductFormModalProps {
@@ -188,26 +187,21 @@ export default function ProductFormModal({
             let finalProductImage = product?.productImage || '';
 
             if (imageFile) {
-                const options = {
-                    maxSizeMB: 1,
-                    maxWidthOrHeight: 1920,
-                    useWebWorker: true,
-                }
-                const compressedFile = await imageCompression(imageFile, options);
-
-                const storageRef = ref(storage, `products/${Date.now()}_${compressedFile.name}`);
-                await uploadBytes(storageRef, compressedFile);
+                const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
+                await uploadBytes(storageRef, imageFile);
                 finalProductImage = await getDownloadURL(storageRef);
-
             } else if (!imagePreview) {
                 finalProductImage = '';
             }
 
             const stockNum = Number(stock) || 0;
             const reOrderLevelNum = Number(reOrderLevel) || 0;
-            const stockStatus = stockNum > 0
-                ? (stockNum <= reOrderLevelNum ? 'Low Stock' : 'In Stock')
-                : 'Out of Stock';
+            let stockStatus = product?.status || 'In Stock';
+            if (product?.status !== 'Discontinued') {
+                stockStatus = stockNum > 0
+                    ? (stockNum <= reOrderLevelNum ? 'Low Stock' : 'In Stock')
+                    : 'Out of Stock';
+            }
 
             const productData = {
                 productCode,
@@ -228,7 +222,7 @@ export default function ProductFormModal({
                 reOrderLevel: reOrderLevelNum,
                 uom,
                 expiryDateTracking,
-                status: product?.status === 'Discontinued' ? product.status : stockStatus,
+                status: stockStatus,
                 brand,
                 vatType: vatType as 'VATABLE' | 'VAT-EXEMPT' | 'ZERO-RATED',
                 barcode,
@@ -249,8 +243,8 @@ export default function ProductFormModal({
         } catch (error: any) {
             console.error("Operation failed", error);
             toast({
-                title: "Error Saving Product",
-                description: `Failed to save product. ${error.message}`,
+                title: "ERROR Saving Product",
+                description: `Failed to save product because of the uploaded image. ${error.message}`,
                 variant: "destructive",
             });
         } finally {
@@ -472,3 +466,5 @@ export default function ProductFormModal({
     </Dialog>
   );
 }
+
+    
