@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -44,6 +44,8 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
     const [categories, setCategories] = useState<ItemCategory[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('all');
     const { toast } = useToast();
 
     useEffect(() => {
@@ -85,6 +87,15 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
             setProductToDelete(null);
         }
     };
+    
+    const filteredProducts = useMemo(() => {
+        return products.filter(product => {
+            const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                  product.sku.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
+            return matchesSearch && matchesCategory;
+        });
+    }, [products, searchQuery, categoryFilter]);
   
     return (
     <>
@@ -93,16 +104,21 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
             <Tabs defaultValue="products">
             <div className="flex justify-between items-center">
                 <TabsList>
-                <TabsTrigger value="products">Products ({products.length})</TabsTrigger>
+                <TabsTrigger value="products">Products ({filteredProducts.length})</TabsTrigger>
                 <TabsTrigger value="orders">Orders</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
                 </TabsList>
                 <div className="flex items-center gap-4">
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search products by name or SKU..." className="pl-10 w-64" />
+                    <Input 
+                        placeholder="Search products by name or SKU..." 
+                        className="pl-10 w-64"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                 </div>
-                <Select>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                     <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
@@ -116,7 +132,7 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
                 </div>
             </div>
             <TabsContent value="products" className="mt-6">
-                <CardTitle>Products ({products.length})</CardTitle>
+                <CardTitle>Products ({filteredProducts.length})</CardTitle>
                 <CardDescription>Your current inventory of products.</CardDescription>
                 <Table className="mt-4">
                 <TableHeader>
@@ -132,7 +148,7 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {products.map((product) => (
+                    {filteredProducts.map((product) => (
                     <TableRow key={product.id}>
                         <TableCell>
                         <Image 
@@ -183,6 +199,11 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
                     ))}
                 </TableBody>
                 </Table>
+                 {filteredProducts.length === 0 && (
+                    <div className="text-center py-10 text-muted-foreground">
+                        No products found.
+                    </div>
+                )}
             </TabsContent>
             </Tabs>
         </CardHeader>
