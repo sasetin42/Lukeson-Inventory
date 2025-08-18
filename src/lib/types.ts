@@ -61,21 +61,6 @@ export type Warehouse = {
     isPrimary: boolean;
 };
 
-export type Item = {
-    id: string;
-    sku: string;
-    name: string;
-    categoryId: string;
-    uom: string; // Unit of Measure
-    barcode?: string;
-    brand?: string;
-    price: number;
-    vatType: 'VATABLE' | 'VAT-EXEMPT' | 'ZERO-RATED';
-    reOrderLevel: number;
-    status: 'active' | 'discontinued';
-    imageUrl?: string;
-};
-
 export type ItemCategory = {
     id: string;
     name: string;
@@ -300,4 +285,8 @@ export type Product = {
     suppliers?: Supplier[];
     uom: string;
     expiryDateTracking: boolean;
+    brand?: string;
+    vatType: 'VATABLE' | 'VAT-EXEMPT' | 'ZERO-RATED';
+    barcode?: string;
 };
+

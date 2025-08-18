@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Product, Supplier, ItemCategory } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
-import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock } from 'lucide-react';
+import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, Building2, Percent } from 'lucide-react';
 import Image from 'next/image';
 import { db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -34,6 +34,7 @@ interface ProductFormModalProps {
 const uomOptions = ["pcs", "box", "roll", "m", "kg", "pack"];
 const ledQtyOptions = ["240", "180", "120", "72", "60"];
 const voltageOptions = ["220", "24", "12"];
+const vatTypeOptions = ['VATABLE', 'VAT-EXEMPT', 'ZERO-RATED'];
 
 export default function ProductFormModal({ 
     isOpen, 
@@ -67,6 +68,9 @@ export default function ProductFormModal({
     const [price, setPrice] = useState('');
     const [reOrderLevel, setReOrderLevel] = useState('');
     const [expiryDateTracking, setExpiryDateTracking] = useState(false);
+    const [brand, setBrand] = useState('');
+    const [vatType, setVatType] = useState('VATABLE');
+    const [barcode, setBarcode] = useState('');
 
     useEffect(() => {
         if (!isOpen) return;
@@ -116,6 +120,9 @@ export default function ProductFormModal({
                 setPrice(product.price?.toString() || '0');
                 setReOrderLevel(product.reOrderLevel?.toString() || '');
                 setExpiryDateTracking(product.expiryDateTracking || false);
+                setBrand(product.brand || '');
+                setVatType(product.vatType || 'VATABLE');
+                setBarcode(product.barcode || '');
             } else {
                 // Adding new product
                 resetForm();
@@ -162,6 +169,9 @@ export default function ProductFormModal({
         setPrice('');
         setReOrderLevel('');
         setExpiryDateTracking(false);
+        setBrand('');
+        setVatType('VATABLE');
+        setBarcode('');
     };
 
     const handleSubmit = async () => {
@@ -217,6 +227,9 @@ export default function ProductFormModal({
                 uom,
                 expiryDateTracking,
                 status: product?.status === 'Discontinued' ? product.status : stockStatus,
+                brand,
+                vatType: vatType as 'VATABLE' | 'VAT-EXEMPT' | 'ZERO-RATED',
+                barcode,
             };
 
             if (product) {
@@ -325,25 +338,53 @@ export default function ProductFormModal({
                     <Label htmlFor="product-name" className="flex items-center gap-2"><Package className="h-4 w-4 text-blue-500" /> Product Name</Label>
                     <Input id="product-name" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="e.g. High-Density LED Striplight" />
                 </div>
-                <div className="space-y-2" style={{width: '25%'}}>
-                    <Label htmlFor="cost" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-orange-500" /> Cost</Label>
-                    <Input id="cost" type="number" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="e.g. 100.00" />
-                </div>
-                <div className="space-y-2" style={{width: '25%'}}>
-                    <Label htmlFor="sku" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
-                    <Input id="sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. LED-HD-240-24" />
+                 <div className="space-y-2" style={{width: '50%'}}>
+                    <Label htmlFor="brand" className="flex items-center gap-2"><Building2 className="h-4 w-4 text-indigo-500" /> Brand</Label>
+                    <Input id="brand" value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="e.g. Philips" />
                 </div>
             </div>
 
-            <div className="space-y-2">
-                <Label htmlFor="price" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
-                <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 150.00" />
+             <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="sku" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
+                    <Input id="sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. LED-HD-240-24" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="barcode" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-gray-500" /> Barcode (UPC/EAN)</Label>
+                    <Input id="barcode" value={barcode} onChange={(e) => setBarcode(e.target.value)} placeholder="e.g. 4801234567890" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="vat-type" className="flex items-center gap-2"><Percent className="h-4 w-4 text-green-500" /> VAT Type</Label>
+                    <Select onValueChange={setVatType} value={vatType}>
+                        <SelectTrigger id="vat-type">
+                            <SelectValue placeholder="Select VAT Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {vatTypeOptions.map(opt => (
+                                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
+
 
             <div className="space-y-2">
                 <Label htmlFor="description" className="flex items-center gap-2"><AlignLeft className="h-4 w-4 text-gray-500" /> Description</Label>
                 <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter product description" />
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                 <div className="space-y-2">
+                    <Label htmlFor="cost" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-orange-500" /> Cost</Label>
+                    <Input id="cost" type="number" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="e.g. 100.00" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="price" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
+                    <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 150.00" />
+                </div>
+            </div>
+
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">

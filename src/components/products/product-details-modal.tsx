@@ -35,6 +35,8 @@ import {
   Info,
   Edit,
   Trash2,
+  Building2,
+  Percent,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -107,9 +109,12 @@ export default function ProductDetailsModal({
 
   const details = [
     { label: 'SKU', value: product.sku, icon: Barcode, color: 'text-indigo-500' },
+    { label: 'Barcode', value: product.barcode, icon: Barcode, color: 'text-gray-500' },
+    { label: 'Brand', value: product.brand, icon: Building2, color: 'text-indigo-500' },
     { label: 'Category', value: product.category, icon: LayoutGrid, color: 'text-red-500' },
     { label: 'Supplier', value: product.supplier, icon: Truck, color: 'text-green-500' },
     { label: 'Price', value: `₱${(product.price || 0).toFixed(2)}`, icon: DollarSign, color: 'text-green-500' },
+    { label: 'VAT Type', value: product.vatType, icon: Percent, color: 'text-green-500' },
     { label: 'UOM', value: product.uom, icon: Scaling, color: 'text-purple-500' },
     { label: 'LED Qty', value: product.ledQty ? `${product.ledQty}L` : 'N/A', icon: Lightbulb, color: 'text-yellow-500' },
     { label: 'Voltage', value: product.voltage ? `${product.voltage}v` : 'N/A', icon: Zap, color: 'text-orange-500' },
@@ -166,6 +171,7 @@ export default function ProductDetailsModal({
               </h4>
               <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] pl-7">
                 {details.map((detail) => {
+                  if (!detail.value) return null;
                   const Icon = detail.icon;
                   return (
                     <div key={detail.label} className="flex items-center justify-between">
