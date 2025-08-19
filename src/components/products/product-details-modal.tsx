@@ -10,7 +10,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Product } from '@/lib/types';
-import Image from 'next/image';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import {
@@ -53,6 +52,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import ProductImage from './product-image';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -144,8 +144,8 @@ export default function ProductDetailsModal({
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
           <div className="md:col-span-1">
-            <Image
-              src={product.productImage || 'https://placehold.co/300x300.png'}
+            <ProductImage
+              path={product.imageUpload}
               alt={product.name}
               width={300}
               height={300}

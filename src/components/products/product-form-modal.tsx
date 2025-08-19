@@ -19,7 +19,7 @@ import { Textarea } from '../ui/textarea';
 import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, Building2, Percent } from 'lucide-react';
 import Image from 'next/image';
 import { db, storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes } from "firebase/storage";
 import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
@@ -111,7 +111,7 @@ export default function ProductFormModal({
                 setMeters(product.meters?.toString() || '');
                 setSupplier(product.supplier || '');
                 setLocation(product.location || '');
-                setImagePreview(product.productImage || null);
+                setImagePreview(product.imageUpload || null); // Note: this won't be a displayable URL
                 setImageFile(null);
                 setUom(product.uom || '');
                 setStock(product.stock?.toString() || '');
@@ -184,14 +184,14 @@ export default function ProductFormModal({
         }
 
         setIsSaving(true);
-        let finalProductImage = product?.productImage || '';
+        let imageUploadPath = product?.imageUpload || '';
         
         try {
             if (imageFile) {
                  try {
                     const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
                     const uploadResult = await uploadBytes(storageRef, imageFile);
-                    finalProductImage = await getDownloadURL(uploadResult.ref);
+                    imageUploadPath = uploadResult.ref.fullPath;
                 } catch (error) {
                     console.error("Image upload failed:", error);
                     toast({
@@ -203,7 +203,7 @@ export default function ProductFormModal({
                     return;
                 }
             } else if (!imagePreview) {
-                finalProductImage = '';
+                imageUploadPath = '';
             }
 
             const stockNum = Number(stock) || 0;
@@ -227,7 +227,7 @@ export default function ProductFormModal({
                 meters: Number(meters) || 0,
                 supplier,
                 location,
-                productImage: finalProductImage,
+                imageUpload: imageUploadPath,
                 stock: stockNum,
                 cost: Number(cost) || 0,
                 price: Number(price) || 0,
@@ -310,7 +310,7 @@ export default function ProductFormModal({
             
             <div className="space-y-2">
                 <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4 text-purple-500" /> Product Profile Image</Label>
-                {imagePreview ? (
+                {imagePreview && !imagePreview.startsWith('products/') ? (
                     <div className="relative w-full h-48 rounded-lg overflow-hidden">
                         <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="cover" data-ai-hint="product image" />
                         <Button
@@ -340,6 +340,9 @@ export default function ProductFormModal({
                         </label>
                     </div> 
                 )}
+                 {imagePreview && imagePreview.startsWith('products/') && (
+                     <p className="text-sm text-muted-foreground">Image already uploaded. To change it, please upload a new one.</p>
+                 )}
             </div>
             
             <div className="grid grid-cols-2 gap-4">

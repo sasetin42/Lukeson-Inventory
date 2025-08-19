@@ -9,7 +9,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Search, Edit, Trash2, Eye } from "lucide-react";
-import Image from "next/image";
 import { Product, ItemCategory } from "@/lib/types";
 import {
   DropdownMenu,
@@ -32,6 +31,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import ProductImage from './product-image';
 
 interface ProductListProps {
     products: Product[];
@@ -151,10 +151,10 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
                     {filteredProducts.map((product) => (
                     <TableRow key={product.id}>
                         <TableCell>
-                        <Image 
-                            src={product.productImage || 'https://placehold.co/48x48.png'} 
-                            alt={product.name} 
-                            width={48} 
+                        <ProductImage 
+                            path={product.imageUpload}
+                            alt={product.name}
+                            width={48}
                             height={48} 
                             className="rounded-md"
                             data-ai-hint="product image"

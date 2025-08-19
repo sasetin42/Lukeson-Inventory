@@ -209,7 +209,7 @@ export type Return = {
 export type TopSellingItem = {
     id: string;
     name: string;
-    productImage: string;
+    imageUpload: string;
     unitsSold: number;
     revenue: number;
 };
@@ -217,7 +217,7 @@ export type TopSellingItem = {
 export type SlowMovingItem = {
     id: string;
     name: string;
-    productImage: string;
+    imageUpload: string;
     daysInStock: number;
     stock: number;
 };
@@ -266,7 +266,7 @@ export type Product = {
     id: string;
     productCode: string;
     category: string;
-    productImage?: string;
+    imageUpload?: string;
     name: string;
     sku: string;
     description: string;
@@ -289,7 +289,3 @@ export type Product = {
     vatType: 'VATABLE' | 'VAT-EXEMPT' | 'ZERO-RATED';
     barcode?: string;
 };
-
-
-
-
