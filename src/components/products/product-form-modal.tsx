@@ -189,8 +189,8 @@ export default function ProductFormModal({
             if (imageFile) {
                 try {
                     const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-                    await uploadBytes(storageRef, imageFile);
-                    finalProductImage = await getDownloadURL(storageRef);
+                    const uploadResult = await uploadBytes(storageRef, imageFile);
+                    finalProductImage = await getDownloadURL(uploadResult.ref);
                 } catch (error) {
                     console.error("Image upload failed:", error);
                     toast({
