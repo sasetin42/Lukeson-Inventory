@@ -345,12 +345,12 @@ export default function ProductFormModal({
                 )}
             </div>
             
-            <div className="flex gap-4 items-end">
-                <div className="space-y-2" style={{width: '50%'}}>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
                     <Label htmlFor="product-name" className="flex items-center gap-2"><Package className="h-4 w-4 text-blue-500" /> Product Name</Label>
                     <Input id="product-name" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="e.g. High-Density LED Striplight" />
                 </div>
-                 <div className="space-y-2" style={{width: '50%'}}>
+                 <div className="space-y-2">
                     <Label htmlFor="brand" className="flex items-center gap-2"><Building2 className="h-4 w-4 text-indigo-500" /> Brand</Label>
                     <Input id="brand" value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="e.g. Philips" />
                 </div>
