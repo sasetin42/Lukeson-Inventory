@@ -187,7 +187,6 @@ export default function ProductFormModal({
         let finalProductImage = product?.productImage || '';
         
         try {
-            // 1. Handle Image Upload only if a new file is selected
             if (imageFile) {
                  try {
                     const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
@@ -197,10 +196,11 @@ export default function ProductFormModal({
                     console.error("Image upload failed:", error);
                     toast({
                         title: "Image Upload Failed",
-                        description: `Could not upload image. Product saved without image. You can add it by editing. Error: ${error}`,
+                        description: `Could not upload image. Please try again. Error: ${error}`,
                         variant: "destructive",
                     });
-                    // Continue to save product data even if image upload fails
+                    setIsSaving(false);
+                    return;
                 }
             } else if (!imagePreview) {
                 finalProductImage = '';
@@ -240,7 +240,6 @@ export default function ProductFormModal({
                 barcode,
             };
 
-            // 2. Handle Firestore Operation
             if (product) {
                 const productRef = doc(db, 'products', product.id);
                 await updateDoc(productRef, productData);
@@ -258,7 +257,7 @@ export default function ProductFormModal({
             console.error("Failed to save product:", error);
             toast({
                 title: "ERROR Saving Product",
-                description: `Failed to save product. ${error.message}`,
+                description: `Failed to save product data to the database. ${error.message}`,
                 variant: "destructive",
             });
         } finally {
