@@ -19,7 +19,7 @@ import { Textarea } from '../ui/textarea';
 import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, Building2, Percent } from 'lucide-react';
 import Image from 'next/image';
 import { db, storage } from '@/lib/firebase';
-import { ref, uploadBytes } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
@@ -111,7 +111,7 @@ export default function ProductFormModal({
                 setMeters(product.meters?.toString() || '');
                 setSupplier(product.supplier || '');
                 setLocation(product.location || '');
-                setImagePreview(product.imageUpload || null); // Note: this won't be a displayable URL
+                setImagePreview(product.imageUpload || null); 
                 setImageFile(null);
                 setUom(product.uom || '');
                 setStock(product.stock?.toString() || '');
@@ -257,7 +257,7 @@ export default function ProductFormModal({
             console.error("Failed to save product:", error);
             toast({
                 title: "ERROR Saving Product",
-                description: `Failed to save product data to the database. ${error.message}`,
+                description: `Failed to save product. ${error.message}`,
                 variant: "destructive",
             });
         } finally {
