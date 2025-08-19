@@ -258,7 +258,7 @@ export default function ProductFormModal({
             console.error("Failed to save product:", error);
             toast({
                 title: "ERROR Saving Product",
-                description: `Failed to save product data. ${error.message}`,
+                description: `Failed to save product. ${error.message}`,
                 variant: "destructive",
             });
         } finally {
