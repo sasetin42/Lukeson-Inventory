@@ -65,7 +65,7 @@ export default function ProductsPage() {
         setIsModalOpen(true);
     };
     
-    const handleFormSuccess = () => {
+    const handleCloseModal = () => {
         setIsModalOpen(false);
         setEditingProduct(null);
     }
@@ -150,11 +150,7 @@ export default function ProductsPage() {
       {isModalOpen && (
           <ProductFormModal 
             isOpen={isModalOpen}
-            onClose={() => {
-                setIsModalOpen(false);
-                setEditingProduct(null);
-            }}
-            onSuccess={handleFormSuccess}
+            onClose={handleCloseModal}
             product={editingProduct}
           />
       )}

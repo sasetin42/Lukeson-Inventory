@@ -28,7 +28,6 @@ import { useToast } from '@/hooks/use-toast';
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
   product: Product | null;
 }
 
@@ -40,7 +39,6 @@ const vatTypeOptions = ['VATABLE', 'VAT-EXEMPT', 'ZERO-RATED'];
 export default function ProductFormModal({ 
     isOpen, 
     onClose, 
-    onSuccess,
     product, 
 }: ProductFormModalProps) {
     const { toast } = useToast();
@@ -175,6 +173,10 @@ export default function ProductFormModal({
         setBarcode('');
     };
 
+    const handleFormSuccess = () => {
+        onClose();
+    };
+
     const handleSubmit = async () => {
         if (!productName) {
             toast({ title: "Validation Error", description: "Product name is required.", variant: "destructive" });
@@ -198,7 +200,6 @@ export default function ProductFormModal({
                         description: `Failed to upload image. Please try again. Error: ${error}`,
                         variant: "destructive",
                     });
-                    // Don't proceed if image upload fails
                     throw error; 
                 }
             } else if (!imagePreview) {
@@ -251,11 +252,10 @@ export default function ProductFormModal({
                 });
                 toast({ title: "Success", description: "Product added successfully.", variant: "success" });
             }
-            onSuccess();
+            handleFormSuccess();
 
         } catch (error: any) {
             console.error("Failed to save product:", error);
-            // Error from upload will be caught here and we won't toast again
             if (!String(error?.code).startsWith('storage/')) {
                  toast({
                     title: "ERROR Saving Product",
