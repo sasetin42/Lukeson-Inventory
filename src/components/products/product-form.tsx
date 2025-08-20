@@ -185,7 +185,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             let imageUrl = product?.productImage || '';
             
             if (imageFile) {
-                await new Promise<void>((resolve, reject) => {
+                imageUrl = await new Promise<string>((resolve, reject) => {
                     const storageRef = ref(storage, `product_images/${Date.now()}_${imageFile.name}`);
                     const uploadTask = uploadBytesResumable(storageRef, imageFile);
 
@@ -207,8 +207,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                         async () => {
                             try {
                                 const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                                imageUrl = downloadURL;
-                                resolve();
+                                resolve(downloadURL);
                             } catch (error) {
                                 reject(error)
                             }
@@ -485,3 +484,5 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         </div>
     );
 }
+
+    
