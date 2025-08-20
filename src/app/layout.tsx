@@ -121,13 +121,14 @@ export default function RootLayout({
 
   const handleAccordionChange = (value: string[]) => {
       const alwaysOpen = ['Overview', 'Inventory'];
-      let newOpenState = [...value];
-      
-      alwaysOpen.forEach(item => {
+      let newOpenState = value;
+
+      // This ensures that other accordions can be closed, but "Overview" and "Inventory" will be re-opened if the user tries to close them.
+      for (const item of alwaysOpen) {
           if (!newOpenState.includes(item)) {
               newOpenState.push(item);
           }
-      });
+      }
       setOpenAccordion(newOpenState);
   }
 
