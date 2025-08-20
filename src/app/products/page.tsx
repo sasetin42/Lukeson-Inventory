@@ -88,13 +88,13 @@ export default function ProductsPage() {
 
     const handleProductSave = async (savedProductData: Omit<Product, 'id' | 'createdAt'> & {id?: string}) => {
       try {
-          if (savedProductData.id) {
-              const docRef = doc(db, 'products', savedProductData.id);
-              const { id, ...dataToSave } = savedProductData;
+          const { id, ...dataToSave } = savedProductData;
+          if (id) {
+              const docRef = doc(db, 'products', id);
               await setDoc(docRef, dataToSave, { merge: true });
           } else {
               await addDoc(collection(db, 'products'), {
-                  ...savedProductData,
+                  ...dataToSave,
                   createdAt: serverTimestamp()
               });
           }
@@ -106,14 +106,14 @@ export default function ProductsPage() {
 
     const handleCategorySave = async (savedCategory: Omit<ItemCategory, 'id' | 'createdAt'> & {id?: string}) => {
         try {
-            if (savedCategory.id) {
-                const docRef = doc(db, 'categories', savedCategory.id);
-                const { id, ...dataToSave } = savedCategory;
+            const { id, ...dataToSave } = savedCategory;
+            if (id) {
+                const docRef = doc(db, 'categories', id);
                 await setDoc(docRef, dataToSave, { merge: true });
                 toast({ title: "Success", description: "Category updated successfully.", variant: "success" });
             } else {
                 await addDoc(collection(db, 'categories'), {
-                    ...savedCategory,
+                    ...dataToSave,
                     createdAt: serverTimestamp()
                 });
                 toast({ title: "Success", description: "Category added successfully.", variant: "success" });

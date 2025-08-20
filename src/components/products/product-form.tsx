@@ -187,7 +187,6 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             }
 
             const productData: Omit<Product, 'id' | 'createdAt'> & {id?:string} = {
-                id: product?.id,
                 productCode,
                 name: productName,
                 sku,
@@ -213,6 +212,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             };
             
             if (product) {
+                (productData as any).id = product.id;
                 toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
             } else {
                 toast({ title: "Success", description: "Product added successfully.", variant: "success" });
