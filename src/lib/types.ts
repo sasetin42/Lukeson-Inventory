@@ -25,7 +25,8 @@ export type User = {
     email: string;
     role: 'Admin' | 'Inventory Manager' | 'Sales' | 'Purchasing' | 'Finance' | 'Auditor';
     status: 'active' | 'inactive';
-    lastLoginAt: Timestamp;
+    lastLoginAt?: Timestamp;
+    createdAt: FieldValue | Timestamp | Date;
 };
 
 // Contacts
