@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download, Power } from "lucide-react";
+import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download, Power, LayoutGrid } from "lucide-react";
 import { Product, ItemCategory } from "@/lib/types";
 import {
   DropdownMenu,
@@ -35,9 +35,10 @@ interface ProductListProps {
     products: Product[];
     onEdit: (product: Product | null) => void;
     onDelete: (product: Product) => void;
+    onAddCategory: () => void;
 }
 
-export default function ProductList({ products, onEdit, onDelete }: ProductListProps) {
+export default function ProductList({ products, onEdit, onDelete, onAddCategory }: ProductListProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
@@ -138,6 +139,10 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
                         <CardDescription>Your current inventory of products.</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
+                        <Button variant="outline" onClick={onAddCategory}>
+                            <LayoutGrid className="mr-2 h-4 w-4" />
+                            Add Category
+                        </Button>
                         <Button onClick={() => onEdit(null)}>
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Add Product

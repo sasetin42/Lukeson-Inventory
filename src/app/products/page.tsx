@@ -8,14 +8,16 @@ import { Package, PlusCircle, Upload, Download, DollarSign, AlertTriangle, XCirc
 import KpiCard from "@/components/kpi-card";
 import ActionCard from "@/components/action-card";
 import ProductList from "@/components/products/product-list";
-import { Product } from '@/lib/types';
+import { Product, ItemCategory } from '@/lib/types';
 import ProductFormModal from '@/components/products/product-form-modal';
+import CategoryFormModal from '@/components/category/category-form-modal';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const { toast } = useToast();
 
@@ -95,6 +97,25 @@ export default function ProductsPage() {
       }
       persistProducts(updatedProducts);
     }
+    
+    const handleAddCategory = async (newCategoryData: Omit<ItemCategory, 'id' | 'createdAt'>) => {
+        try {
+            const storedCategoriesRaw = localStorage.getItem('categories');
+            const storedCategories = storedCategoriesRaw ? JSON.parse(storedCategoriesRaw) : [];
+            const newCategory: ItemCategory = {
+                ...newCategoryData,
+                id: new Date().toISOString(),
+                createdAt: new Date(),
+            };
+            const updatedCategories = [...storedCategories, newCategory];
+            localStorage.setItem('categories', JSON.stringify(updatedCategories));
+            toast({ title: "Success", description: "Category added successfully.", variant: "success" });
+        } catch (error) {
+            console.error("Error adding category: ", error);
+            toast({ title: "Error", description: "Failed to add category.", variant: "destructive" });
+        }
+    };
+
 
   return (
     <div className="flex flex-col gap-4">
@@ -148,7 +169,8 @@ export default function ProductsPage() {
       <ProductList 
         products={products} 
         onEdit={handleOpenModal} 
-        onDelete={handleDeleteProduct} 
+        onDelete={handleDeleteProduct}
+        onAddCategory={() => setIsCategoryModalOpen(true)}
       />
 
       {isModalOpen && (
@@ -159,6 +181,14 @@ export default function ProductsPage() {
             onSave={handleProductSave}
           />
       )}
+      
+      <CategoryFormModal
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        onAddCategory={handleAddCategory}
+        onUpdateCategory={async () => {}} // Not used here
+        category={null}
+      />
     </div>
   );
 }
