@@ -1,6 +1,6 @@
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getDatabase } from "firebase/database";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -10,12 +10,13 @@ const firebaseConfig = {
   "apiKey": "AIzaSyBsmEybb-ASyKOifiWleLs9kZsy2NMwAJQ",
   "authDomain": "lukeson-inventory.firebaseapp.com",
   "messagingSenderId": "365879575919",
-  "measurementId": "G-XXXXXXXXXX"
+  "measurementId": "G-XXXXXXXXXX",
+  "databaseURL": "https://lukeson-inventory-default-rtdb.firebaseio.com"
 };
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app);
+const db = getDatabase(app);
 const storage = getStorage(app);
 
 export { app, db, storage };

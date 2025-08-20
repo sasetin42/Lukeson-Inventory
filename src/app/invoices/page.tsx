@@ -7,19 +7,21 @@ import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle } from "lucide-react";
 import InvoiceList from "@/components/invoices/invoice-list";
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { ref, onValue } from 'firebase/database';
 import { Invoice } from '@/lib/types';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "invoices"), (snapshot) => {
-      const invoicesData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        date: doc.data().date.toDate().toLocaleDateString(),
-      } as Invoice));
+    const invoicesRef = ref(db, "invoices");
+    const unsubscribe = onValue(invoicesRef, (snapshot) => {
+      const data = snapshot.val();
+      const invoicesData = data ? Object.entries(data).map(([id, value]) => ({
+        id,
+        ...(value as Omit<Invoice, 'id'>),
+        date: new Date((value as Invoice).date).toLocaleDateString(),
+      })) : [];
       setInvoices(invoicesData);
     });
     return () => unsubscribe();

@@ -8,7 +8,7 @@ import { LayoutGrid, PlusCircle } from "lucide-react";
 import CategoryList from "@/components/category/category-list";
 import CategoryFormModal from "@/components/category/category-form-modal";
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, onSnapshot, doc, updateDoc, deleteDoc, getDocs, query, where } from "firebase/firestore";
+import { ref, onValue, push, set, serverTimestamp, update, remove, query, orderByChild, equalTo, get } from 'firebase/database';
 import { useToast } from '@/hooks/use-toast';
 import type { ItemCategory } from '@/lib/types';
 
@@ -20,12 +20,14 @@ export default function CategoryPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "categories"), (snapshot) => {
-      const categoriesData: ItemCategory[] = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate()?.toISOString(),
-      } as ItemCategory)).sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
+    const categoriesRef = ref(db, "categories");
+    const unsubscribe = onValue(categoriesRef, (snapshot) => {
+      const data = snapshot.val();
+      const categoriesData: ItemCategory[] = data ? Object.entries(data).map(([id, value]) => ({
+        id,
+        ...(value as Omit<ItemCategory, 'id'>),
+        createdAt: (value as ItemCategory).createdAt,
+      })).sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime()) : [];
       setCategories(categoriesData);
       setLoading(false);
     });
@@ -39,7 +41,9 @@ export default function CategoryPage() {
 
   const handleAddCategory = async (newCategoryData: Omit<ItemCategory, 'id' | 'createdAt'>) => {
     try {
-      await addDoc(collection(db, "categories"), {
+      const categoriesRef = ref(db, "categories");
+      const newCategoryRef = push(categoriesRef);
+      await set(newCategoryRef, {
         ...newCategoryData,
         createdAt: serverTimestamp(),
       });
@@ -52,8 +56,8 @@ export default function CategoryPage() {
 
   const handleUpdateCategory = async (categoryId: string, updatedCategoryData: Partial<ItemCategory>) => {
     try {
-      const categoryRef = doc(db, 'categories', categoryId);
-      await updateDoc(categoryRef, {
+      const categoryRef = ref(db, `categories/${categoryId}`);
+      await update(categoryRef, {
           ...updatedCategoryData,
           parentId: updatedCategoryData.parentId === 'none' ? null : updatedCategoryData.parentId
       });
@@ -77,9 +81,9 @@ export default function CategoryPage() {
     }
 
     // Check if any product is using this category
-    const productsQuery = query(collection(db, 'products'), where('category', '==', category.name));
-    const productSnap = await getDocs(productsQuery);
-    if (!productSnap.empty) {
+    const productsRef = query(ref(db, 'products'), orderByChild('category'), equalTo(category.name));
+    const productSnap = await get(productsRef);
+    if (productSnap.exists()) {
         toast({
             title: "Deletion Failed",
             description: `Cannot delete category. It is being used by ${productSnap.size} product(s).`,
@@ -89,7 +93,7 @@ export default function CategoryPage() {
     }
 
     try {
-      await deleteDoc(doc(db, "categories", category.id));
+      await remove(ref(db, `categories/${category.id}`));
       toast({ title: "Success", description: "Category deleted successfully.", variant: "success" });
     } catch (error) {
       console.error("Error deleting document: ", error);

@@ -10,7 +10,7 @@ import RecentTransactions from "@/components/dashboard/recent-transactions";
 import QuickStats from "@/components/dashboard/quick-stats";
 import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, orderBy, query, limit } from "firebase/firestore";
+import { ref, onValue, query, orderByChild, limitToLast } from "firebase/database";
 import { Product, Sales } from '@/lib/types';
 
 export default function DashboardPage() {
@@ -19,16 +19,19 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const productsUnsub = onSnapshot(collection(db, "products"), (snapshot) => {
-        const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    const productsRef = ref(db, "products");
+    const productsUnsub = onValue(productsRef, (snapshot) => {
+        const data = snapshot.val();
+        const productsData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<Product, 'id'>) })) : [];
         setProducts(productsData);
         setLoading(false);
     });
 
-    const salesQuery = query(collection(db, 'sales'), orderBy('date', 'desc'), limit(10));
-    const salesUnsub = onSnapshot(salesQuery, (snapshot) => {
-        const salesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), date: doc.data().date.toDate() } as Sales));
-        setSales(salesData);
+    const salesRef = query(ref(db, 'sales'), orderByChild('date'), limitToLast(10));
+    const salesUnsub = onValue(salesRef, (snapshot) => {
+        const data = snapshot.val();
+        const salesData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<Sales, 'id'>), date: new Date((value as Sales).date) })) : [];
+        setSales(salesData.reverse());
     });
 
     return () => {

@@ -29,7 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { collection, onSnapshot } from 'firebase/firestore';
+import { ref, onValue } from 'firebase/database';
 import { db } from '@/lib/firebase';
 import ProductImage from './product-image';
 
@@ -49,8 +49,10 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
     const { toast } = useToast();
 
     useEffect(() => {
-        const categoriesUnsub = onSnapshot(collection(db, "categories"), (snapshot) => {
-            const categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
+        const categoriesRef = ref(db, "categories");
+        const categoriesUnsub = onValue(categoriesRef, (snapshot) => {
+            const data = snapshot.val();
+            const categoriesData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<ItemCategory, 'id'>) })) : [];
             setCategories(categoriesData);
         });
 

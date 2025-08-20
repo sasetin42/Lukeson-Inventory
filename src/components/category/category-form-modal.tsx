@@ -19,8 +19,8 @@ import Image from 'next/image';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { db, storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { collection, onSnapshot } from 'firebase/firestore';
+import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref as dbRef, onValue } from 'firebase/database';
 import { useToast } from '@/hooks/use-toast';
 
 interface CategoryFormModalProps {
@@ -51,11 +51,13 @@ export default function CategoryFormModal({
     useEffect(() => {
         if (!isOpen) return;
 
-        const unsubscribe = onSnapshot(collection(db, "categories"), (snapshot) => {
-            const categoriesData: ItemCategory[] = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-            } as ItemCategory));
+        const categoriesRef = dbRef(db, "categories");
+        const unsubscribe = onValue(categoriesRef, (snapshot) => {
+            const data = snapshot.val();
+            const categoriesData: ItemCategory[] = data ? Object.entries(data).map(([id, value]) => ({
+                id,
+                ...(value as Omit<ItemCategory, 'id'>)
+            })) : [];
             setAllCategories(categoriesData);
         });
 
@@ -111,9 +113,11 @@ export default function CategoryFormModal({
             let productImage = category?.productImage || '';
 
             if (imageFile) {
-                const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
-                await uploadBytes(storageRef, imageFile);
-                productImage = await getDownloadURL(storageRef);
+                setIsUploading(true);
+                const fileRef = storageRef(storage, `categories/${Date.now()}_${imageFile.name}`);
+                await uploadBytes(fileRef, imageFile);
+                productImage = await getDownloadURL(fileRef);
+                setIsUploading(false);
             } else if (!imagePreview) {
                 productImage = '';
             }
@@ -136,6 +140,7 @@ export default function CategoryFormModal({
             toast({ title: "Error", description: "Failed to save category.", variant: "destructive" });
         } finally {
             setIsSaving(false);
+            setIsUploading(false);
         }
     };
 

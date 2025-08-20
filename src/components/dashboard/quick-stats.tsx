@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, where, Timestamp } from 'firebase/firestore';
+import { ref, onValue, query, orderByChild, startAt } from 'firebase/database';
 import { Zap } from "lucide-react";
 import Link from 'next/link';
 
@@ -17,28 +17,38 @@ export default function QuickStats() {
   ]);
 
   useEffect(() => {
-    // In a real app, you would fetch this data from Firestore
-    // For now, we'll use placeholder values and logic
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const thirtyDaysAgoTimestamp = Timestamp.fromDate(thirtyDaysAgo);
+    const thirtyDaysAgoTimestamp = thirtyDaysAgo.getTime();
 
-    const customersUnsub = onSnapshot(query(collection(db, "customers"), where("createdAt", ">=", thirtyDaysAgo)), (snapshot) => {
+    const customersRef = query(ref(db, "customers"), orderByChild("createdAt"), startAt(thirtyDaysAgoTimestamp));
+    const customersUnsub = onValue(customersRef, (snapshot) => {
         setStats(prev => prev.map(s => s.label === 'New Customers' ? {...s, value: snapshot.size.toString()} : s));
     });
     
-    const ordersUnsub = onSnapshot(collection(db, "salesOrders"), (snapshot) => {
-        const pending = snapshot.docs.filter(doc => doc.data().status === 'Confirmed').length;
-        const fulfilled = snapshot.docs.filter(doc => doc.data().status === 'Fulfilled').length;
-        setStats(prev => prev.map(s => {
-            if (s.label === 'Pending Orders') return {...s, value: pending.toString()};
-            if (s.label === 'Fulfilled Orders') return {...s, value: fulfilled.toString()};
-            return s;
-        }));
+    const ordersRef = ref(db, "salesOrders");
+    const ordersUnsub = onValue(ordersRef, (snapshot) => {
+        const data = snapshot.val();
+        if(data) {
+            const orders = Object.values(data) as any[];
+            const pending = orders.filter(doc => doc.status === 'Confirmed').length;
+            const fulfilled = orders.filter(doc => doc.status === 'Fulfilled').length;
+            setStats(prev => prev.map(s => {
+                if (s.label === 'Pending Orders') return {...s, value: pending.toString()};
+                if (s.label === 'Fulfilled Orders') return {...s, value: fulfilled.toString()};
+                return s;
+            }));
+        }
     });
 
-    const invoicesUnsub = onSnapshot(query(collection(db, "invoices"), where("status", "in", ["Posted", "Overdue"])), (snapshot) => {
-        setStats(prev => prev.map(s => s.label === 'Open Invoices' ? {...s, value: snapshot.size.toString()} : s));
+    const invoicesRef = ref(db, "invoices");
+    const invoicesUnsub = onValue(invoicesRef, (snapshot) => {
+        const data = snapshot.val();
+        if(data) {
+            const invoices = Object.values(data) as any[];
+            const open = invoices.filter(doc => ["Posted", "Overdue"].includes(doc.status)).length;
+            setStats(prev => prev.map(s => s.label === 'Open Invoices' ? {...s, value: open.toString()} : s));
+        }
     });
 
     return () => {

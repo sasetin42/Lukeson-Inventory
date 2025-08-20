@@ -39,7 +39,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { doc, updateDoc } from 'firebase/firestore';
+import { ref, update } from 'firebase/database';
 import { db } from '@/lib/firebase';
 import { useState } from 'react';
 import {
@@ -91,8 +91,8 @@ export default function ProductDetailsModal({
   const handleToggleStatus = async () => {
       const newStatus = product.status === 'Discontinued' ? 'In Stock' : 'Discontinued';
       try {
-        const productRef = doc(db, 'products', product.id);
-        await updateDoc(productRef, { status: newStatus });
+        const productRef = ref(db, `products/${product.id}`);
+        await update(productRef, { status: newStatus });
         toast({ title: 'Success', description: `Product has been ${newStatus === 'Discontinued' ? 'deactivated' : 'activated'}.`, variant: 'success' });
         onClose();
       } catch (error) {

@@ -11,7 +11,7 @@ import { Textarea } from '../ui/textarea';
 import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, Building2, Percent } from 'lucide-react';
 import Image from 'next/image';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { ref, onValue } from 'firebase/database';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
@@ -57,14 +57,16 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [barcode, setBarcode] = useState('');
 
     useEffect(() => {
-        // Fetch suppliers and categories from Firestore for dropdowns
-        const suppliersUnsub = onSnapshot(collection(db, "suppliers"), (snapshot) => {
-            const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
+        // Fetch suppliers and categories from Firebase for dropdowns
+        const suppliersUnsub = onValue(ref(db, "suppliers"), (snapshot) => {
+            const data = snapshot.val();
+            const suppliersData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<Supplier, 'id'>) })) : [];
             setSuppliers(suppliersData);
         });
         
-        const categoriesUnsub = onSnapshot(collection(db, "categories"), (snapshot) => {
-            const categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
+        const categoriesUnsub = onValue(ref(db, "categories"), (snapshot) => {
+            const data = snapshot.val();
+            const categoriesData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<ItemCategory, 'id'>) })) : [];
             setCategories(categoriesData);
         });
 
