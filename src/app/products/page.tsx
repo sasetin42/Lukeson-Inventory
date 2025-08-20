@@ -86,22 +86,9 @@ export default function ProductsPage() {
         }
     }
 
-    const handleProductSave = async (savedProductData: Omit<Product, 'id' | 'createdAt'> & {id?: string}) => {
-      try {
-          const { id, ...dataToSave } = savedProductData;
-          if (id) {
-              const docRef = doc(db, 'products', id);
-              await setDoc(docRef, dataToSave, { merge: true });
-          } else {
-              await addDoc(collection(db, 'products'), {
-                  ...dataToSave,
-                  createdAt: serverTimestamp()
-              });
-          }
-      } catch (error) {
-          console.error("Error saving product:", error);
-          toast({ title: "Error", description: "Failed to save product.", variant: "destructive" });
-      }
+    const handleProductSave = () => {
+      // The form now handles the save, so we just need to re-fetch or rely on onSnapshot to update the UI.
+      // The modal will close itself on success.
     }
 
     const handleCategorySave = async (savedCategory: Omit<ItemCategory, 'id' | 'createdAt'> & {id?: string}) => {
@@ -187,7 +174,7 @@ export default function ProductsPage() {
             isOpen={isProductModalOpen}
             onClose={handleCloseProductModal}
             product={editingProduct}
-            onSave={handleProductSave as any}
+            onSave={handleProductSave}
           />
       )}
 

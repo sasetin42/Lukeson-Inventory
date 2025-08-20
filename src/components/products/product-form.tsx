@@ -13,12 +13,12 @@ import Image from 'next/image';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { db, storage } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface ProductFormProps {
   product: Product | null;
-  onSuccess: (product: Omit<Product, 'id' | 'createdAt'> & {id?: string}) => void;
+  onSuccess: () => void;
   onCancel: () => void;
 }
 
@@ -186,7 +186,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                     : 'Out of Stock';
             }
 
-            const productData: Omit<Product, 'id' | 'createdAt'> & {id?:string} = {
+            const productData = {
                 productCode,
                 name: productName,
                 sku,
@@ -212,13 +212,18 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             };
             
             if (product) {
-                (productData as any).id = product.id;
+                const docRef = doc(db, 'products', product.id);
+                await setDoc(docRef, productData, { merge: true });
                 toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
             } else {
+                await addDoc(collection(db, 'products'), {
+                    ...productData,
+                    createdAt: serverTimestamp()
+                });
                 toast({ title: "Success", description: "Product added successfully.", variant: "success" });
             }
             
-            onSuccess(productData);
+            onSuccess();
 
         } catch (error: any) {
             console.error("Failed to save product:", error);

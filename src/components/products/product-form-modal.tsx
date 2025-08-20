@@ -15,7 +15,7 @@ interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   product: Product | null;
-  onSave: (product: Product) => void;
+  onSave: () => void;
 }
 
 export default function ProductFormModal({ 
@@ -25,8 +25,8 @@ export default function ProductFormModal({
     onSave,
 }: ProductFormModalProps) {
 
-    const handleSuccess = (savedProduct: Product) => {
-        onSave(savedProduct);
+    const handleSuccess = () => {
+        onSave();
         onClose();
     };
 
