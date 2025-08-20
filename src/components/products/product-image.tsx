@@ -15,7 +15,7 @@ interface ProductImageProps {
 
 export default function ProductImage({ path, alt, className, width = 48, height = 48, ...props }: ProductImageProps) {
   // If path is a base64 string, use it directly. Otherwise, show placeholder.
-  const imageUrl = path && path.startsWith('data:image') ? path : `https://placehold.co/${width}x${height}.png`;
+  const imageUrl = path && (path.startsWith('data:image') || path.startsWith('http')) ? path : `https://placehold.co/${width}x${height}.png`;
   
   if (!path) {
     return (
@@ -38,6 +38,7 @@ export default function ProductImage({ path, alt, className, width = 48, height 
       height={height}
       className={className}
       {...props}
+      unoptimized // Add this if you are using external images without loader configuration
     />
   );
 }

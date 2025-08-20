@@ -194,7 +194,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                     <TableRow key={product.id}>
                         <TableCell>
                         <ProductImage 
-                            path={product.imageUpload}
+                            path={product.productImage}
                             alt={product.name}
                             width={48}
                             height={48} 

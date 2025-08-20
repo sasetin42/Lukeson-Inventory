@@ -210,7 +210,7 @@ export type Return = {
 export type TopSellingItem = {
     id: string;
     name: string;
-    imageUpload: string;
+    productImage: string;
     unitsSold: number;
     revenue: number;
 };
@@ -218,7 +218,7 @@ export type TopSellingItem = {
 export type SlowMovingItem = {
     id: string;
     name: string;
-    imageUpload: string;
+    productImage: string;
     daysInStock: number;
     stock: number;
 };
@@ -267,7 +267,7 @@ export type Product = {
     id: string;
     productCode: string;
     category: string;
-    imageUpload?: string;
+    productImage?: string;
     name: string;
     sku: string;
     description: string;

@@ -18,7 +18,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface ProductFormProps {
   product: Product | null;
-  onSuccess: () => void;
+  onSuccess: (productData: Omit<Product, 'id' | 'createdAt'> & {id?: string}) => void;
   onCancel: () => void;
 }
 
@@ -102,7 +102,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             setMeters(product.meters?.toString() || '');
             setSupplier(product.supplier || '');
             setLocation(product.location || '');
-            setImagePreview(product.imageUpload || null); 
+            setImagePreview(product.productImage || null); 
             setImageFile(null);
             setUom(product.uom || '');
             setStock(product.stock?.toString() || '');
@@ -170,7 +170,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         setIsSaving(true);
         
         try {
-            let imageUrl = product?.imageUpload || '';
+            let imageUrl = product?.productImage || '';
             if (imageFile) {
                 const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
                 const snapshot = await uploadBytes(storageRef, imageFile);
@@ -186,7 +186,8 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                     : 'Out of Stock';
             }
 
-            const productData = {
+            const productData: Omit<Product, 'id'| 'createdAt'> & {id?: string} = {
+                id: product?.id,
                 productCode,
                 name: productName,
                 sku,
@@ -198,7 +199,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 meters: Number(meters) || 0,
                 supplier,
                 location,
-                imageUpload: imageUrl,
+                productImage: imageUrl,
                 stock: stockNum,
                 cost: Number(cost) || 0,
                 price: Number(price) || 0,
@@ -211,19 +212,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 barcode,
             };
             
-            if (product) {
-                const docRef = doc(db, 'products', product.id);
-                await setDoc(docRef, productData, { merge: true });
-                toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
-            } else {
-                await addDoc(collection(db, 'products'), {
-                    ...productData,
-                    createdAt: serverTimestamp()
-                });
-                toast({ title: "Success", description: "Product added successfully.", variant: "success" });
-            }
-            
-            onSuccess();
+            onSuccess(productData);
 
         } catch (error: any) {
             console.error("Failed to save product:", error);

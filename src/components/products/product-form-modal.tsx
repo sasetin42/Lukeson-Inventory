@@ -15,7 +15,7 @@ interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   product: Product | null;
-  onSave: () => void;
+  onSave: (productData: Omit<Product, 'id' | 'createdAt'> & {id?: string}) => void;
 }
 
 export default function ProductFormModal({ 
@@ -24,11 +24,6 @@ export default function ProductFormModal({
     product, 
     onSave,
 }: ProductFormModalProps) {
-
-    const handleSuccess = () => {
-        onSave();
-        onClose();
-    };
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -39,7 +34,7 @@ export default function ProductFormModal({
                 {product ? 'Update the details of this product.' : 'Fill in the details below to add a new product.'}
             </DialogDescription>
             </DialogHeader>
-            <ProductForm product={product} onSuccess={handleSuccess} onCancel={onClose}/>
+            <ProductForm product={product} onSuccess={onSave} onCancel={onClose}/>
         </DialogContent>
         </Dialog>
     );
