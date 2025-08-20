@@ -123,26 +123,18 @@ function AppContent({ children }: { children: React.ReactNode }) {
   
   const handleAccordionChange = (value: string[]) => {
       const alwaysOpen = ['Overview', 'Inventory'];
-      let newOpenState = [...openAccordion];
+      let newOpenState = [...value];
 
+      for (const item of alwaysOpen) {
+        if (!newOpenState.includes(item)) {
+          newOpenState.push(item);
+        }
+      }
+      
       const changedItem = value.find(item => !openAccordion.includes(item)) || openAccordion.find(item => !value.includes(item));
 
       if (changedItem && !alwaysOpen.includes(changedItem)) {
-          if (newOpenState.includes(changedItem)) {
-              newOpenState = newOpenState.filter(item => item === changedItem ? false : true);
-          } else {
-              newOpenState.push(changedItem);
-          }
-
-          newOpenState = newOpenState.filter(item => {
-              return alwaysOpen.includes(item) || item === changedItem;
-          });
-      }
-
-      for (const item of alwaysOpen) {
-          if (!newOpenState.includes(item)) {
-              newOpenState.push(item);
-          }
+        newOpenState = newOpenState.filter(item => alwaysOpen.includes(item) || item === changedItem);
       }
       
       setOpenAccordion(newOpenState);
@@ -234,10 +226,10 @@ function AppContent({ children }: { children: React.ReactNode }) {
                 <Button variant="ghost" className="justify-start w-full gap-2 p-2 h-auto">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="https://placehold.co/40x40.png" alt="Admin" data-ai-hint="user avatar" />
-                    <AvatarFallback>{user?.email?.[0]?.toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>{user?.displayName?.[0] || user?.email?.[0]?.toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="text-left">
-                    <p className="text-sm font-medium text-foreground">Admin</p>
+                    <p className="text-sm font-medium text-foreground">{user.displayName || 'Admin'}</p>
                     <p className="text-xs text-muted-foreground">{user?.email}</p>
                   </div>
                 </Button>
