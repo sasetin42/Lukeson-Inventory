@@ -1,4 +1,5 @@
 
+'use client';
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
@@ -12,12 +13,13 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, Sidebar
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/components/app-layout';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { useState } from 'react';
 
 
-export const metadata: Metadata = {
-  title: 'IMIS Pro - All-in-One Business Management',
-  description: 'A comprehensive, all-in-one business management system tailored for businesses in the Philippines.',
-};
+// export const metadata: Metadata = {
+//   title: 'IMIS Pro - All-in-One Business Management',
+//   description: 'A comprehensive, all-in-one business management system tailored for businesses in the Philippines.',
+// };
 
 const navGroups = [
   {
@@ -35,7 +37,6 @@ const navGroups = [
         title: 'Inventory',
         links: [
           { href: '/products', icon: Package, label: 'Products', color: 'text-blue-500' },
-          { href: '/products/new', icon: PlusCircle, label: 'Add Item', color: 'text-pink-500' },
           { href: '/category', icon: LayoutGrid, label: 'Category', color: 'text-red-500' },
           { href: '/warehouses', icon: Warehouse, label: 'Warehouses', color: 'text-green-500' },
           { href: '/inventory-settings', icon: Settings, label: 'Settings', color: 'text-yellow-500' },
@@ -116,12 +117,29 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory']);
+
+  const handleAccordionChange = (value: string[]) => {
+      const alwaysOpen = ['Overview', 'Inventory'];
+      let newOpenState = [...value];
+      
+      alwaysOpen.forEach(item => {
+          if (!newOpenState.includes(item)) {
+              newOpenState.push(item);
+          }
+      });
+      setOpenAccordion(newOpenState);
+  }
+
   return (
     <html lang="en" className="h-full">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <title>IMIS Pro - All-in-One Business Management</title>
+        <meta name="description" content="A comprehensive, all-in-one business management system tailored for businesses in the Philippines." />
       </head>
       <body className="font-body antialiased h-full bg-background transition-colors duration-300" suppressHydrationWarning={true}>
         <SidebarProvider>
@@ -137,7 +155,12 @@ export default function RootLayout({
             </SidebarHeader>
             <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
               <div className="flex flex-col gap-2 px-2">
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion 
+                  type="multiple"
+                  className="w-full" 
+                  value={openAccordion} 
+                  onValueChange={handleAccordionChange}
+                >
                   {navGroups.map((group, groupIndex) => (
                     <div key={group.title}>
                       {groupIndex > 0 && <SidebarSeparator className="my-2" />}
