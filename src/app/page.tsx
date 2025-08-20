@@ -10,13 +10,41 @@ import RecentTransactions from "@/components/dashboard/recent-transactions";
 import QuickStats from "@/components/dashboard/quick-stats";
 import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
 import { db } from '@/lib/firebase';
-import { ref, onValue, query, orderByChild, limitToLast } from "firebase/database";
+import { ref, onValue, query, orderByChild, limitToLast, push, get, serverTimestamp, set, equalTo } from "firebase/database";
 import { Product, Sales } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<Sales[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const seedInitialCategories = async () => {
+        const categoriesRef = ref(db, 'categories');
+        const categoriesToAdd = [
+            { name: 'STRIPLIGHT', description: 'Various types of LED striplights.' },
+            { name: 'POWER SUPPLY', description: 'Power supplies for LED lighting.' },
+            { name: 'GENERAL LIGHTING', description: 'General purpose lighting fixtures.' },
+            { name: 'ALUMINIUM PROFILE', description: 'Aluminium profiles for LED strips.' },
+        ];
+
+        for (const category of categoriesToAdd) {
+            const q = query(categoriesRef, orderByChild('name'), equalTo(category.name));
+            const snapshot = await get(q);
+            if (!snapshot.exists()) {
+                const newCategoryRef = push(categoriesRef);
+                await set(newCategoryRef, {
+                    ...category,
+                    createdAt: serverTimestamp(),
+                });
+                console.log(`Added category: ${category.name}`);
+            }
+        }
+    };
+    seedInitialCategories();
+  }, []);
 
   useEffect(() => {
     const productsRef = ref(db, "products");
@@ -25,6 +53,10 @@ export default function DashboardPage() {
         const productsData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<Product, 'id'>) })) : [];
         setProducts(productsData);
         setLoading(false);
+    }, (error) => {
+        console.error(error);
+        toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
+        setLoading(false);
     });
 
     const salesRef = query(ref(db, 'sales'), orderByChild('date'), limitToLast(10));
@@ -32,13 +64,16 @@ export default function DashboardPage() {
         const data = snapshot.val();
         const salesData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<Sales, 'id'>), date: new Date((value as Sales).date) })) : [];
         setSales(salesData.reverse());
+    }, (error) => {
+        console.error(error);
+        toast({ title: "Error", description: "Failed to load sales data.", variant: "destructive" });
     });
 
     return () => {
         productsUnsub();
         salesUnsub();
     }
-  }, []);
+  }, [toast]);
 
   return (
     <div className="flex flex-col gap-6">
