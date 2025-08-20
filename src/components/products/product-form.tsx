@@ -14,7 +14,8 @@ import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { db, storage } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { Progress } from '../ui/progress';
 
 interface ProductFormProps {
   product: Product | null;
@@ -40,6 +41,8 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [categories, setCategories] = useState<ItemCategory[]>([]);
     
     const [isSaving, setIsSaving] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+
     const [productCode, setProductCode] = useState('');
     const [category, setCategory] = useState('');
     const [productName, setProductName] = useState('');
@@ -122,6 +125,14 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                toast({
+                    title: "File too large",
+                    description: "Please upload an image smaller than 5MB.",
+                    variant: "destructive",
+                });
+                return;
+            }
             setImageFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -159,6 +170,31 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         setBrand('');
         setVatType('VATABLE');
         setBarcode('');
+        setUploadProgress(null);
+    };
+
+    const handleUpload = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const storageRef = ref(storage, `product_images/${Date.now()}_${file.name}`);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    setUploadProgress(progress);
+                },
+                (error) => {
+                    console.error("Upload failed:", error);
+                    setUploadProgress(null);
+                    reject(error);
+                },
+                async () => {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    setUploadProgress(null);
+                    resolve(downloadURL);
+                }
+            );
+        });
     };
 
     const handleSubmit = async () => {
@@ -172,9 +208,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         try {
             let imageUrl = product?.productImage || '';
             if (imageFile) {
-                const storageRef = ref(storage, `product_images/${Date.now()}_${imageFile.name}`);
-                const snapshot = await uploadBytes(storageRef, imageFile);
-                imageUrl = await getDownloadURL(snapshot.ref);
+                imageUrl = await handleUpload(imageFile);
             }
 
             const stockNum = Number(stock) || 0;
@@ -218,7 +252,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             console.error("Failed to save product:", error);
             toast({
                 title: "Error Saving Product",
-                description: `Failed to save product. ${error.message}`,
+                description: `Failed to save product. ${error.code === 'storage/retry-limit-exceeded' ? 'Max retry time exceeded. Please check your network and try again.' : error.message}`,
                 variant: "destructive",
             });
         } finally {
@@ -297,6 +331,12 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                             <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isSaving}/>
                         </label>
                     </div> 
+                )}
+                 {uploadProgress !== null && (
+                    <div className="space-y-1 mt-2">
+                        <Progress value={uploadProgress} className="w-full" />
+                        <p className="text-xs text-muted-foreground text-center">{Math.round(uploadProgress)}% uploaded</p>
+                    </div>
                 )}
             </div>
             
@@ -430,9 +470,11 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 <Button variant="outline" onClick={onCancel} disabled={isSaving}>Cancel</Button>
                 <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isSaving ? 'Saving...' : (product ? 'Save Changes' : 'Add Product')}
+                    {uploadProgress !== null ? `Uploading... ${Math.round(uploadProgress)}%` : (isSaving ? 'Saving...' : (product ? 'Save Changes' : 'Add Product'))}
                 </Button>
             </div>
         </div>
     );
 }
+
+    
