@@ -25,11 +25,9 @@ export default function ProductFormModal({
     onClose, 
     product, 
 }: ProductFormModalProps) {
-    const router = useRouter();
 
     const handleSuccess = () => {
         onClose();
-        router.refresh();
     };
 
     return (

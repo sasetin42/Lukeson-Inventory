@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Truck } from "lucide-react";
 import SupplierList from "@/components/suppliers/supplier-list";
 import { db } from '@/lib/firebase';
-import { ref, onValue, push, set, serverTimestamp, update, remove } from 'firebase/database';
+import { collection, onSnapshot, addDoc, serverTimestamp, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { Supplier } from '@/lib/types';
 import SupplierFormModal from '@/components/suppliers/supplier-form-modal';
 import { useToast } from '@/hooks/use-toast';
@@ -19,10 +19,8 @@ export default function SuppliersPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const suppliersRef = ref(db, "suppliers");
-    const unsubscribe = onValue(suppliersRef, (snapshot) => {
-      const data = snapshot.val();
-      const suppliersData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<Supplier, 'id'>) })) : [];
+    const unsubscribe = onSnapshot(collection(db, "suppliers"), (snapshot) => {
+      const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Omit<Supplier, 'id'>) }));
       setSuppliers(suppliersData);
     });
     return () => unsubscribe();
@@ -35,9 +33,7 @@ export default function SuppliersPage() {
 
   const handleAddSupplier = async (newSupplierData: Omit<Supplier, 'id'>) => {
     try {
-      const suppliersRef = ref(db, "suppliers");
-      const newSupplierRef = push(suppliersRef);
-      await set(newSupplierRef, {
+      await addDoc(collection(db, "suppliers"), {
         ...newSupplierData,
         createdAt: serverTimestamp(),
       });
@@ -50,8 +46,8 @@ export default function SuppliersPage() {
 
   const handleUpdateSupplier = async (supplierId: string, updatedSupplierData: Partial<Supplier>) => {
     try {
-      const supplierRef = ref(db, `suppliers/${supplierId}`);
-      await update(supplierRef, updatedSupplierData);
+      const supplierRef = doc(db, "suppliers", supplierId);
+      await updateDoc(supplierRef, updatedSupplierData);
       toast({ title: "Success", description: "Supplier updated successfully.", variant: "success" });
     } catch (error) {
       console.error("Error updating document: ", error);
@@ -61,7 +57,7 @@ export default function SuppliersPage() {
 
   const handleDeleteSupplier = async (supplierId: string) => {
     try {
-      await remove(ref(db, `suppliers/${supplierId}`));
+      await deleteDoc(doc(db, `suppliers/${supplierId}`));
       toast({ title: "Success", description: "Supplier deleted successfully.", variant: "success" });
     } catch (error) {
       console.error("Error deleting document: ", error);

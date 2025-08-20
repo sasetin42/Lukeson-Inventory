@@ -20,7 +20,7 @@ import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { db, storage } from '@/lib/firebase';
 import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
-import { ref as dbRef, onValue } from 'firebase/database';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 interface CategoryFormModalProps {
@@ -51,13 +51,11 @@ export default function CategoryFormModal({
     useEffect(() => {
         if (!isOpen) return;
 
-        const categoriesRef = dbRef(db, "categories");
-        const unsubscribe = onValue(categoriesRef, (snapshot) => {
-            const data = snapshot.val();
-            const categoriesData: ItemCategory[] = data ? Object.entries(data).map(([id, value]) => ({
-                id,
-                ...(value as Omit<ItemCategory, 'id'>)
-            })) : [];
+        const unsubscribe = onSnapshot(collection(db, "categories"), (snapshot) => {
+            const categoriesData: ItemCategory[] = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...(doc.data() as Omit<ItemCategory, 'id'>)
+            }));
             setAllCategories(categoriesData);
         });
 
@@ -125,7 +123,7 @@ export default function CategoryFormModal({
             const categoryData = {
                 name,
                 description,
-                parentId: parentId === 'none' ? null : parentId,
+                parentId: parentId === 'none' ? '' : parentId,
                 productImage,
             };
 

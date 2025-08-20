@@ -18,7 +18,7 @@ import InventoryOptimizationRecommendations from "@/components/analytics/invento
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { db } from '@/lib/firebase';
-import { ref, onValue, query, orderByChild, startAt, get } from 'firebase/database';
+import { collection, onSnapshot, query, where, getDocs, Timestamp, orderBy } from 'firebase/firestore';
 import { Product, Sales, Supplier } from '@/lib/types';
 import SupplierOnTimeChart from '@/components/analytics/supplier-on-time-chart';
 
@@ -30,24 +30,25 @@ export default function AnalyticsPage() {
   const [kpiData, setKpiData] = useState<any[]>([]);
 
   useEffect(() => {
-    const productsRef = ref(db, "products");
-    const productsUnsub = onValue(productsRef, (snapshot) => {
-      const data = snapshot.val();
-      const productsData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<Product, 'id'>) })) : [];
+    const productsUnsub = onSnapshot(collection(db, "products"), (snapshot) => {
+      const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
       setProducts(productsData);
     });
 
-    const salesRef = ref(db, "sales");
-    const salesUnsub = onValue(salesRef, (snapshot) => {
-      const data = snapshot.val();
-      const salesData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<Sales, 'id'>), date: new Date((value as Sales).date) })) : [];
+    const salesUnsub = onSnapshot(collection(db, "sales"), (snapshot) => {
+      const salesData = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return { 
+          id: doc.id, 
+          ...data,
+          date: (data.date as Timestamp).toDate() 
+        } as Sales
+      });
       setSales(salesData);
     });
 
-    const suppliersRef = ref(db, "suppliers");
-    const suppliersUnsub = onValue(suppliersRef, (snapshot) => {
-      const data = snapshot.val();
-      const suppliersData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<Supplier, 'id'>) })) : [];
+    const suppliersUnsub = onSnapshot(collection(db, "suppliers"), (snapshot) => {
+      const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
       setSuppliers(suppliersData);
     });
 
@@ -63,12 +64,11 @@ export default function AnalyticsPage() {
         const days = Number(dateRange);
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - days);
-        const cutoffTimestamp = cutoffDate.getTime();
+        const cutoffTimestamp = Timestamp.fromDate(cutoffDate);
 
-        const salesRef = query(ref(db, "sales"), orderByChild("date"), startAt(cutoffTimestamp));
-        const salesSnapshot = await get(salesRef);
-        const salesData = salesSnapshot.val();
-        const filteredSales = salesData ? Object.values(salesData) as Sales[] : [];
+        const salesQuery = query(collection(db, "sales"), where("date", ">=", cutoffTimestamp));
+        const salesSnapshot = await getDocs(salesQuery);
+        const filteredSales = salesSnapshot.docs.map(doc => doc.data() as Sales);
         
         const totalRevenue = filteredSales.reduce((acc, s) => acc + s.total, 0);
         const unitsSold = filteredSales.reduce((acc, s) => acc + s.quantity, 0);

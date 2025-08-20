@@ -10,7 +10,7 @@ import RecentTransactions from "@/components/dashboard/recent-transactions";
 import QuickStats from "@/components/dashboard/quick-stats";
 import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
 import { db } from '@/lib/firebase';
-import { ref, onValue, query, orderByChild, limitToLast, push, get, serverTimestamp, set, equalTo } from "firebase/database";
+import { collection, onSnapshot, query, orderBy, limit, addDoc, getDocs, where, serverTimestamp, Timestamp } from "firebase/firestore";
 import { Product, Sales } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
@@ -22,7 +22,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const seedInitialCategories = async () => {
-        const categoriesRef = ref(db, 'categories');
+        const categoriesRef = collection(db, 'categories');
         const categoriesToAdd = [
             { name: 'STRIPLIGHT', description: 'Various types of LED striplights.' },
             { name: 'POWER SUPPLY', description: 'Power supplies for LED lighting.' },
@@ -31,11 +31,10 @@ export default function DashboardPage() {
         ];
 
         for (const category of categoriesToAdd) {
-            const q = query(categoriesRef, orderByChild('name'), equalTo(category.name));
-            const snapshot = await get(q);
-            if (!snapshot.exists()) {
-                const newCategoryRef = push(categoriesRef);
-                await set(newCategoryRef, {
+            const q = query(categoriesRef, where('name', '==', category.name));
+            const snapshot = await getDocs(q);
+            if (snapshot.empty) {
+                await addDoc(categoriesRef, {
                     ...category,
                     createdAt: serverTimestamp(),
                 });
@@ -47,10 +46,11 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    const productsRef = ref(db, "products");
-    const productsUnsub = onValue(productsRef, (snapshot) => {
-        const data = snapshot.val();
-        const productsData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<Product, 'id'>) })) : [];
+    const productsUnsub = onSnapshot(collection(db, "products"), (snapshot) => {
+        const productsData = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return { id: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate() } as Product
+        });
         setProducts(productsData);
         setLoading(false);
     }, (error) => {
@@ -59,11 +59,13 @@ export default function DashboardPage() {
         setLoading(false);
     });
 
-    const salesRef = query(ref(db, 'sales'), orderByChild('date'), limitToLast(10));
-    const salesUnsub = onValue(salesRef, (snapshot) => {
-        const data = snapshot.val();
-        const salesData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<Sales, 'id'>), date: new Date((value as Sales).date) })) : [];
-        setSales(salesData.reverse());
+    const salesQuery = query(collection(db, 'sales'), orderBy('date', 'desc'), limit(10));
+    const salesUnsub = onSnapshot(salesQuery, (snapshot) => {
+        const salesData = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return { id: doc.id, ...data, date: (data.date as Timestamp).toDate() } as Sales
+        });
+        setSales(salesData);
     }, (error) => {
         console.error(error);
         toast({ title: "Error", description: "Failed to load sales data.", variant: "destructive" });
@@ -73,7 +75,7 @@ export default function DashboardPage() {
         productsUnsub();
         salesUnsub();
     }
-  }, [toast]);
+  }, []);
 
   return (
     <div className="flex flex-col gap-6">

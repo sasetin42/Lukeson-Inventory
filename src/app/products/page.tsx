@@ -11,6 +11,8 @@ import ProductList from "@/components/products/product-list";
 import { Product } from '@/lib/types';
 import ProductFormModal from '@/components/products/product-form-modal';
 import { useToast } from '@/hooks/use-toast';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, doc, deleteDoc, Timestamp } from 'firebase/firestore';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -20,22 +22,25 @@ export default function ProductsPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        loadProductsFromLocal();
-    }, []);
-
-    const loadProductsFromLocal = () => {
-        setLoading(true);
-        try {
-            const localData = localStorage.getItem('products');
-            const productsData = localData ? JSON.parse(localData) : [];
-            setProducts(productsData.sort((a:Product, b:Product) => new Date(b.createdAt as any).getTime() - new Date(a.createdAt as any).getTime()));
-        } catch (error) {
-            console.error("Failed to load products from local storage", error);
-            toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
-        } finally {
+        const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
+            const productsData = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    createdAt: (data.createdAt as Timestamp)?.toDate() || new Date(),
+                } as Product;
+            }).sort((a,b) => (b.createdAt as Date).getTime() - (a.createdAt as Date).getTime());
+            setProducts(productsData);
             setLoading(false);
-        }
-    };
+        }, (error) => {
+            console.error("Failed to load products from firestore", error);
+            toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
     
     const totalProducts = products.length;
     const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
@@ -44,7 +49,7 @@ export default function ProductsPage() {
     
     const addedThisWeek = products.filter(p => {
         if (!p.createdAt) return false;
-        const productDate = new Date(p.createdAt as any);
+        const productDate = new Date(p.createdAt);
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         return productDate > sevenDaysAgo;
@@ -67,18 +72,14 @@ export default function ProductsPage() {
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setEditingProduct(null);
-        loadProductsFromLocal(); // Refresh list after modal closes
     }
 
     const handleDeleteProduct = async (product: Product) => {
         try {
-            const localProducts = JSON.parse(localStorage.getItem('products') || '[]');
-            const updatedProducts = localProducts.filter((p: Product) => p.id !== product.id);
-            localStorage.setItem('products', JSON.stringify(updatedProducts));
-            loadProductsFromLocal();
-            toast({ title: "Success", description: "Product deleted locally.", variant: "success" });
+            await deleteDoc(doc(db, "products", product.id));
+            toast({ title: "Success", description: "Product deleted.", variant: "success" });
         } catch (error) {
-            console.error("Error deleting product locally: ", error);
+            console.error("Error deleting product: ", error);
             toast({ title: "Error", description: "Failed to delete product.", variant: "destructive" });
         }
     }

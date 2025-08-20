@@ -1,6 +1,6 @@
 
 
-import { Timestamp } from "firebase/firestore";
+import { FieldValue, Timestamp } from "firebase/firestore";
 import type { LucideIcon } from "lucide-react";
 
 // Main Company Information
@@ -67,7 +67,7 @@ export type ItemCategory = {
     description?: string;
     productImage?: string;
     parentId?: string;
-    createdAt: string | Timestamp | Date;
+    createdAt: FieldValue | Timestamp | Date;
 };
 
 export type Stock = {
@@ -280,7 +280,7 @@ export type Product = {
     cost: number;
     price: number;
     reOrderLevel: number;
-    createdAt: string | Timestamp | Date;
+    createdAt: FieldValue | Timestamp | Date;
     status: 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Discontinued';
     suppliers?: Supplier[];
     uom: string;

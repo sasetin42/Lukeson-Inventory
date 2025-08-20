@@ -11,7 +11,7 @@ import { Textarea } from '../ui/textarea';
 import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, Building2, Percent } from 'lucide-react';
 import Image from 'next/image';
 import { db } from '@/lib/firebase';
-import { ref, onValue } from 'firebase/database';
+import { collection, onSnapshot, getDocs, addDoc, updateDoc, doc, serverTimestamp, query, orderBy, limitToLast, getDoc } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
@@ -30,7 +30,6 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const { toast } = useToast();
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [categories, setCategories] = useState<ItemCategory[]>([]);
-    const [products, setProducts] = useState<Product[]>([]);
     
     const [isSaving, setIsSaving] = useState(false);
     const [productCode, setProductCode] = useState('');
@@ -57,23 +56,16 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [barcode, setBarcode] = useState('');
 
     useEffect(() => {
-        // Fetch suppliers and categories from Firebase for dropdowns
-        const suppliersUnsub = onValue(ref(db, "suppliers"), (snapshot) => {
-            const data = snapshot.val();
-            const suppliersData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<Supplier, 'id'>) })) : [];
+        const suppliersUnsub = onSnapshot(collection(db, "suppliers"), (snapshot) => {
+            const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
             setSuppliers(suppliersData);
         });
         
-        const categoriesUnsub = onValue(ref(db, "categories"), (snapshot) => {
-            const data = snapshot.val();
-            const categoriesData = data ? Object.entries(data).map(([id, value]) => ({ id, ...(value as Omit<ItemCategory, 'id'>) })) : [];
+        const categoriesUnsub = onSnapshot(collection(db, "categories"), (snapshot) => {
+            const categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
             setCategories(categoriesData);
         });
-
-        // Load existing products from localStorage
-        const localProducts = JSON.parse(localStorage.getItem('products') || '[]');
-        setProducts(localProducts);
-
+        
         return () => {
             suppliersUnsub();
             categoriesUnsub();
@@ -81,6 +73,21 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     }, []);
 
     useEffect(() => {
+        const generateProductCode = async () => {
+            const year = new Date().getFullYear();
+            const productsRef = collection(db, 'products');
+            const q = query(productsRef, orderBy('productCode', 'desc'), limitToLast(1));
+            const querySnapshot = await getDocs(q);
+
+            let nextId = 1;
+            if (!querySnapshot.empty) {
+                const lastProduct = querySnapshot.docs[0].data();
+                const lastId = parseInt(lastProduct.productCode.split('-').pop() || '0');
+                nextId = lastId + 1;
+            }
+            setProductCode(`PRO-${year}-${nextId.toString().padStart(3, '0')}`);
+        };
+
         if (product) {
             setProductCode(product.productCode || '');
             setCategory(product.category || '');
@@ -106,11 +113,9 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             setBarcode(product.barcode || '');
         } else {
             resetForm();
-            const year = new Date().getFullYear();
-            const nextId = (products.length + 1).toString().padStart(3, '0');
-            setProductCode(`PRO-${year}-${nextId}`);
+            generateProductCode();
         }
-    }, [product, products]);
+    }, [product]);
     
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -172,9 +177,8 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                     : 'Out of Stock';
             }
 
-            const productData: Product = {
-                id: product?.id || new Date().toISOString(),
-                createdAt: product?.createdAt || new Date(),
+            const productData: Omit<Product, 'id'> = {
+                createdAt: product?.createdAt || serverTimestamp(),
                 productCode,
                 name: productName,
                 sku,
@@ -198,31 +202,25 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 vatType: vatType as 'VATABLE' | 'VAT-EXEMPT' | 'ZERO-RATED',
                 barcode,
             };
-
-            const localProducts = JSON.parse(localStorage.getItem('products') || '[]');
             
             if (product) {
                 // Update existing product
-                const productIndex = localProducts.findIndex((p: Product) => p.id === product.id);
-                if (productIndex > -1) {
-                    localProducts[productIndex] = productData;
-                }
-                 toast({ title: "Success", description: "Product updated locally.", variant: "success" });
+                const productRef = doc(db, 'products', product.id);
+                await updateDoc(productRef, productData);
+                toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
             } else {
                 // Add new product
-                localProducts.push(productData);
-                toast({ title: "Success", description: "Product added locally.", variant: "success" });
+                await addDoc(collection(db, 'products'), productData);
+                toast({ title: "Success", description: "Product added successfully.", variant: "success" });
             }
-            
-            localStorage.setItem('products', JSON.stringify(localProducts));
             
             onSuccess();
 
         } catch (error: any) {
-            console.error("Failed to save product locally:", error);
+            console.error("Failed to save product:", error);
             toast({
                 title: "Error Saving Product",
-                description: `Failed to save product locally. ${error.message}`,
+                description: `Failed to save product. ${error.message}`,
                 variant: "destructive",
             });
         } finally {

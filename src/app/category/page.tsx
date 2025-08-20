@@ -8,7 +8,7 @@ import { LayoutGrid, PlusCircle } from "lucide-react";
 import CategoryList from "@/components/category/category-list";
 import CategoryFormModal from "@/components/category/category-form-modal";
 import { db } from '@/lib/firebase';
-import { ref, onValue, push, set, serverTimestamp, update, remove, query, orderByChild, equalTo, get } from 'firebase/database';
+import { collection, addDoc, serverTimestamp, updateDoc, deleteDoc, onSnapshot, query, where, getDocs, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { ItemCategory } from '@/lib/types';
 
@@ -20,17 +20,21 @@ export default function CategoryPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const categoriesRef = ref(db, "categories");
-    const unsubscribe = onValue(categoriesRef, (snapshot) => {
-      const data = snapshot.val();
-      const categoriesData: ItemCategory[] = data ? Object.entries(data).map(([id, value]) => ({
-        id,
-        ...(value as Omit<ItemCategory, 'id'>),
-        createdAt: (value as ItemCategory).createdAt,
-      })).sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime()) : [];
+    const q = query(collection(db, "categories"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const categoriesData: ItemCategory[] = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate(),
+        } as ItemCategory;
+      }).sort((a,b) => (b.createdAt as Date).getTime() - (a.createdAt as Date).getTime());
+      
       setCategories(categoriesData);
       setLoading(false);
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -41,9 +45,7 @@ export default function CategoryPage() {
 
   const handleAddCategory = async (newCategoryData: Omit<ItemCategory, 'id' | 'createdAt'>) => {
     try {
-      const categoriesRef = ref(db, "categories");
-      const newCategoryRef = push(categoriesRef);
-      await set(newCategoryRef, {
+      await addDoc(collection(db, "categories"), {
         ...newCategoryData,
         createdAt: serverTimestamp(),
       });
@@ -56,10 +58,10 @@ export default function CategoryPage() {
 
   const handleUpdateCategory = async (categoryId: string, updatedCategoryData: Partial<ItemCategory>) => {
     try {
-      const categoryRef = ref(db, `categories/${categoryId}`);
-      await update(categoryRef, {
-          ...updatedCategoryData,
-          parentId: updatedCategoryData.parentId === 'none' ? null : updatedCategoryData.parentId
+      const categoryRef = doc(db, "categories", categoryId);
+      await updateDoc(categoryRef, {
+        ...updatedCategoryData,
+        parentId: updatedCategoryData.parentId === 'none' ? null : updatedCategoryData.parentId
       });
       toast({ title: "Success", description: "Category updated successfully.", variant: "success" });
     } catch (error) {
@@ -70,20 +72,21 @@ export default function CategoryPage() {
 
   const handleDeleteCategory = async (category: ItemCategory) => {
     // Check if category is a parent to any other category
-    const isParent = categories.some(c => c.parentId === category.id);
-    if (isParent) {
+    const isParentQuery = query(collection(db, 'categories'), where('parentId', '==', category.id));
+    const parentSnap = await getDocs(isParentQuery);
+    if (!parentSnap.empty) {
       toast({
         title: "Deletion Failed",
-        description: "Cannot delete a category that is a parent to other categories.",
+        description: `Cannot delete a category that is a parent to ${parentSnap.size} other categories.`,
         variant: "destructive",
       });
       return;
     }
 
     // Check if any product is using this category
-    const productsRef = query(ref(db, 'products'), orderByChild('category'), equalTo(category.name));
-    const productSnap = await get(productsRef);
-    if (productSnap.exists()) {
+    const productsQuery = query(collection(db, 'products'), where('category', '==', category.name));
+    const productSnap = await getDocs(productsQuery);
+    if (!productSnap.empty) {
         toast({
             title: "Deletion Failed",
             description: `Cannot delete category. It is being used by ${productSnap.size} product(s).`,
@@ -93,7 +96,7 @@ export default function CategoryPage() {
     }
 
     try {
-      await remove(ref(db, `categories/${category.id}`));
+      await deleteDoc(doc(db, "categories", category.id));
       toast({ title: "Success", description: "Category deleted successfully.", variant: "success" });
     } catch (error) {
       console.error("Error deleting document: ", error);

@@ -7,6 +7,7 @@ import { Button } from "../ui/button";
 import { ChevronRight } from "lucide-react";
 import Link from 'next/link';
 import ProductImage from "../products/product-image";
+import { Timestamp } from "firebase/firestore";
 
 interface SlowMovingItemsProps {
     products: Product[];
@@ -21,7 +22,7 @@ export default function SlowMovingItems({ products, sales }: SlowMovingItemsProp
     .slice(0, 3)
     .map(p => ({
         ...p,
-        daysInStock: p.createdAt ? Math.floor((Date.now() - (p.createdAt as any).toDate().getTime()) / (1000 * 60 * 60 * 24)) : 0
+        daysInStock: p.createdAt ? Math.floor((Date.now() - (p.createdAt as Date).getTime()) / (1000 * 60 * 60 * 24)) : 0
     }));
 
   return (
