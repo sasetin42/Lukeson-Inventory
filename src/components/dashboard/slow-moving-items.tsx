@@ -20,10 +20,16 @@ export default function SlowMovingItems({ products, sales }: SlowMovingItemsProp
   const slowMovingProducts = products
     .filter(p => !soldProductIds.has(p.id) && p.stock > 0)
     .slice(0, 3)
-    .map(p => ({
-        ...p,
-        daysInStock: p.createdAt ? Math.floor((Date.now() - (p.createdAt as Date).getTime()) / (1000 * 60 * 60 * 24)) : 0
-    }));
+    .map(p => {
+        const createdAtDate = p.createdAt && typeof (p.createdAt as any).toDate === 'function' 
+            ? (p.createdAt as Timestamp).toDate() 
+            : p.createdAt as Date;
+        
+        return {
+            ...p,
+            daysInStock: createdAtDate ? Math.floor((Date.now() - new Date(createdAtDate).getTime()) / (1000 * 60 * 60 * 24)) : 0
+        };
+    });
 
   return (
     <Card>
