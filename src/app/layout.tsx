@@ -121,14 +121,34 @@ export default function RootLayout({
 
   const handleAccordionChange = (value: string[]) => {
       const alwaysOpen = ['Overview', 'Inventory'];
-      let newOpenState = value;
+      let newOpenState = [...openAccordion];
 
-      // This ensures that other accordions can be closed, but "Overview" and "Inventory" will be re-opened if the user tries to close them.
+      // Determine which item was just clicked
+      const changedItem = value.find(item => !openAccordion.includes(item)) || openAccordion.find(item => !value.includes(item));
+
+      if (changedItem && !alwaysOpen.includes(changedItem)) {
+          // If the clicked item is not an "always-open" item
+          if (newOpenState.includes(changedItem)) {
+              // It was just closed, so remove it
+              newOpenState = newOpenState.filter(item => item === changedItem ? false : true);
+          } else {
+              // It was just opened, so add it
+              newOpenState.push(changedItem);
+          }
+
+          // Ensure only one non-always-open item is open at a time
+          newOpenState = newOpenState.filter(item => {
+              return alwaysOpen.includes(item) || item === changedItem;
+          });
+      }
+
+      // Ensure always-open items are always present
       for (const item of alwaysOpen) {
           if (!newOpenState.includes(item)) {
               newOpenState.push(item);
           }
       }
+      
       setOpenAccordion(newOpenState);
   }
 
