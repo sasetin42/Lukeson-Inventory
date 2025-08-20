@@ -10,8 +10,6 @@ import ActionCard from "@/components/action-card";
 import ProductList from "@/components/products/product-list";
 import { Product } from '@/lib/types';
 import ProductFormModal from '@/components/products/product-form-modal';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import { useToast } from '@/hooks/use-toast';
 
 export default function ProductsPage() {
@@ -22,22 +20,23 @@ export default function ProductsPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
-            const productsData: Product[] = [];
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                productsData.push({ 
-                    id: doc.id, 
-                    ...data,
-                    createdAt: data.createdAt?.toDate()?.toISOString(),
-                } as Product);
-            });
-            setProducts(productsData.sort((a, b) => new Date(b.createdAt as any).getTime() - new Date(a.createdAt as any).getTime()));
-            setLoading(false);
-        });
-        return () => unsubscribe();
+        loadProductsFromLocal();
     }, []);
 
+    const loadProductsFromLocal = () => {
+        setLoading(true);
+        try {
+            const localData = localStorage.getItem('products');
+            const productsData = localData ? JSON.parse(localData) : [];
+            setProducts(productsData.sort((a:Product, b:Product) => new Date(b.createdAt as any).getTime() - new Date(a.createdAt as any).getTime()));
+        } catch (error) {
+            console.error("Failed to load products from local storage", error);
+            toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
+        } finally {
+            setLoading(false);
+        }
+    };
+    
     const totalProducts = products.length;
     const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
     const lowStock = products.filter(p => p.stock > 0 && p.stock <= p.reOrderLevel).length;
@@ -68,14 +67,18 @@ export default function ProductsPage() {
     const handleCloseModal = () => {
         setIsModalOpen(false);
         setEditingProduct(null);
+        loadProductsFromLocal(); // Refresh list after modal closes
     }
 
     const handleDeleteProduct = async (product: Product) => {
         try {
-            await deleteDoc(doc(db, "products", product.id));
-            toast({ title: "Success", description: "Product deleted successfully.", variant: "success" });
+            const localProducts = JSON.parse(localStorage.getItem('products') || '[]');
+            const updatedProducts = localProducts.filter((p: Product) => p.id !== product.id);
+            localStorage.setItem('products', JSON.stringify(updatedProducts));
+            loadProductsFromLocal();
+            toast({ title: "Success", description: "Product deleted locally.", variant: "success" });
         } catch (error) {
-            console.error("Error deleting document: ", error);
+            console.error("Error deleting product locally: ", error);
             toast({ title: "Error", description: "Failed to delete product.", variant: "destructive" });
         }
     }

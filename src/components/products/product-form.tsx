@@ -10,9 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from '../ui/textarea';
 import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, Building2, Percent } from 'lucide-react';
 import Image from 'next/image';
-import { db, storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { collection, onSnapshot, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
@@ -58,6 +57,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [barcode, setBarcode] = useState('');
 
     useEffect(() => {
+        // Fetch suppliers and categories from Firestore for dropdowns
         const suppliersUnsub = onSnapshot(collection(db, "suppliers"), (snapshot) => {
             const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
             setSuppliers(suppliersData);
@@ -68,15 +68,13 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             setCategories(categoriesData);
         });
 
-        const productsUnsub = onSnapshot(collection(db, "products"), (snapshot) => {
-            const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-            setProducts(productsData);
-        });
+        // Load existing products from localStorage
+        const localProducts = JSON.parse(localStorage.getItem('products') || '[]');
+        setProducts(localProducts);
 
         return () => {
             suppliersUnsub();
             categoriesUnsub();
-            productsUnsub();
         }
     }, []);
 
@@ -112,18 +110,19 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         }
     }, [product, products]);
     
-    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
     const removeImage = () => {
-        if (imagePreview) {
-            URL.revokeObjectURL(imagePreview);
-        }
         setImageFile(null);
         setImagePreview(null);
     };
@@ -160,38 +159,20 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         }
 
         setIsSaving(true);
-        let imageUploadPath = product?.imageUpload || '';
         
         try {
-            if (imageFile) {
-                 try {
-                    const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
-                    const uploadResult = await uploadBytes(storageRef, imageFile);
-                    imageUploadPath = uploadResult.ref.fullPath;
-                } catch (error) {
-                    console.error("Image upload failed:", error);
-                    toast({
-                        title: "Image Upload Failed",
-                        description: `Could not upload image. Please try again. Error: ${error}`,
-                        variant: "destructive",
-                    });
-                    setIsSaving(false);
-                    return;
-                }
-            } else if (!imagePreview) {
-                imageUploadPath = '';
-            }
-
             const stockNum = Number(stock) || 0;
             const reOrderLevelNum = Number(reOrderLevel) || 0;
             let stockStatus = product?.status || 'In Stock';
-            if (product?.status !== 'Discontinued') {
+             if (product?.status !== 'Discontinued') {
                 stockStatus = stockNum > 0
                     ? (stockNum <= reOrderLevelNum ? 'Low Stock' : 'In Stock')
                     : 'Out of Stock';
             }
 
-            const productData = {
+            const productData: Product = {
+                id: product?.id || new Date().toISOString(),
+                createdAt: product?.createdAt || new Date(),
                 productCode,
                 name: productName,
                 sku,
@@ -203,7 +184,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 meters: Number(meters) || 0,
                 supplier,
                 location,
-                imageUpload: imageUploadPath,
+                imageUpload: imagePreview || '', // Save base64 image
                 stock: stockNum,
                 cost: Number(cost) || 0,
                 price: Number(price) || 0,
@@ -216,24 +197,30 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 barcode,
             };
 
+            const localProducts = JSON.parse(localStorage.getItem('products') || '[]');
+            
             if (product) {
-                const productRef = doc(db, 'products', product.id);
-                await updateDoc(productRef, productData);
-                toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
+                // Update existing product
+                const productIndex = localProducts.findIndex((p: Product) => p.id === product.id);
+                if (productIndex > -1) {
+                    localProducts[productIndex] = productData;
+                }
+                 toast({ title: "Success", description: "Product updated locally.", variant: "success" });
             } else {
-                await addDoc(collection(db, "products"), {
-                    ...productData,
-                    createdAt: serverTimestamp(),
-                });
-                toast({ title: "Success", description: "Product added successfully.", variant: "success" });
+                // Add new product
+                localProducts.push(productData);
+                toast({ title: "Success", description: "Product added locally.", variant: "success" });
             }
+            
+            localStorage.setItem('products', JSON.stringify(localProducts));
+            
             onSuccess();
 
         } catch (error: any) {
-            console.error("Failed to save product:", error);
+            console.error("Failed to save product locally:", error);
             toast({
-                title: "ERROR Saving Product",
-                description: `Failed to save product. ${error.message}`,
+                title: "Error Saving Product",
+                description: `Failed to save product locally. ${error.message}`,
                 variant: "destructive",
             });
         } finally {
@@ -278,7 +265,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             
             <div className="space-y-2">
                 <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4 text-purple-500" /> Product Profile Image</Label>
-                {imagePreview && !imagePreview.startsWith('products/') ? (
+                {imagePreview ? (
                     <div className="relative w-full h-48 rounded-lg overflow-hidden">
                         <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="cover" data-ai-hint="product image" />
                         <Button
@@ -308,9 +295,6 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                         </label>
                     </div> 
                 )}
-                 {imagePreview && imagePreview.startsWith('products/') && (
-                     <p className="text-sm text-muted-foreground">Image already uploaded. To change it, please upload a new one.</p>
-                 )}
             </div>
             
             <div className="grid grid-cols-2 gap-4">
