@@ -51,6 +51,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import ProductImage from './product-image';
+import { db } from '@/lib/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -89,14 +91,10 @@ export default function ProductDetailsModal({
   const handleToggleStatus = async () => {
       const newStatus = product.status === 'Discontinued' ? 'In Stock' : 'Discontinued';
       try {
-        const storedProducts = localStorage.getItem('products');
-        const products = storedProducts ? JSON.parse(storedProducts) : [];
-        const updatedProducts = products.map((p: Product) => p.id === product.id ? {...p, status: newStatus} : p);
-        localStorage.setItem('products', JSON.stringify(updatedProducts));
+        const productRef = doc(db, 'products', product.id);
+        await setDoc(productRef, { status: newStatus }, { merge: true });
         toast({ title: 'Success', description: `Product has been ${newStatus === 'Discontinued' ? 'deactivated' : 'activated'}.`, variant: 'success' });
         onClose();
-        // NOTE: This will require a page refresh in the parent to see the change.
-        // A more robust solution would involve passing a callback to update the parent's state.
       } catch (error) {
           toast({ title: 'Error', description: 'Failed to update product status.', variant: 'destructive'});
       } finally {

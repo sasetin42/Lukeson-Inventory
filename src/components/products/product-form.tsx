@@ -12,10 +12,13 @@ import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Pa
 import Image from 'next/image';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { db, storage } from '@/lib/firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface ProductFormProps {
   product: Product | null;
-  onSuccess: (product: Product) => void;
+  onSuccess: (product: Omit<Product, 'id' | 'createdAt'> & {id?: string}) => void;
   onCancel: () => void;
 }
 
@@ -54,33 +57,30 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [barcode, setBarcode] = useState('');
 
     useEffect(() => {
-        try {
-            const storedSuppliers = localStorage.getItem('suppliers');
-            if (storedSuppliers) {
-                setSuppliers(JSON.parse(storedSuppliers));
+        const fetchData = async () => {
+            try {
+                const suppliersCollection = collection(db, 'suppliers');
+                const suppliersSnapshot = await getDocs(suppliersCollection);
+                setSuppliers(suppliersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier)));
+
+                const categoriesCollection = collection(db, 'categories');
+                const categoriesSnapshot = await getDocs(categoriesCollection);
+                setCategories(categoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory)));
+            } catch(error) {
+                console.error("Error loading data from Firestore", error);
+                toast({ title: "Error", description: "Failed to load supporting data.", variant: "destructive" });
             }
-            const storedCategories = localStorage.getItem('categories');
-            if (storedCategories) {
-                setCategories(JSON.parse(storedCategories));
-            }
-        } catch(error) {
-            console.error("Error loading data from localStorage", error);
-            toast({ title: "Error", description: "Failed to load supporting data.", variant: "destructive" });
-        }
-    }, []);
+        };
+        fetchData();
+    }, [toast]);
 
     useEffect(() => {
-        const generateProductCode = () => {
+        const generateProductCode = async () => {
             const year = new Date().getFullYear();
-            const storedProducts = localStorage.getItem('products');
-            const products = storedProducts ? JSON.parse(storedProducts) : [];
-            let nextId = 1;
-            if (products.length > 0) {
-                const lastProduct = products.sort((a:Product, b:Product) => a.productCode > b.productCode ? -1 : 1)[0];
-                const lastId = parseInt(lastProduct.productCode.split('-').pop() || '0');
-                nextId = lastId + 1;
-            }
-            setProductCode(`PRO-${year}-${nextId.toString().padStart(3, '0')}`);
+            const productsCollection = collection(db, 'products');
+            const snapshot = await getDocs(productsCollection);
+            const productsCount = snapshot.size;
+            setProductCode(`PRO-${year}-${(productsCount + 1).toString().padStart(3, '0')}`);
         };
 
         if (product) {
@@ -163,6 +163,13 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         setIsSaving(true);
         
         try {
+            let imageUrl = product?.imageUpload || '';
+            if (imageFile) {
+                const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
+                const snapshot = await uploadBytes(storageRef, imageFile);
+                imageUrl = await getDownloadURL(snapshot.ref);
+            }
+
             const stockNum = Number(stock) || 0;
             const reOrderLevelNum = Number(reOrderLevel) || 0;
             let stockStatus = product?.status || 'In Stock';
@@ -172,9 +179,8 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                     : 'Out of Stock';
             }
 
-            const productData: Product = {
-                id: product?.id || new Date().toISOString(),
-                createdAt: product?.createdAt || new Date(),
+            const productData: Omit<Product, 'id' | 'createdAt'> & {id?:string} = {
+                id: product?.id,
                 productCode,
                 name: productName,
                 sku,
@@ -186,7 +192,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 meters: Number(meters) || 0,
                 supplier,
                 location,
-                imageUpload: imagePreview || '',
+                imageUpload: imageUrl,
                 stock: stockNum,
                 cost: Number(cost) || 0,
                 price: Number(price) || 0,

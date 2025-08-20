@@ -9,6 +9,8 @@ import SupplierList from "@/components/suppliers/supplier-list";
 import { Supplier } from '@/lib/types';
 import SupplierFormModal from '@/components/suppliers/supplier-form-modal';
 import { useToast } from '@/hooks/use-toast';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, addDoc, doc, setDoc, deleteDoc } from 'firebase/firestore';
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -17,21 +19,17 @@ export default function SuppliersPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    try {
-        const storedSuppliers = localStorage.getItem('suppliers');
-        if(storedSuppliers){
-            setSuppliers(JSON.parse(storedSuppliers));
-        }
-    } catch(error) {
-        console.error("Failed to load suppliers from localstorage", error);
-        toast({ title: "Error", description: "Failed to load suppliers.", variant: "destructive"});
-    }
-  }, []);
+    const unsubscribe = onSnapshot(collection(db, "suppliers"), (snapshot) => {
+      const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
+      setSuppliers(suppliersData);
+    }, (error) => {
+      console.error("Failed to load suppliers from Firestore", error);
+      toast({ title: "Error", description: "Failed to load suppliers.", variant: "destructive" });
+    });
 
-  const persistSuppliers = (updatedSuppliers: Supplier[]) => {
-      localStorage.setItem('suppliers', JSON.stringify(updatedSuppliers));
-      setSuppliers(updatedSuppliers);
-  }
+    return () => unsubscribe();
+  }, [toast]);
+
 
   const handleOpenModal = (supplier: Supplier | null) => {
     setEditingSupplier(supplier);
@@ -40,9 +38,7 @@ export default function SuppliersPage() {
 
   const handleAddSupplier = async (newSupplierData: Omit<Supplier, 'id'>) => {
     try {
-      const newSupplier = { ...newSupplierData, id: new Date().toISOString() };
-      const updatedSuppliers = [...suppliers, newSupplier];
-      persistSuppliers(updatedSuppliers);
+      await addDoc(collection(db, 'suppliers'), newSupplierData);
       toast({ title: "Success", description: "Supplier added successfully.", variant: "success" });
     } catch (error) {
       console.error("Error adding document: ", error);
@@ -52,8 +48,8 @@ export default function SuppliersPage() {
 
   const handleUpdateSupplier = async (supplierId: string, updatedSupplierData: Partial<Supplier>) => {
     try {
-      const updatedSuppliers = suppliers.map(s => s.id === supplierId ? {...s, ...updatedSupplierData, id: supplierId} : s);
-      persistSuppliers(updatedSuppliers);
+      const supplierRef = doc(db, 'suppliers', supplierId);
+      await setDoc(supplierRef, updatedSupplierData, { merge: true });
       toast({ title: "Success", description: "Supplier updated successfully.", variant: "success" });
     } catch (error) {
       console.error("Error updating document: ", error);
@@ -63,8 +59,7 @@ export default function SuppliersPage() {
 
   const handleDeleteSupplier = async (supplierId: string) => {
     try {
-      const updatedSuppliers = suppliers.filter(s => s.id !== supplierId);
-      persistSuppliers(updatedSuppliers);
+      await deleteDoc(doc(db, 'suppliers', supplierId));
       toast({ title: "Success", description: "Supplier deleted successfully.", variant: "success" });
     } catch (error) {
       console.error("Error deleting document: ", error);

@@ -19,11 +19,13 @@ import { Textarea } from '../ui/textarea';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, X } from 'lucide-react';
+import { storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface CategoryFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (category: ItemCategory) => void;
+  onSave: (category: Omit<ItemCategory, 'id' | 'createdAt'> & {id?: string}) => void;
   category: ItemCategory | null;
 }
 
@@ -83,42 +85,22 @@ export default function CategoryFormModal({
         }
         setIsSaving(true);
         
-        const categoryData: Omit<ItemCategory, 'id' | 'createdAt'> = {
-            name,
-            description,
-            productImage: imagePreview || '',
-        };
-
         try {
-            const storedCategories = localStorage.getItem('categories') || '[]';
-            const categories: ItemCategory[] = JSON.parse(storedCategories);
-
-            let newCategory: ItemCategory;
-
-            if (category) {
-                // Update
-                const categoryIndex = categories.findIndex(c => c.id === category.id);
-                if (categoryIndex > -1) {
-                    newCategory = { ...categories[categoryIndex], ...categoryData };
-                    categories[categoryIndex] = newCategory;
-                } else {
-                    // This case should ideally not happen if UI is correct
-                    throw new Error("Category not found for updating.");
-                }
-                 toast({ title: "Success", description: "Category updated successfully.", variant: "success" });
-            } else {
-                // Add
-                newCategory = {
-                    ...categoryData,
-                    id: new Date().toISOString(),
-                    createdAt: new Date(),
-                }
-                categories.push(newCategory);
-                toast({ title: "Success", description: "Category added successfully.", variant: "success" });
+            let imageUrl = category?.productImage || '';
+            if (imageFile) {
+                const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
+                const snapshot = await uploadBytes(storageRef, imageFile);
+                imageUrl = await getDownloadURL(snapshot.ref);
             }
 
-            localStorage.setItem('categories', JSON.stringify(categories));
-            onSave(newCategory);
+            const categoryData: Omit<ItemCategory, 'id' | 'createdAt'> & {id?: string} = {
+                id: category?.id,
+                name,
+                description,
+                productImage: imageUrl,
+            };
+
+            onSave(categoryData);
             onClose();
 
         } catch (error: any) {

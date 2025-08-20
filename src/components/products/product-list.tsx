@@ -30,6 +30,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import ProductImage from './product-image';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 interface ProductListProps {
     products: Product[];
@@ -48,14 +50,14 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
     const { toast } = useToast();
 
     useEffect(() => {
-       try {
-            const storedCategories = localStorage.getItem('categories');
-            if (storedCategories) {
-                setCategories(JSON.parse(storedCategories));
-            }
-        } catch(error) {
-            console.error("Failed to load categories from localStorage", error);
-        }
+        const unsubscribe = onSnapshot(collection(db, "categories"), (snapshot) => {
+            const categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
+            setCategories(categoriesData);
+        }, (error) => {
+            console.error("Failed to load categories from Firestore", error);
+        });
+
+        return () => unsubscribe();
     }, []);
 
     const getStatusVariant = (status: string) => {

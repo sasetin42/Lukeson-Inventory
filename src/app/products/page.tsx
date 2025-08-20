@@ -12,6 +12,8 @@ import { Product, ItemCategory } from '@/lib/types';
 import ProductFormModal from '@/components/products/product-form-modal';
 import CategoryFormModal from '@/components/category/category-form-modal';
 import { useToast } from '@/hooks/use-toast';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, addDoc, doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -22,27 +24,25 @@ export default function ProductsPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        try {
-            const storedProducts = localStorage.getItem('products');
-            if (storedProducts) {
-                const productsData = JSON.parse(storedProducts).map((p: any) => ({
-                    ...p,
-                    createdAt: p.createdAt ? new Date(p.createdAt) : new Date(),
-                })).sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime());
-                setProducts(productsData);
-            }
-        } catch (error) {
-            console.error("Failed to load products from localStorage", error);
-            toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
-        } finally {
+        const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
+            const productsData = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
+                } as Product;
+            }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+            setProducts(productsData);
             setLoading(false);
-        }
-    }, []);
+        }, (error) => {
+            console.error("Failed to load products from Firestore", error);
+            toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
+            setLoading(false);
+        });
 
-    const persistProducts = (updatedProducts: Product[]) => {
-        localStorage.setItem('products', JSON.stringify(updatedProducts));
-        setProducts(updatedProducts.map(p => ({ ...p, createdAt: new Date(p.createdAt) })).sort((a,b) => b.createdAt.getTime() - a.createdAt.getTime()));
-    };
+        return () => unsubscribe();
+    }, []);
     
     const totalProducts = products.length;
     const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
@@ -51,7 +51,7 @@ export default function ProductsPage() {
     
     const addedThisWeek = products.filter(p => {
         if (!p.createdAt) return false;
-        const productDate = new Date(p.createdAt);
+        const productDate = new Date(p.createdAt as any);
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         return productDate > sevenDaysAgo;
@@ -78,8 +78,7 @@ export default function ProductsPage() {
 
     const handleDeleteProduct = async (productToDelete: Product) => {
         try {
-            const updatedProducts = products.filter(p => p.id !== productToDelete.id);
-            persistProducts(updatedProducts);
+            await deleteDoc(doc(db, 'products', productToDelete.id));
             toast({ title: "Success", description: "Product deleted.", variant: "success" });
         } catch (error) {
             console.error("Error deleting product: ", error);
@@ -87,21 +86,43 @@ export default function ProductsPage() {
         }
     }
 
-    const handleProductSave = (savedProduct: Product) => {
-      const existing = products.find(p => p.id === savedProduct.id);
-      let updatedProducts;
-      if (existing) {
-        updatedProducts = products.map(p => p.id === savedProduct.id ? savedProduct : p);
-      } else {
-        updatedProducts = [...products, savedProduct];
+    const handleProductSave = async (savedProductData: Omit<Product, 'id' | 'createdAt'> & {id?: string}) => {
+      try {
+          if (savedProductData.id) {
+              const docRef = doc(db, 'products', savedProductData.id);
+              const { id, ...dataToSave } = savedProductData;
+              await setDoc(docRef, dataToSave, { merge: true });
+          } else {
+              await addDoc(collection(db, 'products'), {
+                  ...savedProductData,
+                  createdAt: serverTimestamp()
+              });
+          }
+      } catch (error) {
+          console.error("Error saving product:", error);
+          toast({ title: "Error", description: "Failed to save product.", variant: "destructive" });
       }
-      persistProducts(updatedProducts);
     }
 
-    const handleCategorySave = (savedCategory: ItemCategory) => {
-        // Categories are just read from local storage in the form,
-        // so we don't need to update any state here, just close the modal.
-        setIsCategoryModalOpen(false);
+    const handleCategorySave = async (savedCategory: Omit<ItemCategory, 'id' | 'createdAt'> & {id?: string}) => {
+        try {
+            if (savedCategory.id) {
+                const docRef = doc(db, 'categories', savedCategory.id);
+                const { id, ...dataToSave } = savedCategory;
+                await setDoc(docRef, dataToSave, { merge: true });
+                toast({ title: "Success", description: "Category updated successfully.", variant: "success" });
+            } else {
+                await addDoc(collection(db, 'categories'), {
+                    ...savedCategory,
+                    createdAt: serverTimestamp()
+                });
+                toast({ title: "Success", description: "Category added successfully.", variant: "success" });
+            }
+            setIsCategoryModalOpen(false);
+        } catch (error) {
+             console.error("Error saving category:", error);
+            toast({ title: "Error", description: "Failed to save category.", variant: "destructive" });
+        }
     }
 
 
@@ -166,7 +187,7 @@ export default function ProductsPage() {
             isOpen={isProductModalOpen}
             onClose={handleCloseProductModal}
             product={editingProduct}
-            onSave={handleProductSave}
+            onSave={handleProductSave as any}
           />
       )}
 
@@ -174,7 +195,7 @@ export default function ProductsPage() {
         <CategoryFormModal
             isOpen={isCategoryModalOpen}
             onClose={() => setIsCategoryModalOpen(false)}
-            onSave={handleCategorySave}
+            onSave={handleCategorySave as any}
             category={null}
         />
       )}

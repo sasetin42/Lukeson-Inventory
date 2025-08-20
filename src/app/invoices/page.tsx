@@ -7,20 +7,30 @@ import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle } from "lucide-react";
 import InvoiceList from "@/components/invoices/invoice-list";
 import { Invoice } from '@/lib/types';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
 
   useEffect(() => {
-    try {
-      const storedInvoices = localStorage.getItem('invoices');
-      if (storedInvoices) {
-        setInvoices(JSON.parse(storedInvoices).map((i: any) => ({ ...i, date: new Date(i.date) })));
-      }
-    } catch(error) {
-      console.error("Failed to load invoices from localStorage", error);
-    }
-  }, []);
+    const unsubscribe = onSnapshot(collection(db, "invoices"), (snapshot) => {
+        const invoicesData = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                date: data.date.toDate ? data.date.toDate() : new Date(),
+            } as Invoice;
+        });
+        setInvoices(invoicesData);
+    }, (error) => {
+        console.error("Failed to load invoices from Firestore", error);
+    });
+
+    return () => unsubscribe();
+}, []);
+
 
   return (
     <div className="flex flex-col gap-4">
