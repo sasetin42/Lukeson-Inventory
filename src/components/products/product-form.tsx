@@ -173,30 +173,6 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         setUploadProgress(null);
     };
 
-    const handleUpload = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            const storageRef = ref(storage, `product_images/${Date.now()}_${file.name}`);
-            const uploadTask = uploadBytesResumable(storageRef, file);
-
-            uploadTask.on('state_changed',
-                (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    setUploadProgress(progress);
-                },
-                (error) => {
-                    console.error("Upload failed:", error);
-                    setUploadProgress(null);
-                    reject(error);
-                },
-                async () => {
-                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    setUploadProgress(null);
-                    resolve(downloadURL);
-                }
-            );
-        });
-    };
-
     const handleSubmit = async () => {
         if (!productName) {
             toast({ title: "Validation Error", description: "Product name is required.", variant: "destructive" });
@@ -207,8 +183,38 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         
         try {
             let imageUrl = product?.productImage || '';
+            
             if (imageFile) {
-                imageUrl = await handleUpload(imageFile);
+                await new Promise<void>((resolve, reject) => {
+                    const storageRef = ref(storage, `product_images/${Date.now()}_${imageFile.name}`);
+                    const uploadTask = uploadBytesResumable(storageRef, imageFile);
+
+                    uploadTask.on('state_changed',
+                        (snapshot) => {
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            setUploadProgress(progress);
+                        },
+                        (error) => {
+                            console.error("Upload failed:", error);
+                            setUploadProgress(null);
+                            toast({
+                                title: "Error Uploading Image",
+                                description: `Upload failed. ${error.code === 'storage/retry-limit-exceeded' ? 'Max retry time exceeded. Please check your network and try again.' : error.message}`,
+                                variant: "destructive",
+                            });
+                            reject(error);
+                        },
+                        async () => {
+                            try {
+                                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                                imageUrl = downloadURL;
+                                resolve();
+                            } catch (error) {
+                                reject(error)
+                            }
+                        }
+                    );
+                });
             }
 
             const stockNum = Number(stock) || 0;
@@ -248,15 +254,13 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             
             onSuccess(productData);
 
-        } catch (error: any) {
+        } catch (error) {
             console.error("Failed to save product:", error);
-            toast({
-                title: "Error Saving Product",
-                description: `Failed to save product. ${error.code === 'storage/retry-limit-exceeded' ? 'Max retry time exceeded. Please check your network and try again.' : error.message}`,
-                variant: "destructive",
-            });
+            // Toast for upload errors is already handled inside the promise.
+            // A general save error could be handled here if needed.
         } finally {
             setIsSaving(false);
+            setUploadProgress(null);
         }
     };
 
@@ -468,13 +472,16 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
 
             <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={onCancel} disabled={isSaving}>Cancel</Button>
-                <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
-                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {uploadProgress !== null ? `Uploading... ${Math.round(uploadProgress)}%` : (isSaving ? 'Saving...' : (product ? 'Save Changes' : 'Add Product'))}
+                <Button type="submit" onClick={handleSubmit} disabled={isSaving || uploadProgress !== null}>
+                    {isSaving && uploadProgress === null && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {uploadProgress !== null ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            {`Uploading... ${Math.round(uploadProgress)}%`}
+                        </>
+                    ) : (isSaving ? 'Saving...' : (product ? 'Save Changes' : 'Add Product'))}
                 </Button>
             </div>
         </div>
     );
 }
-
-    
