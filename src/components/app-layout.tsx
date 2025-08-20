@@ -18,10 +18,11 @@ export default function AppLayout({
     const mainRef = useRef<HTMLElement>(null);
     const headerRef = useRef<HTMLElement>(null);
     const [scrolled, setScrolled] = useState(false);
-    const [dateTime, setDateTime] = useState(new Date());
+    const [dateTime, setDateTime] = useState<Date | null>(null);
     const { toast } = useToast();
 
     useEffect(() => {
+        setDateTime(new Date());
         const timer = setInterval(() => {
             setDateTime(new Date());
         }, 1000);
@@ -72,7 +73,7 @@ export default function AppLayout({
                 <div className="flex-1" />
                 <div className="flex items-center gap-4">
                     <div className="text-sm text-muted-foreground font-medium hidden md:block">
-                        {format(dateTime, 'E, MMM d, yyyy, h:mm:ss a')}
+                        {dateTime ? format(dateTime, 'E, MMM d, yyyy, h:mm:ss a') : 'Loading...'}
                     </div>
                     <Button variant="outline" size="sm" onClick={handleOptimize}>
                         <Zap className="h-4 w-4 mr-2" />
