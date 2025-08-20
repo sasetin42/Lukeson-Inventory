@@ -8,15 +8,17 @@ import { Package, PlusCircle, Upload, Download, DollarSign, AlertTriangle, XCirc
 import KpiCard from "@/components/kpi-card";
 import ActionCard from "@/components/action-card";
 import ProductList from "@/components/products/product-list";
-import { Product } from '@/lib/types';
+import { Product, ItemCategory } from '@/lib/types';
 import ProductFormModal from '@/components/products/product-form-modal';
+import CategoryFormModal from '@/components/category/category-form-modal';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isProductModalOpen, setIsProductModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -64,13 +66,13 @@ export default function ProductsPage() {
         { title: "Pending Orders", value: 0, icon: Clock, subtext: "Awaiting fulfillment", color: "orange" as const }
     ];
 
-    const handleOpenModal = (product: Product | null) => {
+    const handleOpenProductModal = (product: Product | null) => {
         setEditingProduct(product);
-        setIsModalOpen(true);
+        setIsProductModalOpen(true);
     };
     
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
+    const handleCloseProductModal = () => {
+        setIsProductModalOpen(false);
         setEditingProduct(null);
     }
 
@@ -94,6 +96,12 @@ export default function ProductsPage() {
         updatedProducts = [...products, savedProduct];
       }
       persistProducts(updatedProducts);
+    }
+
+    const handleCategorySave = (savedCategory: ItemCategory) => {
+        // Categories are just read from local storage in the form,
+        // so we don't need to update any state here, just close the modal.
+        setIsCategoryModalOpen(false);
     }
 
 
@@ -121,7 +129,7 @@ export default function ProductsPage() {
             title="Add Product" 
             description="Create new inventory item" 
             icon="plus"
-            onClick={() => handleOpenModal(null)}
+            onClick={() => handleOpenProductModal(null)}
             color="blue"
         />
         <ActionCard 
@@ -148,17 +156,27 @@ export default function ProductsPage() {
       </div>
       <ProductList 
         products={products} 
-        onEdit={handleOpenModal} 
+        onEdit={handleOpenProductModal} 
         onDelete={handleDeleteProduct}
+        onAddCategory={() => setIsCategoryModalOpen(true)}
       />
 
-      {isModalOpen && (
+      {isProductModalOpen && (
           <ProductFormModal 
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
+            isOpen={isProductModalOpen}
+            onClose={handleCloseProductModal}
             product={editingProduct}
             onSave={handleProductSave}
           />
+      )}
+
+      {isCategoryModalOpen && (
+        <CategoryFormModal
+            isOpen={isCategoryModalOpen}
+            onClose={() => setIsCategoryModalOpen(false)}
+            onSave={handleCategorySave}
+            category={null}
+        />
       )}
       
     </div>

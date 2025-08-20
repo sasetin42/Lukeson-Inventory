@@ -35,9 +35,10 @@ interface ProductListProps {
     products: Product[];
     onEdit: (product: Product | null) => void;
     onDelete: (product: Product) => void;
+    onAddCategory: () => void;
 }
 
-export default function ProductList({ products, onEdit, onDelete }: ProductListProps) {
+export default function ProductList({ products, onEdit, onDelete, onAddCategory }: ProductListProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
@@ -138,6 +139,10 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
                         <CardDescription>Your current inventory of products.</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
+                        <Button variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-50 hover:text-purple-700" onClick={onAddCategory}>
+                            <LayoutGrid className="mr-2 h-4 w-4" />
+                            Add Category
+                        </Button>
                         <Button onClick={() => onEdit(null)}>
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Add Product
