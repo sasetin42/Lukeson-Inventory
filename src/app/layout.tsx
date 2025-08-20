@@ -13,7 +13,11 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, Sidebar
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/components/app-layout';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from '@/context/auth-context';
+import { usePathname, useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
 
 
 // export const metadata: Metadata = {
@@ -111,38 +115,30 @@ const navGroups = [
   },
 ];
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-
+function AppContent({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory']);
-
+  
   const handleAccordionChange = (value: string[]) => {
       const alwaysOpen = ['Overview', 'Inventory'];
       let newOpenState = [...openAccordion];
 
-      // Determine which item was just clicked
       const changedItem = value.find(item => !openAccordion.includes(item)) || openAccordion.find(item => !value.includes(item));
 
       if (changedItem && !alwaysOpen.includes(changedItem)) {
-          // If the clicked item is not an "always-open" item
           if (newOpenState.includes(changedItem)) {
-              // It was just closed, so remove it
               newOpenState = newOpenState.filter(item => item === changedItem ? false : true);
           } else {
-              // It was just opened, so add it
               newOpenState.push(changedItem);
           }
 
-          // Ensure only one non-always-open item is open at a time
           newOpenState = newOpenState.filter(item => {
               return alwaysOpen.includes(item) || item === changedItem;
           });
       }
 
-      // Ensure always-open items are always present
       for (const item of alwaysOpen) {
           if (!newOpenState.includes(item)) {
               newOpenState.push(item);
@@ -151,7 +147,135 @@ export default function RootLayout({
       
       setOpenAccordion(newOpenState);
   }
+  
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push('/login');
+  };
 
+  useEffect(() => {
+    if (!loading && !user && pathname !== '/login' && pathname !== '/signup') {
+      router.push('/login');
+    }
+  }, [user, loading, router, pathname]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+  
+  if (!user && (pathname === '/login' || pathname === '/signup')) {
+      return <>{children}</>
+  }
+  
+  if (!user) {
+    return null;
+  }
+
+  return (
+      <SidebarProvider>
+        <Sidebar>
+          <SidebarHeader>
+            <div className="flex items-center gap-3">
+              <Logo className="size-9 text-primary" />
+              <div className="flex flex-col">
+                <h1 className="text-xl font-bold tracking-tight text-foreground">IMIS Pro</h1>
+                <p className="text-sm text-muted-foreground">Workspace</p>
+              </div>
+            </div>
+          </SidebarHeader>
+          <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
+            <div className="flex flex-col gap-2 px-2">
+              <Accordion 
+                type="multiple"
+                className="w-full" 
+                value={openAccordion} 
+                onValueChange={handleAccordionChange}
+              >
+                {navGroups.map((group, groupIndex) => (
+                  <div key={group.title}>
+                    {groupIndex > 0 && <SidebarSeparator className="my-2" />}
+                    <h3 className={`text-sm font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
+                    {group.items.map((item) => (
+                        <AccordionItem value={item.title} key={item.title}>
+                          <AccordionTrigger>
+                            <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
+                                <span className="text-[14px] font-bold">{item.title}</span>
+                            </div>
+                          </AccordionTrigger>
+                          <AccordionContent>
+                            <SidebarMenu className="ml-4 border-l border-gray-200 dark:border-gray-700 py-1">
+                              {item.links.map((link) => (
+                                <SidebarMenuItem key={link.label}>
+                                  <SidebarMenuButton asChild>
+                                    <Link href={link.href}>
+                                      <link.icon className={link.color} />
+                                      <span className="font-normal leading-[18px] text-[14px]">{link.label}</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              ))}
+                            </SidebarMenu>
+                          </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                  </div>
+                ))}
+              </Accordion>
+            </div>
+          </SidebarContent>
+          <SidebarFooter className="mt-auto">
+            <SidebarSeparator className="mb-2" />
+             <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="justify-start w-full gap-2 p-2 h-auto">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="https://placehold.co/40x40.png" alt="Admin" data-ai-hint="user avatar" />
+                    <AvatarFallback>{user?.email?.[0]?.toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="text-left">
+                    <p className="text-sm font-medium text-foreground">Admin</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="right" align="start" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <LifeBuoy className="mr-2 h-4 w-4" />
+                  <span>Support</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarFooter>
+        </Sidebar>
+        <AppLayout>
+          {children}
+        </AppLayout>
+      </SidebarProvider>
+  );
+}
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html lang="en" className="h-full">
       <head>
@@ -162,98 +286,9 @@ export default function RootLayout({
         <meta name="description" content="A comprehensive, all-in-one business management system tailored for businesses in the Philippines." />
       </head>
       <body className="font-body antialiased h-full bg-background transition-colors duration-300" suppressHydrationWarning={true}>
-        <SidebarProvider>
-          <Sidebar>
-            <SidebarHeader>
-              <div className="flex items-center gap-3">
-                <Logo className="size-9 text-primary" />
-                <div className="flex flex-col">
-                  <h1 className="text-xl font-bold tracking-tight text-foreground">IMIS Pro</h1>
-                  <p className="text-sm text-muted-foreground">Workspace</p>
-                </div>
-              </div>
-            </SidebarHeader>
-            <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-              <div className="flex flex-col gap-2 px-2">
-                <Accordion 
-                  type="multiple"
-                  className="w-full" 
-                  value={openAccordion} 
-                  onValueChange={handleAccordionChange}
-                >
-                  {navGroups.map((group, groupIndex) => (
-                    <div key={group.title}>
-                      {groupIndex > 0 && <SidebarSeparator className="my-2" />}
-                      <h3 className={`text-sm font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
-                      {group.items.map((item) => (
-                          <AccordionItem value={item.title} key={item.title}>
-                            <AccordionTrigger>
-                              <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
-                                  <span className="text-[14px] font-bold">{item.title}</span>
-                              </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                              <SidebarMenu className="ml-4 border-l border-gray-200 dark:border-gray-700 py-1">
-                                {item.links.map((link) => (
-                                  <SidebarMenuItem key={link.label}>
-                                    <SidebarMenuButton asChild>
-                                      <Link href={link.href}>
-                                        <link.icon className={link.color} />
-                                        <span className="font-normal leading-[18px] text-[14px]">{link.label}</span>
-                                      </Link>
-                                    </SidebarMenuButton>
-                                  </SidebarMenuItem>
-                                ))}
-                              </SidebarMenu>
-                            </AccordionContent>
-                          </AccordionItem>
-                      ))}
-                    </div>
-                  ))}
-                </Accordion>
-              </div>
-            </SidebarContent>
-            <SidebarFooter className="mt-auto">
-              <SidebarSeparator className="mb-2" />
-               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="justify-start w-full gap-2 p-2 h-auto">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src="https://placehold.co/40x40.png" alt="Admin" data-ai-hint="user avatar" />
-                      <AvatarFallback>A</AvatarFallback>
-                    </Avatar>
-                    <div className="text-left">
-                      <p className="text-sm font-medium text-foreground">Admin</p>
-                      <p className="text-xs text-muted-foreground">admin@imis-pro.com</p>
-                    </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="right" align="start" className="w-56">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <LifeBuoy className="mr-2 h-4 w-4" />
-                    <span>Support</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </SidebarFooter>
-          </Sidebar>
-          <AppLayout>
-            {children}
-          </AppLayout>
-        </SidebarProvider>
+        <AuthProvider>
+          <AppContent>{children}</AppContent>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>
