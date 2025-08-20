@@ -17,8 +17,6 @@ import StockMovementTrendChart from "@/components/analytics/stock-movement-trend
 import InventoryOptimizationRecommendations from "@/components/analytics/inventory-optimization-recommendations";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, where, getDocs, Timestamp, orderBy } from 'firebase/firestore';
 import { Product, Sales, Supplier } from '@/lib/types';
 import SupplierOnTimeChart from '@/components/analytics/supplier-on-time-chart';
 
@@ -30,45 +28,31 @@ export default function AnalyticsPage() {
   const [kpiData, setKpiData] = useState<any[]>([]);
 
   useEffect(() => {
-    const productsUnsub = onSnapshot(collection(db, "products"), (snapshot) => {
-      const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-      setProducts(productsData);
-    });
-
-    const salesUnsub = onSnapshot(collection(db, "sales"), (snapshot) => {
-      const salesData = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return { 
-          id: doc.id, 
-          ...data,
-          date: (data.date as Timestamp).toDate() 
-        } as Sales
-      });
-      setSales(salesData);
-    });
-
-    const suppliersUnsub = onSnapshot(collection(db, "suppliers"), (snapshot) => {
-      const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
-      setSuppliers(suppliersData);
-    });
-
-    return () => {
-      productsUnsub();
-      salesUnsub();
-      suppliersUnsub();
-    };
+    try {
+      const storedProducts = localStorage.getItem('products');
+      if (storedProducts) {
+        setProducts(JSON.parse(storedProducts));
+      }
+      const storedSales = localStorage.getItem('sales');
+      if (storedSales) {
+        setSales(JSON.parse(storedSales).map((s:any) => ({...s, date: new Date(s.date) })));
+      }
+      const storedSuppliers = localStorage.getItem('suppliers');
+      if (storedSuppliers) {
+        setSuppliers(JSON.parse(storedSuppliers));
+      }
+    } catch (error) {
+      console.error("Failed to load data from localStorage", error);
+    }
   }, []);
 
   useEffect(() => {
-    async function calculateKpis() {
+    function calculateKpis() {
         const days = Number(dateRange);
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - days);
-        const cutoffTimestamp = Timestamp.fromDate(cutoffDate);
-
-        const salesQuery = query(collection(db, "sales"), where("date", ">=", cutoffTimestamp));
-        const salesSnapshot = await getDocs(salesQuery);
-        const filteredSales = salesSnapshot.docs.map(doc => doc.data() as Sales);
+        
+        const filteredSales = sales.filter(s => new Date(s.date) >= cutoffDate);
         
         const totalRevenue = filteredSales.reduce((acc, s) => acc + s.total, 0);
         const unitsSold = filteredSales.reduce((acc, s) => acc + s.quantity, 0);

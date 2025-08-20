@@ -10,14 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from '../ui/textarea';
 import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, Building2, Percent } from 'lucide-react';
 import Image from 'next/image';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, getDocs, addDoc, updateDoc, doc, serverTimestamp, query, orderBy, limitToLast, getDoc } from 'firebase/firestore';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProductFormProps {
   product: Product | null;
-  onSuccess: () => void;
+  onSuccess: (product: Product) => void;
   onCancel: () => void;
 }
 
@@ -56,32 +54,29 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [barcode, setBarcode] = useState('');
 
     useEffect(() => {
-        const suppliersUnsub = onSnapshot(collection(db, "suppliers"), (snapshot) => {
-            const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
-            setSuppliers(suppliersData);
-        });
-        
-        const categoriesUnsub = onSnapshot(collection(db, "categories"), (snapshot) => {
-            const categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
-            setCategories(categoriesData);
-        });
-        
-        return () => {
-            suppliersUnsub();
-            categoriesUnsub();
+        try {
+            const storedSuppliers = localStorage.getItem('suppliers');
+            if (storedSuppliers) {
+                setSuppliers(JSON.parse(storedSuppliers));
+            }
+            const storedCategories = localStorage.getItem('categories');
+            if (storedCategories) {
+                setCategories(JSON.parse(storedCategories));
+            }
+        } catch(error) {
+            console.error("Error loading data from localStorage", error);
+            toast({ title: "Error", description: "Failed to load supporting data.", variant: "destructive" });
         }
     }, []);
 
     useEffect(() => {
-        const generateProductCode = async () => {
+        const generateProductCode = () => {
             const year = new Date().getFullYear();
-            const productsRef = collection(db, 'products');
-            const q = query(productsRef, orderBy('productCode', 'desc'), limitToLast(1));
-            const querySnapshot = await getDocs(q);
-
+            const storedProducts = localStorage.getItem('products');
+            const products = storedProducts ? JSON.parse(storedProducts) : [];
             let nextId = 1;
-            if (!querySnapshot.empty) {
-                const lastProduct = querySnapshot.docs[0].data();
+            if (products.length > 0) {
+                const lastProduct = products.sort((a:Product, b:Product) => a.productCode > b.productCode ? -1 : 1)[0];
                 const lastId = parseInt(lastProduct.productCode.split('-').pop() || '0');
                 nextId = lastId + 1;
             }
@@ -177,8 +172,9 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                     : 'Out of Stock';
             }
 
-            const productData: Omit<Product, 'id'> = {
-                createdAt: product?.createdAt || serverTimestamp(),
+            const productData: Product = {
+                id: product?.id || new Date().toISOString(),
+                createdAt: product?.createdAt || new Date(),
                 productCode,
                 name: productName,
                 sku,
@@ -190,7 +186,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 meters: Number(meters) || 0,
                 supplier,
                 location,
-                imageUpload: imagePreview || '', // Save base64 image
+                imageUpload: imagePreview || '',
                 stock: stockNum,
                 cost: Number(cost) || 0,
                 price: Number(price) || 0,
@@ -204,17 +200,12 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             };
             
             if (product) {
-                // Update existing product
-                const productRef = doc(db, 'products', product.id);
-                await updateDoc(productRef, productData);
                 toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
             } else {
-                // Add new product
-                await addDoc(collection(db, 'products'), productData);
                 toast({ title: "Success", description: "Product added successfully.", variant: "success" });
             }
             
-            onSuccess();
+            onSuccess(productData);
 
         } catch (error: any) {
             console.error("Failed to save product:", error);

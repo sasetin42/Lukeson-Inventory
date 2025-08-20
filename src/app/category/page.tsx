@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { LayoutGrid, PlusCircle } from "lucide-react";
 import CategoryList from "@/components/category/category-list";
 import CategoryFormModal from "@/components/category/category-form-modal";
-import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, updateDoc, deleteDoc, onSnapshot, query, where, getDocs, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { ItemCategory } from '@/lib/types';
 
@@ -20,22 +18,21 @@ export default function CategoryPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const q = query(collection(db, "categories"));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const categoriesData: ItemCategory[] = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate(),
-        } as ItemCategory;
-      }).sort((a,b) => (b.createdAt as Date).getTime() - (a.createdAt as Date).getTime());
-      
-      setCategories(categoriesData);
+    try {
+      const storedCategories = localStorage.getItem('categories');
+      if (storedCategories) {
+        const categoriesData = JSON.parse(storedCategories).map((c: any) => ({
+          ...c,
+          createdAt: c.createdAt ? new Date(c.createdAt) : new Date(),
+        })).sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime());
+        setCategories(categoriesData);
+      }
+    } catch (error) {
+      console.error("Failed to load categories from localStorage", error);
+      toast({ title: "Error", description: "Failed to load categories.", variant: "destructive" });
+    } finally {
       setLoading(false);
-    });
-
-    return () => unsubscribe();
+    }
   }, []);
 
   const handleOpenModal = (category: ItemCategory | null) => {
@@ -43,63 +40,73 @@ export default function CategoryPage() {
     setIsModalOpen(true);
   };
 
+  const persistCategories = (updatedCategories: ItemCategory[]) => {
+    localStorage.setItem('categories', JSON.stringify(updatedCategories));
+    setCategories(updatedCategories.map((c: any) => ({
+      ...c,
+      createdAt: new Date(c.createdAt),
+    })).sort((a,b) => b.createdAt.getTime() - a.createdAt.getTime()));
+  };
+
   const handleAddCategory = async (newCategoryData: Omit<ItemCategory, 'id' | 'createdAt'>) => {
     try {
-      await addDoc(collection(db, "categories"), {
+      const newCategory: ItemCategory = {
         ...newCategoryData,
-        createdAt: serverTimestamp(),
-      });
+        id: new Date().toISOString(),
+        createdAt: new Date(),
+      };
+      const updatedCategories = [...categories, newCategory];
+      persistCategories(updatedCategories);
       toast({ title: "Success", description: "Category added successfully.", variant: "success" });
     } catch (error) {
-      console.error("Error adding document: ", error);
+      console.error("Error adding category: ", error);
       toast({ title: "Error", description: "Failed to add category.", variant: "destructive" });
     }
   };
 
   const handleUpdateCategory = async (categoryId: string, updatedCategoryData: Partial<ItemCategory>) => {
     try {
-      const categoryRef = doc(db, "categories", categoryId);
-      await updateDoc(categoryRef, {
-        ...updatedCategoryData,
-        parentId: updatedCategoryData.parentId === 'none' ? null : updatedCategoryData.parentId
-      });
+      const updatedCategories = categories.map(c => 
+        c.id === categoryId ? { ...c, ...updatedCategoryData } : c
+      );
+      persistCategories(updatedCategories);
       toast({ title: "Success", description: "Category updated successfully.", variant: "success" });
     } catch (error) {
-      console.error("Error updating document: ", error);
+      console.error("Error updating category: ", error);
       toast({ title: "Error", description: "Failed to update category.", variant: "destructive" });
     }
   };
 
   const handleDeleteCategory = async (category: ItemCategory) => {
-    // Check if category is a parent to any other category
-    const isParentQuery = query(collection(db, 'categories'), where('parentId', '==', category.id));
-    const parentSnap = await getDocs(isParentQuery);
-    if (!parentSnap.empty) {
+    const isParent = categories.some(c => c.parentId === category.id);
+    if (isParent) {
       toast({
         title: "Deletion Failed",
-        description: `Cannot delete a category that is a parent to ${parentSnap.size} other categories.`,
+        description: `Cannot delete a category that is a parent to other categories.`,
         variant: "destructive",
       });
       return;
     }
-
-    // Check if any product is using this category
-    const productsQuery = query(collection(db, 'products'), where('category', '==', category.name));
-    const productSnap = await getDocs(productsQuery);
-    if (!productSnap.empty) {
-        toast({
+    
+    const productsRaw = localStorage.getItem('products');
+    const products = productsRaw ? JSON.parse(productsRaw) : [];
+    const isProductUsingCategory = products.some((p: any) => p.category === category.name);
+    if(isProductUsingCategory) {
+       toast({
             title: "Deletion Failed",
-            description: `Cannot delete category. It is being used by ${productSnap.size} product(s).`,
+            description: `Cannot delete category. It is being used by product(s).`,
             variant: "destructive"
         });
         return;
     }
 
+
     try {
-      await deleteDoc(doc(db, "categories", category.id));
+      const updatedCategories = categories.filter(c => c.id !== category.id);
+      persistCategories(updatedCategories);
       toast({ title: "Success", description: "Category deleted successfully.", variant: "success" });
     } catch (error) {
-      console.error("Error deleting document: ", error);
+      console.error("Error deleting category: ", error);
       toast({ title: "Error", description: "Failed to delete category.", variant: "destructive" });
     }
   }

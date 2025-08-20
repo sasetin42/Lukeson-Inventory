@@ -9,8 +9,6 @@ import InventoryOverview from "@/components/dashboard/inventory-overview";
 import RecentTransactions from "@/components/dashboard/recent-transactions";
 import QuickStats from "@/components/dashboard/quick-stats";
 import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, orderBy, limit, addDoc, getDocs, where, serverTimestamp, Timestamp } from "firebase/firestore";
 import { Product, Sales } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
@@ -21,60 +19,41 @@ export default function DashboardPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const seedInitialCategories = async () => {
-        const categoriesRef = collection(db, 'categories');
-        const categoriesToAdd = [
-            { name: 'STRIPLIGHT', description: 'Various types of LED striplights.' },
-            { name: 'POWER SUPPLY', description: 'Power supplies for LED lighting.' },
-            { name: 'GENERAL LIGHTING', description: 'General purpose lighting fixtures.' },
-            { name: 'ALUMINIUM PROFILE', description: 'Aluminium profiles for LED strips.' },
-        ];
+    const seedInitialCategories = () => {
+        const categoriesRef = 'categories';
+        const storedCategories = localStorage.getItem(categoriesRef);
 
-        for (const category of categoriesToAdd) {
-            const q = query(categoriesRef, where('name', '==', category.name));
-            const snapshot = await getDocs(q);
-            if (snapshot.empty) {
-                await addDoc(categoriesRef, {
-                    ...category,
-                    createdAt: serverTimestamp(),
-                });
-                console.log(`Added category: ${category.name}`);
-            }
+        if(!storedCategories) {
+            const categoriesToAdd = [
+                { id: '1', name: 'STRIPLIGHT', description: 'Various types of LED striplights.', createdAt: new Date() },
+                { id: '2', name: 'POWER SUPPLY', description: 'Power supplies for LED lighting.', createdAt: new Date() },
+                { id: '3', name: 'GENERAL LIGHTING', description: 'General purpose lighting fixtures.', createdAt: new Date() },
+                { id: '4', name: 'ALUMINIUM PROFILE', description: 'Aluminium profiles for LED strips.', createdAt: new Date() },
+            ];
+            localStorage.setItem(categoriesRef, JSON.stringify(categoriesToAdd));
+            console.log('Seeded initial categories to localStorage');
         }
     };
     seedInitialCategories();
   }, []);
 
   useEffect(() => {
-    const productsUnsub = onSnapshot(collection(db, "products"), (snapshot) => {
-        const productsData = snapshot.docs.map(doc => {
-          const data = doc.data();
-          return { id: doc.id, ...data, createdAt: (data.createdAt as Timestamp)?.toDate() } as Product
-        });
-        setProducts(productsData);
-        setLoading(false);
-    }, (error) => {
-        console.error(error);
-        toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
-        setLoading(false);
-    });
+      try {
+        const storedProducts = localStorage.getItem('products');
+        if (storedProducts) {
+            setProducts(JSON.parse(storedProducts).map((p:any) => ({...p, createdAt: new Date(p.createdAt)})));
+        }
 
-    const salesQuery = query(collection(db, 'sales'), orderBy('date', 'desc'), limit(10));
-    const salesUnsub = onSnapshot(salesQuery, (snapshot) => {
-        const salesData = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return { id: doc.id, ...data, date: (data.date as Timestamp).toDate() } as Sales
-        });
-        setSales(salesData);
-    }, (error) => {
+        const storedSales = localStorage.getItem('sales');
+        if (storedSales) {
+            setSales(JSON.parse(storedSales).map((s:any) => ({...s, date: new Date(s.date)})));
+        }
+      } catch (error) {
         console.error(error);
-        toast({ title: "Error", description: "Failed to load sales data.", variant: "destructive" });
-    });
-
-    return () => {
-        productsUnsub();
-        salesUnsub();
-    }
+        toast({ title: "Error", description: "Failed to load data from localStorage.", variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
   }, []);
 
   return (

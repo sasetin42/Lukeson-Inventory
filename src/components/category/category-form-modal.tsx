@@ -18,9 +18,6 @@ import type { ItemCategory } from '@/lib/types';
 import Image from 'next/image';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { db, storage } from '@/lib/firebase';
-import { ref as storageRef, uploadBytes, getDownloadURL } from "firebase/storage";
-import { collection, onSnapshot } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 interface CategoryFormModalProps {
@@ -44,22 +41,22 @@ export default function CategoryFormModal({
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
+    const [isUploading, setIsUploading] = useState(false); // Kept for UI state, though no real upload happens
     const [allCategories, setAllCategories] = useState<ItemCategory[]>([]);
     const { toast } = useToast();
 
     useEffect(() => {
         if (!isOpen) return;
+        
+        try {
+            const storedCategories = localStorage.getItem('categories');
+            if(storedCategories) {
+                setAllCategories(JSON.parse(storedCategories));
+            }
+        } catch(error) {
+            console.error("Failed to load categories from local storage", error);
+        }
 
-        const unsubscribe = onSnapshot(collection(db, "categories"), (snapshot) => {
-            const categoriesData: ItemCategory[] = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...(doc.data() as Omit<ItemCategory, 'id'>)
-            }));
-            setAllCategories(categoriesData);
-        });
-
-        return () => unsubscribe();
     }, [isOpen]);
 
     useEffect(() => {
@@ -84,47 +81,32 @@ export default function CategoryFormModal({
         setIsUploading(false);
     }
     
-    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
     };
     
     const removeImage = () => {
-        if (imagePreview) {
-            URL.revokeObjectURL(imagePreview);
-        }
         setImageFile(null);
         setImagePreview(null);
     };
 
     const handleSubmit = async () => {
-        if (isUploading) {
-            toast({ title: "Please wait", description: "Image is still processing.", variant: "destructive" });
-            return;
-        }
         setIsSaving(true);
         
         try {
-            let productImage = category?.productImage || '';
-
-            if (imageFile) {
-                setIsUploading(true);
-                const fileRef = storageRef(storage, `categories/${Date.now()}_${imageFile.name}`);
-                await uploadBytes(fileRef, imageFile);
-                productImage = await getDownloadURL(fileRef);
-                setIsUploading(false);
-            } else if (!imagePreview) {
-                productImage = '';
-            }
-            
             const categoryData = {
                 name,
                 description,
                 parentId: parentId === 'none' ? '' : parentId,
-                productImage,
+                productImage: imagePreview || '',
             };
 
             if (category) {
@@ -138,7 +120,6 @@ export default function CategoryFormModal({
             toast({ title: "Error", description: "Failed to save category.", variant: "destructive" });
         } finally {
             setIsSaving(false);
-            setIsUploading(false);
         }
     };
 

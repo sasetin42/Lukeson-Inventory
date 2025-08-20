@@ -11,8 +11,6 @@ import ProductList from "@/components/products/product-list";
 import { Product } from '@/lib/types';
 import ProductFormModal from '@/components/products/product-form-modal';
 import { useToast } from '@/hooks/use-toast';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, deleteDoc, Timestamp } from 'firebase/firestore';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -22,25 +20,27 @@ export default function ProductsPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
-            const productsData = snapshot.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    id: doc.id,
-                    ...data,
-                    createdAt: (data.createdAt as Timestamp)?.toDate() || new Date(),
-                } as Product;
-            }).sort((a,b) => (b.createdAt as Date).getTime() - (a.createdAt as Date).getTime());
-            setProducts(productsData);
-            setLoading(false);
-        }, (error) => {
-            console.error("Failed to load products from firestore", error);
+        try {
+            const storedProducts = localStorage.getItem('products');
+            if (storedProducts) {
+                const productsData = JSON.parse(storedProducts).map((p: any) => ({
+                    ...p,
+                    createdAt: p.createdAt ? new Date(p.createdAt) : new Date(),
+                })).sort((a: any, b: any) => b.createdAt.getTime() - a.createdAt.getTime());
+                setProducts(productsData);
+            }
+        } catch (error) {
+            console.error("Failed to load products from localStorage", error);
             toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
+        } finally {
             setLoading(false);
-        });
-
-        return () => unsubscribe();
+        }
     }, []);
+
+    const persistProducts = (updatedProducts: Product[]) => {
+        localStorage.setItem('products', JSON.stringify(updatedProducts));
+        setProducts(updatedProducts.map(p => ({ ...p, createdAt: new Date(p.createdAt) })).sort((a,b) => b.createdAt.getTime() - a.createdAt.getTime()));
+    };
     
     const totalProducts = products.length;
     const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
@@ -74,14 +74,26 @@ export default function ProductsPage() {
         setEditingProduct(null);
     }
 
-    const handleDeleteProduct = async (product: Product) => {
+    const handleDeleteProduct = async (productToDelete: Product) => {
         try {
-            await deleteDoc(doc(db, "products", product.id));
+            const updatedProducts = products.filter(p => p.id !== productToDelete.id);
+            persistProducts(updatedProducts);
             toast({ title: "Success", description: "Product deleted.", variant: "success" });
         } catch (error) {
             console.error("Error deleting product: ", error);
             toast({ title: "Error", description: "Failed to delete product.", variant: "destructive" });
         }
+    }
+
+    const handleProductSave = (savedProduct: Product) => {
+      const existing = products.find(p => p.id === savedProduct.id);
+      let updatedProducts;
+      if (existing) {
+        updatedProducts = products.map(p => p.id === savedProduct.id ? savedProduct : p);
+      } else {
+        updatedProducts = [...products, savedProduct];
+      }
+      persistProducts(updatedProducts);
     }
 
   return (
@@ -144,6 +156,7 @@ export default function ProductsPage() {
             isOpen={isModalOpen}
             onClose={handleCloseModal}
             product={editingProduct}
+            onSave={handleProductSave}
           />
       )}
     </div>

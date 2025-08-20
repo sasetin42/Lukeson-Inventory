@@ -3,8 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, query, where, Timestamp } from 'firebase/firestore';
 import { Zap } from "lucide-react";
 import Link from 'next/link';
 
@@ -17,37 +15,10 @@ export default function QuickStats() {
   ]);
 
   useEffect(() => {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const thirtyDaysAgoTimestamp = Timestamp.fromDate(thirtyDaysAgo);
-
-    const customersQuery = query(collection(db, "customers"), where("createdAt", ">=", thirtyDaysAgoTimestamp));
-    const customersUnsub = onSnapshot(customersQuery, (snapshot) => {
-        setStats(prev => prev.map(s => s.label === 'New Customers' ? {...s, value: snapshot.size.toString()} : s));
-    });
-    
-    const ordersQuery = query(collection(db, "salesOrders"));
-    const ordersUnsub = onSnapshot(ordersQuery, (snapshot) => {
-        const orders = snapshot.docs.map(doc => doc.data());
-        const pending = orders.filter(doc => doc.status === 'Confirmed').length;
-        const fulfilled = orders.filter(doc => doc.status === 'Fulfilled').length;
-        setStats(prev => prev.map(s => {
-            if (s.label === 'Pending Orders') return {...s, value: pending.toString()};
-            if (s.label === 'Fulfilled Orders') return {...s, value: fulfilled.toString()};
-            return s;
-        }));
-    });
-
-    const invoicesQuery = query(collection(db, "invoices"), where("status", "in", ["Posted", "Overdue"]));
-    const invoicesUnsub = onSnapshot(invoicesQuery, (snapshot) => {
-        setStats(prev => prev.map(s => s.label === 'Open Invoices' ? {...s, value: snapshot.size.toString()} : s));
-    });
-
-    return () => {
-        customersUnsub();
-        ordersUnsub();
-        invoicesUnsub();
-    }
+      // This component's data was dependent on Firestore.
+      // With localStorage, this data is not available in the same way.
+      // For now, we will display 0 for all stats.
+      // A more complete solution would involve creating and managing this data in localStorage as well.
   }, []);
 
   const statLinks = {

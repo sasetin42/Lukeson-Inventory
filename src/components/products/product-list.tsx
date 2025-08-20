@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download } from "lucide-react";
+import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download, Power } from "lucide-react";
 import { Product, ItemCategory } from "@/lib/types";
 import {
   DropdownMenu,
@@ -29,8 +29,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import ProductImage from './product-image';
 
 interface ProductListProps {
@@ -49,12 +47,14 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
     const { toast } = useToast();
 
     useEffect(() => {
-        const categoriesUnsub = onSnapshot(collection(db, "categories"), (snapshot) => {
-            const categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
-            setCategories(categoriesData);
-        });
-
-        return () => categoriesUnsub();
+       try {
+            const storedCategories = localStorage.getItem('categories');
+            if (storedCategories) {
+                setCategories(JSON.parse(storedCategories));
+            }
+        } catch(error) {
+            console.error("Failed to load categories from localStorage", error);
+        }
     }, []);
 
     const getStatusVariant = (status: string) => {

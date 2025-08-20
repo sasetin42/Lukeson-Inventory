@@ -6,26 +6,20 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle } from "lucide-react";
 import InvoiceList from "@/components/invoices/invoice-list";
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, Timestamp } from 'firebase/firestore';
 import { Invoice } from '@/lib/types';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "invoices"), (snapshot) => {
-      const invoicesData = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          date: (data.date as Timestamp).toDate().toLocaleDateString(),
-        } as Invoice;
-      });
-      setInvoices(invoicesData);
-    });
-    return () => unsubscribe();
+    try {
+      const storedInvoices = localStorage.getItem('invoices');
+      if (storedInvoices) {
+        setInvoices(JSON.parse(storedInvoices).map((i: any) => ({ ...i, date: new Date(i.date) })));
+      }
+    } catch(error) {
+      console.error("Failed to load invoices from localStorage", error);
+    }
   }, []);
 
   return (

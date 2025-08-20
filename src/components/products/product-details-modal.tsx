@@ -39,8 +39,6 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { useState } from 'react';
 import {
   AlertDialog,
@@ -91,10 +89,14 @@ export default function ProductDetailsModal({
   const handleToggleStatus = async () => {
       const newStatus = product.status === 'Discontinued' ? 'In Stock' : 'Discontinued';
       try {
-        const productRef = doc(db, "products", product.id);
-        await updateDoc(productRef, { status: newStatus });
+        const storedProducts = localStorage.getItem('products');
+        const products = storedProducts ? JSON.parse(storedProducts) : [];
+        const updatedProducts = products.map((p: Product) => p.id === product.id ? {...p, status: newStatus} : p);
+        localStorage.setItem('products', JSON.stringify(updatedProducts));
         toast({ title: 'Success', description: `Product has been ${newStatus === 'Discontinued' ? 'deactivated' : 'activated'}.`, variant: 'success' });
         onClose();
+        // NOTE: This will require a page refresh in the parent to see the change.
+        // A more robust solution would involve passing a callback to update the parent's state.
       } catch (error) {
           toast({ title: 'Error', description: 'Failed to update product status.', variant: 'destructive'});
       } finally {

@@ -10,23 +10,23 @@ import {
 } from "@/components/ui/dialog";
 import { Product } from '@/lib/types';
 import ProductForm from './product-form';
-import { useRouter } from 'next/navigation';
-
 
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   product: Product | null;
+  onSave: (product: Product) => void;
 }
-
 
 export default function ProductFormModal({ 
     isOpen, 
     onClose, 
     product, 
+    onSave,
 }: ProductFormModalProps) {
 
-    const handleSuccess = () => {
+    const handleSuccess = (savedProduct: Product) => {
+        onSave(savedProduct);
         onClose();
     };
 
