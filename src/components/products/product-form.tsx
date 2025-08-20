@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Product, Supplier, ItemCategory } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
-import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, Building2, Percent } from 'lucide-react';
+import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, Building2, Percent, Layers, PowerOff, Lamp, Square } from 'lucide-react';
 import Image from 'next/image';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
@@ -26,6 +26,13 @@ const uomOptions = ["pcs", "box", "roll", "m", "kg", "pack"];
 const ledQtyOptions = ["240", "180", "120", "72", "60"];
 const voltageOptions = ["220", "24", "12"];
 const vatTypeOptions = ['VATABLE', 'VAT-EXEMPT', 'ZERO-RATED'];
+
+const categoryIcons: { [key: string]: React.ReactElement } = {
+    'STRIPLIGHT': <Layers className="h-4 w-4 text-blue-500" />,
+    'POWER SUPPLY': <PowerOff className="h-4 w-4 text-green-500" />,
+    'GENERAL LIGHTING': <Lamp className="h-4 w-4 text-yellow-500" />,
+    'ALUMINIUM PROFILE': <Square className="h-4 w-4 text-gray-500" />,
+};
 
 export default function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
     const { toast } = useToast();
@@ -240,7 +247,12 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                         </SelectTrigger>
                         <SelectContent>
                             {categories.map(cat => (
-                                <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                <SelectItem key={cat.id} value={cat.name}>
+                                    <div className="flex items-center gap-2">
+                                        {categoryIcons[cat.name] || <Package className="h-4 w-4" />}
+                                        {cat.name}
+                                    </div>
+                                </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>

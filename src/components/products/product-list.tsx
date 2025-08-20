@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download, Power, LayoutGrid } from "lucide-react";
+import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download, Power, LayoutGrid, Package, Layers, PowerOff, Lamp, Square } from "lucide-react";
 import { Product, ItemCategory } from "@/lib/types";
 import {
   DropdownMenu,
@@ -39,6 +39,13 @@ interface ProductListProps {
     onDelete: (product: Product) => void;
     onAddCategory: () => void;
 }
+
+const categoryIcons: { [key: string]: React.ReactElement } = {
+    'STRIPLIGHT': <Layers className="h-4 w-4 text-blue-500" />,
+    'POWER SUPPLY': <PowerOff className="h-4 w-4 text-green-500" />,
+    'GENERAL LIGHTING': <Lamp className="h-4 w-4 text-yellow-500" />,
+    'ALUMINIUM PROFILE': <Square className="h-4 w-4 text-gray-500" />,
+};
 
 export default function ProductList({ products, onEdit, onDelete, onAddCategory }: ProductListProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -126,9 +133,19 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                     <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="all">
+                        <div className="flex items-center gap-2">
+                            <LayoutGrid className="h-4 w-4" />
+                            All Categories
+                        </div>
+                    </SelectItem>
                     {categories.map(cat => (
-                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                        <SelectItem key={cat.id} value={cat.name}>
+                            <div className="flex items-center gap-2">
+                                {categoryIcons[cat.name] || <Package className="h-4 w-4" />}
+                                {cat.name}
+                            </div>
+                        </SelectItem>
                     ))}
                     </SelectContent>
                 </Select>
