@@ -13,7 +13,7 @@ import Image from 'next/image';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { db, storage } from '@/lib/firebase';
-import { collection, getDocs, addDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface ProductFormProps {
@@ -172,7 +172,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         try {
             let imageUrl = product?.productImage || '';
             if (imageFile) {
-                const storageRef = ref(storage, `products/${Date.now()}_${imageFile.name}`);
+                const storageRef = ref(storage, `product_images/${Date.now()}_${imageFile.name}`);
                 const snapshot = await uploadBytes(storageRef, imageFile);
                 imageUrl = await getDownloadURL(snapshot.ref);
             }
