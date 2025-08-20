@@ -89,22 +89,6 @@ export default function ProductsPage() {
         title="Products Overview"
         description="Complete inventory management with clickable widgets and analytics"
         icon={<Package className="h-6 w-6" />}
-        actions={
-          <div className="flex items-center gap-2">
-            <Button onClick={() => handleOpenModal(null)}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add Product
-            </Button>
-            <Button variant="ghost">
-              <Upload className="mr-2 h-4 w-4" />
-              Import
-            </Button>
-            <Button variant="ghost">
-              <Download className="mr-2 h-4 w-4" />
-              Export
-            </Button>
-          </div>
-        }
       />
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {productKpis.map((kpi) => (
@@ -148,7 +132,11 @@ export default function ProductsPage() {
             color="red"
         />
       </div>
-      <ProductList products={products} onEdit={handleOpenModal} onDelete={handleDeleteProduct} />
+      <ProductList 
+        products={products} 
+        onEdit={handleOpenModal} 
+        onDelete={handleDeleteProduct} 
+      />
 
       {isModalOpen && (
           <ProductFormModal 

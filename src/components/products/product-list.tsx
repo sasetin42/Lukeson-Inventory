@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Search, Edit, Trash2, Eye } from "lucide-react";
+import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download } from "lucide-react";
 import { Product, ItemCategory } from "@/lib/types";
 import {
   DropdownMenu,
@@ -35,7 +35,7 @@ import ProductImage from './product-image';
 
 interface ProductListProps {
     products: Product[];
-    onEdit: (product: Product) => void;
+    onEdit: (product: Product | null) => void;
     onDelete: (product: Product) => void;
 }
 
@@ -134,8 +134,26 @@ export default function ProductList({ products, onEdit, onDelete }: ProductListP
                 </div>
             </div>
             <TabsContent value="products" className="mt-6">
-                <CardTitle>Products ({filteredProducts.length})</CardTitle>
-                <CardDescription>Your current inventory of products.</CardDescription>
+                <div className="flex justify-between items-center mb-4">
+                    <div>
+                        <CardTitle>Products</CardTitle>
+                        <CardDescription>Your current inventory of products.</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button onClick={() => onEdit(null)}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add Product
+                        </Button>
+                        <Button variant="outline">
+                        <Upload className="mr-2 h-4 w-4" />
+                        Import
+                        </Button>
+                        <Button variant="outline">
+                        <Download className="mr-2 h-4 w-4" />
+                        Export
+                        </Button>
+                    </div>
+                </div>
                 <Table className="mt-4">
                 <TableHeader>
                     <TableRow>
