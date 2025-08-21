@@ -27,7 +27,7 @@ export default function ProductFormModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
             <DialogTitle>{product ? 'Edit Product' : 'Add New Product'}</DialogTitle>
             <DialogDescription>
