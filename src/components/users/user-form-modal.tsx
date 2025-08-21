@@ -25,7 +25,7 @@ interface UserFormModalProps {
   user: User | null;
 }
 
-const roles: User['role'][] = ['Admin', 'Inventory Manager', 'Sales', 'Purchasing', 'Finance', 'Auditor'];
+const roles: User['role'][] = ['Admin', 'Manager', 'Viewer'];
 const statuses: User['status'][] = ['active', 'inactive'];
 
 export default function UserFormModal({ 
@@ -38,7 +38,7 @@ export default function UserFormModal({
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState<User['role']>('Sales');
+    const [role, setRole] = useState<User['role']>('Viewer');
     const [status, setStatus] = useState<User['status']>('active');
     const [isSaving, setIsSaving] = useState(false);
 
@@ -47,7 +47,7 @@ export default function UserFormModal({
             if (user) {
                 setName(user.name || '');
                 setEmail(user.email || '');
-                setRole(user.role || 'Sales');
+                setRole(user.role || 'Viewer');
                 setStatus(user.status || 'active');
                 setPassword('');
             } else {
@@ -60,7 +60,7 @@ export default function UserFormModal({
         setName('');
         setEmail('');
         setPassword('');
-        setRole('Sales');
+        setRole('Viewer');
         setStatus('active');
     }
     

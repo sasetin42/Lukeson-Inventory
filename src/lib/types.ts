@@ -22,7 +22,7 @@ export type User = {
     id: string;
     name: string;
     email: string;
-    role: 'Admin' | 'Inventory Manager' | 'Sales' | 'Purchasing' | 'Finance' | 'Auditor';
+    role: 'Admin' | 'Manager' | 'Viewer' | 'Inventory Manager' | 'Sales' | 'Purchasing' | 'Finance' | 'Auditor';
     status: 'active' | 'inactive';
     lastLoginAt?: Date | FieldValue | string;
     createdAt: Date | FieldValue | string;
@@ -266,28 +266,31 @@ export type ProductKpi = {
 
 export type Product = {
     id: string;
-    productCode?: string;
-    category: string;
-    productImage?: string | null;
     name: string;
-    sku: string;
+    category: string;
     description: string;
+    sku: string;
+    price: number;
+    stock: number; // Quantity In Stock
+    reOrderLevel: number;
+    supplier: { // Supplier Information
+        name: string;
+        contact: string;
+    };
+    productImage?: string | null; // Image URL
+    
+    // Fields from old schema for compatibility
+    productCode?: string;
     ledQty?: number;
     voltage?: number;
     wattage?: number;
     meters?: number;
     size?: string;
     color?: string;
-    supplier: string;
     location: string;
-    stock: number;
-    price: number;
-    reOrderLevel: number;
     createdAt: Date | FieldValue | string;
     modifiedAt?: Date | FieldValue | string;
     status: 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Discontinued';
-    suppliers?: Supplier[];
     uom: string;
     expiryDateTracking: boolean;
 };
-

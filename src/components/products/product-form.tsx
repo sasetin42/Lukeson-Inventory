@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Product, Supplier, ItemCategory, Warehouse as WarehouseType } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
-import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, Building2, Percent, Layers, PowerOff, Lamp, Square, Palette, StretchHorizontal } from 'lucide-react';
+import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, Building2, Percent, Layers, PowerOff, Lamp, Square, Palette, StretchHorizontal, User } from 'lucide-react';
 import Image from 'next/image';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
@@ -49,7 +49,8 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [productName, setProductName] = useState('');
     const [sku, setSku] = useState('');
     const [description, setDescription] = useState('');
-    const [supplier, setSupplier] = useState('');
+    const [supplierName, setSupplierName] = useState('');
+    const [supplierContact, setSupplierContact] = useState('');
     const [location, setLocation] = useState('');
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -107,7 +108,8 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         setVoltage('');
         setWattage('');
         setMeters('');
-        setSupplier('');
+        setSupplierName('');
+        setSupplierContact('');
         setLocation('');
         setIsSaving(false);
         setUom('');
@@ -139,7 +141,8 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             setVoltage(product.voltage?.toString() || '');
             setWattage(product.wattage?.toString() || '');
             setMeters(product.meters?.toString() || '');
-            setSupplier(product.supplier || '');
+            setSupplierName(product.supplier?.name || '');
+            setSupplierContact(product.supplier?.contact || '');
             setLocation(product.location || '');
             setImagePreview(product.productImage || null); 
             setImageFile(null);
@@ -202,7 +205,8 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             'Location': location,
             'Stock Quantity': stock,
             'Reorder Level': reOrderLevel,
-            'Supplier': supplier
+            'Supplier Name': supplierName,
+            'Supplier Contact': supplierContact,
         };
     
         if (category === 'STRIPLIGHT') {
@@ -259,7 +263,10 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 sku,
                 category,
                 description,
-                supplier,
+                supplier: {
+                    name: supplierName,
+                    contact: supplierContact,
+                },
                 location,
                 productImage: imagePreview,
                 stock: stockNum,
@@ -288,8 +295,17 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             setUploadProgress(null);
         }
     };
+    
+    const handleSupplierChange = (supplierId: string) => {
+        const selected = suppliers.find(s => s.id === supplierId);
+        if (selected) {
+            setSupplierName(selected.name);
+            setSupplierContact(selected.contact.name);
+        }
+    };
 
-    const renderStriplightFields = () => (
+
+    const renderSharedFields = () => (
         <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
@@ -316,13 +332,13 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 </div>
                  <div className="space-y-2">
                     <Label htmlFor="supplier" className="flex items-center gap-2"><Truck className="h-4 w-4 text-green-500" /> Supplier</Label>
-                     <Select onValueChange={setSupplier} value={supplier}>
+                     <Select onValueChange={handleSupplierChange} value={suppliers.find(s => s.name === supplierName)?.id}>
                         <SelectTrigger id="supplier">
                             <SelectValue placeholder="Select a supplier" />
                         </SelectTrigger>
                         <SelectContent>
                            {suppliers.map(s => (
-                               <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                               <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                            ))}
                         </SelectContent>
                     </Select>
@@ -350,7 +366,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                     </div> 
                 )}
             </div>
-
+            
             <div className="flex gap-4">
                 <div className="space-y-2 w-1/2">
                     <Label htmlFor="product-name" className="flex items-center gap-2"><Package className="h-4 w-4 text-blue-500" /> Product Name</Label>
@@ -370,7 +386,12 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 <Label htmlFor="description" className="flex items-center gap-2"><AlignLeft className="h-4 w-4 text-gray-500" /> Description</Label>
                 <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter product description" />
             </div>
+        </>
+    )
 
+    const renderStriplightFields = () => (
+        <>
+            {renderSharedFields()}
              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 border rounded-md bg-muted/50">
                 <div className="space-y-2">
                     <Label htmlFor="led-qty" className="flex items-center gap-2"><Lightbulb className="h-4 w-4 text-yellow-500" /> LED Qty</Label>
@@ -437,80 +458,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
 
     const renderPowerSupplyFields = () => (
         <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="product-code-ps" className="flex items-center gap-2"><FileText className="h-4 w-4" /> Product Code</Label>
-                    <Input id="product-code-ps" value={productCode} disabled />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="category-ps" className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-red-500" /> Product Category</Label>
-                    <Select onValueChange={setCategory} value={category}>
-                        <SelectTrigger id="category-ps"><SelectValue placeholder="Select a category" /></SelectTrigger>
-                        <SelectContent>
-                            {categories.map(cat => (
-                                <SelectItem key={cat.id} value={cat.name}>
-                                    <div className="flex items-center gap-2">
-                                        {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
-                                        {cat.name}
-                                    </div>
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="supplier-ps" className="flex items-center gap-2"><Truck className="h-4 w-4 text-green-500" /> Supplier</Label>
-                    <Select onValueChange={setSupplier} value={supplier}>
-                        <SelectTrigger id="supplier-ps"><SelectValue placeholder="Select a supplier" /></SelectTrigger>
-                        <SelectContent>
-                           {suppliers.map(s => (<SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-
-            <div className="space-y-2">
-                <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4 text-purple-500" /> Product Profile Image</Label>
-                {imagePreview ? (
-                    <div className="relative w-full h-48 rounded-lg overflow-hidden">
-                        <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="cover" data-ai-hint="product image" />
-                        <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={removeImage} disabled={isSaving}>
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </div>
-                ) : (
-                    <div className="flex items-center justify-center w-full">
-                        <label htmlFor="dropzone-file-ps" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isSaving ? 'cursor-not-allowed bg-muted/50' : 'cursor-pointer bg-muted hover:bg-muted/80'}`}>
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <Upload className="w-8 h-8 mb-4 text-primary" />
-                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                            </div>
-                            <Input id="dropzone-file-ps" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isSaving}/>
-                        </label>
-                    </div> 
-                )}
-            </div>
-
-            <div className="flex gap-4">
-                <div className="space-y-2 w-1/2">
-                    <Label htmlFor="product-name-ps" className="flex items-center gap-2"><Package className="h-4 w-4 text-blue-500" /> Product Name</Label>
-                    <Input id="product-name-ps" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="e.g. Mean Well Power Supply" />
-                </div>
-                <div className="space-y-2 w-1/4">
-                    <Label htmlFor="price-ps" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
-                    <Input id="price-ps" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 1500.00" />
-                </div>
-                <div className="space-y-2 w-1/4">
-                    <Label htmlFor="sku-ps" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
-                    <Input id="sku-ps" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. PS-MW-100-24" />
-                </div>
-            </div>
-
-            <div className="space-y-2">
-                <Label htmlFor="description-ps" className="flex items-center gap-2"><AlignLeft className="h-4 w-4 text-gray-500" /> Description</Label>
-                <Textarea id="description-ps" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter product description" />
-            </div>
-
+            {renderSharedFields()}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="voltage-ps" className="flex items-center gap-2"><Zap className="h-4 w-4 text-orange-500" /> Voltage</Label>
@@ -560,80 +508,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
 
     const renderGeneralLightingFields = () => (
         <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="product-code-gl" className="flex items-center gap-2"><FileText className="h-4 w-4" /> Product Code</Label>
-                    <Input id="product-code-gl" value={productCode} disabled />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="category-gl" className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-red-500" /> Product Category</Label>
-                    <Select onValueChange={setCategory} value={category}>
-                        <SelectTrigger id="category-gl"><SelectValue placeholder="Select a category" /></SelectTrigger>
-                        <SelectContent>
-                            {categories.map(cat => (
-                                <SelectItem key={cat.id} value={cat.name}>
-                                    <div className="flex items-center gap-2">
-                                        {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
-                                        {cat.name}
-                                    </div>
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="supplier-gl" className="flex items-center gap-2"><Truck className="h-4 w-4 text-green-500" /> Supplier</Label>
-                    <Select onValueChange={setSupplier} value={supplier}>
-                        <SelectTrigger id="supplier-gl"><SelectValue placeholder="Select a supplier" /></SelectTrigger>
-                        <SelectContent>
-                           {suppliers.map(s => (<SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-
-            <div className="space-y-2">
-                <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4 text-purple-500" /> Product Profile Image</Label>
-                {imagePreview ? (
-                    <div className="relative w-full h-48 rounded-lg overflow-hidden">
-                        <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="cover" data-ai-hint="product image" />
-                        <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={removeImage} disabled={isSaving}>
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </div>
-                ) : (
-                    <div className="flex items-center justify-center w-full">
-                        <label htmlFor="dropzone-file-gl" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isSaving ? 'cursor-not-allowed bg-muted/50' : 'cursor-pointer bg-muted hover:bg-muted/80'}`}>
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <Upload className="w-8 h-8 mb-4 text-primary" />
-                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                            </div>
-                            <Input id="dropzone-file-gl" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isSaving}/>
-                        </label>
-                    </div> 
-                )}
-            </div>
-
-            <div className="flex gap-4">
-                <div className="space-y-2 w-1/2">
-                    <Label htmlFor="product-name-gl" className="flex items-center gap-2"><Package className="h-4 w-4 text-blue-500" /> Product Name</Label>
-                    <Input id="product-name-gl" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="e.g. LED Bulb 9W" />
-                </div>
-                <div className="space-y-2 w-1/4">
-                    <Label htmlFor="price-gl" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
-                    <Input id="price-gl" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 99.00" />
-                </div>
-                <div className="space-y-2 w-1/4">
-                    <Label htmlFor="sku-gl" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
-                    <Input id="sku-gl" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. BULB-9W-DAY" />
-                </div>
-            </div>
-
-            <div className="space-y-2">
-                <Label htmlFor="description-gl" className="flex items-center gap-2"><AlignLeft className="h-4 w-4 text-gray-500" /> Description</Label>
-                <Textarea id="description-gl" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter product description" />
-            </div>
-
+            {renderSharedFields()}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="uom-gl" className="flex items-center gap-2"><Scaling className="h-4 w-4 text-purple-500" /> UOM</Label>
@@ -670,86 +545,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
 
     const renderAluminiumProfileFields = () => (
         <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="product-code-ap" className="flex items-center gap-2"><FileText className="h-4 w-4" /> Product Code</Label>
-                    <Input id="product-code-ap" value={productCode} disabled />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="category-ap" className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-red-500" /> Product Category</Label>
-                    <Select onValueChange={setCategory} value={category}>
-                        <SelectTrigger id="category-ap">
-                            <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {categories.map(cat => (
-                                <SelectItem key={cat.id} value={cat.name}>
-                                    <div className="flex items-center gap-2">
-                                        {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
-                                        {cat.name}
-                                    </div>
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="supplier-ap" className="flex items-center gap-2"><Truck className="h-4 w-4 text-green-500" /> Supplier</Label>
-                     <Select onValueChange={setSupplier} value={supplier}>
-                        <SelectTrigger id="supplier-ap">
-                            <SelectValue placeholder="Select a supplier" />
-                        </SelectTrigger>
-                        <SelectContent>
-                           {suppliers.map(s => (
-                               <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                           ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-            
-            <div className="space-y-2">
-                <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4 text-purple-500" /> Product Profile Image</Label>
-                {imagePreview ? (
-                    <div className="relative w-full h-48 rounded-lg overflow-hidden">
-                        <Image src={imagePreview} alt="Product preview" layout="fill" objectFit="cover" data-ai-hint="product image" />
-                        <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={removeImage} disabled={isSaving}>
-                            <X className="h-4 w-4" />
-                        </Button>
-                    </div>
-                ) : (
-                    <div className="flex items-center justify-center w-full">
-                        <label htmlFor="dropzone-file-ap" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isSaving ? 'cursor-not-allowed bg-muted/50' : 'cursor-pointer bg-muted hover:bg-muted/80'}`}>
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <Upload className="w-8 h-8 mb-4 text-primary" />
-                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                            </div>
-                            <Input id="dropzone-file-ap" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isSaving}/>
-                        </label>
-                    </div> 
-                )}
-            </div>
-
-            <div className="flex gap-4">
-                <div className="space-y-2 w-1/2">
-                    <Label htmlFor="product-name-ap" className="flex items-center gap-2"><Package className="h-4 w-4 text-blue-500" /> Product Name</Label>
-                    <Input id="product-name-ap" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="e.g. Recessed Aluminium Profile" />
-                </div>
-                <div className="space-y-2 w-1/4">
-                    <Label htmlFor="price-ap" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
-                    <Input id="price-ap" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 250.00" />
-                </div>
-                <div className="space-y-2 w-1/4">
-                    <Label htmlFor="sku-ap" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
-                    <Input id="sku-ap" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. ALU-REC-2M" />
-                </div>
-            </div>
-
-            <div className="space-y-2">
-                <Label htmlFor="description-ap" className="flex items-center gap-2"><AlignLeft className="h-4 w-4 text-gray-500" /> Description</Label>
-                <Textarea id="description-ap" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter product description" />
-            </div>
-
+            {renderSharedFields()}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="size-ap" className="flex items-center gap-2"><StretchHorizontal className="h-4 w-4" /> Size</Label>
@@ -808,23 +604,34 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 return renderAluminiumProfileFields();
             default:
                 return (
-                     <div className="space-y-2">
-                        <Label htmlFor="category" className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-red-500" /> Product Category</Label>
-                        <Select onValueChange={setCategory} value={category}>
-                            <SelectTrigger id="category">
-                                <SelectValue placeholder="Select a category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {categories.map(cat => (
-                                    <SelectItem key={cat.id} value={cat.name}>
-                                        <div className="flex items-center gap-2">
-                                            {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
-                                            {cat.name}
-                                        </div>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                    <div className="space-y-4">
+                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="product-code" className="flex items-center gap-2"><FileText className="h-4 w-4" /> Product Code</Label>
+                                <Input id="product-code" value={productCode} disabled />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="category" className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-red-500" /> Product Category</Label>
+                                <Select onValueChange={setCategory} value={category}>
+                                    <SelectTrigger id="category">
+                                        <SelectValue placeholder="Select a category to begin" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {categories.map(cat => (
+                                            <SelectItem key={cat.id} value={cat.name}>
+                                                <div className="flex items-center gap-2">
+                                                    {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
+                                                    {cat.name}
+                                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-center h-48 border-2 border-dashed rounded-lg">
+                            <p className="text-muted-foreground">Please select a category to see relevant fields.</p>
+                        </div>
                     </div>
                 );
         }
@@ -844,3 +651,4 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             )}
         </div>
     );
+}

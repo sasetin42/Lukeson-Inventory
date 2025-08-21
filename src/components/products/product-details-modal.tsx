@@ -38,6 +38,7 @@ import {
   Percent,
   Calendar as CalendarIcon,
   Pencil,
+  User,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -112,7 +113,8 @@ export default function ProductDetailsModal({
 
   const allDetails = [
     { label: 'SKU', value: product.sku, icon: Barcode, color: 'text-indigo-500' },
-    { label: 'Supplier', value: product.supplier, icon: Truck, color: 'text-green-500' },
+    { label: 'Supplier Name', value: product.supplier.name, icon: Truck, color: 'text-green-500' },
+    { label: 'Supplier Contact', value: product.supplier.contact, icon: User, color: 'text-blue-500' },
     { label: 'Price', value: `₱${(product.price || 0).toFixed(2)}`, icon: DollarSign, color: 'text-green-500' },
     { label: 'UOM', value: product.uom, icon: Scaling, color: 'text-purple-500' },
     { label: 'LED Qty', value: product.ledQty ? `${product.ledQty}L` : null, icon: Lightbulb, color: 'text-yellow-500' },
