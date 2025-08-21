@@ -112,25 +112,26 @@ export default function ProductDetailsModal({
     onClose();
   }
 
-  const details = [
+  const allDetails = [
     { label: 'SKU', value: product.sku, icon: Barcode, color: 'text-indigo-500' },
     { label: 'Supplier', value: product.supplier, icon: Truck, color: 'text-green-500' },
     { label: 'Price', value: `₱${(product.price || 0).toFixed(2)}`, icon: DollarSign, color: 'text-green-500' },
     { label: 'UOM', value: product.uom, icon: Scaling, color: 'text-purple-500' },
-    { label: 'LED Qty', value: product.ledQty ? `${product.ledQty}L` : 'N/A', icon: Lightbulb, color: 'text-yellow-500' },
-    { label: 'Voltage', value: product.voltage ? `${product.voltage}v` : 'N/A', icon: Zap, color: 'text-orange-500' },
-    { label: 'Wattage', value: product.wattage ? `${product.wattage}w` : 'N/A', icon: Power, color: 'text-red-500' },
-    { label: 'Meters', value: product.meters ? `${product.meters}m` : 'N/A', icon: Ruler, color: 'text-blue-500' },
+    { label: 'LED Qty', value: product.ledQty ? `${product.ledQty}L` : null, icon: Lightbulb, color: 'text-yellow-500' },
+    { label: 'Voltage', value: product.voltage ? `${product.voltage}v` : null, icon: Zap, color: 'text-orange-500' },
+    { label: 'Wattage', value: product.wattage ? `${product.wattage}w` : null, icon: Power, color: 'text-red-500' },
+    { label: 'Meters', value: product.meters ? `${product.meters}m` : null, icon: Ruler, color: 'text-blue-500' },
     { label: 'Location', value: product.location, icon: MapPin, color: 'text-pink-500' },
     { label: 'Stock', value: product.stock, icon: Warehouse, color: 'text-green-500', status: product.status },
     { label: 'Re-Order Level', value: product.reOrderLevel, icon: AlertTriangle, color: 'text-yellow-500' },
     { label: 'Expiry Tracking', value: product.expiryDateTracking ? 'Enabled' : 'Disabled', icon: CalendarClock, color: 'text-cyan-500', isBool: true },
   ];
 
-  const detailPairs: (typeof details)[][] = [];
-    for (let i = 0; i < details.length; i += 2) {
-      detailPairs.push(details.slice(i, i + 2));
-  }
+  const availableDetails = allDetails.filter(detail => detail.value !== null && detail.value !== undefined && detail.value !== '');
+  
+  const midPoint = Math.ceil(availableDetails.length / 2);
+  const leftColumnDetails = availableDetails.slice(0, midPoint);
+  const rightColumnDetails = availableDetails.slice(midPoint);
   
   const isActive = product.status !== 'Discontinued';
 
@@ -146,7 +147,7 @@ export default function ProductDetailsModal({
               </div>
               <div>
                 <DialogTitle>{product.name}</DialogTitle>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
                     <div className="flex items-center gap-1">
                       <FileText className="h-4 w-4 text-gray-400" />
                       <DialogDescription className="text-sm">{product.productCode}</DialogDescription>
@@ -192,11 +193,9 @@ export default function ProductDetailsModal({
                 <Info className="h-5 w-5 text-blue-500" />
                 Details
               </h4>
-              <div className="text-[13px] pl-7 space-y-2">
-                {detailPairs.map((pair, index) => (
-                  <div key={index} className="grid grid-cols-2 gap-x-4 gap-y-1">
-                    {pair.map(detail => {
-                      if (!detail.value || detail.value === 'N/A') return <div key={detail.label} />;
+              <div className="text-[13px] pl-7 grid grid-cols-2 gap-x-8">
+                 <div className="space-y-2">
+                    {leftColumnDetails.map(detail => {
                       const Icon = detail.icon;
                       return (
                          <div key={detail.label} className="flex items-center justify-between py-1 border-b border-dashed">
@@ -219,7 +218,7 @@ export default function ProductDetailsModal({
                               ) : (
                                 <XCircle className="h-4 w-4" />
                               )}
-                              {detail.value}
+                              {detail.value as string}
                             </span>
                           ) : (
                             <span className="font-medium">{detail.value}</span>
@@ -227,8 +226,40 @@ export default function ProductDetailsModal({
                         </div>
                       )
                     })}
-                  </div>
-                ))}
+                 </div>
+                 <div className="space-y-2">
+                    {rightColumnDetails.map(detail => {
+                      const Icon = detail.icon;
+                      return (
+                         <div key={detail.label} className="flex items-center justify-between py-1 border-b border-dashed">
+                          <span className="flex items-center gap-2 text-muted-foreground">
+                            <Icon className={`h-4 w-4 ${detail.color}`} />
+                            {detail.label}
+                          </span>
+                          {detail.label === 'Stock' ? (
+                            <Badge variant={getStatusVariant(detail.status as string)}>
+                              {detail.value} ({detail.status})
+                            </Badge>
+                          ) : detail.isBool ? (
+                            <span
+                              className={`flex items-center gap-1 font-medium ${
+                                product.expiryDateTracking ? 'text-green-600' : 'text-red-600'
+                              }`}
+                            >
+                              {product.expiryDateTracking ? (
+                                <CheckCircle className="h-4 w-4" />
+                              ) : (
+                                <XCircle className="h-4 w-4" />
+                              )}
+                              {detail.value as string}
+                            </span>
+                          ) : (
+                            <span className="font-medium">{detail.value}</span>
+                          )}
+                        </div>
+                      )
+                    })}
+                 </div>
               </div>
             </div>
           </div>
