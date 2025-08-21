@@ -90,9 +90,11 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     }, []);
 
     useEffect(() => {
-        const generateProductCode = () => {
+        const generateProductCode = async () => {
+            const productsRef = collection(db, 'products');
+            const snapshot = await getDocs(productsRef);
+            const productsCount = snapshot.size;
             const year = new Date().getFullYear();
-            const productsCount = 100;
             setProductCode(`PRO-${year}-${(productsCount + 1).toString().padStart(3, '0')}`);
         };
 
