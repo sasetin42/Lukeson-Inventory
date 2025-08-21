@@ -9,12 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Edit, Trash2, Eye, CheckCircle } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -25,6 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { format } from 'date-fns';
+import Link from 'next/link';
 
 interface QuotationListProps {
     quotations: Quotation[];
@@ -98,7 +93,11 @@ export default function QuotationList({ quotations, onEdit, onDelete }: Quotatio
                             {quotations.map((quotation) => (
                                 <TableRow key={quotation.id}>
                                     <TableCell className="font-medium">{quotation.id}</TableCell>
-                                    <TableCell>{quotation.customerId}</TableCell>
+                                    <TableCell>
+                                        <Link href={`/customer?customerId=${quotation.customerId}`} className="text-blue-600 hover:underline">
+                                            {quotation.customerName || quotation.customerId}
+                                        </Link>
+                                    </TableCell>
                                     <TableCell>{formatDate(quotation.qtnDate)}</TableCell>
                                     <TableCell>{formatDate(quotation.expiryDate)}</TableCell>
                                     <TableCell>₱{quotation.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
@@ -147,4 +146,3 @@ export default function QuotationList({ quotations, onEdit, onDelete }: Quotatio
         </>
     );
 }
-

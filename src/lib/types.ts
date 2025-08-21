@@ -99,6 +99,7 @@ export type DocumentLine = {
 export type Quotation = {
     id: string; // QTN-YYYY-XXXX
     customerId: string;
+    customerName?: string;
     qtnDate: Date | FieldValue | string;
     expiryDate: Date | FieldValue | string;
     status: 'Draft' | 'Sent' | 'Accepted' | 'Expired';
