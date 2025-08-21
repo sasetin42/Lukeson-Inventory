@@ -36,6 +36,8 @@ import {
   Trash2,
   Building2,
   Percent,
+  Calendar as CalendarIcon,
+  Pencil,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -51,6 +53,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import ProductImage from './product-image';
+import { format } from 'date-fns';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -113,7 +116,6 @@ export default function ProductDetailsModal({
     { label: 'SKU', value: product.sku, icon: Barcode, color: 'text-indigo-500' },
     { label: 'Barcode', value: product.barcode, icon: Barcode, color: 'text-gray-500' },
     { label: 'Brand', value: product.brand, icon: Building2, color: 'text-indigo-500' },
-    { label: 'Category', value: product.category, icon: LayoutGrid, color: 'text-red-500' },
     { label: 'Supplier', value: product.supplier, icon: Truck, color: 'text-green-500' },
     { label: 'Price', value: `₱${(product.price || 0).toFixed(2)}`, icon: DollarSign, color: 'text-green-500' },
     { label: 'Cost', value: `₱${(product.cost || 0).toFixed(2)}`, icon: DollarSign, color: 'text-orange-500' },
@@ -127,6 +129,8 @@ export default function ProductDetailsModal({
     { label: 'Stock', value: product.stock, icon: Warehouse, color: 'text-green-500', status: product.status },
     { label: 'Re-Order Level', value: product.reOrderLevel, icon: AlertTriangle, color: 'text-yellow-500' },
     { label: 'Expiry Tracking', value: product.expiryDateTracking ? 'Enabled' : 'Disabled', icon: CalendarClock, color: 'text-cyan-500', isBool: true },
+    { label: 'Date Created', value: product.createdAt ? format(new Date(product.createdAt as Date), 'PPpp') : 'N/A', icon: CalendarIcon, color: 'text-sky-500' },
+    { label: 'Date Modified', value: product.modifiedAt ? format(new Date(product.modifiedAt as Date), 'PPpp') : 'N/A', icon: Pencil, color: 'text-orange-500' },
   ];
   
   const isActive = product.status !== 'Discontinued';
@@ -140,9 +144,20 @@ export default function ProductDetailsModal({
             <Package className="h-6 w-6 text-blue-500" />
             <DialogTitle>{product.name}</DialogTitle>
           </div>
-          <div className="flex items-center gap-2 ml-8 text-muted-foreground">
-            <FileText className="h-4 w-4 text-gray-400" />
-            <DialogDescription>{product.productCode}</DialogDescription>
+          <div className="flex items-center gap-4 ml-8 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-gray-400" />
+                <DialogDescription className="text-sm">{product.productCode}</DialogDescription>
+            </div>
+            {product.category && (
+                <>
+                    <Separator orientation="vertical" className="h-4" />
+                    <div className="flex items-center gap-2">
+                        <LayoutGrid className="h-4 w-4 text-red-500" />
+                        <span className="font-medium">{product.category}</span>
+                    </div>
+                </>
+            )}
           </div>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
