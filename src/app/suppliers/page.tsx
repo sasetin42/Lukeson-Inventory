@@ -4,13 +4,14 @@
 import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Truck } from "lucide-react";
+import { PlusCircle, Truck, Users, BarChart } from "lucide-react";
 import SupplierList from "@/components/suppliers/supplier-list";
 import { Supplier } from '@/lib/types';
 import SupplierFormModal from '@/components/suppliers/supplier-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import KpiCard from '@/components/kpi-card';
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -70,6 +71,18 @@ export default function SuppliersPage() {
     fetchSuppliers(); // refetch
   };
 
+  const totalSuppliers = suppliers.length;
+  const newThisMonth = suppliers.filter(s => {
+      const createdAt = (s as any).createdAt?.toDate ? (s as any).createdAt.toDate() : new Date();
+      return createdAt > new Date(new Date().setDate(new Date().getDate() - 30));
+  }).length;
+  
+  const kpis = [
+      { title: "Total Suppliers", value: totalSuppliers, icon: Truck, color: "orange" as const },
+      { title: "New This Month", value: newThisMonth, icon: Users, color: "blue" as const },
+      { title: "Total PO Value", value: '₱1.2M', icon: BarChart, color: "purple" as const }, // Mock data
+  ];
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -83,6 +96,19 @@ export default function SuppliersPage() {
           </Button>
         }
       />
+      <div className="grid gap-6 md:grid-cols-3">
+        {kpis.map((kpi, index) => (
+          <KpiCard
+            key={index}
+            title={kpi.title}
+            value={kpi.value as string}
+            icon={kpi.icon}
+            color={kpi.color}
+            style={{ animationDelay: `${index * 100}ms` }}
+            className="fade-in-up"
+          />
+        ))}
+      </div>
       <SupplierList 
         suppliers={suppliers} 
         onEdit={handleOpenModal}

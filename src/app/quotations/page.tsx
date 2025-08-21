@@ -4,13 +4,14 @@
 import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileText, PlusCircle } from "lucide-react";
+import { FileText, PlusCircle, HelpCircle, Check, Clock, DollarSign } from "lucide-react";
 import QuotationList from "@/components/quotations/quotation-list";
 import { Quotation } from '@/lib/types';
 import QuotationFormModal from '@/components/quotations/quotation-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import KpiCard from '@/components/kpi-card';
 
 export default function QuotationsPage() {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
@@ -75,6 +76,20 @@ export default function QuotationsPage() {
     fetchQuotations();
   };
 
+  const totalQuotations = quotations.length;
+  const pendingQuotations = quotations.filter(q => q.status === 'Sent' || q.status === 'Draft').length;
+  const acceptedQuotations = quotations.filter(q => q.status === 'Accepted').length;
+  const acceptanceRate = totalQuotations > 0 ? (acceptedQuotations / totalQuotations) * 100 : 0;
+  const totalQuotedValue = quotations.reduce((sum, q) => sum + q.totalAmount, 0);
+
+  const kpis = [
+      { title: "Total Quotations", value: totalQuotations, icon: FileText, color: "blue" as const },
+      { title: "Pending", value: pendingQuotations, icon: Clock, color: "yellow" as const },
+      { title: "Total Quoted Value", value: `₱${totalQuotedValue.toLocaleString()}`, icon: DollarSign, color: "green" as const },
+      { title: "Acceptance Rate", value: `${acceptanceRate.toFixed(1)}%`, icon: Check, color: "purple" as const }
+  ];
+
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -88,6 +103,19 @@ export default function QuotationsPage() {
           </Button>
         }
       />
+       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {kpis.map((kpi, index) => (
+          <KpiCard
+            key={index}
+            title={kpi.title}
+            value={kpi.value as string}
+            icon={kpi.icon}
+            color={kpi.color}
+            style={{ animationDelay: `${index * 100}ms` }}
+            className="fade-in-up"
+          />
+        ))}
+      </div>
       <QuotationList
         quotations={quotations}
         onEdit={handleOpenModal}

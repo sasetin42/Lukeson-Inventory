@@ -4,13 +4,14 @@
 import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Users2 } from "lucide-react";
+import { PlusCircle, Users2, Shield, Activity } from "lucide-react";
 import { User } from '@/lib/types';
 import UserList from '@/components/users/user-list';
 import UserFormModal from '@/components/users/user-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import KpiCard from '@/components/kpi-card';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -73,6 +74,16 @@ export default function UsersManagementPage() {
     fetchUsers(); // refetch
   };
 
+  const totalUsers = users.length;
+  const activeUsers = users.filter(u => u.status === 'active').length;
+  const adminUsers = users.filter(u => u.role === 'Admin').length;
+
+  const kpis = [
+      { title: "Total Users", value: totalUsers, icon: Users2, color: "indigo" as const },
+      { title: "Active Users", value: activeUsers, icon: Activity, color: "green" as const },
+      { title: "Admins", value: adminUsers, icon: Shield, color: "red" as const },
+  ];
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader 
@@ -86,6 +97,19 @@ export default function UsersManagementPage() {
             </Button>
         }
       />
+      <div className="grid gap-6 md:grid-cols-3">
+        {kpis.map((kpi, index) => (
+          <KpiCard
+            key={index}
+            title={kpi.title}
+            value={kpi.value as string}
+            icon={kpi.icon}
+            color={kpi.color}
+            style={{ animationDelay: `${index * 100}ms` }}
+            className="fade-in-up"
+          />
+        ))}
+      </div>
       <UserList 
         users={users} 
         onEdit={handleOpenModal} 
