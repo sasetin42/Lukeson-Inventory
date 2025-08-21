@@ -177,22 +177,36 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
     };
 
     const totals = useMemo(() => {
-        const vatableSales = lines.filter(l => l.vatType === 'VATable').reduce((acc, l) => acc + l.total, 0);
-        const vatExemptSales = lines.filter(l => l.vatType === 'VAT-Exempt').reduce((acc, l) => acc + l.total, 0);
-        const zeroRatedSales = lines.filter(l => l.vatType === 'Zero-Rated').reduce((acc, l) => acc + l.total, 0);
-        const totalSales = vatableSales + vatExemptSales + zeroRatedSales;
+        const totalSales = lines.reduce((acc, l) => acc + l.total, 0);
 
-        const discountAmount = discountType === 'Fixed' ? discountValue : totalSales * (discountValue / 100);
+        let vatableSales = 0;
+        let vatExemptSales = 0;
+        let zeroRatedSales = 0;
+
+        const discountAmount = discountType === 'Fixed' 
+            ? Math.min(discountValue, totalSales)
+            : totalSales * (Math.min(discountValue, 100) / 100);
+
         const totalAfterDiscount = totalSales - discountAmount;
-        
-        const vatAmount = lines.filter(l => l.vatType === 'VATable').reduce((acc, l) => {
-            const lineSubtotal = l.total;
-            const proportionOfTotal = totalSales > 0 ? lineSubtotal / totalSales : 0;
-            const lineDiscount = discountAmount * proportionOfTotal;
-            const taxableAmount = lineSubtotal - lineDiscount;
-            return acc + (taxableAmount * l.taxRate);
-        }, 0);
+        let vatAmount = 0;
 
+        if(totalSales > 0) {
+            lines.forEach(line => {
+                const proportion = line.total / totalSales;
+                const lineDiscount = discountAmount * proportion;
+                const discountedTotal = line.total - lineDiscount;
+
+                if (line.vatType === 'VATable') {
+                    vatableSales += discountedTotal;
+                    vatAmount += discountedTotal * line.taxRate;
+                } else if (line.vatType === 'VAT-Exempt') {
+                    vatExemptSales += discountedTotal;
+                } else if (line.vatType === 'Zero-Rated') {
+                    zeroRatedSales += discountedTotal;
+                }
+            });
+        }
+        
         const totalAmount = totalAfterDiscount + vatAmount;
         
         return {
