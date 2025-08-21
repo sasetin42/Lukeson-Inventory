@@ -55,6 +55,12 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const { toast } = useToast();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
 
     const getStatusVariant = (status: string) => {
         switch (status) {
@@ -98,6 +104,10 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
         });
     }, [products, searchQuery, categoryFilter]);
   
+    if (!mounted) {
+        return null;
+    }
+
     return (
     <>
         <Card>
