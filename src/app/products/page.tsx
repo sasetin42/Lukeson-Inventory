@@ -130,7 +130,7 @@ export default function ProductsPage() {
         try {
             if (id) {
                 const categoryRef = doc(db, "categories", id);
-                await setDoc(categoryRef, finalData, { merge: true });
+                await setDoc(categoryRef, { ...finalData, modifiedAt: serverTimestamp() }, { merge: true });
                 toast({ title: "Success", description: "Category updated successfully.", variant: "success" });
             } else {
                 await addDoc(collection(db, "categories"), { ...finalData, createdAt: serverTimestamp() });

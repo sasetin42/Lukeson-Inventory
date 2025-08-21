@@ -1,14 +1,14 @@
 
 import { Product, Sales, Invoice, Supplier, User, ItemCategory } from './types';
 
-// This file is now used for seeding the database if empty, or for local testing.
-// The main application will fetch data from Firebase Realtime Database.
+// This file can be used for seeding the database if empty, or for local testing.
+// The main application fetches data from Cloud Firestore.
 
 export const categories: ItemCategory[] = [
-    { id: 'cat-1', name: 'STRIPLIGHT', description: 'Various types of LED striplights.', createdAt: new Date().toISOString() },
-    { id: 'cat-2', name: 'POWER SUPPLY', description: 'Power supplies for LED lighting.', createdAt: new Date().toISOString() },
-    { id: 'cat-3', name: 'GENERAL LIGHTING', description: 'General purpose lighting fixtures.', createdAt: new Date().toISOString() },
-    { id: 'cat-4', name: 'ALUMINIUM PROFILE', description: 'Aluminium profiles for LED strips.', createdAt: new Date().toISOString() },
+    { id: 'cat-1', name: 'STRIPLIGHT', description: 'Various types of LED striplights.', createdAt: new Date() },
+    { id: 'cat-2', name: 'POWER SUPPLY', description: 'Power supplies for LED lighting.', createdAt: new Date() },
+    { id: 'cat-3', name: 'GENERAL LIGHTING', description: 'General purpose lighting fixtures.', createdAt: new Date() },
+    { id: 'cat-4', name: 'ALUMINIUM PROFILE', description: 'Aluminium profiles for LED strips.', createdAt: new Date() },
 ];
 
 export const products: Product[] = [
@@ -24,8 +24,8 @@ export const products: Product[] = [
         reOrderLevel: 20,
         supplier: "LED Innovations Inc.",
         status: "In Stock",
-        createdAt: "2024-05-01T10:00:00Z",
-        modifiedAt: "2024-05-20T14:30:00Z",
+        createdAt: new Date("2024-05-01T10:00:00Z"),
+        modifiedAt: new Date("2024-05-20T14:30:00Z"),
         productImage: "https://placehold.co/300x300.png",
         uom: "roll",
         expiryDateTracking: false,
@@ -38,11 +38,11 @@ export const products: Product[] = [
 ];
 
 export const sales: Sales[] = [
-    { id: "SALE-001", productId: "PROD-2024-001", productName: "High-Density LED Striplight 240L", customerName: "John Doe", date: "2024-05-20", quantity: 5, total: 750.00 },
+    { id: "SALE-001", productId: "PROD-2024-001", productName: "High-Density LED Striplight 240L", customerName: "John Doe", date: new Date("2024-05-20"), quantity: 5, total: 750.00 },
 ];
 
 export const invoices: Invoice[] = [
-  { id: "INV-2024-001", customerName: "John Doe", date: "2024-05-20", amount: 750.00, status: 'Paid' },
+  { id: "INV-2024-001", customerName: "John Doe", date: new Date("2024-05-20"), amount: 750.00, status: 'Paid' },
 ];
 
 export const suppliers: Supplier[] = [
@@ -62,7 +62,7 @@ export const users: User[] = [
         email: "admin@example.com",
         role: "Admin",
         status: "active",
-        lastLoginAt: "2024-05-23T10:00:00Z",
-        createdAt: "2024-01-01T10:00:00Z"
+        lastLoginAt: new Date("2024-05-23T10:00:00Z"),
+        createdAt: new Date("2024-01-01T10:00:00Z")
     },
 ];

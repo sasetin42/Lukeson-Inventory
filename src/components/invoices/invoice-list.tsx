@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { format } from 'date-fns';
 
 interface InvoiceListProps {
     invoices: Invoice[];
@@ -53,7 +54,7 @@ export default function InvoiceList({ invoices }: InvoiceListProps) {
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>Due Date: {invoice.date}</span>
+              <span>Due Date: {format(invoice.date, 'PP')}</span>
               <Badge variant={getStatusVariant(invoice.status)}>{invoice.status}</Badge>
             </div>
             <div className="text-lg font-semibold text-right">

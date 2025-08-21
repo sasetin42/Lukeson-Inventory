@@ -8,7 +8,6 @@ const firebaseConfig = {
   storageBucket: "lukeson-inventory.firebasestorage.app",
   apiKey: "AIzaSyBsmEybb-ASyKOifiWleLs9kZsy2NMwAJQ",
   authDomain: "lukeson-inventory.firebaseapp.com",
-  measurementId: "",
   messagingSenderId: "365879575919"
 };
 

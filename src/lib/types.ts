@@ -1,5 +1,6 @@
 
 import type { LucideIcon } from "lucide-react";
+import { FieldValue } from "firebase/firestore";
 
 // Main Company Information
 export type Company = {
@@ -23,8 +24,8 @@ export type User = {
     email: string;
     role: 'Admin' | 'Inventory Manager' | 'Sales' | 'Purchasing' | 'Finance' | 'Auditor';
     status: 'active' | 'inactive';
-    lastLoginAt?: string | Date;
-    createdAt: string | Date;
+    lastLoginAt?: Date | FieldValue;
+    createdAt: Date | FieldValue;
 };
 
 // Contacts
@@ -66,7 +67,7 @@ export type ItemCategory = {
     description?: string;
     productImage?: string;
     parentId?: string;
-    createdAt: string | Date;
+    createdAt: Date | FieldValue;
 };
 
 export type Stock = {
@@ -96,8 +97,8 @@ export type DocumentLine = {
 export type Quotation = {
     id: string; // QTN-YYYY-XXXX
     customerId: string;
-    qtnDate: string | Date;
-    expiryDate: string | Date;
+    qtnDate: Date;
+    expiryDate: Date;
     status: 'Draft' | 'Sent' | 'Accepted' | 'Expired';
     totalAmount: number;
     lines: DocumentLine[];
@@ -106,7 +107,7 @@ export type Quotation = {
 export type SalesOrder = {
     id: string; // SO-YYYY-XXXX
     customerId: string;
-    orderDate: string | Date;
+    orderDate: Date;
     status: 'Draft' | 'Confirmed' | 'Fulfilled' | 'Invoiced' | 'Cancelled';
     totalAmount: number;
     lines: DocumentLine[];
@@ -115,8 +116,8 @@ export type SalesOrder = {
 export type SalesInvoice = {
     id:string; // INV-YYYY-XXXX
     salesOrderId: string;
-    invoiceDate: string | Date;
-    dueDate: string | Date;
+    invoiceDate: Date;
+    dueDate: Date;
     status: 'Draft' | 'Posted' | 'Paid' | 'Overdue';
     totalAmount: number;
     paidAmount: number;
@@ -127,7 +128,7 @@ export type SalesInvoice = {
 export type Payment = {
     id: string;
     invoiceId: string;
-    paymentDate: string | Date;
+    paymentDate: Date;
     amount: number;
     paymentMethod: string;
 };
@@ -137,8 +138,8 @@ export type Payment = {
 export type PurchaseOrder = {
     id: string; // PO-YYYY-XXXX
     supplierId: string;
-    orderDate: string | Date;
-    expectedDeliveryDate: string | Date;
+    orderDate: Date;
+    expectedDeliveryDate: Date;
     status: 'Draft' | 'Sent' | 'Confirmed' | 'Partially Received' | 'Received' | 'Billed' | 'Cancelled';
     totalAmount: number;
     lines: DocumentLine[];
@@ -147,7 +148,7 @@ export type PurchaseOrder = {
 export type GoodsReceipt = {
     id: string; // GRN-YYYY-XXXX
     purchaseOrderId: string;
-    receiptDate: string | Date;
+    receiptDate: Date;
     warehouseId: string;
     lines: {
         id: string;
@@ -160,8 +161,8 @@ export type GoodsReceipt = {
 export type Bill = {
     id: string;
     goodsReceiptId: string;
-    billDate: string | Date;
-    dueDate: string | Date;
+    billDate: Date;
+    dueDate: Date;
     status: 'Draft' | 'Posted' | 'Paid' | 'Overdue';
     totalAmount: number;
     paidAmount: number;
@@ -172,7 +173,7 @@ export type Bill = {
 export type SupplierPayment = {
     id: string;
     billId: string;
-    paymentDate: string | Date;
+    paymentDate: Date;
     amount: number;
     paymentMethod: string;
 };
@@ -181,7 +182,7 @@ export type SupplierPayment = {
 // Stock Movement & Returns
 export type StockMovement = {
     id: string;
-    moveDate: string | Date;
+    moveDate: Date;
     type: 'Transfer' | 'Adjustment-In' | 'Adjustment-Out';
     fromWarehouseId?: string;
     toWarehouseId?: string;
@@ -194,7 +195,7 @@ export type Return = {
     id: string; // RA-YYYY-XXXX
     type: 'Sales Return' | 'Purchase Return';
     documentId: string; // SalesInvoiceId or GoodsReceiptId
-    returnDate: string | Date;
+    returnDate: Date;
     status: 'Pending' | 'Approved' | 'Rejected';
     lines: {
         id: string;
@@ -238,7 +239,7 @@ export type LowStockAlert = {
 export type Invoice = {
   id: string;
   customerName: string;
-  date: string | Date;
+  date: Date;
   amount: number;
   status: 'Paid' | 'Pending' | 'Overdue';
 };
@@ -248,7 +249,7 @@ export type Sales = {
   productId: string;
   productName: string;
   customerName: string;
-  date: string | Date;
+  date: Date;
   quantity: number;
   total: number;
 };
@@ -278,8 +279,8 @@ export type Product = {
     stock: number;
     price: number;
     reOrderLevel: number;
-    createdAt: string | Date;
-    modifiedAt?: string | Date;
+    createdAt: Date | FieldValue;
+    modifiedAt?: Date | FieldValue;
     status: 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Discontinued';
     suppliers?: Supplier[];
     uom: string;
