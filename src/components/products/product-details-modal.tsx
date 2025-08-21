@@ -193,7 +193,7 @@ export default function ProductDetailsModal({
                 <Info className="h-5 w-5 text-blue-500" />
                 Details
               </h4>
-              <div className="text-[13px] pl-7 grid grid-cols-2 gap-x-8">
+              <div className="text-[13px] pl-7 grid grid-cols-2 gap-x-16">
                  <div className="space-y-2">
                     {leftColumnDetails.map(detail => {
                       const Icon = detail.icon;
