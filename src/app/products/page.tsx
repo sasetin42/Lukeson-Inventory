@@ -13,7 +13,7 @@ import ProductFormModal from '@/components/products/product-form-modal';
 import CategoryFormModal from '@/components/category/category-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { ref, onValue, set, remove, push, serverTimestamp } from 'firebase/database';
+import { ref, onValue, set, remove, push, serverTimestamp, update } from 'firebase/database';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -98,7 +98,7 @@ export default function ProductsPage() {
             if (id) {
                 // This is an existing product, update it.
                 const productRef = ref(db, `products/${id}`);
-                await set(productRef, { ...finalData, modifiedAt: serverTimestamp() });
+                await update(productRef, { ...finalData, modifiedAt: serverTimestamp() });
                 toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
             } else {
                 // This is a new product, create it.
