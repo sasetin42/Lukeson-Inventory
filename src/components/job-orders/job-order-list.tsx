@@ -81,7 +81,8 @@ export default function JobOrderList({ jobOrders, onEdit, onDelete }: JobOrderLi
                             <TableRow>
                                 <TableHead>Job Order ID</TableHead>
                                 <TableHead>Customer</TableHead>
-                                <TableHead>Date</TableHead>
+                                <TableHead>Job Order Date</TableHead>
+                                <TableHead>Completion Date</TableHead>
                                 <TableHead>Amount</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="w-[50px]"></TableHead>
@@ -93,6 +94,7 @@ export default function JobOrderList({ jobOrders, onEdit, onDelete }: JobOrderLi
                                     <TableCell className="font-medium">{jobOrder.id}</TableCell>
                                     <TableCell>{jobOrder.customerName}</TableCell>
                                     <TableCell>{formatDate(jobOrder.jobOrderDate)}</TableCell>
+                                    <TableCell>{formatDate(jobOrder.expectedCompletionDate)}</TableCell>
                                     <TableCell>₱{jobOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                     <TableCell>
                                         <Badge variant={getStatusVariant(jobOrder.status)}>{jobOrder.status}</Badge>
