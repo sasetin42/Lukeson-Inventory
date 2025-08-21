@@ -8,6 +8,7 @@ import { FileText, PlusCircle, HelpCircle, Check, Clock, DollarSign } from "luci
 import QuotationList from "@/components/quotations/quotation-list";
 import { Quotation } from '@/lib/types';
 import QuotationFormModal from '@/components/quotations/quotation-form-modal';
+import QuotationDetailsModal from '@/components/quotations/quotation-details-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -15,8 +16,10 @@ import KpiCard from '@/components/kpi-card';
 
 export default function QuotationsPage() {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [editingQuotation, setEditingQuotation] = useState<Quotation | null>(null);
+  const [viewingQuotation, setViewingQuotation] = useState<Quotation | null>(null);
   const { toast } = useToast();
 
   const fetchQuotations = async () => {
@@ -39,36 +42,42 @@ export default function QuotationsPage() {
     fetchQuotations();
   }, []);
 
-  const handleOpenModal = (quotation: Quotation | null) => {
+  const handleOpenFormModal = (quotation: Quotation | null) => {
     setEditingQuotation(quotation);
-    setIsModalOpen(true);
+    setIsFormModalOpen(true);
+    setIsDetailsModalOpen(false); // Close details modal if open
   };
   
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseFormModal = () => {
+    setIsFormModalOpen(false);
     setEditingQuotation(null);
+  }
+
+  const handleOpenDetailsModal = (quotation: Quotation) => {
+    setViewingQuotation(quotation);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleCloseDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setViewingQuotation(null);
   }
 
   const handleSaveQuotation = async (quotationData: Omit<Quotation, 'id'> & { id?: string }) => {
     try {
       const { id, ...dataToSave } = quotationData;
-      if (id) {
-        const docRef = editingQuotation ? doc(db, "quotations", id) : doc(db, "quotations", id);
-
-        if (editingQuotation) { // We are editing
-          await setDoc(docRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
-          toast({ title: "Success", description: "Quotation updated successfully.", variant: "success" });
-        } else { // We are creating
-          await setDoc(docRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
-          toast({ title: "Success", description: "Quotation added successfully.", variant: "success" });
-        }
-      } else {
-        // Fallback for any case where ID is not provided, though it shouldn't happen with the new logic.
-        await addDoc(collection(db, "quotations"), { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+      const docId = id || `QTN-${new Date().getFullYear()}-${(quotations.length + 1).toString().padStart(4, '0')}`;
+      const docRef = doc(db, "quotations", docId);
+      
+      if (editingQuotation) { // We are editing
+        await setDoc(docRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
+        toast({ title: "Success", description: "Quotation updated successfully.", variant: "success" });
+      } else { // We are creating
+        await setDoc(docRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
         toast({ title: "Success", description: "Quotation added successfully.", variant: "success" });
       }
 
-      handleCloseModal();
+      handleCloseFormModal();
       fetchQuotations();
     } catch (error) {
       console.error("Error saving quotation: ", error);
@@ -104,7 +113,7 @@ export default function QuotationsPage() {
         description="Create and manage customer quotations."
         icon={<FileText className="h-6 w-6 text-purple-500" />}
         actions={
-          <Button onClick={() => handleOpenModal(null)}>
+          <Button onClick={() => handleOpenFormModal(null)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Create Quotation
           </Button>
@@ -125,15 +134,24 @@ export default function QuotationsPage() {
       </div>
       <QuotationList
         quotations={quotations}
-        onEdit={handleOpenModal}
+        onView={handleOpenDetailsModal}
+        onEdit={handleOpenFormModal}
         onDelete={handleDeleteQuotation}
       />
-      {isModalOpen && (
+      {isFormModalOpen && (
         <QuotationFormModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
+          isOpen={isFormModalOpen}
+          onClose={handleCloseFormModal}
           onSave={handleSaveQuotation}
           quotation={editingQuotation}
+        />
+      )}
+      {isDetailsModalOpen && (
+        <QuotationDetailsModal
+          isOpen={isDetailsModalOpen}
+          onClose={handleCloseDetailsModal}
+          onEdit={handleOpenFormModal}
+          quotation={viewingQuotation}
         />
       )}
     </div>

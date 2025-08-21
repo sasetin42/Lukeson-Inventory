@@ -23,11 +23,12 @@ import Link from 'next/link';
 
 interface QuotationListProps {
     quotations: Quotation[];
+    onView: (quotation: Quotation) => void;
     onEdit: (quotation: Quotation) => void;
     onDelete: (quotationId: string) => void;
 }
 
-export default function QuotationList({ quotations, onEdit, onDelete }: QuotationListProps) {
+export default function QuotationList({ quotations, onView, onEdit, onDelete }: QuotationListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [quotationToDelete, setQuotationToDelete] = useState<Quotation | null>(null);
 
@@ -105,11 +106,8 @@ export default function QuotationList({ quotations, onEdit, onDelete }: Quotatio
                                         <Badge variant={getStatusVariant(quotation.status)}>{quotation.status}</Badge>
                                     </TableCell>
                                     <TableCell className="flex items-center gap-1">
-                                        <Button variant="ghost" size="icon" onClick={() => onEdit(quotation)}>
+                                        <Button variant="ghost" size="icon" onClick={() => onView(quotation)}>
                                             <Eye className="h-4 w-4 text-blue-500" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => onEdit(quotation)}>
-                                            <Edit className="h-4 w-4 text-yellow-500" />
                                         </Button>
                                         <Button variant="ghost" size="icon" onClick={() => handleApprove(quotation)}>
                                             <CheckCircle className="h-4 w-4 text-green-500" />
