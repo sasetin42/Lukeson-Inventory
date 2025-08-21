@@ -282,6 +282,7 @@ export type Product = {
     price: number;
     reOrderLevel: number;
     createdAt: FieldValue | Timestamp | Date;
+    modifiedAt?: FieldValue | Timestamp | Date;
     status: 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Discontinued';
     suppliers?: Supplier[];
     uom: string;
@@ -290,4 +291,5 @@ export type Product = {
     vatType: 'VATABLE' | 'VAT-EXEMPT' | 'ZERO-RATED';
     barcode?: string;
 };
+
 

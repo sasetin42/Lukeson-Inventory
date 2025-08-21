@@ -219,6 +219,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 brand,
                 vatType: vatType as 'VATABLE' | 'VAT-EXEMPT' | 'ZERO-RATED',
                 barcode,
+                modifiedAt: new Date(),
             };
             
             onSuccess(productData);

@@ -103,7 +103,7 @@ export default function ProductsPage() {
             if (productData.id) {
                 // Update existing product
                 updatedProducts = products.map(p => 
-                    p.id === productData.id ? { ...p, ...productData, id: p.id, createdAt: p.createdAt } : p
+                    p.id === productData.id ? { ...p, ...productData, id: p.id, createdAt: p.createdAt, modifiedAt: new Date().toISOString() } : p
                 );
                 toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
             } else {
@@ -112,6 +112,7 @@ export default function ProductsPage() {
                     ...productData,
                     id: new Date().toISOString(), // Generate a unique ID
                     createdAt: new Date().toISOString(),
+                    modifiedAt: new Date().toISOString(),
                 };
                 updatedProducts = [...products, newProduct];
                 toast({ title: "Success", description: "Product added successfully.", variant: "success" });

@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import ProductImage from './product-image';
+import { format } from 'date-fns';
 
 interface ProductListProps {
     products: Product[];
@@ -188,11 +189,12 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                     <TableRow>
                     <TableHead className="w-[80px]">Image</TableHead>
                     <TableHead>Product</TableHead>
-                    <TableHead>SKU</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Price</TableHead>
                     <TableHead>Stock</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Date Created</TableHead>
+                    <TableHead>Date Modified</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                 </TableHeader>
@@ -212,14 +214,16 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                         <TableCell>
                             <div className="font-medium">{product.name}</div>
                             <div className="text-xs text-muted-foreground">{product.productCode}</div>
+                            <div className="text-[12px] text-muted-foreground">SKU: {product.sku}</div>
                         </TableCell>
-                        <TableCell>{product.sku}</TableCell>
                         <TableCell>{product.category}</TableCell>
                         <TableCell>₱{product.price.toFixed(2)}</TableCell>
                         <TableCell>{product.stock}</TableCell>
                         <TableCell>
                         <Badge variant={getStatusVariant(product.status)}>{product.status}</Badge>
                         </TableCell>
+                        <TableCell>{product.createdAt ? format(new Date(product.createdAt as Date), 'PP') : 'N/A'}</TableCell>
+                        <TableCell>{product.modifiedAt ? format(new Date(product.modifiedAt as Date), 'PP') : 'N/A'}</TableCell>
                         <TableCell>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
