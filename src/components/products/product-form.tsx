@@ -14,7 +14,7 @@ import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '../ui/progress';
 import { db } from '@/lib/firebase';
-import { ref, onValue } from 'firebase/database';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 interface ProductFormProps {
   product: Product | null;
@@ -61,18 +61,16 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [expiryDateTracking, setExpiryDateTracking] = useState(false);
 
     useEffect(() => {
-        const suppliersRef = ref(db, 'suppliers');
-        const categoriesRef = ref(db, 'categories');
+        const suppliersRef = collection(db, 'suppliers');
+        const categoriesRef = collection(db, 'categories');
 
-        const unsubscribeSuppliers = onValue(suppliersRef, (snapshot) => {
-            const data = snapshot.val();
-            const loadedSuppliers = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Supplier, 'id'>) })) : [];
+        const unsubscribeSuppliers = onSnapshot(suppliersRef, (snapshot) => {
+            const loadedSuppliers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
             setSuppliers(loadedSuppliers);
         });
 
-        const unsubscribeCategories = onValue(categoriesRef, (snapshot) => {
-            const data = snapshot.val();
-            const loadedCategories = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<ItemCategory, 'id'>) })) : [];
+        const unsubscribeCategories = onSnapshot(categoriesRef, (snapshot) => {
+            const loadedCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
             setCategories(loadedCategories);
         });
 
@@ -232,7 +230,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                             {categories.map(cat => (
                                 <SelectItem key={cat.id} value={cat.name}>
                                     <div className="flex items-center gap-2">
-                                        {categoryIcons[cat.name] || <Package className="h-4 w-4" />}
+                                        {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
                                         {cat.name}
                                     </div>
                                 </SelectItem>

@@ -12,7 +12,7 @@ import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
 import { Product, Sales, ItemCategory } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { ref, onValue } from 'firebase/database';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -22,26 +22,23 @@ export default function DashboardPage() {
   const { toast } = useToast();
   
   useEffect(() => {
-    const productsRef = ref(db, 'products');
-    const salesRef = ref(db, 'sales');
-    const categoriesRef = ref(db, 'categories');
+    const productsRef = collection(db, 'products');
+    const salesRef = collection(db, 'sales');
+    const categoriesRef = collection(db, 'categories');
 
-    const unsubscribeProducts = onValue(productsRef, (snapshot) => {
-        const data = snapshot.val();
-        const loadedProducts = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Product, 'id'>) })) : [];
+    const unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
+        const loadedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
         setProducts(loadedProducts);
         setLoading(false);
     });
 
-    const unsubscribeSales = onValue(salesRef, (snapshot) => {
-        const data = snapshot.val();
-        const loadedSales = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Sales, 'id'>) })) : [];
+    const unsubscribeSales = onSnapshot(salesRef, (snapshot) => {
+        const loadedSales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Sales));
         setSales(loadedSales);
     });
 
-    const unsubscribeCategories = onValue(categoriesRef, (snapshot) => {
-        const data = snapshot.val();
-        const loadedCategories = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<ItemCategory, 'id'>) })) : [];
+    const unsubscribeCategories = onSnapshot(categoriesRef, (snapshot) => {
+        const loadedCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
         setCategories(loadedCategories);
     });
 

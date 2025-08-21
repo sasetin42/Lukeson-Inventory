@@ -54,6 +54,12 @@ export default function UserList({ users, onEdit, onDelete }: UserListProps) {
         return status === 'active' ? 'default' : 'secondary';
     };
 
+    const formatLastLogin = (lastLoginAt: any) => {
+      if (!lastLoginAt) return 'Never';
+      const date = lastLoginAt.toDate ? lastLoginAt.toDate() : new Date(lastLoginAt);
+      return `${formatDistanceToNow(date)} ago`;
+    }
+
     return (
         <>
             <Card>
@@ -92,7 +98,7 @@ export default function UserList({ users, onEdit, onDelete }: UserListProps) {
                                         <Badge variant={getStatusVariant(user.status)}>{user.status}</Badge>
                                     </TableCell>
                                     <TableCell>
-                                        {user.lastLoginAt ? `${formatDistanceToNow(new Date(user.lastLoginAt as string))} ago` : 'Never'}
+                                        {formatLastLogin(user.lastLoginAt)}
                                     </TableCell>
                                     <TableCell>
                                         <DropdownMenu>

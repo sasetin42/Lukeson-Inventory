@@ -9,17 +9,16 @@ import InvoiceList from "@/components/invoices/invoice-list";
 import { Invoice } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { ref, onValue } from 'firebase/database';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    const invoicesRef = ref(db, 'invoices');
-    const unsubscribe = onValue(invoicesRef, (snapshot) => {
-      const data = snapshot.val();
-      const loadedInvoices = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Invoice, 'id'>) })) : [];
+    const invoicesRef = collection(db, 'invoices');
+    const unsubscribe = onSnapshot(invoicesRef, (snapshot) => {
+      const loadedInvoices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
       setInvoices(loadedInvoices);
     });
 

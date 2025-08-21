@@ -14,13 +14,16 @@ interface SlowMovingItemsProps {
 }
 
 export default function SlowMovingItems({ products, sales }: SlowMovingItemsProps) {
-  const salesLast90Days = sales.filter(s => new Date(s.date) > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000));
+  const salesLast90Days = sales.filter(s => {
+      const saleDate = (s.date as any).toDate ? (s.date as any).toDate() : new Date(s.date as string);
+      return saleDate > new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+  });
   const soldProductIds = new Set(salesLast90Days.map(s => s.productId));
   const slowMovingProducts = products
     .filter(p => !soldProductIds.has(p.id) && p.stock > 0)
     .slice(0, 3)
     .map(p => {
-        const createdAtDate = p.createdAt ? new Date(p.createdAt as string) : new Date(0);
+        const createdAtDate = p.createdAt ? ((p.createdAt as any).toDate ? (p.createdAt as any).toDate() : new Date(p.createdAt as string)) : new Date(0);
         return {
             ...p,
             daysInStock: Math.floor((Date.now() - createdAtDate.getTime()) / (1000 * 60 * 60 * 24))

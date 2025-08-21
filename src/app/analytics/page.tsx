@@ -21,7 +21,7 @@ import { Product, Sales, Supplier } from '@/lib/types';
 import SupplierOnTimeChart from '@/components/analytics/supplier-on-time-chart';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { ref, onValue } from 'firebase/database';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState("30");
@@ -32,25 +32,22 @@ export default function AnalyticsPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const productsRef = ref(db, 'products');
-    const salesRef = ref(db, 'sales');
-    const suppliersRef = ref(db, 'suppliers');
+    const productsRef = collection(db, 'products');
+    const salesRef = collection(db, 'sales');
+    const suppliersRef = collection(db, 'suppliers');
 
-    const unsubscribeProducts = onValue(productsRef, (snapshot) => {
-        const data = snapshot.val();
-        const loadedProducts = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Product, 'id'>) })) : [];
+    const unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
+        const loadedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
         setProducts(loadedProducts);
     });
 
-    const unsubscribeSales = onValue(salesRef, (snapshot) => {
-        const data = snapshot.val();
-        const loadedSales = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Sales, 'id'>) })) : [];
+    const unsubscribeSales = onSnapshot(salesRef, (snapshot) => {
+        const loadedSales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Sales));
         setSales(loadedSales);
     });
 
-    const unsubscribeSuppliers = onValue(suppliersRef, (snapshot) => {
-        const data = snapshot.val();
-        const loadedSuppliers = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Supplier, 'id'>) })) : [];
+    const unsubscribeSuppliers = onSnapshot(suppliersRef, (snapshot) => {
+        const loadedSuppliers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
         setSuppliers(loadedSuppliers);
     });
     
@@ -67,7 +64,10 @@ export default function AnalyticsPage() {
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - days);
         
-        const filteredSales = sales.filter(s => new Date(s.date) >= cutoffDate);
+        const filteredSales = sales.filter(s => {
+          const saleDate = (s.date as any).toDate ? (s.date as any).toDate() : new Date(s.date as string);
+          return saleDate >= cutoffDate;
+        });
         
         const totalRevenue = filteredSales.reduce((acc, s) => acc + s.total, 0);
         const unitsSold = filteredSales.reduce((acc, s) => acc + s.quantity, 0);

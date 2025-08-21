@@ -10,7 +10,7 @@ import { Supplier } from '@/lib/types';
 import SupplierFormModal from '@/components/suppliers/supplier-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { ref, onValue, set, remove, push, serverTimestamp } from 'firebase/database';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -19,10 +19,9 @@ export default function SuppliersPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const suppliersRef = ref(db, 'suppliers');
-    const unsubscribe = onValue(suppliersRef, (snapshot) => {
-        const data = snapshot.val();
-        const loadedSuppliers = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Supplier, 'id'>) })) : [];
+    const suppliersRef = collection(db, 'suppliers');
+    const unsubscribe = onSnapshot(suppliersRef, (snapshot) => {
+        const loadedSuppliers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
         setSuppliers(loadedSuppliers);
     });
     return () => unsubscribe();
@@ -36,13 +35,11 @@ export default function SuppliersPage() {
   const handleSaveSupplier = async (supplierData: Omit<Supplier, 'id'> & {id?: string}) => {
       try {
           if (supplierData.id) {
-              const supplierRef = ref(db, `suppliers/${supplierData.id}`);
-              await set(supplierRef, { ...supplierData, modifiedAt: serverTimestamp() });
+              const supplierRef = doc(db, "suppliers", supplierData.id);
+              await setDoc(supplierRef, { ...supplierData, modifiedAt: serverTimestamp() }, { merge: true });
               toast({ title: "Success", description: "Supplier updated successfully.", variant: "success" });
           } else {
-              const suppliersRef = ref(db, 'suppliers');
-              const newSupplierRef = push(suppliersRef);
-              await set(newSupplierRef, { ...supplierData, createdAt: serverTimestamp() });
+              await addDoc(collection(db, "suppliers"), { ...supplierData, createdAt: serverTimestamp() });
               toast({ title: "Success", description: "Supplier added successfully.", variant: "success" });
           }
           setIsModalOpen(false);
@@ -53,7 +50,7 @@ export default function SuppliersPage() {
 
 
   const handleDeleteSupplier = async (supplierId: string) => {
-    await remove(ref(db, `suppliers/${supplierId}`));
+    await deleteDoc(doc(db, "suppliers", supplierId));
     toast({ title: "Success", description: "Supplier deleted successfully.", variant: "success" });
   };
 

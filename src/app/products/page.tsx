@@ -13,7 +13,7 @@ import ProductFormModal from '@/components/products/product-form-modal';
 import CategoryFormModal from '@/components/category/category-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { ref, onValue, set, remove, push, serverTimestamp, update } from 'firebase/database';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -26,19 +26,17 @@ export default function ProductsPage() {
     const { toast } = useToast();
     
     useEffect(() => {
-        const productsRef = ref(db, 'products');
-        const categoriesRef = ref(db, 'categories');
+        const productsRef = collection(db, 'products');
+        const categoriesRef = collection(db, 'categories');
 
-        const unsubscribeProducts = onValue(productsRef, (snapshot) => {
-            const data = snapshot.val();
-            const loadedProducts = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Product, 'id'>) })) : [];
+        const unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
+            const loadedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
             setProducts(loadedProducts);
             setLoading(false);
         });
 
-        const unsubscribeCategories = onValue(categoriesRef, (snapshot) => {
-            const data = snapshot.val();
-            const loadedCategories = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<ItemCategory, 'id'>) })) : [];
+        const unsubscribeCategories = onSnapshot(categoriesRef, (snapshot) => {
+            const loadedCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
             setCategories(loadedCategories);
         });
 
@@ -55,7 +53,7 @@ export default function ProductsPage() {
     
     const addedThisWeek = products.filter(p => {
         if (!p.createdAt) return false;
-        const createdAtDate = new Date(p.createdAt as string);
+        const createdAtDate = (p.createdAt as any).toDate ? (p.createdAt as any).toDate() : new Date(p.createdAt as string);
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         return createdAtDate > sevenDaysAgo;
@@ -81,7 +79,7 @@ export default function ProductsPage() {
     }
 
     const handleDeleteProduct = async (productToDelete: Product) => {
-        await remove(ref(db, `products/${productToDelete.id}`));
+        await deleteDoc(doc(db, "products", productToDelete.id));
         toast({ title: "Success", description: "Product deleted.", variant: "success" });
     }
 
@@ -97,14 +95,12 @@ export default function ProductsPage() {
         try {
             if (id) {
                 // This is an existing product, update it.
-                const productRef = ref(db, `products/${id}`);
-                await update(productRef, { ...finalData, modifiedAt: serverTimestamp() });
+                const productRef = doc(db, "products", id);
+                await updateDoc(productRef, { ...finalData, modifiedAt: serverTimestamp() });
                 toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
             } else {
                 // This is a new product, create it.
-                const productsRef = ref(db, 'products');
-                const newProductRef = push(productsRef);
-                await set(newProductRef, { ...finalData, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+                await addDoc(collection(db, "products"), { ...finalData, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
                 toast({ title: "Success", description: "Product added successfully.", variant: "success" });
             }
             handleCloseProductModal();
@@ -115,21 +111,19 @@ export default function ProductsPage() {
     }
 
     const handleCategorySave = async (categoryData: Omit<ItemCategory, 'id' | 'createdAt'> & {id?: string, imageFile?: File | null}) => {
-        const { imageFile, ...dataToSave } = categoryData;
+        const { imageFile, id, ...dataToSave } = categoryData;
         let imageUrl = categoryData.productImage || 'https://placehold.co/300x300.png';
             
         // Again, placeholder for image handling
         const finalData = { ...dataToSave, productImage: imageUrl };
 
         try {
-            if (finalData.id) {
-                const categoryRef = ref(db, `categories/${finalData.id}`);
-                await set(categoryRef, finalData);
+            if (id) {
+                const categoryRef = doc(db, "categories", id);
+                await setDoc(categoryRef, finalData, { merge: true });
                 toast({ title: "Success", description: "Category updated successfully.", variant: "success" });
             } else {
-                const categoriesRef = ref(db, 'categories');
-                const newCategoryRef = push(categoriesRef);
-                await set(newCategoryRef, { ...finalData, createdAt: serverTimestamp() });
+                await addDoc(collection(db, "categories"), { ...finalData, createdAt: serverTimestamp() });
                 toast({ title: "Success", description: "Category added successfully.", variant: "success" });
             }
         } catch(error) {
@@ -138,7 +132,7 @@ export default function ProductsPage() {
     }
 
     const handleCategoryDelete = async (categoryId: string) => {
-        await remove(ref(db, `categories/${categoryId}`));
+        await deleteDoc(doc(db, `categories/${categoryId}`));
         toast({ title: "Success", description: "Category deleted successfully.", variant: "success" });
     }
 

@@ -10,7 +10,7 @@ import UserList from '@/components/users/user-list';
 import UserFormModal from '@/components/users/user-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { ref, onValue, set, remove, push, serverTimestamp } from 'firebase/database';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -19,10 +19,9 @@ export default function UsersManagementPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const usersRef = ref(db, 'users');
-    const unsubscribe = onValue(usersRef, (snapshot) => {
-        const data = snapshot.val();
-        const loadedUsers = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<User, 'id'>) })) : [];
+    const usersRef = collection(db, 'users');
+    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
+        const loadedUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
         setUsers(loadedUsers);
     });
     return () => unsubscribe();
@@ -42,13 +41,11 @@ export default function UsersManagementPage() {
     const { id, password, ...dataToSave } = userData; // We don't save password to DB in this example
     try {
         if (id) { // Editing existing user
-            const userRef = ref(db, `users/${id}`);
-            await set(userRef, { ...(users.find(u => u.id === id)), ...dataToSave, lastLoginAt: new Date().toISOString() });
+            const userRef = doc(db, "users", id);
+            await setDoc(userRef, { ...dataToSave, lastLoginAt: serverTimestamp() }, { merge: true });
             toast({ title: "Success", description: "User updated successfully.", variant: "success" });
         } else { // Adding new user
-            const usersRef = ref(db, 'users');
-            const newUserRef = push(usersRef);
-            await set(newUserRef, { ...dataToSave, createdAt: serverTimestamp(), lastLoginAt: serverTimestamp() });
+            await addDoc(collection(db, "users"), { ...dataToSave, createdAt: serverTimestamp(), lastLoginAt: serverTimestamp() });
             toast({ title: "Success", description: "User added successfully.", variant: "success" });
         }
         handleCloseModal();
@@ -59,7 +56,7 @@ export default function UsersManagementPage() {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    await remove(ref(db, `users/${userId}`));
+    await deleteDoc(doc(db, "users", userId));
     toast({ title: "Success", description: "User deleted successfully.", variant: "success" });
   };
 

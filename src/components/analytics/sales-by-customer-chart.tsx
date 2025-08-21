@@ -13,7 +13,10 @@ export default function SalesByCustomerChart({ dateRange, sales }: SalesByCustom
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - dateRange);
 
-  const filteredSales = sales.filter(s => new Date(s.date) >= cutoffDate);
+  const filteredSales = sales.filter(s => {
+    const saleDate = (s.date as any).toDate ? (s.date as any).toDate() : new Date(s.date as string);
+    return saleDate >= cutoffDate;
+  });
   
   const salesByCustomer = filteredSales.reduce((acc, sale) => {
     if (!acc[sale.customerName]) {

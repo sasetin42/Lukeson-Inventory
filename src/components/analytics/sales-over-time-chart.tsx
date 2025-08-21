@@ -3,6 +3,7 @@
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Sales } from '@/lib/types';
+import { format } from 'date-fns';
 
 interface SalesOverTimeChartProps {
     dateRange: number;
@@ -13,10 +14,14 @@ export default function SalesOverTimeChart({ dateRange, sales }: SalesOverTimeCh
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - dateRange);
   
-  const filteredSales = sales.filter(s => new Date(s.date) >= cutoffDate);
+  const filteredSales = sales.filter(s => {
+    const saleDate = (s.date as any).toDate ? (s.date as any).toDate() : new Date(s.date as string);
+    return saleDate >= cutoffDate;
+  });
 
   const salesByDate = filteredSales.reduce((acc, sale) => {
-    const date = new Date(sale.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const saleDate = (sale.date as any).toDate ? (sale.date as any).toDate() : new Date(sale.date as string);
+    const date = format(saleDate, 'MMM d');
     if (!acc[date]) {
       acc[date] = 0;
     }
@@ -26,7 +31,7 @@ export default function SalesOverTimeChart({ dateRange, sales }: SalesOverTimeCh
 
   const chartData = Object.entries(salesByDate)
     .map(([date, total]) => ({ date, total }))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .sort((a, b) => new Date(a.date + `, ${new Date().getFullYear()}`).getTime() - new Date(b.date + `, ${new Date().getFullYear()}`).getTime());
 
   return (
     <Card>

@@ -16,7 +16,10 @@ export default function ProductPerformanceDetails({ dateRange, products, sales }
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - dateRange);
 
-    const filteredSales = sales.filter(s => new Date(s.date) >= cutoffDate);
+    const filteredSales = sales.filter(s => {
+      const saleDate = (s.date as any).toDate ? (s.date as any).toDate() : new Date(s.date as string);
+      return saleDate >= cutoffDate;
+    });
     
     const productPerformanceData = products.map(product => {
         const productSales = filteredSales.filter(s => s.productId === product.id);

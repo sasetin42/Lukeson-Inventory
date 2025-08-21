@@ -77,6 +77,14 @@ export default function ProductDetailsModal({
 
   if (!product) return null;
 
+  const formatDate = (date: any) => {
+    if (!date) return 'N/A';
+    // Firestore timestamp
+    if (date.toDate) return format(date.toDate(), 'PP');
+    // String date
+    return format(new Date(date), 'PP');
+  }
+
   const getStatusVariant = (status: string) => {
     switch (status) {
       case 'In Stock':
@@ -125,8 +133,8 @@ export default function ProductDetailsModal({
   
   const isActive = product.status !== 'Discontinued';
   
-  const createdAt = product.createdAt ? format(new Date(product.createdAt as string), 'PP') : 'N/A';
-  const modifiedAt = product.modifiedAt ? format(new Date(product.modifiedAt as string), 'PP') : 'N/A';
+  const createdAt = formatDate(product.createdAt);
+  const modifiedAt = formatDate(product.modifiedAt);
 
   return (
     <>

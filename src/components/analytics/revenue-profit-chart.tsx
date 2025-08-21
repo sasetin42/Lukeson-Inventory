@@ -1,3 +1,4 @@
+
 'use client';
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +16,7 @@ export default function RevenueProfitChart({ dateRange, sales, products }: Reven
   const startDate = subDays(endDate, dateRange);
 
   const filteredSales = sales.filter(s => {
-    const saleDate = new Date(s.date);
+    const saleDate = (s.date as any).toDate ? (s.date as any).toDate() : new Date(s.date as string);
     return saleDate >= startDate && saleDate <= endDate;
   });
 
@@ -31,7 +32,8 @@ export default function RevenueProfitChart({ dateRange, sales, products }: Reven
   const dataMap = new Map(dataByDay.map(d => [d.date, d]));
 
   filteredSales.forEach(sale => {
-    const formattedDate = format(new Date(sale.date), 'MMM d');
+    const saleDate = (sale.date as any).toDate ? (sale.date as any).toDate() : new Date(sale.date as string);
+    const formattedDate = format(saleDate, 'MMM d');
     const product = products.find(p => p.id === sale.productId);
     const cost = product ? (product as any).cost * sale.quantity : 0; // Use price as fallback
     const profit = sale.total - cost;

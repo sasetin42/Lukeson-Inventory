@@ -32,7 +32,7 @@ import {
 import ProductImage from './product-image';
 import { format } from 'date-fns';
 import { db } from '@/lib/firebase';
-import { ref, onValue } from 'firebase/database';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 interface ProductListProps {
     products: Product[];
@@ -60,14 +60,21 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
 
     useEffect(() => {
         setMounted(true);
-        const categoriesRef = ref(db, 'categories');
-        const unsubscribe = onValue(categoriesRef, (snapshot) => {
-            const data = snapshot.val();
-            const loadedCategories = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<ItemCategory, 'id'>) })) : [];
+        const categoriesRef = collection(db, 'categories');
+        const unsubscribe = onSnapshot(categoriesRef, (snapshot) => {
+            const loadedCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
             setCategories(loadedCategories);
         });
         return () => unsubscribe();
     }, []);
+
+    const formatDate = (date: any) => {
+      if (!date) return 'N/A';
+      // Firestore timestamp
+      if (date.toDate) return format(date.toDate(), 'PP');
+      // String date
+      return format(new Date(date), 'PP');
+    }
 
 
     const getStatusVariant = (status: string) => {
@@ -151,7 +158,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                     {categories.map(cat => (
                         <SelectItem key={cat.id} value={cat.name}>
                             <div className="flex items-center gap-2">
-                                {categoryIcons[cat.name] || <Package className="h-4 w-4" />}
+                                {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
                                 {cat.name}
                             </div>
                         </SelectItem>
@@ -223,8 +230,8 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                         <TableCell>
                         <Badge variant={getStatusVariant(product.status)}>{product.status}</Badge>
                         </TableCell>
-                        <TableCell>{product.createdAt ? format(new Date(product.createdAt as string), 'PP') : 'N/A'}</TableCell>
-                        <TableCell>{product.modifiedAt ? format(new Date(product.modifiedAt as string), 'PP') : 'N/A'}</TableCell>
+                        <TableCell>{formatDate(product.createdAt)}</TableCell>
+                        <TableCell>{formatDate(product.modifiedAt)}</TableCell>
                         <TableCell>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>

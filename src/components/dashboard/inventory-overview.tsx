@@ -17,7 +17,7 @@ export default function InventoryOverview({ products }: InventoryOverviewProps) 
   
   const addedLastMonth = products.filter(p => {
     if (!p.createdAt) return false;
-    const createdAtDate = new Date(p.createdAt as string);
+    const createdAtDate = (p.createdAt as any).toDate ? (p.createdAt as any).toDate() : new Date(p.createdAt as string);
     const lastMonth = new Date();
     lastMonth.setMonth(lastMonth.getMonth() - 1);
     return createdAtDate > lastMonth;
