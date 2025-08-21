@@ -13,6 +13,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { DatePicker } from '../ui/date-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Textarea } from '../ui/textarea';
 
 interface SalesOrderFormProps {
   salesOrder: SalesOrder | null;
@@ -35,6 +36,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
     const [status, setStatus] = useState<SalesOrder['status'] | 'Approved'>('Draft');
     const [lines, setLines] = useState<DocumentLine[]>([]);
     const [isStatusDisabled, setIsStatusDisabled] = useState(true);
+    const [notes, setNotes] = useState('');
     
     useEffect(() => {
         const fetchData = async () => {
@@ -85,6 +87,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             setCustomerId(salesOrder.customerId || '');
             setOrderDate(salesOrder.orderDate ? (salesOrder.orderDate instanceof Date ? salesOrder.orderDate : (salesOrder.orderDate as any).toDate()) : new Date());
             setLines(salesOrder.lines || []);
+            setNotes(salesOrder.notes || '');
         } else {
             generateSalesOrderId();
             setLines([]);
@@ -92,6 +95,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             setCustomerId('');
             setOrderDate(new Date());
             setIsStatusDisabled(true);
+            setNotes('');
         }
     }, [salesOrder]);
 
@@ -103,6 +107,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             setLines(approvedQuotation.lines);
             setStatus('Approved');
             setIsStatusDisabled(false);
+            setNotes(approvedQuotation.notes || '');
             toast({
                 title: "Quotation Found",
                 description: `Populated line items from approved quotation ${approvedQuotation.id}.`,
@@ -112,6 +117,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             setLines([]);
             setStatus('Draft');
             setIsStatusDisabled(true);
+            setNotes('');
         }
     }
     
@@ -175,6 +181,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                 orderDate,
                 status: finalStatus as SalesOrder['status'],
                 lines,
+                notes,
                 totalAmount: calculateTotalAmount(),
                 quotationId: (salesOrder as SalesOrder)?.quotationId,
             };
@@ -275,6 +282,11 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                 </Button>
             </div>
 
+            <div className="space-y-2">
+                <Label htmlFor="notes">Notes (Optional)</Label>
+                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add any notes for this sales order..."/>
+            </div>
+
             <div className="flex justify-end items-center gap-6 mt-4">
                 <div className="text-right">
                     <p className="text-muted-foreground">Total Amount</p>
@@ -291,6 +303,3 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
         </div>
     );
 }
-
-
-

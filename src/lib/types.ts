@@ -117,6 +117,7 @@ export type SalesOrder = {
     totalAmount: number;
     lines: DocumentLine[];
     quotationId?: string; // Link to the original quotation
+    notes?: string;
 };
 
 export type SalesInvoice = {
