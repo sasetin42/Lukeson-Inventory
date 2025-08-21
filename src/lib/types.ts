@@ -82,6 +82,8 @@ export type Stock = {
     ordered: number;
 };
 
+export type VatType = 'VATable' | 'VAT-Exempt' | 'Zero-Rated';
+
 // Transaction Line Item (used across multiple documents)
 export type DocumentLine = {
     id: string;
@@ -92,6 +94,7 @@ export type DocumentLine = {
     unitPrice: number;
     taxRate: number;
     total: number;
+    vatType: VatType;
 };
 
 
@@ -118,6 +121,8 @@ export type SalesOrder = {
     lines: DocumentLine[];
     quotationId?: string; // Link to the original quotation
     notes?: string;
+    discountType?: 'Fixed' | 'Percent';
+    discountValue?: number;
 };
 
 export type SalesInvoice = {

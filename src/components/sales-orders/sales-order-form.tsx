@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SalesOrder, DocumentLine, Customer, Product, Quotation } from '@/lib/types';
+import { SalesOrder, DocumentLine, Customer, Product, Quotation, VatType } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Loader2, User, Calendar, Hash, FileText, PlusCircle, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -14,12 +14,16 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { DatePicker } from '../ui/date-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from '../ui/textarea';
+import { Separator } from '../ui/separator';
 
 interface SalesOrderFormProps {
   salesOrder: SalesOrder | null;
   onSuccess: (salesOrderData: Omit<SalesOrder, 'id'> & {id?: string}) => void;
   onCancel: () => void;
 }
+
+const vatTypes: VatType[] = ['VATable', 'VAT-Exempt', 'Zero-Rated'];
+const DEFAULT_TAX_RATE = 0.12;
 
 export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: SalesOrderFormProps) {
     const { toast } = useToast();
@@ -37,6 +41,8 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
     const [lines, setLines] = useState<DocumentLine[]>([]);
     const [isStatusDisabled, setIsStatusDisabled] = useState(true);
     const [notes, setNotes] = useState('');
+    const [discountType, setDiscountType] = useState<'Fixed' | 'Percent'>('Fixed');
+    const [discountValue, setDiscountValue] = useState(0);
     
     useEffect(() => {
         const fetchData = async () => {
@@ -88,6 +94,8 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             setOrderDate(salesOrder.orderDate ? (salesOrder.orderDate instanceof Date ? salesOrder.orderDate : (salesOrder.orderDate as any).toDate()) : new Date());
             setLines(salesOrder.lines || []);
             setNotes(salesOrder.notes || '');
+            setDiscountType(salesOrder.discountType || 'Fixed');
+            setDiscountValue(salesOrder.discountValue || 0);
         } else {
             generateSalesOrderId();
             setLines([]);
@@ -96,6 +104,8 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             setOrderDate(new Date());
             setIsStatusDisabled(true);
             setNotes('');
+            setDiscountType('Fixed');
+            setDiscountValue(0);
         }
     }, [salesOrder]);
 
@@ -129,7 +139,8 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             quantity: 1,
             uom: '',
             unitPrice: 0,
-            taxRate: 0.12,
+            vatType: 'VATable',
+            taxRate: DEFAULT_TAX_RATE,
             total: 0,
         };
         setLines([...lines, newLine]);
@@ -143,30 +154,57 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
 
     const handleLineChange = (index: number, field: keyof DocumentLine, value: any) => {
         const newLines = [...lines];
-        (newLines[index] as any)[field] = value;
+        const line = newLines[index];
+        (line as any)[field] = value;
 
         if (field === 'itemId') {
             const product = products.find(p => p.id === value);
             if (product) {
-                newLines[index].description = product.name;
-                newLines[index].unitPrice = product.price;
-                newLines[index].uom = product.uom;
+                line.description = product.name;
+                line.unitPrice = product.price;
+                line.uom = product.uom;
             }
         }
         
-        const line = newLines[index];
+        if (field === 'vatType') {
+            line.taxRate = value === 'VATable' ? DEFAULT_TAX_RATE : 0;
+        }
+
         const subtotal = line.quantity * line.unitPrice;
-        const discountAmount = subtotal * ((line as any).discount || 0) / 100;
-        const taxableAmount = subtotal - discountAmount;
-        const taxAmount = taxableAmount * line.taxRate;
-        line.total = taxableAmount + taxAmount;
+        line.total = subtotal;
 
         setLines(newLines);
     };
 
-    const calculateTotalAmount = () => {
-        return lines.reduce((acc, line) => acc + line.total, 0);
-    };
+    const totals = useMemo(() => {
+        const vatableSales = lines.filter(l => l.vatType === 'VATable').reduce((acc, l) => acc + l.total, 0);
+        const vatExemptSales = lines.filter(l => l.vatType === 'VAT-Exempt').reduce((acc, l) => acc + l.total, 0);
+        const zeroRatedSales = lines.filter(l => l.vatType === 'Zero-Rated').reduce((acc, l) => acc + l.total, 0);
+        const totalSales = vatableSales + vatExemptSales + zeroRatedSales;
+
+        const discountAmount = discountType === 'Fixed' ? discountValue : totalSales * (discountValue / 100);
+        const totalAfterDiscount = totalSales - discountAmount;
+        
+        const vatAmount = lines.filter(l => l.vatType === 'VATable').reduce((acc, l) => {
+            const lineSubtotal = l.total;
+            const proportionOfTotal = totalSales > 0 ? lineSubtotal / totalSales : 0;
+            const lineDiscount = discountAmount * proportionOfTotal;
+            const taxableAmount = lineSubtotal - lineDiscount;
+            return acc + (taxableAmount * l.taxRate);
+        }, 0);
+
+        const totalAmount = totalAfterDiscount + vatAmount;
+        
+        return {
+            vatableSales,
+            vatExemptSales,
+            zeroRatedSales,
+            totalSales,
+            discountAmount,
+            vatAmount: vatAmount < 0 ? 0 : vatAmount,
+            totalAmount: totalAmount < 0 ? 0 : totalAmount,
+        }
+    }, [lines, discountType, discountValue]);
 
     const handleSubmit = async () => {
         setIsSaving(true);
@@ -182,8 +220,10 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                 status: finalStatus as SalesOrder['status'],
                 lines,
                 notes,
-                totalAmount: calculateTotalAmount(),
+                totalAmount: totals.totalAmount,
                 quotationId: (salesOrder as SalesOrder)?.quotationId,
+                discountType,
+                discountValue,
             };
             onSuccess(salesOrderData);
         } catch (error) {
@@ -236,11 +276,10 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[30%]">Product</TableHead>
+                                <TableHead className="w-[25%]">Product</TableHead>
                                 <TableHead>Qty</TableHead>
-                                <TableHead>UOM</TableHead>
                                 <TableHead>Unit Price</TableHead>
-                                <TableHead>Discount (%)</TableHead>
+                                <TableHead>VAT Type</TableHead>
                                 <TableHead>Total</TableHead>
                                 <TableHead className="w-[50px]"></TableHead>
                             </TableRow>
@@ -259,14 +298,18 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                                     <TableCell>
                                         <Input type="number" value={line.quantity} onChange={e => handleLineChange(index, 'quantity', Number(e.target.value))} className="w-20" />
                                     </TableCell>
-                                     <TableCell>{line.uom}</TableCell>
                                     <TableCell>
                                         <Input type="number" value={line.unitPrice} onChange={e => handleLineChange(index, 'unitPrice', Number(e.target.value))} className="w-28" />
                                     </TableCell>
-                                     <TableCell>
-                                        <Input type="number" value={(line as any).discount || 0} onChange={e => handleLineChange(index, 'discount', Number(e.target.value))} className="w-20" />
+                                    <TableCell>
+                                        <Select value={line.vatType} onValueChange={(v: VatType) => handleLineChange(index, 'vatType', v)}>
+                                            <SelectTrigger className="w-[150px]"><SelectValue/></SelectTrigger>
+                                            <SelectContent>
+                                                {vatTypes.map(vt => <SelectItem key={vt} value={vt}>{vt}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
                                     </TableCell>
-                                    <TableCell>₱{line.total.toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">₱{line.total.toFixed(2)}</TableCell>
                                     <TableCell>
                                         <Button variant="ghost" size="icon" onClick={() => handleRemoveLine(index)}>
                                             <Trash2 className="h-4 w-4 text-red-500" />
@@ -281,17 +324,56 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                     <PlusCircle className="mr-2 h-4 w-4"/> Add Line Item
                 </Button>
             </div>
-
-            <div className="space-y-2">
-                <Label htmlFor="notes">Notes (Optional)</Label>
-                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add any notes for this sales order..."/>
+            
+            <div className="flex gap-8">
+                <div className="w-1/2 space-y-2">
+                    <Label htmlFor="notes">Notes (Optional)</Label>
+                    <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add any notes for this sales order..."/>
+                </div>
+                <div className="w-1/2 space-y-2">
+                    <div className="flex justify-between items-center py-1">
+                        <span className="text-muted-foreground">Vatable Sales:</span>
+                        <span className="font-medium">₱{totals.vatableSales.toFixed(2)}</span>
+                    </div>
+                     <div className="flex justify-between items-center py-1">
+                        <span className="text-muted-foreground">VAT-Exempt Sales:</span>
+                        <span className="font-medium">₱{totals.vatExemptSales.toFixed(2)}</span>
+                    </div>
+                     <div className="flex justify-between items-center py-1">
+                        <span className="text-muted-foreground">Zero-Rated Sales:</span>
+                        <span className="font-medium">₱{totals.zeroRatedSales.toFixed(2)}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center py-1 font-semibold">
+                        <span>Total Sales:</span>
+                        <span>₱{totals.totalSales.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1">
+                        <span className="text-muted-foreground">Discount:</span>
+                        <div className="flex items-center gap-2">
+                            <Select value={discountType} onValueChange={(v: 'Fixed' | 'Percent') => setDiscountType(v)}>
+                                <SelectTrigger className="w-[100px] h-8"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Fixed">Fixed</SelectItem>
+                                    <SelectItem value="Percent">Percent</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Input type="number" value={discountValue} onChange={e => setDiscountValue(Number(e.target.value))} className="w-24 h-8" />
+                        </div>
+                    </div>
+                    <div className="flex justify-between items-center py-1">
+                        <span className="text-muted-foreground">VAT ({DEFAULT_TAX_RATE * 100}%):</span>
+                        <span className="font-medium">₱{totals.vatAmount.toFixed(2)}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center py-1 text-xl font-bold">
+                        <span>Amount Due:</span>
+                        <span>₱{totals.totalAmount.toFixed(2)}</span>
+                    </div>
+                </div>
             </div>
 
             <div className="flex justify-end items-center gap-6 mt-4">
-                <div className="text-right">
-                    <p className="text-muted-foreground">Total Amount</p>
-                    <p className="text-2xl font-bold">₱{calculateTotalAmount().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                </div>
                  <div className="flex justify-end gap-2">
                     <Button variant="outline" onClick={onCancel} disabled={isSaving}>Cancel</Button>
                     <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
