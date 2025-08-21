@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, LayoutGrid, FileText, Image as ImageIcon, Trash2, Edit } from 'lucide-react';
+import { Loader2, LayoutGrid, FileText, Image as ImageIcon, Trash2, Edit, Layers, PowerOff, Lamp, Square, Package } from 'lucide-react';
 import type { ItemCategory } from '@/lib/types';
 import { Textarea } from '../ui/textarea';
 import Image from 'next/image';
@@ -30,6 +30,14 @@ interface CategoryFormModalProps {
   category: ItemCategory | null;
   categories: ItemCategory[];
 }
+
+const categoryIcons: { [key: string]: React.ReactElement } = {
+    'STRIPLIGHT': <Layers className="h-4 w-4 text-blue-500" />,
+    'POWER SUPPLY': <PowerOff className="h-4 w-4 text-green-500" />,
+    'GENERAL LIGHTING': <Lamp className="h-4 w-4 text-yellow-500" />,
+    'ALUMINIUM PROFILE': <Square className="h-4 w-4 text-gray-500" />,
+};
+
 
 export default function CategoryFormModal({ 
     isOpen, 
@@ -197,7 +205,10 @@ export default function CategoryFormModal({
                            <div className="space-y-2">
                                 {currentCategories.map(cat => (
                                     <div key={cat.id} className="flex items-center justify-between p-3 rounded-lg border">
-                                        <h4 className="font-semibold text-sm">{cat.name}</h4>
+                                        <div className="flex items-center gap-2">
+                                            {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
+                                            <h4 className="font-semibold text-sm">{cat.name}</h4>
+                                        </div>
                                         <div className="flex items-center gap-1">
                                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEditClick(cat)}>
                                                 <Edit className="h-4 w-4" />
