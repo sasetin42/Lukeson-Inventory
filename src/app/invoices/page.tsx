@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -49,7 +50,7 @@ export default function InvoicesPage() {
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
-        title="Invoices"
+        title="Sales Invoices"
         description="Manage your invoices and track payments."
         icon={<FileText className="h-6 w-6 text-purple-500" />}
         actions={
@@ -59,20 +60,37 @@ export default function InvoicesPage() {
           </Button>
         }
       />
-       <div className="grid gap-6 md:grid-cols-3">
-        {kpis.map((kpi, index) => (
-          <KpiCard
-            key={index}
-            title={kpi.title}
-            value={kpi.value as string}
-            icon={kpi.icon}
-            color={kpi.color}
-            style={{ animationDelay: `${index * 100}ms` }}
-            className="fade-in-up"
-          />
-        ))}
-      </div>
-      <InvoiceList invoices={invoices} />
+      <Tabs defaultValue="sales-invoices">
+        <TabsList>
+            <TabsTrigger value="sales-invoices">Sales Invoices</TabsTrigger>
+            <TabsTrigger value="templates">Sales Invoices Template</TabsTrigger>
+            <TabsTrigger value="settings">Sales Invoices Settings</TabsTrigger>
+        </TabsList>
+        <TabsContent value="sales-invoices" className="mt-4">
+            <div className="grid gap-6 md:grid-cols-3">
+            {kpis.map((kpi, index) => (
+            <KpiCard
+                key={index}
+                title={kpi.title}
+                value={kpi.value as string}
+                icon={kpi.icon}
+                color={kpi.color}
+                style={{ animationDelay: `${index * 100}ms` }}
+                className="fade-in-up"
+            />
+            ))}
+        </div>
+        <div className="mt-4">
+            <InvoiceList invoices={invoices} />
+        </div>
+        </TabsContent>
+        <TabsContent value="templates" className="mt-4">
+            <p>Sales Invoices Template settings will go here.</p>
+        </TabsContent>
+        <TabsContent value="settings" className="mt-4">
+            <p>Sales Invoices Settings will go here.</p>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

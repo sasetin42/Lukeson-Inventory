@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, query, where, getDoc } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 function SalesOrdersContent() {
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
@@ -36,6 +37,7 @@ function SalesOrdersContent() {
             lines: quotationData.lines,
             totalAmount: quotationData.totalAmount,
             quotationId: quotationData.id,
+            notes: quotationData.notes,
         };
         setEditingSalesOrder(newSalesOrder as SalesOrder);
         setIsModalOpen(true);
@@ -139,24 +141,42 @@ function SalesOrdersContent() {
           </Button>
         }
       />
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((kpi, index) => (
-          <KpiCard
-            key={index}
-            title={kpi.title}
-            value={kpi.value as string}
-            icon={kpi.icon}
-            color={kpi.color}
-            style={{ animationDelay: `${index * 100}ms` }}
-            className="fade-in-up"
-          />
-        ))}
-      </div>
-      <SalesOrderList
-        salesOrders={salesOrders}
-        onEdit={handleOpenModal}
-        onDelete={handleDeleteSalesOrder}
-      />
+      <Tabs defaultValue="sales-orders">
+        <TabsList>
+          <TabsTrigger value="sales-orders">Sales Orders</TabsTrigger>
+          <TabsTrigger value="templates">Sales Order Template</TabsTrigger>
+          <TabsTrigger value="settings">Sales Order Settings</TabsTrigger>
+        </TabsList>
+        <TabsContent value="sales-orders" className="mt-4">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {kpis.map((kpi, index) => (
+              <KpiCard
+                key={index}
+                title={kpi.title}
+                value={kpi.value as string}
+                icon={kpi.icon}
+                color={kpi.color}
+                style={{ animationDelay: `${index * 100}ms` }}
+                className="fade-in-up"
+              />
+            ))}
+          </div>
+          <div className="mt-4">
+            <SalesOrderList
+                salesOrders={salesOrders}
+                onEdit={handleOpenModal}
+                onDelete={handleDeleteSalesOrder}
+            />
+          </div>
+        </TabsContent>
+        <TabsContent value="templates" className="mt-4">
+            <p>Sales Order Template settings will go here.</p>
+        </TabsContent>
+        <TabsContent value="settings" className="mt-4">
+            <p>Sales Order Settings will go here.</p>
+        </TabsContent>
+      </Tabs>
+      
       {isModalOpen && (
         <SalesOrderFormModal
           isOpen={isModalOpen}
