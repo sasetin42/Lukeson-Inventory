@@ -129,8 +129,6 @@ export default function ProductDetailsModal({
     { label: 'Stock', value: product.stock, icon: Warehouse, color: 'text-green-500', status: product.status },
     { label: 'Re-Order Level', value: product.reOrderLevel, icon: AlertTriangle, color: 'text-yellow-500' },
     { label: 'Expiry Tracking', value: product.expiryDateTracking ? 'Enabled' : 'Disabled', icon: CalendarClock, color: 'text-cyan-500', isBool: true },
-    { label: 'Date Created', value: product.createdAt ? format(new Date(product.createdAt as Date), 'PPpp') : 'N/A', icon: CalendarIcon, color: 'text-sky-500' },
-    { label: 'Date Modified', value: product.modifiedAt ? format(new Date(product.modifiedAt as Date), 'PPpp') : 'N/A', icon: Pencil, color: 'text-orange-500' },
   ];
   
   const isActive = product.status !== 'Discontinued';
@@ -140,24 +138,32 @@ export default function ProductDetailsModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <Package className="h-6 w-6 text-blue-500" />
-            <DialogTitle>{product.name}</DialogTitle>
-          </div>
-          <div className="flex items-center gap-4 ml-8 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-gray-400" />
-                <DialogDescription className="text-sm">{product.productCode}</DialogDescription>
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <Package className="h-6 w-6 text-blue-500" />
+                <DialogTitle>{product.name}</DialogTitle>
+              </div>
+              <div className="flex items-center gap-4 ml-8 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-gray-400" />
+                    <DialogDescription className="text-sm">{product.productCode}</DialogDescription>
+                </div>
+                {product.category && (
+                    <>
+                        <Separator orientation="vertical" className="h-4" />
+                        <div className="flex items-center gap-2">
+                            <LayoutGrid className="h-4 w-4 text-red-500" />
+                            <span className="font-medium">{product.category}</span>
+                        </div>
+                    </>
+                )}
+              </div>
             </div>
-            {product.category && (
-                <>
-                    <Separator orientation="vertical" className="h-4" />
-                    <div className="flex items-center gap-2">
-                        <LayoutGrid className="h-4 w-4 text-red-500" />
-                        <span className="font-medium">{product.category}</span>
-                    </div>
-                </>
-            )}
+            <div className="text-right text-xs text-muted-foreground">
+                {product.createdAt && <div>Created: {format(new Date(product.createdAt as Date), 'PP')}</div>}
+                {product.modifiedAt && <div>Modified: {format(new Date(product.modifiedAt as Date), 'PP')}</div>}
+            </div>
           </div>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
