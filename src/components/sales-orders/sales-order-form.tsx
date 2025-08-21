@@ -32,7 +32,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
     const [salesOrderId, setSalesOrderId] = useState('');
     const [customerId, setCustomerId] = useState('');
     const [orderDate, setOrderDate] = useState<Date | undefined>(new Date());
-    const [status, setStatus] = useState<SalesOrder['status']>('Draft');
+    const [status, setStatus] = useState<SalesOrder['status'] | 'Approved'>('Draft');
     const [lines, setLines] = useState<DocumentLine[]>([]);
     const [isStatusDisabled, setIsStatusDisabled] = useState(true);
     
@@ -101,7 +101,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
 
         if (approvedQuotation) {
             setLines(approvedQuotation.lines);
-            setStatus('Confirmed');
+            setStatus('Approved');
             setIsStatusDisabled(false);
             toast({
                 title: "Quotation Found",
@@ -166,12 +166,14 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
         setIsSaving(true);
         try {
             const customer = customers.find(c => c.id === customerId);
+            const finalStatus = status === 'Approved' ? 'Confirmed' : status;
+            
             const salesOrderData = {
                 id: salesOrder?.id,
                 customerId,
                 customerName: customer?.name || 'N/A',
                 orderDate,
-                status,
+                status: finalStatus as SalesOrder['status'],
                 lines,
                 totalAmount: calculateTotalAmount(),
                 quotationId: (salesOrder as SalesOrder)?.quotationId,
@@ -211,6 +213,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                         <SelectTrigger><SelectValue/></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Draft">Draft</SelectItem>
+                            <SelectItem value="Approved">Approved</SelectItem>
                             <SelectItem value="Confirmed">Confirmed</SelectItem>
                             <SelectItem value="Fulfilled">Fulfilled</SelectItem>
                             <SelectItem value="Invoiced">Invoiced</SelectItem>
@@ -288,5 +291,6 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
         </div>
     );
 }
+
 
 
