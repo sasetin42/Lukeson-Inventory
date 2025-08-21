@@ -184,15 +184,11 @@ export default function CategoryFormModal({
                         <h3 className="font-medium text-lg">Existing Categories</h3>
                         <Separator />
                         <ScrollArea className="h-[450px] pr-4">
-                           <div className="space-y-4">
+                           <div className="space-y-2">
                                 {categories.map(cat => (
-                                    <div key={cat.id} className="flex items-start gap-4 p-3 rounded-lg border">
-                                        {cat.productImage && <Image src={cat.productImage} alt={cat.name} width={64} height={64} className="rounded-md" data-ai-hint="category image" />}
-                                        <div className="flex-1">
-                                            <h4 className="font-semibold">{cat.name}</h4>
-                                            <p className="text-sm text-muted-foreground">{cat.description}</p>
-                                        </div>
-                                        <div className="flex flex-col gap-1">
+                                    <div key={cat.id} className="flex items-center justify-between p-3 rounded-lg border">
+                                        <h4 className="font-semibold text-sm">{cat.name}</h4>
+                                        <div className="flex items-center gap-1">
                                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleEditClick(cat)}>
                                                 <Edit className="h-4 w-4" />
                                             </Button>
