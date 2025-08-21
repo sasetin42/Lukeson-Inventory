@@ -206,7 +206,6 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                     <TableHead>Category</TableHead>
                     <TableHead>Price</TableHead>
                     <TableHead>Stock</TableHead>
-                    <TableHead>Status</TableHead>
                     <TableHead>Date Created</TableHead>
                     <TableHead>Date Modified</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
@@ -236,9 +235,6 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                             <TableCell>{product.category}</TableCell>
                             <TableCell>₱{product.price.toFixed(2)}</TableCell>
                             <TableCell>{product.stock}</TableCell>
-                            <TableCell>
-                            <Badge variant={getStatusVariant(product.status)}>{product.status}</Badge>
-                            </TableCell>
                             <TableCell>
                               <div>{createdAt.date}</div>
                               <div className="text-muted-foreground" style={{fontSize: '12px'}}>{createdAt.time}</div>
