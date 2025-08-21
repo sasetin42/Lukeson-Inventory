@@ -14,6 +14,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, query, where, getDoc } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import SalesOrderTemplate from '@/components/sales-orders/sales-order-template';
 
 function SalesOrdersContent() {
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
@@ -170,7 +171,7 @@ function SalesOrdersContent() {
           </div>
         </TabsContent>
         <TabsContent value="templates" className="mt-4">
-            <p>Sales Order Template settings will go here.</p>
+            <SalesOrderTemplate />
         </TabsContent>
         <TabsContent value="settings" className="mt-4">
             <p>Sales Order Settings will go here.</p>
