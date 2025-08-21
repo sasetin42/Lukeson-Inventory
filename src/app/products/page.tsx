@@ -86,7 +86,7 @@ export default function ProductsPage() {
     }
 
     const handleProductSave = async (productData: Omit<Product, 'id' | 'createdAt'> & {id?: string; imageFile?: File | null}) => {
-        const { imageFile, ...dataToSave } = productData;
+        const { imageFile, id, ...dataToSave } = productData;
         
         // In a real app, you would handle image uploads to a storage service like Firebase Storage
         // and get back a URL. For now, we will continue using a placeholder or existing URL.
@@ -95,8 +95,8 @@ export default function ProductsPage() {
         const finalData = { ...dataToSave, productImage: imageUrl };
 
         try {
-            if (finalData.id) {
-                const productRef = ref(db, `products/${finalData.id}`);
+            if (id) {
+                const productRef = ref(db, `products/${id}`);
                 await set(productRef, { ...finalData, modifiedAt: serverTimestamp() });
                 toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
             } else {
@@ -107,6 +107,7 @@ export default function ProductsPage() {
             }
             handleCloseProductModal();
         } catch (error) {
+            console.error(error);
             toast({ title: "Error", description: "Failed to save product.", variant: "destructive" });
         }
     }
