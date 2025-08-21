@@ -23,7 +23,6 @@ interface ProductFormProps {
 const uomOptions = ["pcs", "box", "roll", "m", "kg", "pack"];
 const ledQtyOptions = ["240", "180", "120", "72", "60"];
 const voltageOptions = ["220", "24", "12"];
-const vatTypeOptions = ['VATABLE', 'VAT-EXEMPT', 'ZERO-RATED'];
 
 const categoryIcons: { [key: string]: React.ReactElement } = {
     'STRIPLIGHT': <Layers className="h-4 w-4 text-blue-500" />,
@@ -55,13 +54,9 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [uom, setUom] = useState('');
     const [stock, setStock] = useState('');
-    const [cost, setCost] = useState('');
     const [price, setPrice] = useState('');
     const [reOrderLevel, setReOrderLevel] = useState('');
     const [expiryDateTracking, setExpiryDateTracking] = useState(false);
-    const [brand, setBrand] = useState('');
-    const [vatType, setVatType] = useState('VATABLE');
-    const [barcode, setBarcode] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -104,13 +99,9 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             setImageFile(null);
             setUom(product.uom || '');
             setStock(product.stock?.toString() || '');
-            setCost(product.cost?.toString() || '');
             setPrice(product.price?.toString() || '0');
             setReOrderLevel(product.reOrderLevel?.toString() || '');
             setExpiryDateTracking(product.expiryDateTracking || false);
-            setBrand(product.brand || '');
-            setVatType(product.vatType || 'VATABLE');
-            setBarcode(product.barcode || '');
         } else {
             resetForm();
             generateProductCode();
@@ -158,13 +149,9 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         setIsSaving(false);
         setUom('');
         setStock('');
-        setCost('');
         setPrice('');
         setReOrderLevel('');
         setExpiryDateTracking(false);
-        setBrand('');
-        setVatType('VATABLE');
-        setBarcode('');
         setUploadProgress(null);
     };
 
@@ -210,15 +197,11 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 location,
                 productImage: imageUrl,
                 stock: stockNum,
-                cost: Number(cost) || 0,
                 price: Number(price) || 0,
                 reOrderLevel: reOrderLevelNum,
                 uom,
                 expiryDateTracking,
                 status: stockStatus,
-                brand,
-                vatType: vatType as 'VATABLE' | 'VAT-EXEMPT' | 'ZERO-RATED',
-                barcode,
                 modifiedAt: new Date(),
             };
             
@@ -318,36 +301,11 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                     <Label htmlFor="product-name" className="flex items-center gap-2"><Package className="h-4 w-4 text-blue-500" /> Product Name</Label>
                     <Input id="product-name" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="e.g. High-Density LED Striplight" />
                 </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="brand" className="flex items-center gap-2"><Building2 className="h-4 w-4 text-indigo-500" /> Brand</Label>
-                    <Input id="brand" value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="e.g. Philips" />
-                </div>
-            </div>
-
-             <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="sku" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
                     <Input id="sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. LED-HD-240-24" />
                 </div>
-                <div className="space-y-2">
-                    <Label htmlFor="barcode" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-gray-500" /> Barcode (UPC/EAN)</Label>
-                    <Input id="barcode" value={barcode} onChange={(e) => setBarcode(e.target.value)} placeholder="e.g. 4801234567890" />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="vat-type" className="flex items-center gap-2"><Percent className="h-4 w-4 text-green-500" /> VAT Type</Label>
-                    <Select onValueChange={setVatType} value={vatType}>
-                        <SelectTrigger id="vat-type">
-                            <SelectValue placeholder="Select VAT Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {vatTypeOptions.map(opt => (
-                                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
             </div>
-
 
             <div className="space-y-2">
                 <Label htmlFor="description" className="flex items-center gap-2"><AlignLeft className="h-4 w-4 text-gray-500" /> Description</Label>
@@ -355,10 +313,6 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-2">
-                    <Label htmlFor="cost" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-orange-500" /> Cost</Label>
-                    <Input id="cost" type="number" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="e.g. 100.00" />
-                </div>
                 <div className="space-y-2">
                     <Label htmlFor="price" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
                     <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 150.00" />

@@ -278,7 +278,6 @@ export type Product = {
     supplier: string;
     location: string;
     stock: number;
-    cost: number;
     price: number;
     reOrderLevel: number;
     createdAt: FieldValue | Timestamp | Date;
@@ -287,9 +286,7 @@ export type Product = {
     suppliers?: Supplier[];
     uom: string;
     expiryDateTracking: boolean;
-    brand?: string;
-    vatType: 'VATABLE' | 'VAT-EXEMPT' | 'ZERO-RATED';
-    barcode?: string;
 };
+
 
 

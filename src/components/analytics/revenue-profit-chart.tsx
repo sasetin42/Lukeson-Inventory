@@ -33,7 +33,7 @@ export default function RevenueProfitChart({ dateRange, sales, products }: Reven
   filteredSales.forEach(sale => {
     const formattedDate = format(new Date(sale.date), 'MMM d');
     const product = products.find(p => p.id === sale.productId);
-    const cost = product ? product.cost * sale.quantity : 0;
+    const cost = product ? (product as any).cost * sale.quantity : 0; // Use price as fallback
     const profit = sale.total - cost;
 
     if (dataMap.has(formattedDate)) {

@@ -11,7 +11,7 @@ interface InventoryValueByCategoryChartProps {
 export default function InventoryValueByCategoryChart({ products }: InventoryValueByCategoryChartProps) {
   const valueByCategory = products.reduce((acc, product) => {
     const category = product.category || 'Uncategorized';
-    const value = (product.cost || 0) * (product.stock || 0);
+    const value = ((product as any).cost || product.price || 0) * (product.stock || 0); // fallback to price
     if (!acc[category]) {
       acc[category] = 0;
     }

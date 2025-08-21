@@ -13,7 +13,7 @@ export default function InventoryOverview({ products }: InventoryOverviewProps) 
   const totalProducts = products.length;
   const outOfStock = products.filter(p => p.stock === 0).length;
   const lowStock = products.filter(p => p.stock > 0 && p.stock <= p.reOrderLevel).length;
-  const totalValue = products.reduce((acc, p) => acc + (p.cost * p.stock), 0);
+  const totalValue = products.reduce((acc, p) => acc + (((p as any).cost || p.price) * p.stock), 0);
   
   const cardData = [
     { 

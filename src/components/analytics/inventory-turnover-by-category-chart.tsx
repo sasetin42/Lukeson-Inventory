@@ -22,7 +22,7 @@ export default function InventoryTurnoverByCategoryChart({ dateRange, products, 
     if (!product) return acc;
     
     const category = product.category || 'Uncategorized';
-    const cost = (product.cost || 0) * sale.quantity;
+    const cost = ((product as any).cost || product.price || 0) * sale.quantity; // fallback to price
 
     if (!acc[category]) {
       acc[category] = 0;
@@ -33,7 +33,7 @@ export default function InventoryTurnoverByCategoryChart({ dateRange, products, 
 
   const categoryInventoryValue = products.reduce((acc, product) => {
     const category = product.category || 'Uncategorized';
-    const value = (product.cost || 0) * (product.stock || 0);
+    const value = ((product as any).cost || product.price || 0) * (product.stock || 0);
     if (!acc[category]) {
       acc[category] = 0;
     }
