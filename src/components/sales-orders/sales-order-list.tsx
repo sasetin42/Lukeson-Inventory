@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +25,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { format } from 'date-fns';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useToast } from '@/hooks/use-toast';
 
 interface SalesOrderListProps {
     salesOrders: SalesOrder[];
@@ -35,6 +37,7 @@ interface SalesOrderListProps {
 export default function SalesOrderList({ salesOrders, onEdit, onDelete }: SalesOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [salesOrderToDelete, setSalesOrderToDelete] = useState<SalesOrder | null>(null);
+    const { toast } = useToast();
 
     const openDeleteAlert = (salesOrder: SalesOrder) => {
         setSalesOrderToDelete(salesOrder);
@@ -71,6 +74,13 @@ export default function SalesOrderList({ salesOrders, onEdit, onDelete }: SalesO
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     }
 
+    const handleViewSO = (so: SalesOrder) => {
+        toast({
+            title: "Feature Coming Soon!",
+            description: `The view for Sales Order #${so.id} will use the new template.`,
+        });
+    }
+
     return (
         <>
             <Card>
@@ -87,40 +97,49 @@ export default function SalesOrderList({ salesOrders, onEdit, onDelete }: SalesO
                                 <TableHead>Date</TableHead>
                                 <TableHead>Amount</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
+                                <TableHead className="w-[150px] text-center">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {salesOrders.map((salesOrder) => (
-                                <TableRow key={salesOrder.id}>
-                                    <TableCell className="font-medium">{salesOrder.id}</TableCell>
-                                    <TableCell>{salesOrder.customerName}</TableCell>
-                                    <TableCell>{formatDate(salesOrder.orderDate)}</TableCell>
-                                    <TableCell>₱{salesOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={getStatusVariant(salesOrder.status)}>{salesOrder.status}</Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => onEdit(salesOrder)}>
-                                                    <Edit className="mr-2 h-4 w-4" />
-                                                    Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-destructive" onClick={() => openDeleteAlert(salesOrder)}>
-                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                    Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                            <TooltipProvider>
+                                {salesOrders.map((salesOrder) => (
+                                    <TableRow key={salesOrder.id}>
+                                        <TableCell className="font-medium">{salesOrder.id}</TableCell>
+                                        <TableCell>{salesOrder.customerName}</TableCell>
+                                        <TableCell>{formatDate(salesOrder.orderDate)}</TableCell>
+                                        <TableCell>₱{salesOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={getStatusVariant(salesOrder.status)}>{salesOrder.status}</Badge>
+                                        </TableCell>
+                                        <TableCell className="flex justify-center items-center gap-2">
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" onClick={() => handleViewSO(salesOrder)}>
+                                                        <Eye className="h-4 w-4 text-blue-500" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>View Sales Order</TooltipContent>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" onClick={() => onEdit(salesOrder)}>
+                                                        <Edit className="h-4 w-4 text-green-500" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>Edit Sales Order</TooltipContent>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                     <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => openDeleteAlert(salesOrder)}>
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>Delete Sales Order</TooltipContent>
+                                            </Tooltip>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TooltipProvider>
                         </TableBody>
                     </Table>
                     {salesOrders.length === 0 && (
