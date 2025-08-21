@@ -146,7 +146,7 @@ export default function ProductDetailsModal({
               </div>
               <div>
                 <DialogTitle>{product.name}</DialogTitle>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                     <div className="flex items-center gap-1">
                       <FileText className="h-4 w-4 text-gray-400" />
                       <DialogDescription className="text-sm">{product.productCode}</DialogDescription>
