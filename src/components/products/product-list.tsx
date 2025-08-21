@@ -73,12 +73,13 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
         fetchCategories();
     }, []);
 
-    const formatDate = (date: any) => {
-      if (!date) return 'N/A';
-      // Firestore timestamp
-      if (date.toDate) return format(date.toDate(), 'PP');
-      // String date
-      return format(new Date(date), 'PP');
+    const formatDateTime = (date: any) => {
+        if (!date) return { date: 'N/A', time: '' };
+        const d = date.toDate ? date.toDate() : new Date(date);
+        return {
+            date: format(d, 'PP'),
+            time: format(d, 'pp')
+        };
     }
 
 
@@ -212,57 +213,67 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {filteredProducts.map((product) => (
-                    <TableRow key={product.id}>
-                        <TableCell>
-                        <ProductImage 
-                            path={product.productImage}
-                            alt={product.name}
-                            width={48}
-                            height={48} 
-                            className="rounded-md"
-                            data-ai-hint="product image"
-                        />
-                        </TableCell>
-                        <TableCell>
-                            <div className="font-medium">{product.name}</div>
-                            <div className="text-xs text-muted-foreground">{product.productCode}</div>
-                            <div className="text-[12px] text-muted-foreground">SKU: {product.sku}</div>
-                        </TableCell>
-                        <TableCell>{product.category}</TableCell>
-                        <TableCell>₱{product.price.toFixed(2)}</TableCell>
-                        <TableCell>{product.stock}</TableCell>
-                        <TableCell>
-                        <Badge variant={getStatusVariant(product.status)}>{product.status}</Badge>
-                        </TableCell>
-                        <TableCell>{formatDate(product.createdAt)}</TableCell>
-                        <TableCell>{formatDate(product.modifiedAt)}</TableCell>
-                        <TableCell>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setSelectedProduct(product)}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => onEdit(product)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive" onClick={() => openDeleteAlert(product)}>
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                            </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        </TableCell>
-                    </TableRow>
-                    ))}
+                    {filteredProducts.map((product) => {
+                      const createdAt = formatDateTime(product.createdAt);
+                      const modifiedAt = formatDateTime(product.modifiedAt);
+                      return (
+                        <TableRow key={product.id}>
+                            <TableCell>
+                            <ProductImage 
+                                path={product.productImage}
+                                alt={product.name}
+                                width={48}
+                                height={48} 
+                                className="rounded-md"
+                                data-ai-hint="product image"
+                            />
+                            </TableCell>
+                            <TableCell>
+                                <div className="font-medium">{product.name}</div>
+                                <div className="text-xs text-muted-foreground">{product.productCode}</div>
+                                <div className="text-[12px] text-muted-foreground">SKU: {product.sku}</div>
+                            </TableCell>
+                            <TableCell>{product.category}</TableCell>
+                            <TableCell>₱{product.price.toFixed(2)}</TableCell>
+                            <TableCell>{product.stock}</TableCell>
+                            <TableCell>
+                            <Badge variant={getStatusVariant(product.status)}>{product.status}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div>{createdAt.date}</div>
+                              <div className="text-muted-foreground" style={{fontSize: '12px'}}>{createdAt.time}</div>
+                            </TableCell>
+                            <TableCell>
+                              <div>{modifiedAt.date}</div>
+                              <div className="text-muted-foreground" style={{fontSize: '12px'}}>{modifiedAt.time}</div>
+                            </TableCell>
+                            <TableCell>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => setSelectedProduct(product)}>
+                                    <Eye className="mr-2 h-4 w-4" />
+                                    View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => onEdit(product)}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-destructive" onClick={() => openDeleteAlert(product)}>
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            </TableCell>
+                        </TableRow>
+                      );
+                    })}
                 </TableBody>
                 </Table>
                  {filteredProducts.length === 0 && (
