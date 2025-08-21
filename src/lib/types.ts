@@ -90,7 +90,6 @@ export type DocumentLine = {
     quantity: number;
     uom: string;
     unitPrice: number;
-    discount?: number; // as a percentage
     taxRate: number;
     total: number;
 };

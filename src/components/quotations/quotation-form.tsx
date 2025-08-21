@@ -122,8 +122,7 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
         // Recalculate total
         const line = newLines[index];
         const subtotal = line.quantity * line.unitPrice;
-        const discountAmount = subtotal * (line.discount || 0) / 100;
-        const taxableAmount = subtotal - discountAmount;
+        const taxableAmount = subtotal;
         const taxAmount = taxableAmount * line.taxRate;
         line.total = taxableAmount + taxAmount;
 
@@ -191,8 +190,8 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
                                 <TableHead className="w-[30%]">Product</TableHead>
                                 <TableHead>Qty</TableHead>
                                 <TableHead>UOM</TableHead>
+                                <TableHead>Available</TableHead>
                                 <TableHead>Unit Price</TableHead>
-                                <TableHead>Discount (%)</TableHead>
                                 <TableHead>Total</TableHead>
                                 <TableHead className="w-[50px]"></TableHead>
                             </TableRow>
@@ -212,11 +211,11 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
                                         <Input type="number" value={line.quantity} onChange={e => handleLineChange(index, 'quantity', Number(e.target.value))} className="w-20" />
                                     </TableCell>
                                      <TableCell>{line.uom}</TableCell>
+                                     <TableCell>
+                                        {products.find(p => p.id === line.itemId)?.stock ?? 'N/A'}
+                                     </TableCell>
                                     <TableCell>
                                         <Input type="number" value={line.unitPrice} onChange={e => handleLineChange(index, 'unitPrice', Number(e.target.value))} className="w-28" />
-                                    </TableCell>
-                                     <TableCell>
-                                        <Input type="number" value={line.discount || 0} onChange={e => handleLineChange(index, 'discount', Number(e.target.value))} className="w-20" />
                                     </TableCell>
                                     <TableCell>₱{line.total.toFixed(2)}</TableCell>
                                     <TableCell>
