@@ -242,21 +242,21 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         if (!validateForm()) {
             return;
         }
-
+    
         setIsSaving(true);
         setUploadProgress(0);
-        
+    
         try {
             const stockNum = Number(stock) || 0;
             const reOrderLevelNum = Number(reOrderLevel) || 0;
             let stockStatus = product?.status || 'In Stock';
-             if (product?.status !== 'Discontinued') {
+            if (product?.status !== 'Discontinued') {
                 stockStatus = stockNum > 0
                     ? (stockNum <= reOrderLevelNum ? 'Low Stock' : 'In Stock')
                     : 'Out of Stock';
             }
-
-            const productData: Omit<Product, 'id'| 'createdAt'> & {id?: string, imageFile?: File | null} = {
+    
+            const productData: Omit<Product, 'id' | 'createdAt'> & { id?: string, imageFile?: File | null } = {
                 id: product?.id,
                 productCode,
                 name: productName,
@@ -277,16 +277,27 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 status: stockStatus,
                 imageFile,
                 modifiedAt: new Date().toISOString(),
-                ledQty: category === 'STRIPLIGHT' ? parseInt(ledQty) : undefined,
-                voltage: (category === 'STRIPLIGHT' || category === 'POWER SUPPLY') ? parseInt(voltage) : undefined,
-                wattage: (category === 'STRIPLIGHT' || category === 'POWER SUPPLY') ? Number(wattage) : undefined,
-                meters: category === 'STRIPLIGHT' ? Number(meters) : undefined,
-                size: category === 'ALUMINIUM PROFILE' ? size : undefined,
-                color: category === 'ALUMINIUM PROFILE' ? color : undefined,
             };
-            
+    
+            if (category === 'STRIPLIGHT') {
+                if (ledQty) productData.ledQty = parseInt(ledQty);
+                if (voltage) productData.voltage = parseInt(voltage);
+                if (wattage) productData.wattage = Number(wattage);
+                if (meters) productData.meters = Number(meters);
+            }
+    
+            if (category === 'POWER SUPPLY') {
+                if (voltage) productData.voltage = parseInt(voltage);
+                if (wattage) productData.wattage = Number(wattage);
+            }
+    
+            if (category === 'ALUMINIUM PROFILE') {
+                if (size) productData.size = size;
+                if (color) productData.color = color;
+            }
+    
             onSuccess(productData);
-
+    
         } catch (error) {
             console.error("Failed to save product:", error);
             toast({ title: "Error", description: "Failed to save product.", variant: "destructive" });
@@ -392,7 +403,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const renderStriplightFields = () => (
         <>
             {renderSharedFields()}
-             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 border rounded-md bg-muted/50">
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="led-qty" className="flex items-center gap-2"><Lightbulb className="h-4 w-4 text-yellow-500" /> LED Qty</Label>
                     <Select onValueChange={setLedQty} value={ledQty}>
@@ -583,8 +594,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                         </SelectTrigger>
                         <SelectContent>
                            {warehouses.map(w => (
-                               <SelectItem key={w.id} value={w.name}>{w.name}</SelectItem>
-                           ))}
+                               <SelectItem key={w.id} value={w.name}>{w.name}</SelectItem>))}
                         </SelectContent>
                     </Select>
                 </div>
@@ -652,3 +662,5 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         </div>
     );
 }
+
+    
