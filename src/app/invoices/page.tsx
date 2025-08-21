@@ -9,21 +9,30 @@ import InvoiceList from "@/components/invoices/invoice-list";
 import { Invoice } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    const invoicesRef = collection(db, 'invoices');
-    const unsubscribe = onSnapshot(invoicesRef, (snapshot) => {
-      const loadedInvoices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
-      setInvoices(loadedInvoices);
-    });
-
-    return () => unsubscribe();
-  }, []);
+    const fetchInvoices = async () => {
+      try {
+        const invoicesRef = collection(db, 'invoices');
+        const snapshot = await getDocs(invoicesRef);
+        const loadedInvoices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
+        setInvoices(loadedInvoices);
+      } catch (error) {
+        console.error("Error fetching invoices: ", error);
+        toast({
+          title: "Error",
+          description: "Failed to load invoices. Please check your connection and permissions.",
+          variant: "destructive"
+        });
+      }
+    };
+    fetchInvoices();
+  }, [toast]);
 
 
   return (

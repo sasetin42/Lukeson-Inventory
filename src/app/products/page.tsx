@@ -13,7 +13,7 @@ import ProductFormModal from '@/components/products/product-form-modal';
 import CategoryFormModal from '@/components/category/category-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -25,25 +25,33 @@ export default function ProductsPage() {
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const { toast } = useToast();
     
-    useEffect(() => {
-        const productsRef = collection(db, 'products');
-        const categoriesRef = collection(db, 'categories');
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const productsRef = collection(db, 'products');
+            const categoriesRef = collection(db, 'categories');
 
-        const unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
-            const loadedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+            const productsSnapshot = await getDocs(productsRef);
+            const loadedProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
             setProducts(loadedProducts);
-            setLoading(false);
-        });
 
-        const unsubscribeCategories = onSnapshot(categoriesRef, (snapshot) => {
-            const loadedCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
+            const categoriesSnapshot = await getDocs(categoriesRef);
+            const loadedCategories = categoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
             setCategories(loadedCategories);
-        });
-
-        return () => {
-            unsubscribeProducts();
-            unsubscribeCategories();
-        };
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            toast({
+                title: "Error",
+                description: "Failed to load product data. Please check permissions.",
+                variant: "destructive",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    useEffect(() => {
+        fetchData();
     }, []);
     
     const totalProducts = products.length;
@@ -81,6 +89,7 @@ export default function ProductsPage() {
     const handleDeleteProduct = async (productToDelete: Product) => {
         await deleteDoc(doc(db, "products", productToDelete.id));
         toast({ title: "Success", description: "Product deleted.", variant: "success" });
+        fetchData(); // Refetch data
     }
 
     const handleProductSave = async (productData: Omit<Product, 'id' | 'createdAt'> & {id?: string; imageFile?: File | null}) => {
@@ -104,6 +113,7 @@ export default function ProductsPage() {
                 toast({ title: "Success", description: "Product added successfully.", variant: "success" });
             }
             handleCloseProductModal();
+            fetchData(); // Refetch data
         } catch (error) {
             console.error(error);
             toast({ title: "Error", description: "Failed to save product.", variant: "destructive" });
@@ -126,6 +136,7 @@ export default function ProductsPage() {
                 await addDoc(collection(db, "categories"), { ...finalData, createdAt: serverTimestamp() });
                 toast({ title: "Success", description: "Category added successfully.", variant: "success" });
             }
+            fetchData(); // Refetch data
         } catch(error) {
             toast({ title: "Error", description: "Failed to save category.", variant: "destructive" });
         }
@@ -134,6 +145,7 @@ export default function ProductsPage() {
     const handleCategoryDelete = async (categoryId: string) => {
         await deleteDoc(doc(db, `categories/${categoryId}`));
         toast({ title: "Success", description: "Category deleted successfully.", variant: "success" });
+        fetchData(); // Refetch data
     }
 
 

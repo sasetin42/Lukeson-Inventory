@@ -32,7 +32,7 @@ import {
 import ProductImage from './product-image';
 import { format } from 'date-fns';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 
 interface ProductListProps {
     products: Product[];
@@ -60,12 +60,17 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
 
     useEffect(() => {
         setMounted(true);
-        const categoriesRef = collection(db, 'categories');
-        const unsubscribe = onSnapshot(categoriesRef, (snapshot) => {
+        const fetchCategories = async () => {
+          try {
+            const categoriesRef = collection(db, 'categories');
+            const snapshot = await getDocs(categoriesRef);
             const loadedCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
             setCategories(loadedCategories);
-        });
-        return () => unsubscribe();
+          } catch (error) {
+            console.error("Failed to fetch categories", error);
+          }
+        };
+        fetchCategories();
     }, []);
 
     const formatDate = (date: any) => {

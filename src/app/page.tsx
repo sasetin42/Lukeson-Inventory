@@ -12,7 +12,7 @@ import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
 import { Product, Sales, ItemCategory } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -22,32 +22,37 @@ export default function DashboardPage() {
   const { toast } = useToast();
   
   useEffect(() => {
-    const productsRef = collection(db, 'products');
-    const salesRef = collection(db, 'sales');
-    const categoriesRef = collection(db, 'categories');
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const productsRef = collection(db, 'products');
+        const salesRef = collection(db, 'sales');
+        const categoriesRef = collection(db, 'categories');
 
-    const unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
-        const loadedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        const productsSnapshot = await getDocs(productsRef);
+        const loadedProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
         setProducts(loadedProducts);
-        setLoading(false);
-    });
 
-    const unsubscribeSales = onSnapshot(salesRef, (snapshot) => {
-        const loadedSales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Sales));
+        const salesSnapshot = await getDocs(salesRef);
+        const loadedSales = salesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Sales));
         setSales(loadedSales);
-    });
 
-    const unsubscribeCategories = onSnapshot(categoriesRef, (snapshot) => {
-        const loadedCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
+        const categoriesSnapshot = await getDocs(categoriesRef);
+        const loadedCategories = categoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
         setCategories(loadedCategories);
-    });
-
-    return () => {
-        unsubscribeProducts();
-        unsubscribeSales();
-        unsubscribeCategories();
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load dashboard data. Please check permissions.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
     };
-  }, []);
+    fetchData();
+  }, [toast]);
 
   return (
     <div className="flex flex-col gap-6">

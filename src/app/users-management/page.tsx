@@ -10,7 +10,7 @@ import UserList from '@/components/users/user-list';
 import UserFormModal from '@/components/users/user-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -18,13 +18,24 @@ export default function UsersManagementPage() {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const { toast } = useToast();
 
+  const fetchUsers = async () => {
+    try {
+      const usersRef = collection(db, 'users');
+      const snapshot = await getDocs(usersRef);
+      const loadedUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+      setUsers(loadedUsers);
+    } catch (error) {
+      console.error("Error fetching users: ", error);
+      toast({
+        title: "Error",
+        description: "Failed to load users. Please check your connection and permissions.",
+        variant: "destructive"
+      });
+    }
+  };
+
   useEffect(() => {
-    const usersRef = collection(db, 'users');
-    const unsubscribe = onSnapshot(usersRef, (snapshot) => {
-        const loadedUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
-        setUsers(loadedUsers);
-    });
-    return () => unsubscribe();
+    fetchUsers();
   }, []);
 
   const handleOpenModal = (user: User | null) => {
@@ -49,6 +60,7 @@ export default function UsersManagementPage() {
             toast({ title: "Success", description: "User added successfully.", variant: "success" });
         }
         handleCloseModal();
+        fetchUsers(); // refetch
     } catch (error: any) {
         console.error("Error saving user: ", error);
         toast({ title: "Error", description: `Failed to save user: ${error.message}`, variant: "destructive" });
@@ -58,6 +70,7 @@ export default function UsersManagementPage() {
   const handleDeleteUser = async (userId: string) => {
     await deleteDoc(doc(db, "users", userId));
     toast({ title: "Success", description: "User deleted successfully.", variant: "success" });
+    fetchUsers(); // refetch
   };
 
   return (
