@@ -24,8 +24,8 @@ export type User = {
     email: string;
     role: 'Admin' | 'Inventory Manager' | 'Sales' | 'Purchasing' | 'Finance' | 'Auditor';
     status: 'active' | 'inactive';
-    lastLoginAt?: Date | FieldValue;
-    createdAt: Date | FieldValue;
+    lastLoginAt?: Date | FieldValue | string;
+    createdAt: Date | FieldValue | string;
 };
 
 // Contacts
@@ -59,8 +59,8 @@ export type Warehouse = {
     code: string;
     address: string;
     isPrimary: boolean;
-    createdAt: Date | FieldValue;
-    modifiedAt?: Date | FieldValue;
+    createdAt?: Date | FieldValue | string;
+    modifiedAt?: Date | FieldValue | string;
 };
 
 export type ItemCategory = {
@@ -69,7 +69,7 @@ export type ItemCategory = {
     description?: string;
     productImage?: string;
     parentId?: string;
-    createdAt: Date | FieldValue;
+    createdAt?: Date | FieldValue | string;
 };
 
 export type Stock = {
@@ -241,7 +241,7 @@ export type LowStockAlert = {
 export type Invoice = {
   id: string;
   customerName: string;
-  date: Date;
+  date: Date | FieldValue | string;
   amount: number;
   status: 'Paid' | 'Pending' | 'Overdue';
 };
@@ -251,7 +251,7 @@ export type Sales = {
   productId: string;
   productName: string;
   customerName: string;
-  date: Date;
+  date: Date | FieldValue | string;
   quantity: number;
   total: number;
 };
@@ -272,19 +272,22 @@ export type Product = {
     name: string;
     sku: string;
     description: string;
-    ledQty: number;
-    voltage: number;
-    wattage: number;
-    meters: number;
+    ledQty?: number;
+    voltage?: number;
+    wattage?: number;
+    meters?: number;
+    size?: string;
+    color?: string;
     supplier: string;
     location: string;
     stock: number;
     price: number;
     reOrderLevel: number;
-    createdAt: Date | FieldValue;
-    modifiedAt?: Date | FieldValue;
+    createdAt: Date | FieldValue | string;
+    modifiedAt?: Date | FieldValue | string;
     status: 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Discontinued';
     suppliers?: Supplier[];
     uom: string;
     expiryDateTracking: boolean;
 };
+
