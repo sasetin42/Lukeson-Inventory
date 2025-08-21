@@ -115,11 +115,11 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
         const maxStock = reOrderLevel * 5; // Assuming max stock is 5x re-order level
         const percentage = (stock / maxStock) * 100;
 
-        let color = "bg-primary"; // Healthy stock
+        let color = "#2463EB"; // Healthy stock
         if (stock <= reOrderLevel) {
-            color = "bg-red-500"; // Re-order level
+            color = "#EF4444"; // Re-order level
         } else if (stock <= reOrderLevel * 2.5) {
-            color = "bg-green-500"; // Half stock
+            color = "#22C55E"; // Half stock
         }
 
         return {
@@ -242,7 +242,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                                 <div className="flex flex-col gap-1">
                                     <span>{product.stock} units</span>
                                     <Progress value={stockStatus.percentage} className="h-2 [&>*]:bg-none" style={{'--tw-bg-opacity': '1', backgroundColor: 'hsl(var(--muted))'}}>
-                                      <div className={`h-full rounded-full ${stockStatus.color}`} style={{ width: `${stockStatus.percentage}%` }} />
+                                      <div className={`h-full rounded-full`} style={{ width: `${stockStatus.percentage}%`, backgroundColor: stockStatus.color }} />
                                     </Progress>
                                 </div>
                             </TableCell>
