@@ -80,13 +80,13 @@ export default function SalesOrderList({ salesOrders, onEdit, onDelete, onView }
             <Card>
                 <CardHeader>
                     <CardTitle>Sales Orders</CardTitle>
-                    <CardDescription>A list of all your sales orders.</CardDescription>
+                    <CardDescription>A list of all your sales orders. (e.g. SO-2025-001)</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Order ID</TableHead>
+                                <TableHead>Sales Order ID</TableHead>
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Amount</TableHead>
