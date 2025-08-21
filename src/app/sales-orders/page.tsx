@@ -104,14 +104,14 @@ function SalesOrdersContent() {
 
   const handleSaveSalesOrder = async (salesOrderData: Omit<SalesOrder, 'id'> & { id?: string }) => {
       try {
-          if (salesOrderData.id) {
-              const { id, ...dataToSave } = salesOrderData;
-              const soRef = doc(db, "salesOrders", id);
+          const { id, ...dataToSave } = salesOrderData;
+          if (editingSalesOrder && editingSalesOrder.id) { // This is an update
+              const soRef = doc(db, "salesOrders", editingSalesOrder.id);
               await setDoc(soRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
               toast({ title: "Success", description: "Sales Order updated successfully.", variant: "success" });
-          } else {
-              const { id, ...dataToSave } = salesOrderData;
-              await addDoc(collection(db, "salesOrders"), { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+          } else { // This is a new record
+              const soRef = doc(db, "salesOrders", id as string);
+              await setDoc(soRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
               toast({ title: "Success", description: "Sales Order added successfully.", variant: "success" });
           }
           handleCloseModal();

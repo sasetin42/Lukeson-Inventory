@@ -233,7 +233,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             const finalStatus = status === 'Approved' ? 'Confirmed' : status;
             
             const salesOrderData = {
-                id: salesOrder?.id,
+                id: salesOrder?.id || salesOrderId,
                 customerId,
                 customerName: customer?.name || 'N/A',
                 orderDate,
@@ -405,4 +405,3 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
         </div>
     );
 }
-
