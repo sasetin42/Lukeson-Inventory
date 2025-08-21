@@ -45,6 +45,8 @@ export default function CategoryFormModal({
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [editingCategory, setEditingCategory] = useState<ItemCategory | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const categoriesPerPage = 5;
     const { toast } = useToast();
 
     useEffect(() => {
@@ -125,6 +127,14 @@ export default function CategoryFormModal({
         setEditingCategory(cat);
     };
 
+    // Pagination logic
+    const indexOfLastCategory = currentPage * categoriesPerPage;
+    const indexOfFirstCategory = indexOfLastCategory - categoriesPerPage;
+    const currentCategories = categories.slice(indexOfFirstCategory, indexOfLastCategory);
+    const totalPages = Math.ceil(categories.length / categoriesPerPage);
+
+    const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-4xl max-h-[90vh]">
@@ -183,9 +193,9 @@ export default function CategoryFormModal({
                     <div className="space-y-4">
                         <h3 className="font-medium text-lg">Existing Categories</h3>
                         <Separator />
-                        <ScrollArea className="h-[450px] pr-4">
+                        <ScrollArea className="h-[380px] pr-4">
                            <div className="space-y-2">
-                                {categories.map(cat => (
+                                {currentCategories.map(cat => (
                                     <div key={cat.id} className="flex items-center justify-between p-3 rounded-lg border">
                                         <h4 className="font-semibold text-sm">{cat.name}</h4>
                                         <div className="flex items-center gap-1">
@@ -200,6 +210,29 @@ export default function CategoryFormModal({
                                 ))}
                            </div>
                         </ScrollArea>
+                        {totalPages > 1 && (
+                            <div className="flex justify-center items-center gap-2 mt-4">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => paginate(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                >
+                                    Previous
+                                </Button>
+                                <span className="text-sm text-muted-foreground">
+                                    Page {currentPage} of {totalPages}
+                                </span>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => paginate(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Next
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <DialogFooter>
