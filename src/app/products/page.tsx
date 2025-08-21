@@ -96,10 +96,12 @@ export default function ProductsPage() {
 
         try {
             if (id) {
+                // This is an existing product, update it.
                 const productRef = ref(db, `products/${id}`);
                 await set(productRef, { ...finalData, modifiedAt: serverTimestamp() });
                 toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
             } else {
+                // This is a new product, create it.
                 const productsRef = ref(db, 'products');
                 const newProductRef = push(productsRef);
                 await set(newProductRef, { ...finalData, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
@@ -137,7 +139,7 @@ export default function ProductsPage() {
 
     const handleCategoryDelete = async (categoryId: string) => {
         await remove(ref(db, `categories/${categoryId}`));
-        toast({ title: "Success", description: "Category deleted.", variant: "success" });
+        toast({ title: "Success", description: "Category deleted successfully.", variant: "success" });
     }
 
 
