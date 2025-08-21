@@ -15,14 +15,16 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
+    const [categories, setCategories] = useState<ItemCategory[]>([]);
     const [loading, setLoading] = useState(true);
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const [editingCategory, setEditingCategory] = useState<ItemCategory | null>(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
-        const loadProducts = () => {
+        const loadData = () => {
             try {
                 const storedProducts = localStorage.getItem('products');
                 if (storedProducts) {
@@ -30,19 +32,24 @@ export default function ProductsPage() {
                     const sortedProducts = productsData.sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
                     setProducts(sortedProducts);
                 }
+
+                const storedCategories = localStorage.getItem('categories');
+                if (storedCategories) {
+                    setCategories(JSON.parse(storedCategories));
+                }
             } catch (e) {
-                console.error("Failed to load products from local storage", e);
-                toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
+                console.error("Failed to load data from local storage", e);
+                toast({ title: "Error", description: "Failed to load data.", variant: "destructive" });
             } finally {
                 setLoading(false);
             }
         };
 
-        loadProducts();
+        loadData();
 
         const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'products') {
-                loadProducts();
+            if (e.key === 'products' || e.key === 'categories') {
+                loadData();
             }
         };
 
@@ -142,10 +149,21 @@ export default function ProductsPage() {
             }
             localStorage.setItem('categories', JSON.stringify(updatedCategories));
             window.dispatchEvent(new Event('storage'));
-            setIsCategoryModalOpen(false);
         } catch (error) {
              console.error("Error saving category:", error);
             toast({ title: "Error", description: "Failed to save category.", variant: "destructive" });
+        }
+    }
+
+    const handleCategoryDelete = async (categoryId: string) => {
+        try {
+            const updatedCategories = categories.filter(c => c.id !== categoryId);
+            localStorage.setItem('categories', JSON.stringify(updatedCategories));
+            window.dispatchEvent(new Event('storage'));
+            toast({ title: "Success", description: "Category deleted.", variant: "success" });
+        } catch (error) {
+            console.error("Error deleting category: ", error);
+            toast({ title: "Error", description: "Failed to delete category.", variant: "destructive" });
         }
     }
 
@@ -219,8 +237,10 @@ export default function ProductsPage() {
         <CategoryFormModal
             isOpen={isCategoryModalOpen}
             onClose={() => setIsCategoryModalOpen(false)}
-            onSave={handleCategorySave as any}
-            category={null}
+            onSave={handleCategorySave}
+            onDelete={handleCategoryDelete}
+            category={editingCategory}
+            categories={categories}
         />
       )}
       
