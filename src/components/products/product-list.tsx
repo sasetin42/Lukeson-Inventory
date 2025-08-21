@@ -33,6 +33,7 @@ import ProductImage from './product-image';
 import { format } from 'date-fns';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
+import { Progress } from '../ui/progress';
 
 interface ProductListProps {
     products: Product[];
@@ -82,21 +83,6 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
         };
     }
 
-
-    const getStatusVariant = (status: string) => {
-        switch (status) {
-            case 'In Stock':
-                return 'default';
-            case 'Low Stock':
-                return 'secondary';
-            case 'Out of Stock':
-            case 'Discontinued':
-                return 'destructive';
-            default:
-                return 'outline';
-        }
-    };
-    
     const openDeleteAlert = (product: Product) => {
         setProductToDelete(product);
         setIsDeleteAlertOpen(true);
@@ -124,6 +110,23 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
             return matchesSearch && matchesCategory;
         });
     }, [products, searchQuery, categoryFilter]);
+
+    const getStockStatus = (stock: number, reOrderLevel: number) => {
+        const maxStock = reOrderLevel * 5; // Assuming max stock is 5x re-order level
+        const percentage = (stock / maxStock) * 100;
+
+        let color = "bg-primary"; // Healthy stock
+        if (stock <= reOrderLevel) {
+            color = "bg-red-500"; // Re-order level
+        } else if (stock <= reOrderLevel * 2.5) {
+            color = "bg-green-500"; // Half stock
+        }
+
+        return {
+            percentage: Math.min(percentage, 100),
+            color: color
+        }
+    }
   
     if (!mounted) {
         return null;
@@ -205,7 +208,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                     <TableHead>Product</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Price</TableHead>
-                    <TableHead>Stock</TableHead>
+                    <TableHead>Stock Status</TableHead>
                     <TableHead>Date Created</TableHead>
                     <TableHead>Date Modified</TableHead>
                     <TableHead className="w-[50px]"></TableHead>
@@ -215,6 +218,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                     {filteredProducts.map((product) => {
                       const createdAt = formatDateTime(product.createdAt);
                       const modifiedAt = formatDateTime(product.modifiedAt);
+                      const stockStatus = getStockStatus(product.stock, product.reOrderLevel);
                       return (
                         <TableRow key={product.id}>
                             <TableCell>
@@ -234,7 +238,14 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                             </TableCell>
                             <TableCell>{product.category}</TableCell>
                             <TableCell>₱{product.price.toFixed(2)}</TableCell>
-                            <TableCell>{product.stock}</TableCell>
+                            <TableCell>
+                                <div className="flex flex-col gap-1">
+                                    <span>{product.stock} units</span>
+                                    <Progress value={stockStatus.percentage} className="h-2 [&>*]:bg-none" style={{'--tw-bg-opacity': '1', backgroundColor: 'hsl(var(--muted))'}}>
+                                      <div className={`h-full rounded-full ${stockStatus.color}`} style={{ width: `${stockStatus.percentage}%` }} />
+                                    </Progress>
+                                </div>
+                            </TableCell>
                             <TableCell>
                               <div>{createdAt.date}</div>
                               <div className="text-muted-foreground" style={{fontSize: '12px'}}>{createdAt.time}</div>
