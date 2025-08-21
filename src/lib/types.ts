@@ -125,6 +125,21 @@ export type SalesOrder = {
     discountValue?: number;
 };
 
+export type JobOrder = {
+    id: string; // JO-YYYY-XXXX
+    customerId: string;
+    customerName?: string;
+    salesOrderId?: string;
+    jobOrderDate: Date | FieldValue | string;
+    expectedCompletionDate?: Date | FieldValue | string;
+    status: 'Draft' | 'Scheduled' | 'In Progress' | 'On Hold' | 'Completed' | 'Cancelled';
+    totalAmount: number;
+    lines: DocumentLine[];
+    notes?: string;
+    createdAt?: Date | FieldValue | string;
+    modifiedAt?: Date | FieldValue | string;
+};
+
 export type SalesInvoice = {
     id:string; // INV-YYYY-XXXX
     salesOrderId: string;

@@ -1,19 +1,125 @@
 
+'use client';
+
+import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
-import { PlusCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PlusCircle, DollarSign, CheckCircle, Clock, XCircle } from "lucide-react";
+import JobOrderList from "@/components/job-orders/job-order-list";
+import { JobOrder } from '@/lib/types';
+import JobOrderFormModal from '@/components/job-orders/job-order-form-modal';
+import { useToast } from '@/hooks/use-toast';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import KpiCard from '@/components/kpi-card';
 
 export default function JobOrdersPage() {
+  const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingJobOrder, setEditingJobOrder] = useState<JobOrder | null>(null);
+  const { toast } = useToast();
+
+  const fetchJobOrders = async () => {
+    try {
+      const joRef = collection(db, 'jobOrders');
+      const snapshot = await getDocs(joRef);
+      const loadedJOs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
+      setJobOrders(loadedJOs);
+    } catch (error) {
+      console.error("Error fetching job orders: ", error);
+      toast({
+        title: "Error",
+        description: "Failed to load job orders. Please check your connection and permissions.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchJobOrders();
+  }, []);
+
+  const handleOpenModal = (jobOrder: JobOrder | null) => {
+    setEditingJobOrder(jobOrder);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveJobOrder = async (jobOrderData: Omit<JobOrder, 'id'> & {id?: string}) => {
+      try {
+          if (jobOrderData.id) {
+              const { id, ...dataToSave } = jobOrderData;
+              const joRef = doc(db, "jobOrders", id);
+              await setDoc(joRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
+              toast({ title: "Success", description: "Job Order updated successfully.", variant: "success" });
+          } else {
+              const { id, ...dataToSave } = jobOrderData;
+              await addDoc(collection(db, "jobOrders"), { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+              toast({ title: "Success", description: "Job Order added successfully.", variant: "success" });
+          }
+          setIsModalOpen(false);
+          fetchJobOrders();
+      } catch (error) {
+          console.error("Error saving job order: ", error);
+          toast({ title: "Error", description: "Failed to save job order.", variant: "destructive" });
+      }
+  };
+
+
+  const handleDeleteJobOrder = async (jobOrderId: string) => {
+    await deleteDoc(doc(db, "jobOrders", jobOrderId));
+    toast({ title: "Success", description: "Job Order deleted successfully.", variant: "success" });
+    fetchJobOrders();
+  };
+
+  const totalValue = jobOrders.reduce((sum, jo) => sum + jo.totalAmount, 0);
+  const totalCompleted = jobOrders.filter(jo => jo.status === 'Completed').length;
+  const totalInProgress = jobOrders.filter(jo => jo.status === 'In Progress').length;
+  const totalCancelled = jobOrders.filter(jo => jo.status === 'Cancelled').length;
+
+  const kpis = [
+      { title: "Total Job Value", value: `₱${totalValue.toLocaleString()}`, icon: DollarSign, color: "green" as const },
+      { title: "Completed Jobs", value: totalCompleted, icon: CheckCircle, color: "blue" as const },
+      { title: "In Progress", value: totalInProgress, icon: Clock, color: "yellow" as const },
+      { title: "Cancelled Jobs", value: totalCancelled, icon: XCircle, color: "red" as const }
+  ];
+
   return (
     <div className="flex flex-col gap-4">
-      <PageHeader 
-        title="Job Orders" 
-        description="Manage job orders." 
+      <PageHeader
+        title="Job Orders"
+        description="Manage job orders for your customers."
         icon={<PlusCircle className="h-6 w-6 text-orange-500" />}
+        actions={
+          <Button onClick={() => handleOpenModal(null)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create Job Order
+          </Button>
+        }
       />
-      <div className="p-4">
-        <h2 className="text-lg font-semibold">Job Orders Page</h2>
-        <p className="text-muted-foreground">Content for job orders goes here.</p>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {kpis.map((kpi, index) => (
+          <KpiCard
+            key={index}
+            title={kpi.title}
+            value={kpi.value as string}
+            icon={kpi.icon}
+            color={kpi.color}
+            style={{ animationDelay: `${index * 100}ms` }}
+            className="fade-in-up"
+          />
+        ))}
       </div>
+      <JobOrderList 
+        jobOrders={jobOrders} 
+        onEdit={handleOpenModal}
+        onDelete={handleDeleteJobOrder}
+      />
+      <JobOrderFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveJobOrder}
+        jobOrder={editingJobOrder}
+      />
     </div>
   );
 }
