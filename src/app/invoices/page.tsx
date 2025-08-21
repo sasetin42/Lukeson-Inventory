@@ -12,6 +12,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import InvoiceTemplate from '@/components/invoices/invoice-template';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -85,7 +86,7 @@ export default function InvoicesPage() {
         </div>
         </TabsContent>
         <TabsContent value="templates" className="mt-4">
-            <p>Sales Invoices Template settings will go here.</p>
+            <InvoiceTemplate />
         </TabsContent>
         <TabsContent value="settings" className="mt-4">
             <p>Sales Invoices Settings will go here.</p>
