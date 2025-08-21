@@ -206,7 +206,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                     <DatePicker date={orderDate} setDate={setOrderDate} />
                 </div>
                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Status</Label>
+                    <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Quotations Status</Label>
                     <Select value={status} onValueChange={(value) => setStatus(value as SalesOrder['status'])} disabled={isStatusDisabled}>
                         <SelectTrigger><SelectValue/></SelectTrigger>
                         <SelectContent>
@@ -288,4 +288,5 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
         </div>
     );
 }
+
 
