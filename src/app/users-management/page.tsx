@@ -9,10 +9,6 @@ import { User } from '@/lib/types';
 import UserList from '@/components/users/user-list';
 import UserFormModal from '@/components/users/user-form-modal';
 import { useToast } from '@/hooks/use-toast';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, addDoc, doc, setDoc, deleteDoc, serverTimestamp, getDocs } from 'firebase/firestore';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -21,23 +17,27 @@ export default function UsersManagementPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
-      const usersData = snapshot.docs.map(doc => {
-          const data = doc.data();
-          return { 
-              id: doc.id, 
-              ...data,
-              createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
-              lastLoginAt: data.lastLoginAt?.toDate ? data.lastLoginAt.toDate() : undefined,
-            } as User
-        });
-      setUsers(usersData);
-    }, (error) => {
-      console.error("Failed to load users from Firestore", error);
-      toast({ title: "Error", description: "Failed to load users.", variant: "destructive" });
-    });
+    const loadUsers = () => {
+        try {
+            const storedUsers = localStorage.getItem('users');
+            if (storedUsers) {
+                setUsers(JSON.parse(storedUsers));
+            }
+        } catch (error) {
+            console.error("Failed to load users from local storage", error);
+            toast({ title: "Error", description: "Failed to load users.", variant: "destructive" });
+        }
+    };
+    loadUsers();
 
-    return () => unsubscribe();
+    const handleStorageChange = (e: StorageEvent) => {
+        if(e.key === 'users') {
+            loadUsers();
+        }
+    }
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+
   }, [toast]);
 
   const handleOpenModal = (user: User | null) => {
@@ -51,29 +51,25 @@ export default function UsersManagementPage() {
   }
 
   const handleSaveUser = async (userData: Omit<User, 'id' | 'createdAt' | 'lastLoginAt'> & { id?: string, password?: string }) => {
-    const { id, password, ...dataToSave } = userData;
+    const { id, ...dataToSave } = userData;
     try {
+        let updatedUsers;
         if (id) { // Editing existing user
-            const userRef = doc(db, 'users', id);
-            await setDoc(userRef, dataToSave, { merge: true });
+            updatedUsers = users.map(u => u.id === id ? { ...u, ...dataToSave } : u);
             toast({ title: "Success", description: "User updated successfully.", variant: "success" });
         } else { // Adding new user
-            if (!password) {
-                toast({ title: "Error", description: "Password is required for new users.", variant: "destructive" });
-                return;
-            }
-            // 1. Create user in Firebase Auth
-            const userCredential = await createUserWithEmailAndPassword(auth, dataToSave.email, password);
-            const authUser = userCredential.user;
-
-            // 2. Create user document in Firestore with the same UID
-            await setDoc(doc(db, 'users', authUser.uid), {
+            const newUser: User = {
                 ...dataToSave,
-                createdAt: serverTimestamp(),
-            });
-
+                id: new Date().toISOString(),
+                createdAt: new Date().toISOString(),
+                lastLoginAt: undefined,
+            };
+            updatedUsers = [...users, newUser];
             toast({ title: "Success", description: "User added successfully.", variant: "success" });
         }
+        localStorage.setItem('users', JSON.stringify(updatedUsers));
+        setUsers(updatedUsers);
+        window.dispatchEvent(new Event('storage'));
         handleCloseModal();
     } catch (error: any) {
         console.error("Error saving user: ", error);
@@ -83,10 +79,11 @@ export default function UsersManagementPage() {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      // Note: Deleting a user from Firestore does not delete them from Firebase Auth.
-      // A more complete solution would involve a Cloud Function to handle this.
-      await deleteDoc(doc(db, 'users', userId));
-      toast({ title: "Success", description: "User deleted successfully from Firestore.", variant: "success" });
+      const updatedUsers = users.filter(u => u.id !== userId);
+      localStorage.setItem('users', JSON.stringify(updatedUsers));
+      setUsers(updatedUsers);
+      window.dispatchEvent(new Event('storage'));
+      toast({ title: "Success", description: "User deleted successfully.", variant: "success" });
     } catch (error) {
       console.error("Error deleting user: ", error);
       toast({ title: "Error", description: "Failed to delete user.", variant: "destructive" });

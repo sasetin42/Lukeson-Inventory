@@ -19,8 +19,6 @@ import { Textarea } from '../ui/textarea';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, X } from 'lucide-react';
-import { storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface CategoryFormModalProps {
   isOpen: boolean;
@@ -86,12 +84,8 @@ export default function CategoryFormModal({
         setIsSaving(true);
         
         try {
-            let imageUrl = category?.productImage || '';
-            if (imageFile) {
-                const storageRef = ref(storage, `categories/${Date.now()}_${imageFile.name}`);
-                const snapshot = await uploadBytes(storageRef, imageFile);
-                imageUrl = await getDownloadURL(snapshot.ref);
-            }
+            // With local storage, we can store the image as a data URL.
+            let imageUrl = category?.productImage || imagePreview || '';
 
             const categoryData: Omit<ItemCategory, 'id' | 'createdAt'> & {id?: string} = {
                 id: category?.id,

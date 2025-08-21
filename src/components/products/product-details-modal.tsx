@@ -51,8 +51,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import ProductImage from './product-image';
-import { db } from '@/lib/firebase';
-import { doc, setDoc } from 'firebase/firestore';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -91,8 +89,12 @@ export default function ProductDetailsModal({
   const handleToggleStatus = async () => {
       const newStatus = product.status === 'Discontinued' ? 'In Stock' : 'Discontinued';
       try {
-        const productRef = doc(db, 'products', product.id);
-        await setDoc(productRef, { status: newStatus }, { merge: true });
+        const storedProducts = JSON.parse(localStorage.getItem('products') || '[]') as Product[];
+        const updatedProducts = storedProducts.map(p => 
+            p.id === product.id ? { ...p, status: newStatus } : p
+        );
+        localStorage.setItem('products', JSON.stringify(updatedProducts));
+        window.dispatchEvent(new Event('storage'));
         toast({ title: 'Success', description: `Product has been ${newStatus === 'Discontinued' ? 'deactivated' : 'activated'}.`, variant: 'success' });
         onClose();
       } catch (error) {

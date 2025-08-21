@@ -12,9 +12,6 @@ import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Pa
 import Image from 'next/image';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { db, storage } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { Progress } from '../ui/progress';
 
 interface ProductFormProps {
@@ -69,15 +66,14 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const suppliersCollection = collection(db, 'suppliers');
-                const suppliersSnapshot = await getDocs(suppliersCollection);
-                setSuppliers(suppliersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier)));
+                const storedSuppliers = localStorage.getItem('suppliers');
+                if (storedSuppliers) setSuppliers(JSON.parse(storedSuppliers));
 
-                const categoriesCollection = collection(db, 'categories');
-                const categoriesSnapshot = await getDocs(categoriesCollection);
-                setCategories(categoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory)));
+                const storedCategories = localStorage.getItem('categories');
+                if (storedCategories) setCategories(JSON.parse(storedCategories));
+
             } catch(error) {
-                console.error("Error loading data from Firestore", error);
+                console.error("Error loading data from Local Storage", error);
                 toast({ title: "Error", description: "Failed to load supporting data.", variant: "destructive" });
             }
         };
@@ -85,11 +81,10 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     }, [toast]);
 
     useEffect(() => {
-        const generateProductCode = async () => {
+        const generateProductCode = () => {
             const year = new Date().getFullYear();
-            const productsCollection = collection(db, 'products');
-            const snapshot = await getDocs(productsCollection);
-            const productsCount = snapshot.size;
+            const storedProducts = JSON.parse(localStorage.getItem('products') || '[]') as Product[];
+            const productsCount = storedProducts.length;
             setProductCode(`PRO-${year}-${(productsCount + 1).toString().padStart(3, '0')}`);
         };
 
@@ -180,42 +175,17 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         }
 
         setIsSaving(true);
+        setUploadProgress(0); // Show progress bar
         
         try {
-            let imageUrl = product?.productImage || '';
-            
+            // Simulate upload progress for local storage
+            let imageUrl = product?.productImage || imagePreview || '';
             if (imageFile) {
-                imageUrl = await new Promise<string>((resolve, reject) => {
-                    const storageRef = ref(storage, `product_images/${Date.now()}_${imageFile.name}`);
-                    const uploadTask = uploadBytesResumable(storageRef, imageFile);
-
-                    uploadTask.on('state_changed',
-                        (snapshot) => {
-                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                            setUploadProgress(progress);
-                        },
-                        (error) => {
-                            console.error("Upload failed:", error);
-                            setUploadProgress(null);
-                            toast({
-                                title: "Error Uploading Image",
-                                description: `Upload failed. ${error.code === 'storage/retry-limit-exceeded' ? 'Max retry time exceeded. Please check your network and try again.' : error.message}`,
-                                variant: "destructive",
-                            });
-                            reject(error);
-                        },
-                        async () => {
-                            try {
-                                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                                resolve(downloadURL);
-                            } catch (error) {
-                                reject(error)
-                            }
-                        }
-                    );
-                });
+                // Simulate a short delay for "upload"
+                await new Promise(res => setTimeout(res, 500));
+                setUploadProgress(100);
             }
-
+            
             const stockNum = Number(stock) || 0;
             const reOrderLevelNum = Number(reOrderLevel) || 0;
             let stockStatus = product?.status || 'In Stock';
@@ -255,8 +225,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
 
         } catch (error) {
             console.error("Failed to save product:", error);
-            // Toast for upload errors is already handled inside the promise.
-            // A general save error could be handled here if needed.
+            toast({ title: "Error", description: "Failed to save product.", variant: "destructive" });
         } finally {
             setIsSaving(false);
             setUploadProgress(null);

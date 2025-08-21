@@ -30,8 +30,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import ProductImage from './product-image';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
 
 interface ProductListProps {
     products: Product[];
@@ -57,14 +55,23 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
     const { toast } = useToast();
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, "categories"), (snapshot) => {
-            const categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
-            setCategories(categoriesData);
-        }, (error) => {
-            console.error("Failed to load categories from Firestore", error);
+        const loadCategories = () => {
+            const storedCategories = localStorage.getItem('categories');
+            if(storedCategories){
+                setCategories(JSON.parse(storedCategories));
+            }
+        };
+        loadCategories();
+        
+        window.addEventListener('storage', (e) => {
+            if(e.key === 'categories') loadCategories();
         });
 
-        return () => unsubscribe();
+        return () => {
+            window.removeEventListener('storage', (e) => {
+                if(e.key === 'categories') loadCategories();
+            });
+        }
     }, []);
 
     const getStatusVariant = (status: string) => {
@@ -101,7 +108,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
     const filteredProducts = useMemo(() => {
         return products.filter(product => {
             const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                  product.sku.toLowerCase().includes(searchQuery.toLowerCase());
+                                  (product.sku && product.sku.toLowerCase().includes(searchQuery.toLowerCase()));
             const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
             return matchesSearch && matchesCategory;
         });

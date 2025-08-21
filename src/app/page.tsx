@@ -11,8 +11,6 @@ import QuickStats from "@/components/dashboard/quick-stats";
 import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
 import { Product, Sales, ItemCategory } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { db } from '@/lib/firebase';
-import { collection, getDocs, writeBatch, serverTimestamp, doc } from 'firebase/firestore';
 
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -21,55 +19,51 @@ export default function DashboardPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const seedInitialCategories = async () => {
-        const categoriesRef = collection(db, 'categories');
-        const snapshot = await getDocs(categoriesRef);
+    const seedInitialCategories = () => {
+        const storedCategories = localStorage.getItem('categories');
 
-        if(snapshot.empty) {
-            const batch = writeBatch(db);
+        if(!storedCategories) {
             const categoriesToAdd = [
                 { id: '1', name: 'STRIPLIGHT', description: 'Various types of LED striplights.' },
                 { id: '2', name: 'POWER SUPPLY', description: 'Power supplies for LED lighting.' },
                 { id: '3', name: 'GENERAL LIGHTING', description: 'General purpose lighting fixtures.' },
                 { id: '4', name: 'ALUMINIUM PROFILE', description: 'Aluminium profiles for LED strips.' },
             ];
-            categoriesToAdd.forEach(category => {
-                const docRef = doc(db, 'categories', category.id);
-                batch.set(docRef, {...category, createdAt: serverTimestamp()});
-            });
-            await batch.commit();
-            console.log('Seeded initial categories to Firestore');
+            localStorage.setItem('categories', JSON.stringify(categoriesToAdd));
+            console.log('Seeded initial categories to Local Storage');
         }
     };
     seedInitialCategories();
   }, []);
 
   useEffect(() => {
-      const fetchData = async () => {
+      const fetchData = () => {
           try {
-              const productsCollection = collection(db, 'products');
-              const productsSnapshot = await getDocs(productsCollection);
-              const productsData = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+              const productsData = JSON.parse(localStorage.getItem('products') || '[]') as Product[];
               setProducts(productsData);
 
-              const salesCollection = collection(db, 'sales');
-              const salesSnapshot = await getDocs(salesCollection);
-              const salesData = salesSnapshot.docs.map(doc => {
-                  const data = doc.data();
-                  return { id: doc.id, ...data, date: (data.date as any).toDate() } as Sales;
-              });
+              const salesData = JSON.parse(localStorage.getItem('sales') || '[]') as Sales[];
               setSales(salesData);
               
           } catch (error) {
               console.error(error);
-              toast({ title: "Error", description: "Failed to load data from Firestore.", variant: "destructive" });
+              toast({ title: "Error", description: "Failed to load data from Local Storage.", variant: "destructive" });
           } finally {
               setLoading(false);
           }
       };
 
       fetchData();
-  }, []);
+      
+      const handleStorageChange = () => {
+        fetchData();
+      }
+
+      window.addEventListener('storage', handleStorageChange);
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+      }
+  }, [toast]);
 
   return (
     <div className="flex flex-col gap-6">

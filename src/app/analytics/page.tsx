@@ -19,8 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Product, Sales, Supplier } from '@/lib/types';
 import SupplierOnTimeChart from '@/components/analytics/supplier-on-time-chart';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState("30");
@@ -28,27 +27,38 @@ export default function AnalyticsPage() {
   const [sales, setSales] = useState<Sales[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [kpiData, setKpiData] = useState<any[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
-        setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)))
-    });
-    const unsubSales = onSnapshot(collection(db, 'sales'), (snapshot) => {
-        setSales(snapshot.docs.map(doc => {
-            const data = doc.data();
-            return { id: doc.id, ...data, date: data.date.toDate() } as Sales;
-        }))
-    });
-    const unsubSuppliers = onSnapshot(collection(db, 'suppliers'), (snapshot) => {
-        setSuppliers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier)))
-    });
+    const loadData = () => {
+        try {
+            const storedProducts = localStorage.getItem('products');
+            if (storedProducts) setProducts(JSON.parse(storedProducts));
+
+            const storedSales = localStorage.getItem('sales');
+            if (storedSales) setSales(JSON.parse(storedSales));
+            
+            const storedSuppliers = localStorage.getItem('suppliers');
+            if(storedSuppliers) setSuppliers(JSON.parse(storedSuppliers));
+        } catch (error) {
+            console.error("Failed to load data from local storage", error);
+            toast({ title: "Error", description: "Failed to load analytics data.", variant: "destructive" });
+        }
+    };
+    
+    loadData();
+
+    const handleStorageChange = (e: StorageEvent) => {
+        if (['products', 'sales', 'suppliers'].includes(e.key || '')) {
+            loadData();
+        }
+    };
+    window.addEventListener('storage', handleStorageChange);
 
     return () => {
-        unsubProducts();
-        unsubSales();
-        unsubSuppliers();
+        window.removeEventListener('storage', handleStorageChange);
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     function calculateKpis() {
@@ -108,7 +118,7 @@ export default function AnalyticsPage() {
             },
         ]);
     }
-    if(sales.length > 0 && products.length > 0){
+    if(sales.length > 0 || products.length > 0){
         calculateKpis();
     }
   }, [dateRange, sales, products]);

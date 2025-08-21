@@ -12,8 +12,6 @@ import { Product, ItemCategory } from '@/lib/types';
 import ProductFormModal from '@/components/products/product-form-modal';
 import CategoryFormModal from '@/components/category/category-form-modal';
 import { useToast } from '@/hooks/use-toast';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, addDoc, doc, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -24,25 +22,35 @@ export default function ProductsPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
-            const productsData = snapshot.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    id: doc.id,
-                    ...data,
-                    createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : new Date(),
-                } as Product;
-            }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-            setProducts(productsData);
-            setLoading(false);
-        }, (error) => {
-            console.error("Failed to load products from Firestore", error);
-            toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
-            setLoading(false);
-        });
+        const loadProducts = () => {
+            try {
+                const storedProducts = localStorage.getItem('products');
+                if (storedProducts) {
+                    const productsData = JSON.parse(storedProducts) as Product[];
+                    const sortedProducts = productsData.sort((a, b) => new Date(b.createdAt as string).getTime() - new Date(a.createdAt as string).getTime());
+                    setProducts(sortedProducts);
+                }
+            } catch (e) {
+                console.error("Failed to load products from local storage", e);
+                toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        return () => unsubscribe();
-    }, []);
+        loadProducts();
+
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === 'products') {
+                loadProducts();
+            }
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, [toast]);
     
     const totalProducts = products.length;
     const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
@@ -78,7 +86,10 @@ export default function ProductsPage() {
 
     const handleDeleteProduct = async (productToDelete: Product) => {
         try {
-            await deleteDoc(doc(db, 'products', productToDelete.id));
+            const updatedProducts = products.filter(p => p.id !== productToDelete.id);
+            localStorage.setItem('products', JSON.stringify(updatedProducts));
+            setProducts(updatedProducts); // Force state update
+            window.dispatchEvent(new Event('storage')); // Notify other components
             toast({ title: "Success", description: "Product deleted.", variant: "success" });
         } catch (error) {
             console.error("Error deleting product: ", error);
@@ -88,18 +99,26 @@ export default function ProductsPage() {
 
     const handleProductSave = async (productData: Omit<Product, 'id' | 'createdAt'> & {id?: string}) => {
         try {
-            const { id, ...dataToSave } = productData;
-            if (id) {
-                const docRef = doc(db, 'products', id);
-                await setDoc(docRef, dataToSave, { merge: true });
+            let updatedProducts: Product[];
+            if (productData.id) {
+                // Update existing product
+                updatedProducts = products.map(p => 
+                    p.id === productData.id ? { ...p, ...productData, id: p.id, createdAt: p.createdAt } : p
+                );
                 toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
             } else {
-                await addDoc(collection(db, 'products'), {
-                    ...dataToSave,
-                    createdAt: serverTimestamp()
-                });
+                // Add new product
+                const newProduct: Product = {
+                    ...productData,
+                    id: new Date().toISOString(), // Generate a unique ID
+                    createdAt: new Date().toISOString(),
+                };
+                updatedProducts = [...products, newProduct];
                 toast({ title: "Success", description: "Product added successfully.", variant: "success" });
             }
+            localStorage.setItem('products', JSON.stringify(updatedProducts));
+            setProducts(updatedProducts); // Force state update
+            window.dispatchEvent(new Event('storage')); // Notify other components
             handleCloseProductModal();
         } catch (error) {
             console.error("Error saving product: ", error);
@@ -110,18 +129,18 @@ export default function ProductsPage() {
 
     const handleCategorySave = async (savedCategory: Omit<ItemCategory, 'id' | 'createdAt'> & {id?: string}) => {
         try {
-            const { id, ...dataToSave } = savedCategory;
-            if (id) {
-                const docRef = doc(db, 'categories', id);
-                await setDoc(docRef, dataToSave, { merge: true });
+            const storedCategories = JSON.parse(localStorage.getItem('categories') || '[]') as ItemCategory[];
+            let updatedCategories;
+            if (savedCategory.id) {
+                updatedCategories = storedCategories.map(c => c.id === savedCategory.id ? { ...c, ...savedCategory } : c);
                 toast({ title: "Success", description: "Category updated successfully.", variant: "success" });
             } else {
-                await addDoc(collection(db, 'categories'), {
-                    ...dataToSave,
-                    createdAt: serverTimestamp()
-                });
+                 const newCategory = { ...savedCategory, id: new Date().toISOString(), createdAt: new Date().toISOString() };
+                updatedCategories = [...storedCategories, newCategory];
                 toast({ title: "Success", description: "Category added successfully.", variant: "success" });
             }
+            localStorage.setItem('categories', JSON.stringify(updatedCategories));
+            window.dispatchEvent(new Event('storage'));
             setIsCategoryModalOpen(false);
         } catch (error) {
              console.error("Error saving category:", error);

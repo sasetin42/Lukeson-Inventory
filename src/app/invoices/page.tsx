@@ -7,29 +7,39 @@ import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle } from "lucide-react";
 import InvoiceList from "@/components/invoices/invoice-list";
 import { Invoice } from '@/lib/types';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "invoices"), (snapshot) => {
-        const invoicesData = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                ...data,
-                date: data.date.toDate ? data.date.toDate() : new Date(),
-            } as Invoice;
-        });
-        setInvoices(invoicesData);
-    }, (error) => {
-        console.error("Failed to load invoices from Firestore", error);
-    });
+    const loadInvoices = () => {
+      try {
+        const storedInvoices = localStorage.getItem('invoices');
+        if (storedInvoices) {
+          setInvoices(JSON.parse(storedInvoices));
+        }
+      } catch (error) {
+        console.error("Failed to load invoices from local storage", error);
+        toast({ title: "Error", description: "Failed to load invoices.", variant: "destructive" });
+      }
+    };
+    
+    loadInvoices();
 
-    return () => unsubscribe();
-}, []);
+    const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'invoices') {
+            loadInvoices();
+        }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+        window.removeEventListener('storage', handleStorageChange);
+    }
+  }, [toast]);
 
 
   return (

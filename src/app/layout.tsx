@@ -14,10 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import AppLayout from '@/components/app-layout';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useState, useEffect } from 'react';
-import { AuthProvider, useAuth } from '@/context/auth-context';
 import { usePathname, useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase';
-import { signOut } from 'firebase/auth';
 
 
 // export const metadata: Metadata = {
@@ -116,9 +113,7 @@ const navGroups = [
 ];
 
 function AppContent({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory']);
   
   const handleAccordionChange = (value: string[]) => {
@@ -141,31 +136,11 @@ function AppContent({ children }: { children: React.ReactNode }) {
   }
   
   const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/login');
+    // Since we are not using Firebase Auth, this can be a placeholder or cleared from local storage
+    console.log("Logout clicked");
+    // router.push('/login'); // If you had a login page
   };
 
-  useEffect(() => {
-    if (!loading && !user && pathname !== '/login' && pathname !== '/signup') {
-      router.push('/login');
-    }
-  }, [user, loading, router, pathname]);
-
-  if (loading) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center">
-        <p>Loading...</p>
-      </div>
-    );
-  }
-  
-  if (!user && (pathname === '/login' || pathname === '/signup')) {
-      return <>{children}</>
-  }
-  
-  if (!user) {
-    return null;
-  }
 
   return (
       <SidebarProvider>
@@ -226,11 +201,11 @@ function AppContent({ children }: { children: React.ReactNode }) {
                 <Button variant="ghost" className="justify-start w-full gap-2 p-2 h-auto">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="https://placehold.co/40x40.png" alt="Admin" data-ai-hint="user avatar" />
-                    <AvatarFallback>{user?.displayName?.[0] || user?.email?.[0]?.toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>A</AvatarFallback>
                   </Avatar>
                   <div className="text-left">
-                    <p className="text-sm font-medium text-foreground">{user.displayName || 'Admin'}</p>
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    <p className="text-sm font-medium text-foreground">Admin User</p>
+                    <p className="text-xs text-muted-foreground">admin@example.com</p>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
@@ -278,9 +253,7 @@ export default function RootLayout({
         <meta name="description" content="A comprehensive, all-in-one business management system tailored for businesses in the Philippines." />
       </head>
       <body className="font-body antialiased h-full bg-background transition-colors duration-300" suppressHydrationWarning={true}>
-        <AuthProvider>
-          <AppContent>{children}</AppContent>
-        </AuthProvider>
+        <AppContent>{children}</AppContent>
         <Toaster />
       </body>
     </html>

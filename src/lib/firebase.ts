@@ -1,22 +1,2 @@
-
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { getAuth } from 'firebase/auth';
-
-const firebaseConfig = {
-  projectId: "lukeson-inventory",
-  appId: "1:365879575919:web:68ff2291b1aca7441f149a",
-  storageBucket: "lukeson-inventory.firebasestorage.app",
-  apiKey: "AIzaSyBsmEybb-ASyKOifiWleLs9kZsy2NMwAJQ",
-  authDomain: "lukeson-inventory.firebaseapp.com",
-  messagingSenderId: "365879575919",
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const storage = getStorage(app);
-const auth = getAuth(app);
-
-export { app, db, storage, auth };
+// This file is no longer used now that the application uses local storage.
+// You can safely delete it.
