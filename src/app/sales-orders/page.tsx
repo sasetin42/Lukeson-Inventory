@@ -15,11 +15,14 @@ import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, q
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SalesOrderTemplate from '@/components/sales-orders/sales-order-template';
+import SalesOrderViewModal from '@/components/sales-orders/sales-order-view-modal';
 
 function SalesOrdersContent() {
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [editingSalesOrder, setEditingSalesOrder] = useState<SalesOrder | null>(null);
+  const [viewingSalesOrder, setViewingSalesOrder] = useState<SalesOrder | null>(null);
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const customerIdFilter = searchParams.get('customerId');
@@ -87,6 +90,16 @@ function SalesOrdersContent() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingSalesOrder(null);
+  }
+
+  const handleOpenViewModal = (salesOrder: SalesOrder) => {
+    setViewingSalesOrder(salesOrder);
+    setIsViewModalOpen(true);
+  }
+
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false);
+    setViewingSalesOrder(null);
   }
 
   const handleSaveSalesOrder = async (salesOrderData: Omit<SalesOrder, 'id'> & { id?: string }) => {
@@ -167,6 +180,7 @@ function SalesOrdersContent() {
                 salesOrders={salesOrders}
                 onEdit={handleOpenModal}
                 onDelete={handleDeleteSalesOrder}
+                onView={handleOpenViewModal}
             />
           </div>
         </TabsContent>
@@ -184,6 +198,14 @@ function SalesOrdersContent() {
           onClose={handleCloseModal}
           onSave={handleSaveSalesOrder}
           salesOrder={editingSalesOrder}
+        />
+      )}
+      
+      {isViewModalOpen && (
+        <SalesOrderViewModal
+          isOpen={isViewModalOpen}
+          onClose={handleCloseViewModal}
+          salesOrder={viewingSalesOrder}
         />
       )}
     </div>

@@ -32,9 +32,10 @@ interface SalesOrderListProps {
     salesOrders: SalesOrder[];
     onEdit: (salesOrder: SalesOrder) => void;
     onDelete: (salesOrderId: string) => void;
+    onView: (salesOrder: SalesOrder) => void;
 }
 
-export default function SalesOrderList({ salesOrders, onEdit, onDelete }: SalesOrderListProps) {
+export default function SalesOrderList({ salesOrders, onEdit, onDelete, onView }: SalesOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [salesOrderToDelete, setSalesOrderToDelete] = useState<SalesOrder | null>(null);
     const { toast } = useToast();
@@ -74,13 +75,6 @@ export default function SalesOrderList({ salesOrders, onEdit, onDelete }: SalesO
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     }
 
-    const handleViewSO = (so: SalesOrder) => {
-        toast({
-            title: "Feature Coming Soon!",
-            description: `The view for Sales Order #${so.id} will use the new template.`,
-        });
-    }
-
     return (
         <>
             <Card>
@@ -114,7 +108,7 @@ export default function SalesOrderList({ salesOrders, onEdit, onDelete }: SalesO
                                         <TableCell className="flex justify-center items-center gap-2">
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Button variant="ghost" size="icon" onClick={() => handleViewSO(salesOrder)}>
+                                                    <Button variant="ghost" size="icon" onClick={() => onView(salesOrder)}>
                                                         <Eye className="h-4 w-4 text-blue-500" />
                                                     </Button>
                                                 </TooltipTrigger>
