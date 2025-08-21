@@ -142,7 +142,7 @@ export default function ProductDetailsModal({
   return (
     <>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-4xl">
+      <DialogContent className="sm:max-w-5xl">
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-4">
@@ -151,11 +151,16 @@ export default function ProductDetailsModal({
               </div>
               <div>
                 <DialogTitle>{product.name}</DialogTitle>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
                       <FileText className="h-4 w-4 text-gray-400" />
                       <DialogDescription className="text-sm">{product.productCode}</DialogDescription>
-                  </div>
+                    </div>
+                    <Separator orientation="vertical" className="h-4" />
+                    <div className="flex items-center gap-1">
+                        <LayoutGrid className="h-4 w-4 text-red-500" />
+                        <span className="text-sm">{product.category}</span>
+                    </div>
                 </div>
               </div>
             </div>
