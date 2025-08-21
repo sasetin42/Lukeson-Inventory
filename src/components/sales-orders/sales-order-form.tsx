@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Loader2, User, Calendar, Hash, FileText, PlusCircle, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { DatePicker } from '../ui/date-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -24,6 +24,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
     const { toast } = useToast();
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
+    const [quotations, setQuotations] = useState<Quotation[]>([]);
     
     const [isSaving, setIsSaving] = useState(false);
 
@@ -33,12 +34,14 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
     const [orderDate, setOrderDate] = useState<Date | undefined>(new Date());
     const [status, setStatus] = useState<SalesOrder['status']>('Draft');
     const [lines, setLines] = useState<DocumentLine[]>([]);
+    const [isStatusDisabled, setIsStatusDisabled] = useState(true);
     
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const customersRef = collection(db, 'customers');
                 const productsRef = collection(db, 'products');
+                const quotationsRef = collection(db, 'quotations');
                 
                 const customersSnapshot = await getDocs(customersRef);
                 const loadedCustomers = customersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer));
@@ -47,9 +50,14 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                 const productsSnapshot = await getDocs(productsRef);
                 const loadedProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
                 setProducts(loadedProducts);
+
+                const quotationsSnapshot = await getDocs(quotationsRef);
+                const loadedQuotations = quotationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
+                setQuotations(loadedQuotations);
+
             } catch (error) {
                 console.error("Error fetching data:", error);
-                toast({ title: "Error", description: "Failed to load customers and products.", variant: "destructive"});
+                toast({ title: "Error", description: "Failed to load customers, products, and quotations.", variant: "destructive"});
             }
         };
         fetchData();
@@ -65,13 +73,14 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
         };
 
         if (salesOrder) {
-            // This logic handles both editing an existing SO and creating from a quotation
-             if (salesOrder.id) { // Editing existing
+             if (salesOrder.id) { 
                 setSalesOrderId(salesOrder.id);
                 setStatus(salesOrder.status || 'Draft');
-            } else { // Creating from quotation
+                setIsStatusDisabled(false);
+            } else { 
                 generateSalesOrderId();
-                setStatus('Confirmed'); // Set to confirmed when creating from a quotation
+                setStatus('Confirmed');
+                setIsStatusDisabled(false);
             }
             setCustomerId(salesOrder.customerId || '');
             setOrderDate(salesOrder.orderDate ? (salesOrder.orderDate instanceof Date ? salesOrder.orderDate : (salesOrder.orderDate as any).toDate()) : new Date());
@@ -82,8 +91,29 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             setStatus('Draft');
             setCustomerId('');
             setOrderDate(new Date());
+            setIsStatusDisabled(true);
         }
     }, [salesOrder]);
+
+    const handleCustomerChange = (selectedCustomerId: string) => {
+        setCustomerId(selectedCustomerId);
+        const approvedQuotation = quotations.find(q => q.customerId === selectedCustomerId && q.status === 'Accepted');
+
+        if (approvedQuotation) {
+            setLines(approvedQuotation.lines);
+            setStatus('Confirmed');
+            setIsStatusDisabled(false);
+            toast({
+                title: "Quotation Found",
+                description: `Populated line items from approved quotation ${approvedQuotation.id}.`,
+                variant: 'success'
+            });
+        } else {
+            setLines([]);
+            setStatus('Draft');
+            setIsStatusDisabled(true);
+        }
+    }
     
     const handleAddLine = () => {
         const newLine: DocumentLine = {
@@ -93,7 +123,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             quantity: 1,
             uom: '',
             unitPrice: 0,
-            taxRate: 0.12, // Default tax
+            taxRate: 0.12,
             total: 0,
         };
         setLines([...lines, newLine]);
@@ -118,7 +148,6 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             }
         }
         
-        // Recalculate total
         const line = newLines[index];
         const subtotal = line.quantity * line.unitPrice;
         const discountAmount = subtotal * ((line as any).discount || 0) / 100;
@@ -165,7 +194,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                 </div>
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><User className="h-4 w-4" /> Customer</Label>
-                    <Select onValueChange={setCustomerId} value={customerId}>
+                    <Select onValueChange={handleCustomerChange} value={customerId}>
                         <SelectTrigger><SelectValue placeholder="Select a customer" /></SelectTrigger>
                         <SelectContent>
                             {customers.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -178,7 +207,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                 </div>
                  <div className="space-y-2">
                     <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Status</Label>
-                    <Select value={status} onValueChange={(value) => setStatus(value as SalesOrder['status'])}>
+                    <Select value={status} onValueChange={(value) => setStatus(value as SalesOrder['status'])} disabled={isStatusDisabled}>
                         <SelectTrigger><SelectValue/></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Draft">Draft</SelectItem>
@@ -259,3 +288,4 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
         </div>
     );
 }
+
