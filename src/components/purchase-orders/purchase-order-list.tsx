@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { format } from 'date-fns';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 
 interface PurchaseOrderListProps {
     purchaseOrders: PurchaseOrder[];
@@ -36,6 +36,7 @@ interface PurchaseOrderListProps {
 export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete }: PurchaseOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [purchaseOrderToDelete, setPurchaseOrderToDelete] = useState<PurchaseOrder | null>(null);
+    const { toast } = useToast();
 
     const openDeleteAlert = (purchaseOrder: PurchaseOrder) => {
         setPurchaseOrderToDelete(purchaseOrder);
@@ -65,6 +66,14 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete }: 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
+    }
+
+    const handleViewPo = (po: PurchaseOrder) => {
+        toast({
+            title: "Purchase Order Sent",
+            description: `PO #${po.id} has been sent to ${po.supplierName}.`,
+            variant: "success",
+        });
     }
 
     return (
@@ -106,11 +115,15 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete }: 
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => handleViewPo(purchaseOrder)}>
+                                                    <Eye className="mr-2 h-4 w-4 text-blue-500" />
+                                                    View PO
+                                                </DropdownMenuItem>
                                                 <DropdownMenuItem onClick={() => onEdit(purchaseOrder)}>
-                                                    <Edit className="mr-2 h-4 w-4" />
+                                                    <Edit className="mr-2 h-4 w-4 text-green-500" />
                                                     Edit
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-destructive" onClick={() => openDeleteAlert(purchaseOrder)}>
+                                                <DropdownMenuItem className="text-red-500" onClick={() => openDeleteAlert(purchaseOrder)}>
                                                     <Trash2 className="mr-2 h-4 w-4" />
                                                     Delete
                                                 </DropdownMenuItem>
