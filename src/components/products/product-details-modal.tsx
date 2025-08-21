@@ -116,7 +116,6 @@ export default function ProductDetailsModal({
     { label: 'SKU', value: product.sku, icon: Barcode, color: 'text-indigo-500' },
     { label: 'Barcode', value: product.barcode, icon: Barcode, color: 'text-gray-500' },
     { label: 'Brand', value: product.brand, icon: Building2, color: 'text-indigo-500' },
-    { label: 'Category', value: product.category, icon: LayoutGrid, color: 'text-red-500' },
     { label: 'Supplier', value: product.supplier, icon: Truck, color: 'text-green-500' },
     { label: 'Price', value: `₱${(product.price || 0).toFixed(2)}`, icon: DollarSign, color: 'text-green-500' },
     { label: 'Cost', value: `₱${(product.cost || 0).toFixed(2)}`, icon: DollarSign, color: 'text-orange-500' },
@@ -142,7 +141,7 @@ export default function ProductDetailsModal({
   return (
     <>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-4xl">
+      <DialogContent className="sm:max-w-5xl">
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-4">
