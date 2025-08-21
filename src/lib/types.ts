@@ -143,11 +143,14 @@ export type Payment = {
 export type PurchaseOrder = {
     id: string; // PO-YYYY-XXXX
     supplierId: string;
-    orderDate: Date;
-    expectedDeliveryDate: Date;
+    supplierName: string;
+    orderDate: Date | FieldValue | string;
+    expectedDeliveryDate: Date | FieldValue | string;
     status: 'Draft' | 'Sent' | 'Confirmed' | 'Partially Received' | 'Received' | 'Billed' | 'Cancelled';
     totalAmount: number;
     lines: DocumentLine[];
+    createdAt?: Date | FieldValue | string;
+    modifiedAt?: Date | FieldValue | string;
 };
 
 export type GoodsReceipt = {
