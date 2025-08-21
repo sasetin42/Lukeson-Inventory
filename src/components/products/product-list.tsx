@@ -263,16 +263,12 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                 <DropdownMenuItem onClick={() => setSelectedProduct(product)}>
-                                    <Eye className="mr-2 h-4 w-4" />
+                                    <Eye className="mr-2 h-4 w-4 text-blue-500" />
                                     View Details
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => onEdit(product)}>
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Edit
-                                </DropdownMenuItem>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-destructive" onClick={() => openDeleteAlert(product)}>
-                                    <Trash2 className="mr-2 h-4 w-4" />
+                                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteAlert(product)}>
+                                    <Trash2 className="mr-2 h-4 w-4 text-red-500" />
                                     Delete
                                 </DropdownMenuItem>
                                 </DropdownMenuContent>
