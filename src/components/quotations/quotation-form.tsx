@@ -138,7 +138,7 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
         try {
             const customer = customers.find(c => c.id === customerId);
             const quotationData = {
-                id: quotation?.id,
+                id: quotation?.id || quotationId,
                 customerId,
                 customerName: customer?.name || 'N/A',
                 qtnDate,

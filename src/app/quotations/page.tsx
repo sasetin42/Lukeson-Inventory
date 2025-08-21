@@ -50,23 +50,30 @@ export default function QuotationsPage() {
   }
 
   const handleSaveQuotation = async (quotationData: Omit<Quotation, 'id'> & { id?: string }) => {
-      try {
-          if (quotationData.id) {
-              const { id, ...dataToSave } = quotationData;
-              const quotationRef = doc(db, "quotations", id);
-              await setDoc(quotationRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
-              toast({ title: "Success", description: "Quotation updated successfully.", variant: "success" });
-          } else {
-              const { id, ...dataToSave } = quotationData;
-              await addDoc(collection(db, "quotations"), { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
-              toast({ title: "Success", description: "Quotation added successfully.", variant: "success" });
-          }
-          handleCloseModal();
-          fetchQuotations();
-      } catch (error) {
-          console.error("Error saving quotation: ", error);
-          toast({ title: "Error", description: "Failed to save quotation.", variant: "destructive" });
+    try {
+      const { id, ...dataToSave } = quotationData;
+      if (id) {
+        const docRef = editingQuotation ? doc(db, "quotations", id) : doc(db, "quotations", id);
+
+        if (editingQuotation) { // We are editing
+          await setDoc(docRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
+          toast({ title: "Success", description: "Quotation updated successfully.", variant: "success" });
+        } else { // We are creating
+          await setDoc(docRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+          toast({ title: "Success", description: "Quotation added successfully.", variant: "success" });
+        }
+      } else {
+        // Fallback for any case where ID is not provided, though it shouldn't happen with the new logic.
+        await addDoc(collection(db, "quotations"), { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+        toast({ title: "Success", description: "Quotation added successfully.", variant: "success" });
       }
+
+      handleCloseModal();
+      fetchQuotations();
+    } catch (error) {
+      console.error("Error saving quotation: ", error);
+      toast({ title: "Error", description: "Failed to save quotation.", variant: "destructive" });
+    }
   };
 
 
