@@ -43,6 +43,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
     const [notes, setNotes] = useState('');
     const [discountType, setDiscountType] = useState<'Fixed' | 'Percent'>('Fixed');
     const [discountValue, setDiscountValue] = useState(0);
+    const [quotationId, setQuotationId] = useState<string | undefined>(undefined);
     
     useEffect(() => {
         const fetchData = async () => {
@@ -87,7 +88,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                 setIsStatusDisabled(false);
             } else { 
                 generateSalesOrderId();
-                setStatus('Confirmed');
+                setStatus('Approved');
                 setIsStatusDisabled(false);
             }
             setCustomerId(salesOrder.customerId || '');
@@ -96,6 +97,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             setNotes(salesOrder.notes || '');
             setDiscountType(salesOrder.discountType || 'Fixed');
             setDiscountValue(salesOrder.discountValue || 0);
+            setQuotationId(salesOrder.quotationId);
         } else {
             generateSalesOrderId();
             setLines([]);
@@ -106,6 +108,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             setNotes('');
             setDiscountType('Fixed');
             setDiscountValue(0);
+            setQuotationId(undefined);
         }
     }, [salesOrder]);
 
@@ -118,6 +121,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             setStatus('Approved');
             setIsStatusDisabled(false);
             setNotes(approvedQuotation.notes || '');
+            setQuotationId(approvedQuotation.id);
             toast({
                 title: "Quotation Found",
                 description: `Populated line items from approved quotation ${approvedQuotation.id}.`,
@@ -128,6 +132,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             setStatus('Draft');
             setIsStatusDisabled(true);
             setNotes('');
+            setQuotationId(undefined);
         }
     }
     
@@ -197,8 +202,9 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                 const discountedTotal = line.total - lineDiscount;
 
                 if (line.vatType === 'VATable') {
-                    vatableSales += discountedTotal;
-                    vatAmount += (discountedTotal / (1 + line.taxRate)) * line.taxRate;
+                    const baseAmount = discountedTotal / (1 + line.taxRate)
+                    vatableSales += baseAmount;
+                    vatAmount += baseAmount * line.taxRate;
                 } else if (line.vatType === 'VAT-Exempt') {
                     vatExemptSales += discountedTotal;
                 } else if (line.vatType === 'Zero-Rated') {
@@ -235,7 +241,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                 lines,
                 notes,
                 totalAmount: totals.totalAmount,
-                quotationId: (salesOrder as SalesOrder)?.quotationId,
+                quotationId,
                 discountType,
                 discountValue,
             };
