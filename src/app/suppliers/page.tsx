@@ -9,27 +9,13 @@ import SupplierList from "@/components/suppliers/supplier-list";
 import { Supplier } from '@/lib/types';
 import SupplierFormModal from '@/components/suppliers/supplier-form-modal';
 import { useToast } from '@/hooks/use-toast';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { suppliers as initialSuppliers } from '@/lib/data';
 
 export default function SuppliersPage() {
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'suppliers'), (snapshot) => {
-        const suppliersData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Supplier));
-        setSuppliers(suppliersData);
-    }, (error) => {
-        console.error("Failed to load suppliers from Firestore", error);
-        toast({ title: "Error", description: "Failed to load suppliers.", variant: "destructive" });
-    });
-
-    return () => unsub();
-  }, [toast]);
-
 
   const handleOpenModal = (supplier: Supplier | null) => {
     setEditingSupplier(supplier);
@@ -37,33 +23,19 @@ export default function SuppliersPage() {
   };
 
   const handleAddSupplier = async (newSupplierData: Omit<Supplier, 'id'>) => {
-    try {
-      await addDoc(collection(db, 'suppliers'), newSupplierData);
-      toast({ title: "Success", description: "Supplier added successfully.", variant: "success" });
-    } catch (error) {
-      console.error("Error adding supplier: ", error);
-      toast({ title: "Error", description: "Failed to add supplier.", variant: "destructive" });
-    }
+    const newSupplier = { ...newSupplierData, id: `sup-${Date.now()}` };
+    setSuppliers([newSupplier, ...suppliers]);
+    toast({ title: "Success", description: "Supplier added successfully.", variant: "success" });
   };
 
   const handleUpdateSupplier = async (supplierId: string, updatedSupplierData: Partial<Supplier>) => {
-    try {
-      await updateDoc(doc(db, 'suppliers', supplierId), updatedSupplierData);
-      toast({ title: "Success", description: "Supplier updated successfully.", variant: "success" });
-    } catch (error) {
-      console.error("Error updating supplier: ", error);
-      toast({ title: "Error", description: "Failed to update supplier.", variant: "destructive" });
-    }
+    setSuppliers(suppliers.map(s => s.id === supplierId ? { ...s, ...updatedSupplierData } : s));
+    toast({ title: "Success", description: "Supplier updated successfully.", variant: "success" });
   };
 
   const handleDeleteSupplier = async (supplierId: string) => {
-    try {
-      await deleteDoc(doc(db, 'suppliers', supplierId));
-      toast({ title: "Success", description: "Supplier deleted successfully.", variant: "success" });
-    } catch (error) {
-      console.error("Error deleting supplier: ", error);
-      toast({ title: "Error", description: "Failed to delete supplier.", variant: "destructive" });
-    }
+    setSuppliers(suppliers.filter(s => s.id !== supplierId));
+    toast({ title: "Success", description: "Supplier deleted successfully.", variant: "success" });
   };
 
   return (

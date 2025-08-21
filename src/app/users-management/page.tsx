@@ -9,34 +9,13 @@ import { User } from '@/lib/types';
 import UserList from '@/components/users/user-list';
 import UserFormModal from '@/components/users/user-form-modal';
 import { useToast } from '@/hooks/use-toast';
-import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
-import { Timestamp } from 'firebase/firestore';
+import { users as initialUsers } from '@/lib/data';
 
 export default function UsersManagementPage() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>(initialUsers);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const { toast } = useToast();
-
-  useEffect(() => {
-    const unsub = onSnapshot(collection(db, "users"), (snapshot) => {
-        const usersData = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                ...data,
-                lastLoginAt: (data.lastLoginAt as Timestamp)?.toDate(),
-            } as User;
-        });
-        setUsers(usersData);
-    }, (error) => {
-        console.error("Failed to load users from Firestore", error);
-        toast({ title: "Error", description: "Failed to load users.", variant: "destructive" });
-    });
-
-    return () => unsub();
-  }, [toast]);
 
   const handleOpenModal = (user: User | null) => {
     setEditingUser(user);
@@ -52,10 +31,16 @@ export default function UsersManagementPage() {
     const { id, ...dataToSave } = userData;
     try {
         if (id) { // Editing existing user
-            await updateDoc(doc(db, "users", id), dataToSave);
+            setUsers(users.map(u => u.id === id ? { ...u, ...dataToSave } : u));
             toast({ title: "Success", description: "User updated successfully.", variant: "success" });
         } else { // Adding new user
-            await addDoc(collection(db, "users"), { ...dataToSave, createdAt: serverTimestamp() });
+            const newUser = {
+                ...dataToSave,
+                id: `user-${Date.now()}`,
+                createdAt: new Date().toISOString(),
+                lastLoginAt: new Date().toISOString()
+            } as User;
+            setUsers([newUser, ...users]);
             toast({ title: "Success", description: "User added successfully.", variant: "success" });
         }
         handleCloseModal();
@@ -66,13 +51,8 @@ export default function UsersManagementPage() {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    try {
-      await deleteDoc(doc(db, "users", userId));
-      toast({ title: "Success", description: "User deleted successfully.", variant: "success" });
-    } catch (error) {
-      console.error("Error deleting user: ", error);
-      toast({ title: "Error", description: "Failed to delete user.", variant: "destructive" });
-    }
+    setUsers(users.filter(u => u.id !== userId));
+    toast({ title: "Success", description: "User deleted successfully.", variant: "success" });
   };
 
   return (

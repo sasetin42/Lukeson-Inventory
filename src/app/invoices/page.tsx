@@ -7,34 +7,17 @@ import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle } from "lucide-react";
 import InvoiceList from "@/components/invoices/invoice-list";
 import { Invoice } from '@/lib/types';
+import { invoices as initialInvoices } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { Timestamp } from 'firebase/firestore';
-
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'invoices'), (snapshot) => {
-        const invoicesData = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                ...data,
-                date: (data.date as Timestamp).toDate(),
-            } as Invoice;
-        });
-        setInvoices(invoicesData);
-    }, (error) => {
-        console.error("Failed to load invoices from Firestore", error);
-        toast({ title: "Error", description: "Failed to load invoices.", variant: "destructive" });
-    });
-
-    return () => unsub();
-  }, [toast]);
+    // Using mock data since Firebase is removed
+    setInvoices(initialInvoices);
+  }, []);
 
 
   return (

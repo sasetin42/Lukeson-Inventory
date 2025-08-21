@@ -31,9 +31,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import ProductImage from './product-image';
 import { format } from 'date-fns';
-import { Timestamp } from 'firebase/firestore';
-import { onSnapshot, collection } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { categories as initialCategories } from '@/lib/data';
 
 interface ProductListProps {
     products: Product[];
@@ -53,19 +51,10 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
-    const [categories, setCategories] = useState<ItemCategory[]>([]);
+    const [categories, setCategories] = useState<ItemCategory[]>(initialCategories);
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const { toast } = useToast();
-
-    useEffect(() => {
-        const unsub = onSnapshot(collection(db, 'categories'), (snapshot) => {
-            const categoriesData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as ItemCategory));
-            setCategories(categoriesData);
-        });
-
-        return () => unsub();
-    }, []);
 
     const getStatusVariant = (status: string) => {
         switch (status) {
@@ -86,17 +75,19 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
         setIsDeleteAlertOpen(true);
     }
 
-    const handleDelete = async () => {
+    const handleDelete = () => {
         if (!productToDelete) return;
-        try {
-            await onDelete(productToDelete);
-        } catch (error) {
-            toast({ title: "Error", description: "Failed to delete product.", variant: "destructive" });
-        } finally {
-            setIsDeleteAlertOpen(false);
-            setProductToDelete(null);
-        }
+        onDelete(productToDelete);
+        setIsDeleteAlertOpen(false);
+        setProductToDelete(null);
     };
+
+    const handleToggleStatus = (productToToggle: Product) => {
+        const newStatus = productToToggle.status === 'Discontinued' ? 'In Stock' : 'Discontinued';
+        const updatedProduct = { ...productToToggle, status: newStatus };
+        onEdit(updatedProduct); // This will trigger the parent's save logic. A bit of a hack for local state.
+        toast({ title: 'Success', description: `Product has been ${newStatus === 'Discontinued' ? 'deactivated' : 'activated'}.`, variant: 'success' });
+    }
     
     const filteredProducts = useMemo(() => {
         return products.filter(product => {
@@ -214,8 +205,8 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                         <TableCell>
                         <Badge variant={getStatusVariant(product.status)}>{product.status}</Badge>
                         </TableCell>
-                        <TableCell>{product.createdAt ? format((product.createdAt as Timestamp).toDate(), 'PP') : 'N/A'}</TableCell>
-                        <TableCell>{product.modifiedAt ? format((product.modifiedAt as Timestamp).toDate(), 'PP') : 'N/A'}</TableCell>
+                        <TableCell>{product.createdAt ? format(new Date(product.createdAt as string), 'PP') : 'N/A'}</TableCell>
+                        <TableCell>{product.modifiedAt ? format(new Date(product.modifiedAt as string), 'PP') : 'N/A'}</TableCell>
                         <TableCell>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -258,6 +249,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
             product={selectedProduct}
             onEdit={onEdit}
             onDelete={openDeleteAlert}
+            onToggleStatus={handleToggleStatus}
         />
         </Card>
         <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>

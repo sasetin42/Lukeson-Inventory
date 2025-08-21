@@ -1,6 +1,4 @@
 
-
-import { FieldValue, Timestamp } from "firebase/firestore";
 import type { LucideIcon } from "lucide-react";
 
 // Main Company Information
@@ -25,8 +23,8 @@ export type User = {
     email: string;
     role: 'Admin' | 'Inventory Manager' | 'Sales' | 'Purchasing' | 'Finance' | 'Auditor';
     status: 'active' | 'inactive';
-    lastLoginAt?: Timestamp;
-    createdAt: FieldValue | Timestamp | Date;
+    lastLoginAt?: string | Date;
+    createdAt: string | Date;
 };
 
 // Contacts
@@ -68,7 +66,7 @@ export type ItemCategory = {
     description?: string;
     productImage?: string;
     parentId?: string;
-    createdAt: FieldValue | Timestamp | Date;
+    createdAt: string | Date;
 };
 
 export type Stock = {
@@ -98,8 +96,8 @@ export type DocumentLine = {
 export type Quotation = {
     id: string; // QTN-YYYY-XXXX
     customerId: string;
-    qtnDate: Timestamp;
-    expiryDate: Timestamp;
+    qtnDate: string | Date;
+    expiryDate: string | Date;
     status: 'Draft' | 'Sent' | 'Accepted' | 'Expired';
     totalAmount: number;
     lines: DocumentLine[];
@@ -108,7 +106,7 @@ export type Quotation = {
 export type SalesOrder = {
     id: string; // SO-YYYY-XXXX
     customerId: string;
-    orderDate: Timestamp;
+    orderDate: string | Date;
     status: 'Draft' | 'Confirmed' | 'Fulfilled' | 'Invoiced' | 'Cancelled';
     totalAmount: number;
     lines: DocumentLine[];
@@ -117,8 +115,8 @@ export type SalesOrder = {
 export type SalesInvoice = {
     id:string; // INV-YYYY-XXXX
     salesOrderId: string;
-    invoiceDate: Timestamp;
-    dueDate: Timestamp;
+    invoiceDate: string | Date;
+    dueDate: string | Date;
     status: 'Draft' | 'Posted' | 'Paid' | 'Overdue';
     totalAmount: number;
     paidAmount: number;
@@ -129,7 +127,7 @@ export type SalesInvoice = {
 export type Payment = {
     id: string;
     invoiceId: string;
-    paymentDate: Timestamp;
+    paymentDate: string | Date;
     amount: number;
     paymentMethod: string;
 };
@@ -139,8 +137,8 @@ export type Payment = {
 export type PurchaseOrder = {
     id: string; // PO-YYYY-XXXX
     supplierId: string;
-    orderDate: Timestamp;
-    expectedDeliveryDate: Timestamp;
+    orderDate: string | Date;
+    expectedDeliveryDate: string | Date;
     status: 'Draft' | 'Sent' | 'Confirmed' | 'Partially Received' | 'Received' | 'Billed' | 'Cancelled';
     totalAmount: number;
     lines: DocumentLine[];
@@ -149,7 +147,7 @@ export type PurchaseOrder = {
 export type GoodsReceipt = {
     id: string; // GRN-YYYY-XXXX
     purchaseOrderId: string;
-    receiptDate: Timestamp;
+    receiptDate: string | Date;
     warehouseId: string;
     lines: {
         id: string;
@@ -162,8 +160,8 @@ export type GoodsReceipt = {
 export type Bill = {
     id: string;
     goodsReceiptId: string;
-    billDate: Timestamp;
-    dueDate: Timestamp;
+    billDate: string | Date;
+    dueDate: string | Date;
     status: 'Draft' | 'Posted' | 'Paid' | 'Overdue';
     totalAmount: number;
     paidAmount: number;
@@ -174,7 +172,7 @@ export type Bill = {
 export type SupplierPayment = {
     id: string;
     billId: string;
-    paymentDate: Timestamp;
+    paymentDate: string | Date;
     amount: number;
     paymentMethod: string;
 };
@@ -183,7 +181,7 @@ export type SupplierPayment = {
 // Stock Movement & Returns
 export type StockMovement = {
     id: string;
-    moveDate: Timestamp;
+    moveDate: string | Date;
     type: 'Transfer' | 'Adjustment-In' | 'Adjustment-Out';
     fromWarehouseId?: string;
     toWarehouseId?: string;
@@ -196,7 +194,7 @@ export type Return = {
     id: string; // RA-YYYY-XXXX
     type: 'Sales Return' | 'Purchase Return';
     documentId: string; // SalesInvoiceId or GoodsReceiptId
-    returnDate: Timestamp;
+    returnDate: string | Date;
     status: 'Pending' | 'Approved' | 'Rejected';
     lines: {
         id: string;
@@ -210,7 +208,7 @@ export type Return = {
 export type TopSellingItem = {
     id: string;
     name: string;
-    productImage: string;
+    productImage?: string;
     unitsSold: number;
     revenue: number;
 };
@@ -218,7 +216,7 @@ export type TopSellingItem = {
 export type SlowMovingItem = {
     id: string;
     name: string;
-    productImage: string;
+    productImage?: string;
     daysInStock: number;
     stock: number;
 };
@@ -267,7 +265,7 @@ export type Product = {
     id: string;
     productCode?: string;
     category: string;
-    productImage?: string;
+    productImage?: string | null;
     name: string;
     sku: string;
     description: string;
@@ -280,13 +278,10 @@ export type Product = {
     stock: number;
     price: number;
     reOrderLevel: number;
-    createdAt: FieldValue | Timestamp | Date;
-    modifiedAt?: FieldValue | Timestamp | Date;
+    createdAt: string | Date;
+    modifiedAt?: string | Date;
     status: 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Discontinued';
     suppliers?: Supplier[];
     uom: string;
     expiryDateTracking: boolean;
 };
-
-
-

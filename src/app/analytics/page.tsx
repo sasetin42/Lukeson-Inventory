@@ -20,9 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Product, Sales, Supplier } from '@/lib/types';
 import SupplierOnTimeChart from '@/components/analytics/supplier-on-time-chart';
 import { useToast } from '@/hooks/use-toast';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { Timestamp } from 'firebase/firestore';
+import { products as initialProducts, sales as initialSales, suppliers as initialSuppliers } from '@/lib/data';
 
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState("30");
@@ -33,33 +31,10 @@ export default function AnalyticsPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
-        const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
-        setProducts(productsData);
-    });
-
-    const unsubSales = onSnapshot(collection(db, 'sales'), (snapshot) => {
-        const salesData = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return { 
-                id: doc.id, 
-                ...data,
-                date: (data.date as Timestamp).toDate()
-            } as Sales;
-        });
-        setSales(salesData);
-    });
-
-    const unsubSuppliers = onSnapshot(collection(db, 'suppliers'), (snapshot) => {
-        const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Supplier[];
-        setSuppliers(suppliersData);
-    });
-
-    return () => {
-        unsubProducts();
-        unsubSales();
-        unsubSuppliers();
-    }
+    // Using mock data since Firebase is removed
+    setProducts(initialProducts);
+    setSales(initialSales);
+    setSuppliers(initialSuppliers);
   }, []);
 
   useEffect(() => {

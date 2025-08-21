@@ -4,7 +4,6 @@ import { Package, DollarSign, AlertTriangle, XCircle } from 'lucide-react';
 import KpiCard from '@/components/kpi-card';
 import { Product } from '@/lib/types';
 import Link from 'next/link';
-import { Timestamp } from 'firebase/firestore';
 
 interface InventoryOverviewProps {
     products: Product[];
@@ -18,7 +17,7 @@ export default function InventoryOverview({ products }: InventoryOverviewProps) 
   
   const addedLastMonth = products.filter(p => {
     if (!p.createdAt) return false;
-    const createdAtDate = (p.createdAt as Timestamp).toDate ? (p.createdAt as Timestamp).toDate() : new Date(p.createdAt);
+    const createdAtDate = new Date(p.createdAt as string);
     const lastMonth = new Date();
     lastMonth.setMonth(lastMonth.getMonth() - 1);
     return createdAtDate > lastMonth;

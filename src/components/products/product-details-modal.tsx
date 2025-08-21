@@ -54,9 +54,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import ProductImage from './product-image';
 import { format } from 'date-fns';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { Timestamp } from 'firebase/firestore';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -64,6 +61,7 @@ interface ProductDetailsModalProps {
   onClose: () => void;
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
+  onToggleStatus: (product: Product) => void;
 }
 
 export default function ProductDetailsModal({
@@ -72,6 +70,7 @@ export default function ProductDetailsModal({
   onClose,
   onEdit,
   onDelete,
+  onToggleStatus,
 }: ProductDetailsModalProps) {
   const { toast } = useToast();
   const [isDeactivateAlertOpen, setDeactivateAlertOpen] = useState(false);
@@ -93,17 +92,9 @@ export default function ProductDetailsModal({
   };
   
   const handleToggleStatus = async () => {
-      const newStatus = product.status === 'Discontinued' ? 'In Stock' : 'Discontinued';
-      try {
-        const productRef = doc(db, 'products', product.id);
-        await updateDoc(productRef, { status: newStatus });
-        toast({ title: 'Success', description: `Product has been ${newStatus === 'Discontinued' ? 'deactivated' : 'activated'}.`, variant: 'success' });
-        onClose();
-      } catch (error) {
-          toast({ title: 'Error', description: 'Failed to update product status.', variant: 'destructive'});
-      } finally {
-        setDeactivateAlertOpen(false);
-      }
+      onToggleStatus(product);
+      setDeactivateAlertOpen(false);
+      onClose();
   }
 
   const handleDeleteClick = () => {
@@ -133,6 +124,9 @@ export default function ProductDetailsModal({
   const rightColumnDetails = availableDetails.slice(midPoint);
   
   const isActive = product.status !== 'Discontinued';
+  
+  const createdAt = product.createdAt ? format(new Date(product.createdAt as string), 'PP') : 'N/A';
+  const modifiedAt = product.modifiedAt ? format(new Date(product.modifiedAt as string), 'PP') : 'N/A';
 
   return (
     <>
@@ -160,8 +154,8 @@ export default function ProductDetailsModal({
               </div>
             </div>
             <div className="text-right text-xs text-muted-foreground">
-                {product.createdAt && <div>Created: {format((product.createdAt as Timestamp).toDate(), 'PP')}</div>}
-                {product.modifiedAt && <div>Modified: {format((product.modifiedAt as Timestamp).toDate(), 'PP')}</div>}
+                <div>Created: {createdAt}</div>
+                <div>Modified: {modifiedAt}</div>
             </div>
           </div>
         </DialogHeader>

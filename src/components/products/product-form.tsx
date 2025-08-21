@@ -13,8 +13,7 @@ import Image from 'next/image';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '../ui/progress';
-import { collection, getDocs, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { categories as initialCategories, suppliers as initialSuppliers } from '@/lib/data';
 
 interface ProductFormProps {
   product: Product | null;
@@ -35,8 +34,8 @@ const categoryIcons: { [key: string]: React.ReactElement } = {
 
 export default function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
     const { toast } = useToast();
-    const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-    const [categories, setCategories] = useState<ItemCategory[]>([]);
+    const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
+    const [categories, setCategories] = useState<ItemCategory[]>(initialCategories);
     
     const [isSaving, setIsSaving] = useState(false);
     const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -60,29 +59,12 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [reOrderLevel, setReOrderLevel] = useState('');
     const [expiryDateTracking, setExpiryDateTracking] = useState(false);
 
-    useEffect(() => {
-        const unsubSuppliers = onSnapshot(collection(db, "suppliers"), (snapshot) => {
-            const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Supplier[];
-            setSuppliers(suppliersData);
-        });
-        
-        const unsubCategories = onSnapshot(collection(db, "categories"), (snapshot) => {
-            const categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as ItemCategory[];
-            setCategories(categoriesData);
-        });
-
-        return () => {
-            unsubSuppliers();
-            unsubCategories();
-        }
-    }, []);
 
     useEffect(() => {
-        const generateProductCode = async () => {
+        const generateProductCode = () => {
             const year = new Date().getFullYear();
-            const productsCol = collection(db, 'products');
-            const snapshot = await getDocs(productsCol);
-            const productsCount = snapshot.size;
+            // This is a mock count. In a real app, you'd get this from your data source.
+            const productsCount = 100;
             setProductCode(`PRO-${year}-${(productsCount + 1).toString().padStart(3, '0')}`);
         };
 
@@ -198,7 +180,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 expiryDateTracking,
                 status: stockStatus,
                 imageFile,
-                modifiedAt: new Date(),
+                modifiedAt: new Date().toISOString(),
             };
             
             onSuccess(productData);
