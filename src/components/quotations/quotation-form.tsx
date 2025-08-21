@@ -36,6 +36,7 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
     const [expiryDate, setExpiryDate] = useState<Date | undefined>();
     const [status, setStatus] = useState<Quotation['status']>('Draft');
     const [lines, setLines] = useState<DocumentLine[]>([]);
+    const [notes, setNotes] = useState('');
     
     useEffect(() => {
         const fetchData = async () => {
@@ -74,12 +75,14 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
             setExpiryDate(quotation.expiryDate ? (quotation.expiryDate as any).toDate() : undefined);
             setStatus(quotation.status || 'Draft');
             setLines(quotation.lines || []);
+            setNotes(quotation.notes || '');
         } else {
             generateQuotationId();
             const defaultExpiry = new Date();
             defaultExpiry.setDate(defaultExpiry.getDate() + 30);
             setExpiryDate(defaultExpiry);
             setLines([]);
+            setNotes('');
         }
     }, [quotation]);
     
@@ -141,6 +144,7 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
                 expiryDate,
                 status,
                 lines,
+                notes,
                 totalAmount: calculateTotalAmount(),
             };
             onSuccess(quotationData);
@@ -228,6 +232,11 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
                 <Button variant="outline" size="sm" onClick={handleAddLine} className="mt-2">
                     <PlusCircle className="mr-2 h-4 w-4"/> Add Line Item
                 </Button>
+            </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="notes">Notes (Optional)</Label>
+                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add any notes for the customer..."/>
             </div>
 
             <div className="flex justify-end items-center gap-6 mt-4">

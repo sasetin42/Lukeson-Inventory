@@ -105,6 +105,7 @@ export type Quotation = {
     status: 'Draft' | 'Sent' | 'Accepted' | 'Expired';
     totalAmount: number;
     lines: DocumentLine[];
+    notes?: string;
 };
 
 export type SalesOrder = {
