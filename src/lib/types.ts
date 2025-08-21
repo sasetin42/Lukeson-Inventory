@@ -265,7 +265,7 @@ export type ProductKpi = {
 
 export type Product = {
     id: string;
-    productCode: string;
+    productCode?: string;
     category: string;
     productImage?: string;
     name: string;
@@ -290,3 +290,4 @@ export type Product = {
     vatType: 'VATABLE' | 'VAT-EXEMPT' | 'ZERO-RATED';
     barcode?: string;
 };
+

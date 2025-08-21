@@ -114,6 +114,7 @@ export default function ProductDetailsModal({
     { label: 'Category', value: product.category, icon: LayoutGrid, color: 'text-red-500' },
     { label: 'Supplier', value: product.supplier, icon: Truck, color: 'text-green-500' },
     { label: 'Price', value: `₱${(product.price || 0).toFixed(2)}`, icon: DollarSign, color: 'text-green-500' },
+    { label: 'Cost', value: `₱${(product.cost || 0).toFixed(2)}`, icon: DollarSign, color: 'text-orange-500' },
     { label: 'VAT Type', value: product.vatType, icon: Percent, color: 'text-green-500' },
     { label: 'UOM', value: product.uom, icon: Scaling, color: 'text-purple-500' },
     { label: 'LED Qty', value: product.ledQty ? `${product.ledQty}L` : 'N/A', icon: Lightbulb, color: 'text-yellow-500' },
@@ -171,7 +172,7 @@ export default function ProductDetailsModal({
               </h4>
               <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] pl-7">
                 {details.map((detail) => {
-                  if (!detail.value) return null;
+                  if (!detail.value || detail.value === 'N/A') return null;
                   const Icon = detail.icon;
                   return (
                     <div key={detail.label} className="flex items-center justify-between">
