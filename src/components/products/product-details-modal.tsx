@@ -116,6 +116,7 @@ export default function ProductDetailsModal({
     { label: 'SKU', value: product.sku, icon: Barcode, color: 'text-indigo-500' },
     { label: 'Barcode', value: product.barcode, icon: Barcode, color: 'text-gray-500' },
     { label: 'Brand', value: product.brand, icon: Building2, color: 'text-indigo-500' },
+    { label: 'Category', value: product.category, icon: LayoutGrid, color: 'text-red-500' },
     { label: 'Supplier', value: product.supplier, icon: Truck, color: 'text-green-500' },
     { label: 'Price', value: `₱${(product.price || 0).toFixed(2)}`, icon: DollarSign, color: 'text-green-500' },
     { label: 'Cost', value: `₱${(product.cost || 0).toFixed(2)}`, icon: DollarSign, color: 'text-orange-500' },
@@ -130,6 +131,11 @@ export default function ProductDetailsModal({
     { label: 'Re-Order Level', value: product.reOrderLevel, icon: AlertTriangle, color: 'text-yellow-500' },
     { label: 'Expiry Tracking', value: product.expiryDateTracking ? 'Enabled' : 'Disabled', icon: CalendarClock, color: 'text-cyan-500', isBool: true },
   ];
+
+  const detailPairs: (typeof details)[][] = [];
+    for (let i = 0; i < details.length; i += 2) {
+      detailPairs.push(details.slice(i, i + 2));
+  }
   
   const isActive = product.status !== 'Discontinued';
 
@@ -139,25 +145,18 @@ export default function ProductDetailsModal({
       <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2">
+            <div className="flex items-start gap-4">
+              <div className="p-2 bg-blue-100 rounded-md">
                 <Package className="h-6 w-6 text-blue-500" />
-                <DialogTitle>{product.name}</DialogTitle>
               </div>
-              <div className="flex items-center gap-4 ml-8 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-gray-400" />
-                    <DialogDescription className="text-sm">{product.productCode}</DialogDescription>
+              <div>
+                <DialogTitle>{product.name}</DialogTitle>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-gray-400" />
+                      <DialogDescription className="text-sm">{product.productCode}</DialogDescription>
+                  </div>
                 </div>
-                {product.category && (
-                    <>
-                        <Separator orientation="vertical" className="h-4" />
-                        <div className="flex items-center gap-2">
-                            <LayoutGrid className="h-4 w-4 text-red-500" />
-                            <span className="font-medium">{product.category}</span>
-                        </div>
-                    </>
-                )}
               </div>
             </div>
             <div className="text-right text-xs text-muted-foreground">
@@ -193,39 +192,43 @@ export default function ProductDetailsModal({
                 <Info className="h-5 w-5 text-blue-500" />
                 Details
               </h4>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-[13px] pl-7">
-                {details.map((detail) => {
-                  if (!detail.value || detail.value === 'N/A') return null;
-                  const Icon = detail.icon;
-                  return (
-                    <div key={detail.label} className="flex items-center justify-between">
-                      <span className="flex items-center gap-2 text-muted-foreground">
-                        <Icon className={`h-4 w-4 ${detail.color}`} />
-                        {detail.label}
-                      </span>
-                      {detail.label === 'Stock' ? (
-                        <Badge variant={getStatusVariant(detail.status as string)}>
-                          {detail.value} ({detail.status})
-                        </Badge>
-                      ) : detail.isBool ? (
-                        <span
-                          className={`flex items-center gap-1 font-medium ${
-                            product.expiryDateTracking ? 'text-green-600' : 'text-red-600'
-                          }`}
-                        >
-                          {product.expiryDateTracking ? (
-                            <CheckCircle className="h-4 w-4" />
+              <div className="text-[13px] pl-7 space-y-2">
+                {detailPairs.map((pair, index) => (
+                  <div key={index} className="grid grid-cols-2 gap-x-4 gap-y-1">
+                    {pair.map(detail => {
+                      if (!detail.value || detail.value === 'N/A') return <div key={detail.label} />;
+                      const Icon = detail.icon;
+                      return (
+                         <div key={detail.label} className="flex items-center justify-between py-1 border-b border-dashed">
+                          <span className="flex items-center gap-2 text-muted-foreground">
+                            <Icon className={`h-4 w-4 ${detail.color}`} />
+                            {detail.label}
+                          </span>
+                          {detail.label === 'Stock' ? (
+                            <Badge variant={getStatusVariant(detail.status as string)}>
+                              {detail.value} ({detail.status})
+                            </Badge>
+                          ) : detail.isBool ? (
+                            <span
+                              className={`flex items-center gap-1 font-medium ${
+                                product.expiryDateTracking ? 'text-green-600' : 'text-red-600'
+                              }`}
+                            >
+                              {product.expiryDateTracking ? (
+                                <CheckCircle className="h-4 w-4" />
+                              ) : (
+                                <XCircle className="h-4 w-4" />
+                              )}
+                              {detail.value}
+                            </span>
                           ) : (
-                            <XCircle className="h-4 w-4" />
+                            <span className="font-medium">{detail.value}</span>
                           )}
-                          {detail.value}
-                        </span>
-                      ) : (
-                        <span className="font-medium">{detail.value}</span>
-                      )}
-                    </div>
-                  );
-                })}
+                        </div>
+                      )
+                    })}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
