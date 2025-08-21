@@ -142,7 +142,7 @@ export default function ProductDetailsModal({
   return (
     <>
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-5xl">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-4">
