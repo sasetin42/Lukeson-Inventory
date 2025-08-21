@@ -20,15 +20,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 interface QuotationListProps {
     quotations: Quotation[];
     onView: (quotation: Quotation) => void;
     onEdit: (quotation: Quotation) => void;
     onDelete: (quotationId: string) => void;
+    onApprove: (quotation: Quotation) => void;
 }
 
-export default function QuotationList({ quotations, onView, onEdit, onDelete }: QuotationListProps) {
+export default function QuotationList({ quotations, onView, onEdit, onDelete, onApprove }: QuotationListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [quotationToDelete, setQuotationToDelete] = useState<Quotation | null>(null);
 
@@ -65,11 +67,6 @@ export default function QuotationList({ quotations, onView, onEdit, onDelete }: 
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     }
 
-    const handleApprove = (quotation: Quotation) => {
-        // Here you would typically update the quotation status to 'Accepted'
-        console.log(`Approving quotation ${quotation.id}`);
-    }
-
     return (
         <>
             <Card>
@@ -78,6 +75,7 @@ export default function QuotationList({ quotations, onView, onEdit, onDelete }: 
                     <CardDescription>A list of all your quotations.</CardDescription>
                 </CardHeader>
                 <CardContent>
+                    <TooltipProvider>
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -106,20 +104,36 @@ export default function QuotationList({ quotations, onView, onEdit, onDelete }: 
                                         <Badge variant={getStatusVariant(quotation.status)}>{quotation.status}</Badge>
                                     </TableCell>
                                     <TableCell className="flex items-center gap-1">
-                                        <Button variant="ghost" size="icon" onClick={() => onView(quotation)}>
-                                            <Eye className="h-4 w-4 text-blue-500" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => handleApprove(quotation)}>
-                                            <CheckCircle className="h-4 w-4 text-green-500" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => openDeleteAlert(quotation)}>
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button variant="ghost" size="icon" onClick={() => onView(quotation)}>
+                                                    <Eye className="h-4 w-4 text-blue-500" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>View Details</TooltipContent>
+                                        </Tooltip>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button variant="ghost" size="icon" onClick={() => onApprove(quotation)} disabled={quotation.status === 'Accepted'}>
+                                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Approve</TooltipContent>
+                                        </Tooltip>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => openDeleteAlert(quotation)}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Delete</TooltipContent>
+                                        </Tooltip>
                                     </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
+                    </TooltipProvider>
                     {quotations.length === 0 && (
                         <div className="text-center py-10 text-muted-foreground">
                             No quotations found.

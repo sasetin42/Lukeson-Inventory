@@ -92,6 +92,18 @@ export default function QuotationsPage() {
     fetchQuotations();
   };
 
+  const handleApproveQuotation = async (quotation: Quotation) => {
+    const docRef = doc(db, "quotations", quotation.id);
+    try {
+        await setDoc(docRef, { status: 'Accepted', modifiedAt: serverTimestamp() }, { merge: true });
+        toast({ title: 'Success', description: `Quotation ${quotation.id} has been approved.`, variant: 'success' });
+        fetchQuotations();
+    } catch (error) {
+        console.error("Error approving quotation: ", error);
+        toast({ title: 'Error', description: 'Failed to approve quotation.', variant: 'destructive' });
+    }
+  }
+
   const totalQuotations = quotations.length;
   const pendingQuotations = quotations.filter(q => q.status === 'Sent' || q.status === 'Draft').length;
   const acceptedQuotations = quotations.filter(q => q.status === 'Accepted').length;
@@ -137,6 +149,7 @@ export default function QuotationsPage() {
         onView={handleOpenDetailsModal}
         onEdit={handleOpenFormModal}
         onDelete={handleDeleteQuotation}
+        onApprove={handleApproveQuotation}
       />
       {isFormModalOpen && (
         <QuotationFormModal
