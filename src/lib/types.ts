@@ -59,6 +59,8 @@ export type Warehouse = {
     code: string;
     address: string;
     isPrimary: boolean;
+    createdAt: Date | FieldValue;
+    modifiedAt?: Date | FieldValue;
 };
 
 export type ItemCategory = {
