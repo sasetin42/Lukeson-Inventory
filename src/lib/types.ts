@@ -116,6 +116,7 @@ export type SalesOrder = {
     status: 'Draft' | 'Confirmed' | 'Fulfilled' | 'Invoiced' | 'Cancelled';
     totalAmount: number;
     lines: DocumentLine[];
+    quotationId?: string; // Link to the original quotation
 };
 
 export type SalesInvoice = {

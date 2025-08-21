@@ -7,8 +7,8 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign } from "lucide-react";
 import SalesOrderList from "@/components/sales-orders/sales-order-list";
-import { SalesOrder, Customer } from '@/lib/types';
-import SalesOrderFormModal from '@/components/sales-orders/sales-order-form-modal';
+import { SalesOrder, Customer, Quotation } from '@/lib/types';
+import SalesOrderFormModal from "@/components/sales-orders/sales-order-form-modal";
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, query, where, getDoc } from 'firebase/firestore';
@@ -21,7 +21,30 @@ function SalesOrdersContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const customerIdFilter = searchParams.get('customerId');
+  const fromQuotation = searchParams.get('fromQuotation');
   const [customerName, setCustomerName] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (fromQuotation) {
+      try {
+        const quotationData: Quotation = JSON.parse(decodeURIComponent(fromQuotation));
+        const newSalesOrder: Omit<SalesOrder, 'id'> = {
+            customerId: quotationData.customerId,
+            customerName: quotationData.customerName,
+            orderDate: new Date(),
+            status: 'Draft',
+            lines: quotationData.lines,
+            totalAmount: quotationData.totalAmount,
+            quotationId: quotationData.id,
+        };
+        setEditingSalesOrder(newSalesOrder as SalesOrder);
+        setIsModalOpen(true);
+      } catch (error) {
+        console.error("Error parsing quotation data:", error);
+        toast({ title: "Error", description: "Could not create sales order from quotation.", variant: "destructive" });
+      }
+    }
+  }, [fromQuotation, toast]);
 
   const fetchSalesOrders = async () => {
     try {

@@ -19,10 +19,12 @@ import {
   FileText,
   DollarSign,
   Edit,
+  ShoppingCart
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useRouter } from 'next/navigation';
 
 
 interface QuotationDetailsModalProps {
@@ -38,6 +40,7 @@ export default function QuotationDetailsModal({
   onClose,
   onEdit,
 }: QuotationDetailsModalProps) {
+  const router = useRouter();
 
   if (!quotation) return null;
 
@@ -62,6 +65,11 @@ export default function QuotationDetailsModal({
   const handleEditClick = () => {
     onClose(); // Close this modal
     onEdit(quotation); // Open the edit modal
+  }
+
+  const handleCreateSalesOrder = () => {
+    const quotationData = encodeURIComponent(JSON.stringify(quotation));
+    router.push(`/sales-orders?fromQuotation=${quotationData}`);
   }
 
   return (
@@ -143,16 +151,24 @@ export default function QuotationDetailsModal({
                 <h3 className="text-2xl font-bold">₱{quotation.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
              </div>
         </div>
-        <DialogFooter className="sm:justify-end">
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleEditClick}>
-              <Edit className="h-4 w-4 mr-2 text-blue-500" />
-              Edit Quotation
-            </Button>
-             <Button variant="default" onClick={onClose}>
-              Close
-            </Button>
-          </div>
+        <DialogFooter className="sm:justify-between">
+            <div>
+                {quotation.status === 'Accepted' && (
+                    <Button onClick={handleCreateSalesOrder}>
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Create Sales Order
+                    </Button>
+                )}
+            </div>
+            <div className="flex gap-2">
+                <Button variant="outline" onClick={handleEditClick}>
+                <Edit className="h-4 w-4 mr-2 text-blue-500" />
+                Edit Quotation
+                </Button>
+                <Button variant="default" onClick={onClose}>
+                Close
+                </Button>
+            </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
