@@ -46,16 +46,19 @@ export default function SuppliersPage() {
   const handleSaveSupplier = async (supplierData: Omit<Supplier, 'id'> & {id?: string}) => {
       try {
           if (supplierData.id) {
-              const supplierRef = doc(db, "suppliers", supplierData.id);
-              await setDoc(supplierRef, { ...supplierData, modifiedAt: serverTimestamp() }, { merge: true });
+              const { id, ...dataToSave } = supplierData;
+              const supplierRef = doc(db, "suppliers", id);
+              await setDoc(supplierRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
               toast({ title: "Success", description: "Supplier updated successfully.", variant: "success" });
           } else {
-              await addDoc(collection(db, "suppliers"), { ...supplierData, createdAt: serverTimestamp() });
+              const { id, ...dataToSave } = supplierData;
+              await addDoc(collection(db, "suppliers"), { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
               toast({ title: "Success", description: "Supplier added successfully.", variant: "success" });
           }
           setIsModalOpen(false);
           fetchSuppliers(); // refetch
       } catch (error) {
+          console.error("Error saving supplier: ", error);
           toast({ title: "Error", description: "Failed to save supplier.", variant: "destructive" });
       }
   };
