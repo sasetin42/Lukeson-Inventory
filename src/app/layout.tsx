@@ -47,6 +47,7 @@ const navGroups = [
         links: [
             { href: '/quotations', icon: FileText, label: 'Quotations', color: 'text-purple-500' },
             { href: '/sales-orders', icon: ShoppingCart, label: 'Sales Orders', color: 'text-red-500' },
+            { href: '/job-orders', icon: PlusCircle, label: 'Job Order', color: 'text-orange-500' },
             { href: '/invoices', icon: FileCog, label: 'Sales Invoices', color: 'text-yellow-500' },
             { href: '/payments', icon: Banknote, label: 'Payments', color: 'text-indigo-500' },
         ],
