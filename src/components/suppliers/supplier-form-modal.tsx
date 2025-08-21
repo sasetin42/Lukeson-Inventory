@@ -20,16 +20,14 @@ import { Textarea } from '../ui/textarea';
 interface SupplierFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddSupplier: (supplier: Omit<Supplier, 'id'>) => Promise<void>;
-  onUpdateSupplier: (supplierId: string, supplier: Partial<Supplier>) => Promise<void>;
+  onSave: (supplier: Omit<Supplier, 'id'> & {id?: string}) => Promise<void>;
   supplier: Supplier | null;
 }
 
 export default function SupplierFormModal({ 
     isOpen, 
     onClose, 
-    onAddSupplier,
-    onUpdateSupplier,
+    onSave,
     supplier,
 }: SupplierFormModalProps) {
     const [name, setName] = useState('');
@@ -68,6 +66,7 @@ export default function SupplierFormModal({
         setIsSaving(true);
         
         const supplierData = {
+            id: supplier?.id,
             name,
             contact: {
                 name: contactName,
@@ -79,12 +78,7 @@ export default function SupplierFormModal({
         };
 
         try {
-            if (supplier) {
-                await onUpdateSupplier(supplier.id, supplierData);
-            } else {
-                await onAddSupplier(supplierData);
-            }
-            onClose();
+            await onSave(supplierData);
         } catch (error) {
             console.error("Failed to save supplier", error);
         } finally {

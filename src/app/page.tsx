@@ -10,8 +10,9 @@ import RecentTransactions from "@/components/dashboard/recent-transactions";
 import QuickStats from "@/components/dashboard/quick-stats";
 import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
 import { Product, Sales, ItemCategory } from '@/lib/types';
-import { products as initialProducts, sales as initialSales, categories as initialCategories } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
+import { db } from '@/lib/firebase';
+import { ref, onValue } from 'firebase/database';
 
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -21,11 +22,34 @@ export default function DashboardPage() {
   const { toast } = useToast();
   
   useEffect(() => {
-    // Using mock data since Firebase is removed
-    setProducts(initialProducts);
-    setSales(initialSales);
-    setCategories(initialCategories);
-    setLoading(false);
+    const productsRef = ref(db, 'products');
+    const salesRef = ref(db, 'sales');
+    const categoriesRef = ref(db, 'categories');
+
+    const unsubscribeProducts = onValue(productsRef, (snapshot) => {
+        const data = snapshot.val();
+        const loadedProducts = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Product, 'id'>) })) : [];
+        setProducts(loadedProducts);
+        setLoading(false);
+    });
+
+    const unsubscribeSales = onValue(salesRef, (snapshot) => {
+        const data = snapshot.val();
+        const loadedSales = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Sales, 'id'>) })) : [];
+        setSales(loadedSales);
+    });
+
+    const unsubscribeCategories = onValue(categoriesRef, (snapshot) => {
+        const data = snapshot.val();
+        const loadedCategories = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<ItemCategory, 'id'>) })) : [];
+        setCategories(loadedCategories);
+    });
+
+    return () => {
+        unsubscribeProducts();
+        unsubscribeSales();
+        unsubscribeCategories();
+    };
   }, []);
 
   return (

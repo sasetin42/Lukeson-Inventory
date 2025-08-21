@@ -9,13 +9,24 @@ import { User } from '@/lib/types';
 import UserList from '@/components/users/user-list';
 import UserFormModal from '@/components/users/user-form-modal';
 import { useToast } from '@/hooks/use-toast';
-import { users as initialUsers } from '@/lib/data';
+import { db } from '@/lib/firebase';
+import { ref, onValue, set, remove, push, serverTimestamp } from 'firebase/database';
 
 export default function UsersManagementPage() {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const usersRef = ref(db, 'users');
+    const unsubscribe = onValue(usersRef, (snapshot) => {
+        const data = snapshot.val();
+        const loadedUsers = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<User, 'id'>) })) : [];
+        setUsers(loadedUsers);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleOpenModal = (user: User | null) => {
     setEditingUser(user);
@@ -28,19 +39,16 @@ export default function UsersManagementPage() {
   }
 
   const handleSaveUser = async (userData: Omit<User, 'id' | 'createdAt' | 'lastLoginAt'> & { id?: string, password?: string }) => {
-    const { id, ...dataToSave } = userData;
+    const { id, password, ...dataToSave } = userData; // We don't save password to DB in this example
     try {
         if (id) { // Editing existing user
-            setUsers(users.map(u => u.id === id ? { ...u, ...dataToSave } : u));
+            const userRef = ref(db, `users/${id}`);
+            await set(userRef, { ...(users.find(u => u.id === id)), ...dataToSave, lastLoginAt: new Date().toISOString() });
             toast({ title: "Success", description: "User updated successfully.", variant: "success" });
         } else { // Adding new user
-            const newUser = {
-                ...dataToSave,
-                id: `user-${Date.now()}`,
-                createdAt: new Date().toISOString(),
-                lastLoginAt: new Date().toISOString()
-            } as User;
-            setUsers([newUser, ...users]);
+            const usersRef = ref(db, 'users');
+            const newUserRef = push(usersRef);
+            await set(newUserRef, { ...dataToSave, createdAt: serverTimestamp(), lastLoginAt: serverTimestamp() });
             toast({ title: "Success", description: "User added successfully.", variant: "success" });
         }
         handleCloseModal();
@@ -51,7 +59,7 @@ export default function UsersManagementPage() {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    setUsers(users.filter(u => u.id !== userId));
+    await remove(ref(db, `users/${userId}`));
     toast({ title: "Success", description: "User deleted successfully.", variant: "success" });
   };
 

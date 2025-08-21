@@ -7,16 +7,23 @@ import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle } from "lucide-react";
 import InvoiceList from "@/components/invoices/invoice-list";
 import { Invoice } from '@/lib/types';
-import { invoices as initialInvoices } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
+import { db } from '@/lib/firebase';
+import { ref, onValue } from 'firebase/database';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Using mock data since Firebase is removed
-    setInvoices(initialInvoices);
+    const invoicesRef = ref(db, 'invoices');
+    const unsubscribe = onValue(invoicesRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedInvoices = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Invoice, 'id'>) })) : [];
+      setInvoices(loadedInvoices);
+    });
+
+    return () => unsubscribe();
   }, []);
 
 

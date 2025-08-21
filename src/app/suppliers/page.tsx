@@ -9,32 +9,51 @@ import SupplierList from "@/components/suppliers/supplier-list";
 import { Supplier } from '@/lib/types';
 import SupplierFormModal from '@/components/suppliers/supplier-form-modal';
 import { useToast } from '@/hooks/use-toast';
-import { suppliers as initialSuppliers } from '@/lib/data';
+import { db } from '@/lib/firebase';
+import { ref, onValue, set, remove, push, serverTimestamp } from 'firebase/database';
 
 export default function SuppliersPage() {
-  const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const suppliersRef = ref(db, 'suppliers');
+    const unsubscribe = onValue(suppliersRef, (snapshot) => {
+        const data = snapshot.val();
+        const loadedSuppliers = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Supplier, 'id'>) })) : [];
+        setSuppliers(loadedSuppliers);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleOpenModal = (supplier: Supplier | null) => {
     setEditingSupplier(supplier);
     setIsModalOpen(true);
   };
 
-  const handleAddSupplier = async (newSupplierData: Omit<Supplier, 'id'>) => {
-    const newSupplier = { ...newSupplierData, id: `sup-${Date.now()}` };
-    setSuppliers([newSupplier, ...suppliers]);
-    toast({ title: "Success", description: "Supplier added successfully.", variant: "success" });
+  const handleSaveSupplier = async (supplierData: Omit<Supplier, 'id'> & {id?: string}) => {
+      try {
+          if (supplierData.id) {
+              const supplierRef = ref(db, `suppliers/${supplierData.id}`);
+              await set(supplierRef, { ...supplierData, modifiedAt: serverTimestamp() });
+              toast({ title: "Success", description: "Supplier updated successfully.", variant: "success" });
+          } else {
+              const suppliersRef = ref(db, 'suppliers');
+              const newSupplierRef = push(suppliersRef);
+              await set(newSupplierRef, { ...supplierData, createdAt: serverTimestamp() });
+              toast({ title: "Success", description: "Supplier added successfully.", variant: "success" });
+          }
+          setIsModalOpen(false);
+      } catch (error) {
+          toast({ title: "Error", description: "Failed to save supplier.", variant: "destructive" });
+      }
   };
 
-  const handleUpdateSupplier = async (supplierId: string, updatedSupplierData: Partial<Supplier>) => {
-    setSuppliers(suppliers.map(s => s.id === supplierId ? { ...s, ...updatedSupplierData } : s));
-    toast({ title: "Success", description: "Supplier updated successfully.", variant: "success" });
-  };
 
   const handleDeleteSupplier = async (supplierId: string) => {
-    setSuppliers(suppliers.filter(s => s.id !== supplierId));
+    await remove(ref(db, `suppliers/${supplierId}`));
     toast({ title: "Success", description: "Supplier deleted successfully.", variant: "success" });
   };
 
@@ -59,8 +78,7 @@ export default function SuppliersPage() {
       <SupplierFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onAddSupplier={handleAddSupplier}
-        onUpdateSupplier={handleUpdateSupplier}
+        onSave={handleSaveSupplier}
         supplier={editingSupplier}
       />
     </div>
