@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, CheckCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,6 +69,11 @@ export default function QuotationList({ quotations, onEdit, onDelete }: Quotatio
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     }
 
+    const handleApprove = (quotation: Quotation) => {
+        // Here you would typically update the quotation status to 'Accepted'
+        console.log(`Approving quotation ${quotation.id}`);
+    }
+
     return (
         <>
             <Card>
@@ -86,7 +91,7 @@ export default function QuotationList({ quotations, onEdit, onDelete }: Quotatio
                                 <TableHead>Expiry Date</TableHead>
                                 <TableHead>Amount</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
+                                <TableHead className="w-[150px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -100,24 +105,19 @@ export default function QuotationList({ quotations, onEdit, onDelete }: Quotatio
                                     <TableCell>
                                         <Badge variant={getStatusVariant(quotation.status)}>{quotation.status}</Badge>
                                     </TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => onEdit(quotation)}>
-                                                    <Edit className="mr-2 h-4 w-4" />
-                                                    Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-destructive" onClick={() => openDeleteAlert(quotation)}>
-                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                    Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                    <TableCell className="flex items-center gap-1">
+                                        <Button variant="ghost" size="icon" onClick={() => onEdit(quotation)}>
+                                            <Eye className="h-4 w-4 text-blue-500" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" onClick={() => onEdit(quotation)}>
+                                            <Edit className="h-4 w-4 text-yellow-500" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" onClick={() => handleApprove(quotation)}>
+                                            <CheckCircle className="h-4 w-4 text-green-500" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => openDeleteAlert(quotation)}>
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -147,3 +147,4 @@ export default function QuotationList({ quotations, onEdit, onDelete }: Quotatio
         </>
     );
 }
+
