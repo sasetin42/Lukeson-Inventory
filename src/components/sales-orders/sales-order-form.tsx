@@ -198,7 +198,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
 
                 if (line.vatType === 'VATable') {
                     vatableSales += discountedTotal;
-                    vatAmount += discountedTotal * line.taxRate;
+                    vatAmount += (discountedTotal / (1 + line.taxRate)) * line.taxRate;
                 } else if (line.vatType === 'VAT-Exempt') {
                     vatExemptSales += discountedTotal;
                 } else if (line.vatType === 'Zero-Rated') {
@@ -207,7 +207,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             });
         }
         
-        const totalAmount = totalAfterDiscount + vatAmount;
+        const totalAmount = totalAfterDiscount;
         
         return {
             vatableSales,
@@ -270,7 +270,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                 </div>
                  <div className="space-y-2">
                     <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Quotations Status</Label>
-                    <Select value={status} onValueChange={(value) => setStatus(value as SalesOrder['status'])} disabled={isStatusDisabled}>
+                    <Select value={status} onValueChange={(value) => setStatus(value as SalesOrder['status'] | 'Approved')} disabled={isStatusDisabled}>
                         <SelectTrigger><SelectValue/></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Draft">Draft</SelectItem>
@@ -399,3 +399,4 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
         </div>
     );
 }
+
