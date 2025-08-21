@@ -58,8 +58,9 @@ export default function SalesOrderList({ salesOrders, onEdit, onDelete }: SalesO
             case 'Draft':
                 return 'outline';
             case 'Cancelled':
-            case 'Invoiced':
                 return 'destructive';
+            case 'Invoiced':
+                 return 'destructive';
             default:
                 return 'outline';
         }

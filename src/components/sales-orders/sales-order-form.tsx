@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SalesOrder, DocumentLine, Customer, Product } from '@/lib/types';
+import { SalesOrder, DocumentLine, Customer, Product, Quotation } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Loader2, User, Calendar, Hash, FileText, PlusCircle, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -65,14 +65,23 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
         };
 
         if (salesOrder) {
-            setSalesOrderId(salesOrder.id || '');
+            // This logic handles both editing an existing SO and creating from a quotation
+             if (salesOrder.id) { // Editing existing
+                setSalesOrderId(salesOrder.id);
+                setStatus(salesOrder.status || 'Draft');
+            } else { // Creating from quotation
+                generateSalesOrderId();
+                setStatus('Confirmed'); // Set to confirmed when creating from a quotation
+            }
             setCustomerId(salesOrder.customerId || '');
-            setOrderDate(salesOrder.orderDate ? (salesOrder.orderDate as any).toDate() : new Date());
-            setStatus(salesOrder.status || 'Draft');
+            setOrderDate(salesOrder.orderDate ? (salesOrder.orderDate instanceof Date ? salesOrder.orderDate : (salesOrder.orderDate as any).toDate()) : new Date());
             setLines(salesOrder.lines || []);
         } else {
             generateSalesOrderId();
             setLines([]);
+            setStatus('Draft');
+            setCustomerId('');
+            setOrderDate(new Date());
         }
     }, [salesOrder]);
     
@@ -112,7 +121,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
         // Recalculate total
         const line = newLines[index];
         const subtotal = line.quantity * line.unitPrice;
-        const discountAmount = subtotal * (line.discount || 0) / 100;
+        const discountAmount = subtotal * ((line as any).discount || 0) / 100;
         const taxableAmount = subtotal - discountAmount;
         const taxAmount = taxableAmount * line.taxRate;
         line.total = taxableAmount + taxAmount;
@@ -136,6 +145,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                 status,
                 lines,
                 totalAmount: calculateTotalAmount(),
+                quotationId: (salesOrder as SalesOrder)?.quotationId,
             };
             onSuccess(salesOrderData);
         } catch (error) {
@@ -215,7 +225,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                                         <Input type="number" value={line.unitPrice} onChange={e => handleLineChange(index, 'unitPrice', Number(e.target.value))} className="w-28" />
                                     </TableCell>
                                      <TableCell>
-                                        <Input type="number" value={line.discount || 0} onChange={e => handleLineChange(index, 'discount', Number(e.target.value))} className="w-20" />
+                                        <Input type="number" value={(line as any).discount || 0} onChange={e => handleLineChange(index, 'discount', Number(e.target.value))} className="w-20" />
                                     </TableCell>
                                     <TableCell>₱{line.total.toFixed(2)}</TableCell>
                                     <TableCell>
@@ -242,7 +252,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                     <Button variant="outline" onClick={onCancel} disabled={isSaving}>Cancel</Button>
                     <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isSaving ? 'Saving...' : (salesOrder ? 'Save Changes' : 'Create Sales Order')}
+                        {isSaving ? 'Saving...' : (salesOrder?.id ? 'Save Changes' : 'Create Sales Order')}
                     </Button>
                 </div>
             </div>
