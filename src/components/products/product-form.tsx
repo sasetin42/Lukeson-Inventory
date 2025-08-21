@@ -674,12 +674,15 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
 
     const renderAluminiumProfileFields = () => (
         <>
-            {/* Common Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <div className="space-y-2">
-                    <Label htmlFor="category" className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-red-500" /> Product Category</Label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="product-code-ap" className="flex items-center gap-2"><FileText className="h-4 w-4" /> Product Code</Label>
+                    <Input id="product-code-ap" value={productCode} disabled />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="category-ap" className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-red-500" /> Product Category</Label>
                     <Select onValueChange={setCategory} value={category}>
-                        <SelectTrigger id="category">
+                        <SelectTrigger id="category-ap">
                             <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                         <SelectContent>
@@ -695,80 +698,20 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                     </Select>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="product-name" className="flex items-center gap-2"><Package className="h-4 w-4 text-blue-500" /> Product Name</Label>
-                    <Input id="product-name" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="e.g. High-Density LED Striplight" />
-                </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="sku" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
-                    <Input id="sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. LED-HD-240-24" />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="price" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
-                    <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 150.00" />
-                </div>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="description" className="flex items-center gap-2"><AlignLeft className="h-4 w-4 text-gray-500" /> Description</Label>
-                <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter product description" />
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="supplier" className="flex items-center gap-2"><Truck className="h-4 w-4 text-green-500" /> Supplier</Label>
-                 <Select onValueChange={setSupplier} value={supplier}>
-                    <SelectTrigger id="supplier">
-                        <SelectValue placeholder="Select a supplier" />
-                    </SelectTrigger>
-                    <SelectContent>
-                       {suppliers.map(s => (
-                           <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                       ))}
-                    </SelectContent>
-                </Select>
-            </div>
-             <div className="grid grid-cols-2 md:grid-cols-2 gap-4 p-4 border rounded-md bg-muted/50">
-                <div className="space-y-2">
-                    <Label htmlFor="size-ap" className="flex items-center gap-2"><StretchHorizontal className="h-4 w-4" /> Size</Label>
-                    <Input id="size-ap" value={size} onChange={(e) => setSize(e.target.value)} placeholder="e.g. 2m x 17mm x 8mm" />
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="color-ap" className="flex items-center gap-2"><Palette className="h-4 w-4" /> Color</Label>
-                    <Input id="color-ap" value={color} onChange={(e) => setColor(e.target.value)} placeholder="e.g. Silver, Black" />
-                </div>
-            </div>
-             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="uom" className="flex items-center gap-2"><Scaling className="h-4 w-4 text-purple-500" /> UOM</Label>
-                    <Select onValueChange={setUom} value={uom}>
-                        <SelectTrigger id="uom"><SelectValue placeholder="Unit" /></SelectTrigger>
-                        <SelectContent>
-                            {uomOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="stock" className="flex items-center gap-2"><Warehouse className="h-4 w-4 text-green-500" /> Stock Qty</Label>
-                    <Input id="stock" type="number" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="e.g. 100" />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="reorder-level" className="flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-yellow-500" /> Reorder Level</Label>
-                    <Input id="reorder-level" type="number" value={reOrderLevel} onChange={(e) => setReOrderLevel(e.target.value)} placeholder="e.g. 20" />
-                </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="location" className="flex items-center gap-2"><MapPin className="h-4 w-4 text-pink-500" /> Location</Label>
-                     <Select onValueChange={setLocation} value={location}>
-                        <SelectTrigger id="location">
-                            <SelectValue placeholder="Select a warehouse" />
+                    <Label htmlFor="supplier-ap" className="flex items-center gap-2"><Truck className="h-4 w-4 text-green-500" /> Supplier</Label>
+                     <Select onValueChange={setSupplier} value={supplier}>
+                        <SelectTrigger id="supplier-ap">
+                            <SelectValue placeholder="Select a supplier" />
                         </SelectTrigger>
                         <SelectContent>
-                           {warehouses.map(w => (
-                               <SelectItem key={w.id} value={w.name}>{w.name}</SelectItem>
+                           {suppliers.map(s => (
+                               <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                            ))}
                         </SelectContent>
                     </Select>
                 </div>
             </div>
-
+            
             <div className="space-y-2">
                 <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4 text-purple-500" /> Product Profile Image</Label>
                 {imagePreview ? (
@@ -780,15 +723,79 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                     </div>
                 ) : (
                     <div className="flex items-center justify-center w-full">
-                        <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isSaving ? 'cursor-not-allowed bg-muted/50' : 'cursor-pointer bg-muted hover:bg-muted/80'}`}>
+                        <label htmlFor="dropzone-file-ap" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isSaving ? 'cursor-not-allowed bg-muted/50' : 'cursor-pointer bg-muted hover:bg-muted/80'}`}>
                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                 <Upload className="w-8 h-8 mb-4 text-primary" />
                                 <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                             </div>
-                            <Input id="dropzone-file" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isSaving}/>
+                            <Input id="dropzone-file-ap" type="file" className="hidden" onChange={handleImageChange} accept="image/*" disabled={isSaving}/>
                         </label>
                     </div> 
                 )}
+            </div>
+
+            <div className="flex gap-4">
+                <div className="space-y-2 w-1/2">
+                    <Label htmlFor="product-name-ap" className="flex items-center gap-2"><Package className="h-4 w-4 text-blue-500" /> Product Name</Label>
+                    <Input id="product-name-ap" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="e.g. Recessed Aluminium Profile" />
+                </div>
+                <div className="space-y-2 w-1/4">
+                    <Label htmlFor="price-ap" className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-green-500" /> Price</Label>
+                    <Input id="price-ap" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 250.00" />
+                </div>
+                <div className="space-y-2 w-1/4">
+                    <Label htmlFor="sku-ap" className="flex items-center gap-2"><Barcode className="h-4 w-4 text-indigo-500" /> SKU Code</Label>
+                    <Input id="sku-ap" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="e.g. ALU-REC-2M" />
+                </div>
+            </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="description-ap" className="flex items-center gap-2"><AlignLeft className="h-4 w-4 text-gray-500" /> Description</Label>
+                <Textarea id="description-ap" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter product description" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="size-ap" className="flex items-center gap-2"><StretchHorizontal className="h-4 w-4" /> Size</Label>
+                    <Input id="size-ap" value={size} onChange={(e) => setSize(e.target.value)} placeholder="e.g. 2m x 17mm x 8mm" />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="color-ap" className="flex items-center gap-2"><Palette className="h-4 w-4" /> Color</Label>
+                    <Input id="color-ap" value={color} onChange={(e) => setColor(e.target.value)} placeholder="e.g. Silver, Black" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="uom-ap" className="flex items-center gap-2"><Scaling className="h-4 w-4 text-purple-500" /> UOM</Label>
+                    <Select onValueChange={setUom} value={uom}>
+                        <SelectTrigger id="uom-ap"><SelectValue placeholder="Unit" /></SelectTrigger>
+                        <SelectContent>
+                            {uomOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="stock-ap" className="flex items-center gap-2"><Warehouse className="h-4 w-4 text-green-500" /> Stock Qty</Label>
+                    <Input id="stock-ap" type="number" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="e.g. 100" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="reorder-level-ap" className="flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-yellow-500" /> Reorder Level</Label>
+                    <Input id="reorder-level-ap" type="number" value={reOrderLevel} onChange={(e) => setReOrderLevel(e.target.value)} placeholder="e.g. 20" />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="location-ap" className="flex items-center gap-2"><MapPin className="h-4 w-4 text-pink-500" /> Location</Label>
+                     <Select onValueChange={setLocation} value={location}>
+                        <SelectTrigger id="location-ap">
+                            <SelectValue placeholder="Select a warehouse" />
+                        </SelectTrigger>
+                        <SelectContent>
+                           {warehouses.map(w => (
+                               <SelectItem key={w.id} value={w.name}>{w.name}</SelectItem>
+                           ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
         </>
     )
