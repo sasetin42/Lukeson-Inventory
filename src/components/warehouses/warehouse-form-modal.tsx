@@ -60,11 +60,6 @@ export default function WarehouseFormModal({
     }
     
     const handleSubmit = async () => {
-        if (!name || !code) {
-          toast({ title: "Validation Error", description: "Warehouse Name and Code are required.", variant: "destructive" });
-          return;
-        }
-
         setIsSaving(true);
         
         const warehouseData = {

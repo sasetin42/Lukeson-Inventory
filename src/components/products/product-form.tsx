@@ -195,46 +195,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     };
 
     const validateForm = () => {
-        const requiredFields: Record<string, string> = {
-            'Product Name': productName,
-            'SKU Code': sku,
-            'Price': price,
-            'Description': description,
-            'UOM': uom,
-            'Category': category,
-            'Location': location,
-            'Stock Quantity': stock,
-            'Reorder Level': reOrderLevel,
-            'Supplier Name': supplierName,
-            'Supplier Contact': supplierContact,
-        };
-    
-        if (category === 'STRIPLIGHT') {
-            Object.assign(requiredFields, {
-                'LED Qty': ledQty,
-                'Voltage': voltage,
-                'Wattage': wattage,
-                'Meters': meters,
-            });
-        } else if (category === 'POWER SUPPLY') {
-            Object.assign(requiredFields, {
-                'Voltage': voltage,
-                'Wattage': wattage,
-            });
-        } else if (category === 'ALUMINIUM PROFILE') {
-            Object.assign(requiredFields, {
-                'Size': size,
-                'Color': color
-            });
-        }
-    
-        for (const [fieldName, value] of Object.entries(requiredFields)) {
-            if (!value) {
-                toast({ title: "Validation Error", description: `${fieldName} is required.`, variant: "destructive" });
-                return false;
-            }
-        }
-    
+        // Validation removed as per user request
         return true;
     };
 

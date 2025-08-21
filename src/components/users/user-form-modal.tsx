@@ -65,15 +65,6 @@ export default function UserFormModal({
     }
     
     const handleSubmit = async () => {
-        if (!name || !email) {
-            toast({ title: "Validation Error", description: "Name and Email are required.", variant: "destructive" });
-            return;
-        }
-        if (!user && !password) {
-            toast({ title: "Validation Error", description: "Password is required for new users.", variant: "destructive" });
-            return;
-        }
-
         setIsSaving(true);
         
         const userData: Omit<User, 'id' | 'createdAt' | 'lastLoginAt'> & { id?: string, password?: string } = {
