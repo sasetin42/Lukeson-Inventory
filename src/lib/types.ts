@@ -1,4 +1,5 @@
 
+
 import type { LucideIcon } from "lucide-react";
 import { FieldValue } from "firebase/firestore";
 
@@ -99,8 +100,8 @@ export type DocumentLine = {
 export type Quotation = {
     id: string; // QTN-YYYY-XXXX
     customerId: string;
-    qtnDate: Date;
-    expiryDate: Date;
+    qtnDate: Date | FieldValue | string;
+    expiryDate: Date | FieldValue | string;
     status: 'Draft' | 'Sent' | 'Accepted' | 'Expired';
     totalAmount: number;
     lines: DocumentLine[];
@@ -109,7 +110,8 @@ export type Quotation = {
 export type SalesOrder = {
     id: string; // SO-YYYY-XXXX
     customerId: string;
-    orderDate: Date;
+    customerName?: string;
+    orderDate: Date | FieldValue | string;
     status: 'Draft' | 'Confirmed' | 'Fulfilled' | 'Invoiced' | 'Cancelled';
     totalAmount: number;
     lines: DocumentLine[];

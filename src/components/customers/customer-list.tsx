@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 interface CustomerListProps {
     customers: Customer[];
@@ -35,6 +36,7 @@ export default function CustomerList({ customers, onEdit, onDelete }: CustomerLi
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
   const { toast } = useToast();
+  const router = useRouter();
   
   const openDeleteAlert = (customer: Customer) => {
     setCustomerToDelete(customer);
@@ -51,6 +53,10 @@ export default function CustomerList({ customers, onEdit, onDelete }: CustomerLi
         setIsDeleteAlertOpen(false);
         setCustomerToDelete(null);
     }
+  };
+
+  const handleViewSalesOrders = (customer: Customer) => {
+    router.push(`/sales-orders?customerId=${customer.id}`);
   };
 
   return (
@@ -80,7 +86,7 @@ export default function CustomerList({ customers, onEdit, onDelete }: CustomerLi
                   <Edit className="mr-2 h-4 w-4" />
                   Edit Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem>View Sales Orders</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleViewSalesOrders(customer)}>View Sales Orders</DropdownMenuItem>
                 <DropdownMenuItem className="text-destructive" onClick={() => openDeleteAlert(customer)}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   Delete
