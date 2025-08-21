@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Product, Supplier, ItemCategory } from '@/lib/types';
+import { Product, Supplier, ItemCategory, Warehouse as WarehouseType } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
 import { Upload, X, Loader2, FileText, LayoutGrid, Truck, Image as ImageIcon, Package, DollarSign, Barcode, AlignLeft, Lightbulb, Zap, Power, Ruler, Scaling, MapPin, Warehouse, AlertTriangle, CalendarClock, Building2, Percent, Layers, PowerOff, Lamp, Square } from 'lucide-react';
@@ -14,7 +14,7 @@ import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '../ui/progress';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, getDocs } from 'firebase/firestore';
 
 interface ProductFormProps {
   product: Product | null;
@@ -37,6 +37,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const { toast } = useToast();
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [categories, setCategories] = useState<ItemCategory[]>([]);
+    const [warehouses, setWarehouses] = useState<WarehouseType[]>([]);
     
     const [isSaving, setIsSaving] = useState(false);
     const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -63,6 +64,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     useEffect(() => {
         const suppliersRef = collection(db, 'suppliers');
         const categoriesRef = collection(db, 'categories');
+        const warehousesRef = collection(db, 'warehouses');
 
         const unsubscribeSuppliers = onSnapshot(suppliersRef, (snapshot) => {
             const loadedSuppliers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
@@ -73,6 +75,13 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             const loadedCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
             setCategories(loadedCategories);
         });
+
+        const fetchWarehouses = async () => {
+            const snapshot = await getDocs(warehousesRef);
+            const loadedWarehouses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as WarehouseType));
+            setWarehouses(loadedWarehouses);
+        }
+        fetchWarehouses();
 
         return () => {
             unsubscribeSuppliers();
@@ -369,7 +378,16 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="location" className="flex items-center gap-2"><MapPin className="h-4 w-4 text-pink-500" /> Location</Label>
-                    <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Warehouse A, Shelf 3" />
+                     <Select onValueChange={setLocation} value={location}>
+                        <SelectTrigger id="location">
+                            <SelectValue placeholder="Select a warehouse" />
+                        </SelectTrigger>
+                        <SelectContent>
+                           {warehouses.map(w => (
+                               <SelectItem key={w.id} value={w.name}>{w.name}</SelectItem>
+                           ))}
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="stock" className="flex items-center gap-2"><Warehouse className="h-4 w-4 text-green-500" /> Stock Quantity</Label>
