@@ -58,7 +58,7 @@ export default function SalesOrderList({ salesOrders, onEdit, onDelete, onView }
             case 'Fulfilled':
                 return 'default';
             case 'Confirmed':
-                return 'secondary';
+                return 'success';
             case 'Draft':
                 return 'outline';
             case 'Cancelled':
