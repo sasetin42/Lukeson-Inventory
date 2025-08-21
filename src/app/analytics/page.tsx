@@ -20,6 +20,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Product, Sales, Supplier } from '@/lib/types';
 import SupplierOnTimeChart from '@/components/analytics/supplier-on-time-chart';
 import { useToast } from '@/hooks/use-toast';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { Timestamp } from 'firebase/firestore';
 
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState("30");
@@ -30,35 +33,34 @@ export default function AnalyticsPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const loadData = () => {
-        try {
-            const storedProducts = localStorage.getItem('products');
-            if (storedProducts) setProducts(JSON.parse(storedProducts));
+    const unsubProducts = onSnapshot(collection(db, 'products'), (snapshot) => {
+        const productsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Product[];
+        setProducts(productsData);
+    });
 
-            const storedSales = localStorage.getItem('sales');
-            if (storedSales) setSales(JSON.parse(storedSales));
-            
-            const storedSuppliers = localStorage.getItem('suppliers');
-            if(storedSuppliers) setSuppliers(JSON.parse(storedSuppliers));
-        } catch (error) {
-            console.error("Failed to load data from local storage", error);
-            toast({ title: "Error", description: "Failed to load analytics data.", variant: "destructive" });
-        }
-    };
-    
-    loadData();
+    const unsubSales = onSnapshot(collection(db, 'sales'), (snapshot) => {
+        const salesData = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return { 
+                id: doc.id, 
+                ...data,
+                date: (data.date as Timestamp).toDate()
+            } as Sales;
+        });
+        setSales(salesData);
+    });
 
-    const handleStorageChange = (e: StorageEvent) => {
-        if (['products', 'sales', 'suppliers'].includes(e.key || '')) {
-            loadData();
-        }
-    };
-    window.addEventListener('storage', handleStorageChange);
+    const unsubSuppliers = onSnapshot(collection(db, 'suppliers'), (snapshot) => {
+        const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Supplier[];
+        setSuppliers(suppliersData);
+    });
 
     return () => {
-        window.removeEventListener('storage', handleStorageChange);
+        unsubProducts();
+        unsubSales();
+        unsubSuppliers();
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     function calculateKpis() {
@@ -74,10 +76,10 @@ export default function AnalyticsPage() {
 
         const cogs = filteredSales.reduce((acc, sale) => {
           const product = products.find(p => p.id === sale.productId);
-          return acc + (product ? product.cost * sale.quantity : 0);
+          return acc + (product ? product.price * sale.quantity : 0);
         }, 0);
         
-        const avgInventoryValue = products.reduce((acc, p) => acc + p.cost * p.stock, 0) / (products.length || 1);
+        const avgInventoryValue = products.reduce((acc, p) => acc + p.price * p.stock, 0) / (products.length || 1);
         const inventoryTurnover = avgInventoryValue > 0 ? cogs / avgInventoryValue : 0;
         
         const baseData = {

@@ -13,10 +13,12 @@ import Image from 'next/image';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '../ui/progress';
+import { collection, getDocs, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface ProductFormProps {
   product: Product | null;
-  onSuccess: (productData: Omit<Product, 'id' | 'createdAt'> & {id?: string}) => void;
+  onSuccess: (productData: Omit<Product, 'id' | 'createdAt'> & {id?: string; imageFile?: File | null}) => void;
   onCancel: () => void;
 }
 
@@ -59,27 +61,28 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [expiryDateTracking, setExpiryDateTracking] = useState(false);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const storedSuppliers = localStorage.getItem('suppliers');
-                if (storedSuppliers) setSuppliers(JSON.parse(storedSuppliers));
+        const unsubSuppliers = onSnapshot(collection(db, "suppliers"), (snapshot) => {
+            const suppliersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Supplier[];
+            setSuppliers(suppliersData);
+        });
+        
+        const unsubCategories = onSnapshot(collection(db, "categories"), (snapshot) => {
+            const categoriesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as ItemCategory[];
+            setCategories(categoriesData);
+        });
 
-                const storedCategories = localStorage.getItem('categories');
-                if (storedCategories) setCategories(JSON.parse(storedCategories));
-
-            } catch(error) {
-                console.error("Error loading data from Local Storage", error);
-                toast({ title: "Error", description: "Failed to load supporting data.", variant: "destructive" });
-            }
-        };
-        fetchData();
-    }, [toast]);
+        return () => {
+            unsubSuppliers();
+            unsubCategories();
+        }
+    }, []);
 
     useEffect(() => {
-        const generateProductCode = () => {
+        const generateProductCode = async () => {
             const year = new Date().getFullYear();
-            const storedProducts = JSON.parse(localStorage.getItem('products') || '[]') as Product[];
-            const productsCount = storedProducts.length;
+            const productsCol = collection(db, 'products');
+            const snapshot = await getDocs(productsCol);
+            const productsCount = snapshot.size;
             setProductCode(`PRO-${year}-${(productsCount + 1).toString().padStart(3, '0')}`);
         };
 
@@ -162,17 +165,9 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         }
 
         setIsSaving(true);
-        setUploadProgress(0); // Show progress bar
+        setUploadProgress(0);
         
         try {
-            // Simulate upload progress for local storage
-            let imageUrl = product?.productImage || imagePreview || '';
-            if (imageFile) {
-                // Simulate a short delay for "upload"
-                await new Promise(res => setTimeout(res, 500));
-                setUploadProgress(100);
-            }
-            
             const stockNum = Number(stock) || 0;
             const reOrderLevelNum = Number(reOrderLevel) || 0;
             let stockStatus = product?.status || 'In Stock';
@@ -182,7 +177,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                     : 'Out of Stock';
             }
 
-            const productData: Omit<Product, 'id'| 'createdAt'> & {id?: string} = {
+            const productData: Omit<Product, 'id'| 'createdAt'> & {id?: string, imageFile?: File | null} = {
                 id: product?.id,
                 productCode,
                 name: productName,
@@ -195,13 +190,14 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 meters: Number(meters) || 0,
                 supplier,
                 location,
-                productImage: imageUrl,
+                productImage: imagePreview,
                 stock: stockNum,
                 price: Number(price) || 0,
                 reOrderLevel: reOrderLevelNum,
                 uom,
                 expiryDateTracking,
                 status: stockStatus,
+                imageFile,
                 modifiedAt: new Date(),
             };
             
@@ -404,7 +400,3 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         </div>
     );
 }
-
-    
-
-    

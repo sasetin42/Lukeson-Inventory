@@ -25,7 +25,7 @@ import { Separator } from '../ui/separator';
 interface CategoryFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (category: Omit<ItemCategory, 'id' | 'createdAt'> & {id?: string}) => void;
+  onSave: (category: Omit<ItemCategory, 'id' | 'createdAt'> & {id?: string; imageFile?: File | null}) => void;
   onDelete: (categoryId: string) => void;
   category: ItemCategory | null;
   categories: ItemCategory[];
@@ -106,14 +106,12 @@ export default function CategoryFormModal({
         setIsSaving(true);
         
         try {
-            // With local storage, we can store the image as a data URL.
-            let imageUrl = editingCategory?.productImage || imagePreview || '';
-
-            const categoryData: Omit<ItemCategory, 'id' | 'createdAt'> & {id?: string} = {
+            const categoryData: Omit<ItemCategory, 'id' | 'createdAt'> & {id?: string; imageFile?: File | null} = {
                 id: editingCategory?.id,
                 name,
                 description,
-                productImage: imageUrl,
+                productImage: imagePreview || '',
+                imageFile
             };
 
             onSave(categoryData);

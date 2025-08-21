@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
+import { Timestamp } from 'firebase/firestore';
 
 interface UserListProps {
     users: User[];
@@ -92,7 +93,7 @@ export default function UserList({ users, onEdit, onDelete }: UserListProps) {
                                         <Badge variant={getStatusVariant(user.status)}>{user.status}</Badge>
                                     </TableCell>
                                     <TableCell>
-                                        {user.lastLoginAt ? `${formatDistanceToNow(user.lastLoginAt)} ago` : 'Never'}
+                                        {user.lastLoginAt ? `${formatDistanceToNow((user.lastLoginAt as Timestamp).toDate())} ago` : 'Never'}
                                     </TableCell>
                                     <TableCell>
                                         <DropdownMenu>

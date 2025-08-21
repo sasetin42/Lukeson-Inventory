@@ -15,7 +15,7 @@ interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   product: Product | null;
-  onSave: (productData: Omit<Product, 'id' | 'createdAt'> & {id?: string}) => void;
+  onSave: (productData: Omit<Product, 'id' | 'createdAt'> & {id?: string; imageFile?: File | null}) => void;
 }
 
 export default function ProductFormModal({ 

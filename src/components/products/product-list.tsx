@@ -31,6 +31,9 @@ import {
 } from "@/components/ui/alert-dialog"
 import ProductImage from './product-image';
 import { format } from 'date-fns';
+import { Timestamp } from 'firebase/firestore';
+import { onSnapshot, collection } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface ProductListProps {
     products: Product[];
@@ -56,23 +59,12 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
     const { toast } = useToast();
 
     useEffect(() => {
-        const loadCategories = () => {
-            const storedCategories = localStorage.getItem('categories');
-            if(storedCategories){
-                setCategories(JSON.parse(storedCategories));
-            }
-        };
-        loadCategories();
-        
-        window.addEventListener('storage', (e) => {
-            if(e.key === 'categories') loadCategories();
+        const unsub = onSnapshot(collection(db, 'categories'), (snapshot) => {
+            const categoriesData = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as ItemCategory));
+            setCategories(categoriesData);
         });
 
-        return () => {
-            window.removeEventListener('storage', (e) => {
-                if(e.key === 'categories') loadCategories();
-            });
-        }
+        return () => unsub();
     }, []);
 
     const getStatusVariant = (status: string) => {
@@ -222,8 +214,8 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                         <TableCell>
                         <Badge variant={getStatusVariant(product.status)}>{product.status}</Badge>
                         </TableCell>
-                        <TableCell>{product.createdAt ? format(new Date(product.createdAt as Date), 'PP') : 'N/A'}</TableCell>
-                        <TableCell>{product.modifiedAt ? format(new Date(product.modifiedAt as Date), 'PP') : 'N/A'}</TableCell>
+                        <TableCell>{product.createdAt ? format((product.createdAt as Timestamp).toDate(), 'PP') : 'N/A'}</TableCell>
+                        <TableCell>{product.modifiedAt ? format((product.modifiedAt as Timestamp).toDate(), 'PP') : 'N/A'}</TableCell>
                         <TableCell>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>

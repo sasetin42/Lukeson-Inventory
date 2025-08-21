@@ -4,6 +4,7 @@ import { Package, DollarSign, AlertTriangle, XCircle } from 'lucide-react';
 import KpiCard from '@/components/kpi-card';
 import { Product } from '@/lib/types';
 import Link from 'next/link';
+import { Timestamp } from 'firebase/firestore';
 
 interface InventoryOverviewProps {
     products: Product[];
@@ -13,14 +14,22 @@ export default function InventoryOverview({ products }: InventoryOverviewProps) 
   const totalProducts = products.length;
   const outOfStock = products.filter(p => p.stock === 0).length;
   const lowStock = products.filter(p => p.stock > 0 && p.stock <= p.reOrderLevel).length;
-  const totalValue = products.reduce((acc, p) => acc + (((p as any).cost || p.price) * p.stock), 0);
+  const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
   
+  const addedLastMonth = products.filter(p => {
+    if (!p.createdAt) return false;
+    const createdAtDate = (p.createdAt as Timestamp).toDate ? (p.createdAt as Timestamp).toDate() : new Date(p.createdAt);
+    const lastMonth = new Date();
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+    return createdAtDate > lastMonth;
+  }).length;
+
   const cardData = [
     { 
       title: 'Total Products', 
       value: totalProducts,
       icon: Package, 
-      trend: `+${products.filter(p => p.createdAt && new Date(p.createdAt as any) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)).length} from last month`,
+      trend: `+${addedLastMonth} from last month`,
       color: 'blue' as const,
       tooltipText: 'Total number of unique products in your inventory.',
       href: '/products'

@@ -54,6 +54,9 @@ import {
 } from "@/components/ui/alert-dialog"
 import ProductImage from './product-image';
 import { format } from 'date-fns';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { Timestamp } from 'firebase/firestore';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -92,12 +95,8 @@ export default function ProductDetailsModal({
   const handleToggleStatus = async () => {
       const newStatus = product.status === 'Discontinued' ? 'In Stock' : 'Discontinued';
       try {
-        const storedProducts = JSON.parse(localStorage.getItem('products') || '[]') as Product[];
-        const updatedProducts = storedProducts.map(p => 
-            p.id === product.id ? { ...p, status: newStatus } : p
-        );
-        localStorage.setItem('products', JSON.stringify(updatedProducts));
-        window.dispatchEvent(new Event('storage'));
+        const productRef = doc(db, 'products', product.id);
+        await updateDoc(productRef, { status: newStatus });
         toast({ title: 'Success', description: `Product has been ${newStatus === 'Discontinued' ? 'deactivated' : 'activated'}.`, variant: 'success' });
         onClose();
       } catch (error) {
@@ -161,8 +160,8 @@ export default function ProductDetailsModal({
               </div>
             </div>
             <div className="text-right text-xs text-muted-foreground">
-                {product.createdAt && <div>Created: {format(new Date(product.createdAt as Date), 'PP')}</div>}
-                {product.modifiedAt && <div>Modified: {format(new Date(product.modifiedAt as Date), 'PP')}</div>}
+                {product.createdAt && <div>Created: {format((product.createdAt as Timestamp).toDate(), 'PP')}</div>}
+                {product.modifiedAt && <div>Modified: {format((product.modifiedAt as Timestamp).toDate(), 'PP')}</div>}
             </div>
           </div>
         </DialogHeader>

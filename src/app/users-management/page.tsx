@@ -9,6 +9,9 @@ import { User } from '@/lib/types';
 import UserList from '@/components/users/user-list';
 import UserFormModal from '@/components/users/user-form-modal';
 import { useToast } from '@/hooks/use-toast';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, doc, addDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -17,27 +20,22 @@ export default function UsersManagementPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const loadUsers = () => {
-        try {
-            const storedUsers = localStorage.getItem('users');
-            if (storedUsers) {
-                setUsers(JSON.parse(storedUsers));
-            }
-        } catch (error) {
-            console.error("Failed to load users from local storage", error);
-            toast({ title: "Error", description: "Failed to load users.", variant: "destructive" });
-        }
-    };
-    loadUsers();
+    const unsub = onSnapshot(collection(db, "users"), (snapshot) => {
+        const usersData = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                lastLoginAt: (data.lastLoginAt as Timestamp)?.toDate(),
+            } as User;
+        });
+        setUsers(usersData);
+    }, (error) => {
+        console.error("Failed to load users from Firestore", error);
+        toast({ title: "Error", description: "Failed to load users.", variant: "destructive" });
+    });
 
-    const handleStorageChange = (e: StorageEvent) => {
-        if(e.key === 'users') {
-            loadUsers();
-        }
-    }
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-
+    return () => unsub();
   }, [toast]);
 
   const handleOpenModal = (user: User | null) => {
@@ -53,23 +51,13 @@ export default function UsersManagementPage() {
   const handleSaveUser = async (userData: Omit<User, 'id' | 'createdAt' | 'lastLoginAt'> & { id?: string, password?: string }) => {
     const { id, ...dataToSave } = userData;
     try {
-        let updatedUsers;
         if (id) { // Editing existing user
-            updatedUsers = users.map(u => u.id === id ? { ...u, ...dataToSave } : u);
+            await updateDoc(doc(db, "users", id), dataToSave);
             toast({ title: "Success", description: "User updated successfully.", variant: "success" });
         } else { // Adding new user
-            const newUser: User = {
-                ...dataToSave,
-                id: new Date().toISOString(),
-                createdAt: new Date().toISOString(),
-                lastLoginAt: undefined,
-            };
-            updatedUsers = [...users, newUser];
+            await addDoc(collection(db, "users"), { ...dataToSave, createdAt: serverTimestamp() });
             toast({ title: "Success", description: "User added successfully.", variant: "success" });
         }
-        localStorage.setItem('users', JSON.stringify(updatedUsers));
-        setUsers(updatedUsers);
-        window.dispatchEvent(new Event('storage'));
         handleCloseModal();
     } catch (error: any) {
         console.error("Error saving user: ", error);
@@ -79,10 +67,7 @@ export default function UsersManagementPage() {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      const updatedUsers = users.filter(u => u.id !== userId);
-      localStorage.setItem('users', JSON.stringify(updatedUsers));
-      setUsers(updatedUsers);
-      window.dispatchEvent(new Event('storage'));
+      await deleteDoc(doc(db, "users", userId));
       toast({ title: "Success", description: "User deleted successfully.", variant: "success" });
     } catch (error) {
       console.error("Error deleting user: ", error);
