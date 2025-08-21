@@ -1,0 +1,19 @@
+
+import { initializeApp, getApp, getApps } from 'firebase/app';
+import { getDatabase } from 'firebase/database';
+
+const firebaseConfig = {
+  projectId: "lukeson-inventory",
+  appId: "1:365879575919:web:68ff2291b1aca7441f149a",
+  storageBucket: "lukeson-inventory.firebasestorage.app",
+  apiKey: "AIzaSyBsmEybb-ASyKOifiWleLs9kZsy2NMwAJQ",
+  authDomain: "lukeson-inventory.firebaseapp.com",
+  measurementId: "",
+  messagingSenderId: "365879575919",
+  databaseURL: "https://lukeson-inventory-default-rtdb.firebaseio.com"
+};
+
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getDatabase(app);
+
+export { app, db };

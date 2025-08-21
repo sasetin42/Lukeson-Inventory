@@ -12,17 +12,41 @@ import { Product, ItemCategory } from '@/lib/types';
 import ProductFormModal from '@/components/products/product-form-modal';
 import CategoryFormModal from '@/components/category/category-form-modal';
 import { useToast } from '@/hooks/use-toast';
-import { products as initialProducts, categories as initialCategories } from '@/lib/data';
+import { db } from '@/lib/firebase';
+import { ref, onValue, set, remove, push, serverTimestamp } from 'firebase/database';
 
 export default function ProductsPage() {
-    const [products, setProducts] = useState<Product[]>(initialProducts);
-    const [categories, setCategories] = useState<ItemCategory[]>(initialCategories);
-    const [loading, setLoading] = useState(false);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [categories, setCategories] = useState<ItemCategory[]>([]);
+    const [loading, setLoading] = useState(true);
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [editingCategory, setEditingCategory] = useState<ItemCategory | null>(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const { toast } = useToast();
+    
+    useEffect(() => {
+        const productsRef = ref(db, 'products');
+        const categoriesRef = ref(db, 'categories');
+
+        const unsubscribeProducts = onValue(productsRef, (snapshot) => {
+            const data = snapshot.val();
+            const loadedProducts = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Product, 'id'>) })) : [];
+            setProducts(loadedProducts);
+            setLoading(false);
+        });
+
+        const unsubscribeCategories = onValue(categoriesRef, (snapshot) => {
+            const data = snapshot.val();
+            const loadedCategories = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<ItemCategory, 'id'>) })) : [];
+            setCategories(loadedCategories);
+        });
+
+        return () => {
+            unsubscribeProducts();
+            unsubscribeCategories();
+        };
+    }, []);
     
     const totalProducts = products.length;
     const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
@@ -57,53 +81,61 @@ export default function ProductsPage() {
     }
 
     const handleDeleteProduct = async (productToDelete: Product) => {
-        setProducts(products.filter(p => p.id !== productToDelete.id));
+        await remove(ref(db, `products/${productToDelete.id}`));
         toast({ title: "Success", description: "Product deleted.", variant: "success" });
     }
 
     const handleProductSave = async (productData: Omit<Product, 'id' | 'createdAt'> & {id?: string; imageFile?: File | null}) => {
         const { imageFile, ...dataToSave } = productData;
-        let imageUrl = productData.productImage || '';
         
-        if (imageFile) {
-            imageUrl = URL.createObjectURL(imageFile);
-        }
+        // In a real app, you would handle image uploads to a storage service like Firebase Storage
+        // and get back a URL. For now, we will continue using a placeholder or existing URL.
+        const imageUrl = productData.productImage || 'https://placehold.co/300x300.png';
 
         const finalData = { ...dataToSave, productImage: imageUrl };
 
-        if (finalData.id) {
-            setProducts(products.map(p => p.id === finalData.id ? { ...p, ...finalData, modifiedAt: new Date().toISOString() } : p));
-            toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
-        } else {
-            const newProduct = { ...finalData, id: `prod-${Date.now()}`, createdAt: new Date().toISOString(), modifiedAt: new Date().toISOString() } as Product;
-            setProducts([newProduct, ...products]);
-            toast({ title: "Success", description: "Product added successfully.", variant: "success" });
+        try {
+            if (finalData.id) {
+                const productRef = ref(db, `products/${finalData.id}`);
+                await set(productRef, { ...finalData, modifiedAt: serverTimestamp() });
+                toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
+            } else {
+                const productsRef = ref(db, 'products');
+                const newProductRef = push(productsRef);
+                await set(newProductRef, { ...finalData, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+                toast({ title: "Success", description: "Product added successfully.", variant: "success" });
+            }
+            handleCloseProductModal();
+        } catch (error) {
+            toast({ title: "Error", description: "Failed to save product.", variant: "destructive" });
         }
-        handleCloseProductModal();
     }
 
     const handleCategorySave = async (categoryData: Omit<ItemCategory, 'id' | 'createdAt'> & {id?: string, imageFile?: File | null}) => {
         const { imageFile, ...dataToSave } = categoryData;
-        let imageUrl = categoryData.productImage || '';
+        let imageUrl = categoryData.productImage || 'https://placehold.co/300x300.png';
             
-        if (imageFile) {
-             imageUrl = URL.createObjectURL(imageFile);
-        }
-
+        // Again, placeholder for image handling
         const finalData = { ...dataToSave, productImage: imageUrl };
 
-        if (finalData.id) {
-            setCategories(categories.map(c => c.id === finalData.id ? { ...c, ...finalData } : c));
-            toast({ title: "Success", description: "Category updated successfully.", variant: "success" });
-        } else {
-            const newCategory = { ...finalData, id: `cat-${Date.now()}`, createdAt: new Date().toISOString() } as ItemCategory;
-            setCategories([newCategory, ...categories]);
-            toast({ title: "Success", description: "Category added successfully.", variant: "success" });
+        try {
+            if (finalData.id) {
+                const categoryRef = ref(db, `categories/${finalData.id}`);
+                await set(categoryRef, finalData);
+                toast({ title: "Success", description: "Category updated successfully.", variant: "success" });
+            } else {
+                const categoriesRef = ref(db, 'categories');
+                const newCategoryRef = push(categoriesRef);
+                await set(newCategoryRef, { ...finalData, createdAt: serverTimestamp() });
+                toast({ title: "Success", description: "Category added successfully.", variant: "success" });
+            }
+        } catch(error) {
+            toast({ title: "Error", description: "Failed to save category.", variant: "destructive" });
         }
     }
 
     const handleCategoryDelete = async (categoryId: string) => {
-        setCategories(categories.filter(c => c.id !== categoryId));
+        await remove(ref(db, `categories/${categoryId}`));
         toast({ title: "Success", description: "Category deleted.", variant: "success" });
     }
 
@@ -119,7 +151,6 @@ export default function ProductsPage() {
         {productKpis.map((kpi) => (
           <KpiCard
             key={kpi.title}
-            title={kpi.title}
             value={kpi.value}
             icon={kpi.icon}
             subtext={kpi.subtext}

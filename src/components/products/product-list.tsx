@@ -31,7 +31,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import ProductImage from './product-image';
 import { format } from 'date-fns';
-import { categories as initialCategories } from '@/lib/data';
+import { db } from '@/lib/firebase';
+import { ref, onValue } from 'firebase/database';
 
 interface ProductListProps {
     products: Product[];
@@ -51,7 +52,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
-    const [categories, setCategories] = useState<ItemCategory[]>(initialCategories);
+    const [categories, setCategories] = useState<ItemCategory[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const { toast } = useToast();
@@ -59,6 +60,13 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
 
     useEffect(() => {
         setMounted(true);
+        const categoriesRef = ref(db, 'categories');
+        const unsubscribe = onValue(categoriesRef, (snapshot) => {
+            const data = snapshot.val();
+            const loadedCategories = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<ItemCategory, 'id'>) })) : [];
+            setCategories(loadedCategories);
+        });
+        return () => unsubscribe();
     }, []);
 
 

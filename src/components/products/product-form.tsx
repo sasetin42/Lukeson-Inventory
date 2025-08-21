@@ -13,7 +13,8 @@ import Image from 'next/image';
 import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '../ui/progress';
-import { categories as initialCategories, suppliers as initialSuppliers } from '@/lib/data';
+import { db } from '@/lib/firebase';
+import { ref, onValue } from 'firebase/database';
 
 interface ProductFormProps {
   product: Product | null;
@@ -34,8 +35,8 @@ const categoryIcons: { [key: string]: React.ReactElement } = {
 
 export default function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
     const { toast } = useToast();
-    const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
-    const [categories, setCategories] = useState<ItemCategory[]>(initialCategories);
+    const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+    const [categories, setCategories] = useState<ItemCategory[]>([]);
     
     const [isSaving, setIsSaving] = useState(false);
     const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -59,11 +60,31 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [reOrderLevel, setReOrderLevel] = useState('');
     const [expiryDateTracking, setExpiryDateTracking] = useState(false);
 
+    useEffect(() => {
+        const suppliersRef = ref(db, 'suppliers');
+        const categoriesRef = ref(db, 'categories');
+
+        const unsubscribeSuppliers = onValue(suppliersRef, (snapshot) => {
+            const data = snapshot.val();
+            const loadedSuppliers = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<Supplier, 'id'>) })) : [];
+            setSuppliers(loadedSuppliers);
+        });
+
+        const unsubscribeCategories = onValue(categoriesRef, (snapshot) => {
+            const data = snapshot.val();
+            const loadedCategories = data ? Object.entries(data).map(([key, value]) => ({ id: key, ...(value as Omit<ItemCategory, 'id'>) })) : [];
+            setCategories(loadedCategories);
+        });
+
+        return () => {
+            unsubscribeSuppliers();
+            unsubscribeCategories();
+        };
+    }, []);
 
     useEffect(() => {
         const generateProductCode = () => {
             const year = new Date().getFullYear();
-            // This is a mock count. In a real app, you'd get this from your data source.
             const productsCount = 100;
             setProductCode(`PRO-${year}-${(productsCount + 1).toString().padStart(3, '0')}`);
         };
