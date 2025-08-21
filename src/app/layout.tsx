@@ -57,7 +57,6 @@ const navGroups = [
         links: [
             { href: '/purchase-orders', icon: ShoppingBag, label: 'Purchase Orders', color: 'text-blue-500' },
             { href: '/goods-receipts', icon: File, label: 'Goods Receipts', color: 'text-purple-500' },
-            { href: '/bills', icon: FilePlus, label: 'Bills', color: 'text-pink-500' },
         ],
       },
       {

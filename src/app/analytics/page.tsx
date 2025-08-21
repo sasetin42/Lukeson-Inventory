@@ -17,7 +17,7 @@ import StockMovementTrendChart from "@/components/analytics/stock-movement-trend
 import InventoryOptimizationRecommendations from "@/components/analytics/inventory-optimization-recommendations";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Product, Sales, Supplier } from '@/lib/types';
+import { Product, SalesOrder, Supplier } from '@/lib/types';
 import SupplierOnTimeChart from '@/components/analytics/supplier-on-time-chart';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
@@ -26,7 +26,7 @@ import { collection, getDocs } from 'firebase/firestore';
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState("30");
   const [products, setProducts] = useState<Product[]>([]);
-  const [sales, setSales] = useState<Sales[]>([]);
+  const [sales, setSales] = useState<SalesOrder[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [kpiData, setKpiData] = useState<any[]>([]);
   const { toast } = useToast();
@@ -35,7 +35,7 @@ export default function AnalyticsPage() {
     const fetchData = async () => {
       try {
         const productsRef = collection(db, 'products');
-        const salesRef = collection(db, 'sales');
+        const salesRef = collection(db, 'salesOrders');
         const suppliersRef = collection(db, 'suppliers');
 
         const productsSnapshot = await getDocs(productsRef);
@@ -43,7 +43,7 @@ export default function AnalyticsPage() {
         setProducts(loadedProducts);
 
         const salesSnapshot = await getDocs(salesRef);
-        const loadedSales = salesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Sales));
+        const loadedSales = salesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
         setSales(loadedSales);
 
         const suppliersSnapshot = await getDocs(suppliersRef);
@@ -68,16 +68,18 @@ export default function AnalyticsPage() {
         cutoffDate.setDate(cutoffDate.getDate() - days);
         
         const filteredSales = sales.filter(s => {
-          const saleDate = (s.date as any).toDate ? (s.date as any).toDate() : new Date(s.date as string);
+          const saleDate = (s.orderDate as any).toDate ? (s.orderDate as any).toDate() : new Date(s.orderDate as string);
           return saleDate >= cutoffDate;
         });
+
+        const flatSales = filteredSales.flatMap(order => order.lines.map(line => ({ ...line, date: order.orderDate })));
         
-        const totalRevenue = filteredSales.reduce((acc, s) => acc + s.total, 0);
-        const unitsSold = filteredSales.reduce((acc, s) => acc + s.quantity, 0);
+        const totalRevenue = filteredSales.reduce((acc, s) => acc + s.totalAmount, 0);
+        const unitsSold = flatSales.reduce((acc, s) => acc + s.quantity, 0);
         const avgOrderValue = totalRevenue / (filteredSales.length || 1);
 
-        const cogs = filteredSales.reduce((acc, sale) => {
-          const product = products.find(p => p.id === sale.productId);
+        const cogs = flatSales.reduce((acc, sale) => {
+          const product = products.find(p => p.id === sale.itemId);
           return acc + (product ? product.price * sale.quantity : 0);
         }, 0);
         

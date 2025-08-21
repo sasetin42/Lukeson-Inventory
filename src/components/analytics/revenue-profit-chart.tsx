@@ -2,12 +2,12 @@
 'use client';
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Sales, Product } from '@/lib/types';
+import { SalesOrder, Product } from '@/lib/types';
 import { eachDayOfInterval, format, subDays } from 'date-fns';
 
 interface RevenueProfitChartProps {
     dateRange: number;
-    sales: Sales[];
+    sales: SalesOrder[];
     products: Product[];
 }
 
@@ -16,7 +16,7 @@ export default function RevenueProfitChart({ dateRange, sales, products }: Reven
   const startDate = subDays(endDate, dateRange);
 
   const filteredSales = sales.filter(s => {
-    const saleDate = (s.date as any).toDate ? (s.date as any).toDate() : new Date(s.date as string);
+    const saleDate = (s.orderDate as any).toDate ? (s.orderDate as any).toDate() : new Date(s.orderDate as string);
     return saleDate >= startDate && saleDate <= endDate;
   });
 
@@ -32,16 +32,20 @@ export default function RevenueProfitChart({ dateRange, sales, products }: Reven
   const dataMap = new Map(dataByDay.map(d => [d.date, d]));
 
   filteredSales.forEach(sale => {
-    const saleDate = (sale.date as any).toDate ? (sale.date as any).toDate() : new Date(sale.date as string);
+    const saleDate = (sale.orderDate as any).toDate ? (sale.orderDate as any).toDate() : new Date(sale.orderDate as string);
     const formattedDate = format(saleDate, 'MMM d');
-    const product = products.find(p => p.id === sale.productId);
-    const cost = product ? (product as any).cost * sale.quantity : 0; // Use price as fallback
-    const profit = sale.total - cost;
+    
+    let orderProfit = 0;
+    sale.lines.forEach(line => {
+        const product = products.find(p => p.id === line.itemId);
+        const cost = product ? ((product as any).cost || product.price) * line.quantity : 0;
+        orderProfit += line.total - cost;
+    });
 
     if (dataMap.has(formattedDate)) {
       const currentData = dataMap.get(formattedDate)!;
-      currentData.revenue += sale.total;
-      currentData.profit += profit;
+      currentData.revenue += sale.totalAmount;
+      currentData.profit += orderProfit;
     }
   });
   

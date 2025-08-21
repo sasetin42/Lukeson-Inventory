@@ -2,7 +2,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sales, Product } from "@/lib/types";
+import { FlatSale, Product } from "@/lib/types";
 import { TrendingUpIcon } from "../icons/trending-up";
 import { Button } from "../ui/button";
 import { ChevronRight } from "lucide-react";
@@ -10,7 +10,7 @@ import Link from 'next/link';
 import ProductImage from "../products/product-image";
 
 interface TopSellingItemsProps {
-    sales: Sales[];
+    sales: FlatSale[];
     products: Product[];
 }
 

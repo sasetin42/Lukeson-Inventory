@@ -1,7 +1,7 @@
 
 'use client';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Product, Sales } from "@/lib/types";
+import { Product, FlatSale } from "@/lib/types";
 import { TrendingDownIcon } from "../icons/trending-down";
 import { Button } from "../ui/button";
 import { ChevronRight } from "lucide-react";
@@ -10,7 +10,7 @@ import ProductImage from "../products/product-image";
 
 interface SlowMovingItemsProps {
     products: Product[];
-    sales: Sales[];
+    sales: FlatSale[];
 }
 
 export default function SlowMovingItems({ products, sales }: SlowMovingItemsProps) {

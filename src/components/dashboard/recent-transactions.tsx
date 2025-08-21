@@ -3,7 +3,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Sales } from '@/lib/types';
+import { FlatSale } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Activity, ChevronRight } from 'lucide-react';
@@ -11,7 +11,7 @@ import { Button } from '../ui/button';
 import Link from 'next/link';
 
 interface RecentTransactionsProps {
-    sales: Sales[];
+    sales: FlatSale[];
 }
 
 export default function RecentTransactions({ sales }: RecentTransactionsProps) {

@@ -2,11 +2,11 @@
 'use client';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Sales } from '@/lib/types';
+import { SalesOrder } from '@/lib/types';
 
 interface SalesByCustomerChartProps {
     dateRange: number;
-    sales: Sales[];
+    sales: SalesOrder[];
 }
 
 export default function SalesByCustomerChart({ dateRange, sales }: SalesByCustomerChartProps) {
@@ -14,15 +14,15 @@ export default function SalesByCustomerChart({ dateRange, sales }: SalesByCustom
   cutoffDate.setDate(cutoffDate.getDate() - dateRange);
 
   const filteredSales = sales.filter(s => {
-    const saleDate = (s.date as any).toDate ? (s.date as any).toDate() : new Date(s.date as string);
+    const saleDate = (s.orderDate as any).toDate ? (s.orderDate as any).toDate() : new Date(s.orderDate as string);
     return saleDate >= cutoffDate;
   });
   
   const salesByCustomer = filteredSales.reduce((acc, sale) => {
-    if (!acc[sale.customerName]) {
-      acc[sale.customerName] = 0;
+    if (!acc[sale.customerName!]) {
+      acc[sale.customerName!] = 0;
     }
-    acc[sale.customerName] += sale.total;
+    acc[sale.customerName!] += sale.totalAmount;
     return acc;
   }, {} as Record<string, number>);
 

@@ -9,15 +9,14 @@ import InventoryOverview from "@/components/dashboard/inventory-overview";
 import RecentTransactions from "@/components/dashboard/recent-transactions";
 import QuickStats from "@/components/dashboard/quick-stats";
 import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
-import { Product, Sales, ItemCategory } from '@/lib/types';
+import { Product, SalesOrder, ItemCategory } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [sales, setSales] = useState<Sales[]>([]);
-  const [categories, setCategories] = useState<ItemCategory[]>([]);
+  const [sales, setSales] = useState<SalesOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   
@@ -26,20 +25,19 @@ export default function DashboardPage() {
       setLoading(true);
       try {
         const productsRef = collection(db, 'products');
-        const salesRef = collection(db, 'sales');
-        const categoriesRef = collection(db, 'categories');
+        const salesRef = collection(db, 'salesOrders');
 
-        const productsSnapshot = await getDocs(productsRef);
+        const [productsSnapshot, salesSnapshot] = await Promise.all([
+            getDocs(productsRef),
+            getDocs(salesRef)
+        ]);
+
         const loadedProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
         setProducts(loadedProducts);
 
-        const salesSnapshot = await getDocs(salesRef);
-        const loadedSales = salesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Sales));
+        const loadedSales = salesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
         setSales(loadedSales);
 
-        const categoriesSnapshot = await getDocs(categoriesRef);
-        const loadedCategories = categoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
-        setCategories(loadedCategories);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
         toast({
@@ -53,6 +51,19 @@ export default function DashboardPage() {
     };
     fetchData();
   }, [toast]);
+
+  // Transform sales orders to a flat list of sales for compatibility with existing components
+  const flatSales = sales.flatMap(order => 
+    order.lines.map(line => ({
+        id: `${order.id}-${line.id}`,
+        productId: line.itemId,
+        productName: line.description,
+        customerName: order.customerName || 'Unknown',
+        date: order.orderDate,
+        quantity: line.quantity,
+        total: line.total,
+    }))
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -71,11 +82,11 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <TopSellingItems products={products} sales={sales} />
-          <SlowMovingItems products={products} sales={sales} />
+          <TopSellingItems products={products} sales={flatSales} />
+          <SlowMovingItems products={products} sales={flatSales} />
       </div>
 
-      <RecentTransactions sales={sales} />
+      <RecentTransactions sales={flatSales} />
     </div>
   );
 }

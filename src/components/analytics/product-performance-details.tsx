@@ -3,13 +3,13 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Sales, Product } from '@/lib/types';
+import { SalesOrder, Product } from '@/lib/types';
 import { TrendingUpIcon } from '../icons/trending-up';
 
 interface ProductPerformanceDetailsProps {
     dateRange: number;
     products: Product[];
-    sales: Sales[];
+    sales: SalesOrder[];
 }
 
 export default function ProductPerformanceDetails({ dateRange, products, sales }: ProductPerformanceDetailsProps) {
@@ -17,12 +17,20 @@ export default function ProductPerformanceDetails({ dateRange, products, sales }
     cutoffDate.setDate(cutoffDate.getDate() - dateRange);
 
     const filteredSales = sales.filter(s => {
-      const saleDate = (s.date as any).toDate ? (s.date as any).toDate() : new Date(s.date as string);
+      const saleDate = (s.orderDate as any).toDate ? (s.orderDate as any).toDate() : new Date(s.orderDate as string);
       return saleDate >= cutoffDate;
     });
+
+    const flatSales = filteredSales.flatMap(order => 
+        order.lines.map(line => ({
+            productId: line.itemId,
+            quantity: line.quantity,
+            total: line.total,
+        }))
+    );
     
     const productPerformanceData = products.map(product => {
-        const productSales = filteredSales.filter(s => s.productId === product.id);
+        const productSales = flatSales.filter(s => s.productId === product.id);
         if (productSales.length === 0) return null;
 
         const unitsSold = productSales.reduce((acc, s) => acc + s.quantity, 0);

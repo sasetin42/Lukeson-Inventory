@@ -265,25 +265,6 @@ export type LowStockAlert = {
     reOrderLevel: number;
 };
 
-// DEPRECATED / MOCK TYPES
-export type Invoice = {
-  id: string;
-  customerName: string;
-  date: Date | FieldValue | string;
-  amount: number;
-  status: 'Paid' | 'Pending' | 'Overdue';
-};
-
-export type Sales = {
-  id: string;
-  productId: string;
-  productName: string;
-  customerName: string;
-  date: Date | FieldValue | string;
-  quantity: number;
-  total: number;
-};
-
 export type ProductKpi = {
     title: string;
     value: string | number;
@@ -321,4 +302,15 @@ export type Product = {
     status: 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Discontinued';
     uom: string;
     expiryDateTracking: boolean;
+};
+
+// Flat Sales type for analytics
+export type FlatSale = {
+    id: string;
+    productId: string;
+    productName: string;
+    customerName: string;
+    date: Date | FieldValue | string;
+    quantity: number;
+    total: number;
 };

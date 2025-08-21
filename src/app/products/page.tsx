@@ -31,13 +31,17 @@ export default function ProductsPage() {
             const productsRef = collection(db, 'products');
             const categoriesRef = collection(db, 'categories');
 
-            const productsSnapshot = await getDocs(productsRef);
+            const [productsSnapshot, categoriesSnapshot] = await Promise.all([
+                getDocs(productsRef),
+                getDocs(categoriesRef)
+            ]);
+
             const loadedProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
             setProducts(loadedProducts);
 
-            const categoriesSnapshot = await getDocs(categoriesRef);
             const loadedCategories = categoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
             setCategories(loadedCategories);
+
         } catch (error) {
             console.error("Error fetching data:", error);
             toast({

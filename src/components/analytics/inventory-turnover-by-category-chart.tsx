@@ -2,13 +2,13 @@
 'use client';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Product, Sales } from '@/lib/types';
+import { Product, SalesOrder } from '@/lib/types';
 import { categoryMap } from '@/lib/category-map';
 
 interface InventoryTurnoverByCategoryChartProps {
     dateRange: number;
     products: Product[];
-    sales: Sales[];
+    sales: SalesOrder[];
 }
 
 export default function InventoryTurnoverByCategoryChart({ dateRange, products, sales }: InventoryTurnoverByCategoryChartProps) {
@@ -16,11 +16,18 @@ export default function InventoryTurnoverByCategoryChart({ dateRange, products, 
   cutoffDate.setDate(cutoffDate.getDate() - dateRange);
 
   const filteredSales = sales.filter(s => {
-    const saleDate = (s.date as any).toDate ? (s.date as any).toDate() : new Date(s.date as string);
+    const saleDate = (s.orderDate as any).toDate ? (s.orderDate as any).toDate() : new Date(s.orderDate as string);
     return saleDate >= cutoffDate;
   });
+
+  const flatSales = filteredSales.flatMap(order => 
+    order.lines.map(line => ({
+        productId: line.itemId,
+        quantity: line.quantity,
+    }))
+  );
   
-  const categoryCogs = filteredSales.reduce((acc, sale) => {
+  const categoryCogs = flatSales.reduce((acc, sale) => {
     const product = products.find(p => p.id === sale.productId);
     if (!product) return acc;
     
