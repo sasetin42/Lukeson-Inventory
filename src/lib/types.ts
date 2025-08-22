@@ -157,6 +157,7 @@ export type PurchaseOrder = {
     id: string; // PO-YYYY-XXXX
     supplierId: string;
     supplierName: string;
+    supplierEmail: string;
     orderDate: Date | FieldValue | string;
     expectedDeliveryDate: Date | FieldValue | string | null;
     status: 'Draft' | 'Sent' | 'Confirmed' | 'Partially Received' | 'Received' | 'Billed' | 'Cancelled';

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -137,6 +138,7 @@ export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }
                 id: purchaseOrder?.id || purchaseOrderId,
                 supplierId,
                 supplierName: supplier?.name || 'N/A',
+                supplierEmail: supplier?.contact.email || '',
                 orderDate,
                 expectedDeliveryDate: expectedDeliveryDate || null,
                 status,
