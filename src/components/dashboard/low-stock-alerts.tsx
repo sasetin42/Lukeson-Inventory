@@ -8,9 +8,10 @@ import ProductImage from "../products/product-image";
 
 interface LowStockAlertsProps {
     products: Product[];
+    onCreatePO: (product: Product) => void;
 }
 
-export default function LowStockAlerts({ products }: LowStockAlertsProps) {
+export default function LowStockAlerts({ products, onCreatePO }: LowStockAlertsProps) {
   const lowStockProducts = products.filter(p => p.stock > 0 && p.stock <= p.reOrderLevel);
 
   return (
@@ -55,7 +56,7 @@ export default function LowStockAlerts({ products }: LowStockAlertsProps) {
                   <p className="font-semibold text-red-500">{item.stock} units</p>
                   <p className="text-xs text-muted-foreground">Re-order: {item.reOrderLevel}</p>
                 </div>
-                <Button size="sm" variant="outline" className="h-8">
+                <Button size="sm" variant="outline" className="h-8" onClick={() => onCreatePO(item)}>
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Order
                 </Button>

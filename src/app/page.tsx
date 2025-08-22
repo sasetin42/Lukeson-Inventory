@@ -9,15 +9,18 @@ import InventoryOverview from "@/components/dashboard/inventory-overview";
 import RecentTransactions from "@/components/dashboard/recent-transactions";
 import QuickStats from "@/components/dashboard/quick-stats";
 import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
-import { Product, SalesOrder, ItemCategory } from '@/lib/types';
+import { Product, SalesOrder, ItemCategory, PurchaseOrder } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-form-modal';
 
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<SalesOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPurchaseOrder, setEditingPurchaseOrder] = useState<PurchaseOrder | null>(null);
   const { toast } = useToast();
   
   useEffect(() => {
@@ -65,6 +68,49 @@ export default function DashboardPage() {
     }))
   );
 
+  const handleOpenModal = (purchaseOrder: PurchaseOrder | null) => {
+    setEditingPurchaseOrder(purchaseOrder);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingPurchaseOrder(null);
+  }
+
+  const handleSavePurchaseOrder = async (purchaseOrderData: Omit<PurchaseOrder, 'id'> & { id?: string }) => {
+      try {
+          const { id, ...dataToSave } = purchaseOrderData;
+          const poRef = doc(db, "purchaseOrders", id as string);
+          await setDoc(poRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+          toast({ title: "Success", description: "Purchase Order added successfully.", variant: "success" });
+          handleCloseModal();
+      } catch (error) {
+          console.error("Error saving purchase order: ", error);
+          toast({ title: "Error", description: "Failed to save purchase order.", variant: "destructive" });
+      }
+  };
+
+  const handleCreatePO = (product: Product) => {
+    const newPO: Partial<PurchaseOrder> = {
+        supplierId: '', 
+        supplierName: product.supplier.name,
+        status: 'Draft',
+        lines: [{
+            id: `line-${Date.now()}`,
+            itemId: product.id,
+            description: product.name,
+            quantity: product.reOrderLevel,
+            uom: product.uom,
+            unitPrice: product.price,
+            taxRate: 0.12,
+            total: product.reOrderLevel * product.price * 1.12,
+            vatType: 'VATable',
+        }]
+    };
+    handleOpenModal(newPO as PurchaseOrder);
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader 
@@ -78,7 +124,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <QuickStats />
-        <LowStockAlerts products={products} />
+        <LowStockAlerts products={products} onCreatePO={handleCreatePO} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -87,6 +133,15 @@ export default function DashboardPage() {
       </div>
 
       <RecentTransactions sales={flatSales} />
+
+      {isModalOpen && (
+          <PurchaseOrderFormModal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            onSave={handleSavePurchaseOrder}
+            purchaseOrder={editingPurchaseOrder}
+          />
+      )}
     </div>
   );
 }
