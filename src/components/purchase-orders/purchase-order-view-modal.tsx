@@ -35,21 +35,35 @@ export default function PurchaseOrderViewModal({
     const printContent = printableRef.current;
     if (printContent) {
       const printWindow = window.open('', '_blank');
-      printWindow?.document.write('<html><head><title>Print Purchase Order</title>');
-      // You may need to link your stylesheet here for proper printing
-      printWindow?.document.write('<link rel="stylesheet" href="/globals.css" type="text/css" />');
-      printWindow?.document.write('</head><body>');
-      printWindow?.document.write(printContent.innerHTML);
-      printWindow?.document.write('</body></html>');
-      printWindow?.document.close();
-      printWindow?.focus();
-      printWindow?.print();
+      if (printWindow) {
+        printWindow.document.write('<html><head><title>Print Purchase Order</title>');
+        const styles = Array.from(document.styleSheets)
+          .map(styleSheet => {
+            try {
+              return Array.from(styleSheet.cssRules).map(rule => rule.cssText).join('');
+            } catch (e) {
+              console.warn('Could not read stylesheet rules', e);
+              return '';
+            }
+          }).join('\n');
+        printWindow.document.write(`<style>${styles}</style>`);
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(printContent.innerHTML);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.focus();
+        // Use a small timeout to ensure content is loaded before printing
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 250);
+      }
     }
   };
 
   const handleEmail = () => {
     if (purchaseOrder.supplierEmail) {
-        const subject = `Purchase Order from [Your Company Name]: ${purchaseOrder.id}`;
+        const subject = `Purchase Order from YAMASHITA MOLD PHILIPPINES CORPORATION: ${purchaseOrder.id}`;
         const body = `Dear ${purchaseOrder.supplierName},\n\nPlease find our purchase order attached.\n\nThank you,\n[Your Name]`;
         window.location.href = `mailto:${purchaseOrder.supplierEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
