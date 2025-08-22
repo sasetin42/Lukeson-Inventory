@@ -8,6 +8,7 @@ import { PlusCircle, DollarSign, CheckCircle, Clock, XCircle } from "lucide-reac
 import JobOrderList from "@/components/job-orders/job-order-list";
 import { JobOrder } from '@/lib/types';
 import JobOrderFormModal from '@/components/job-orders/job-order-form-modal';
+import JobOrderViewModal from '@/components/job-orders/job-order-view-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -17,8 +18,9 @@ import JobOrderTemplate from '@/components/job-orders/job-order-template';
 
 export default function JobOrdersPage() {
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingJobOrder, setEditingJobOrder] = useState<JobOrder | null>(null);
+  const [viewingJobOrder, setViewingJobOrder] = useState<JobOrder | null>(null);
   const { toast } = useToast();
 
   const fetchJobOrders = async () => {
@@ -41,10 +43,23 @@ export default function JobOrdersPage() {
     fetchJobOrders();
   }, []);
 
-  const handleOpenModal = (jobOrder: JobOrder | null) => {
+  const handleOpenFormModal = (jobOrder: JobOrder | null) => {
     setEditingJobOrder(jobOrder);
-    setIsModalOpen(true);
+    setIsFormModalOpen(true);
   };
+  
+  const handleCloseFormModal = () => {
+      setIsFormModalOpen(false);
+      setEditingJobOrder(null);
+  }
+
+  const handleOpenViewModal = (jobOrder: JobOrder) => {
+    setViewingJobOrder(jobOrder);
+  }
+  
+  const handleCloseViewModal = () => {
+    setViewingJobOrder(null);
+  }
 
   const handleSaveJobOrder = async (jobOrderData: Omit<JobOrder, 'id'> & {id?: string}) => {
       try {
@@ -58,7 +73,7 @@ export default function JobOrdersPage() {
               await addDoc(collection(db, "jobOrders"), { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
               toast({ title: "Success", description: "Job Order added successfully.", variant: "success" });
           }
-          setIsModalOpen(false);
+          handleCloseFormModal();
           fetchJobOrders();
       } catch (error) {
           console.error("Error saving job order: ", error);
@@ -92,7 +107,7 @@ export default function JobOrdersPage() {
         description="Manage job orders for your customers."
         icon={<PlusCircle className="h-6 w-6 text-orange-500" />}
         actions={
-          <Button onClick={() => handleOpenModal(null)}>
+          <Button onClick={() => handleOpenFormModal(null)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Create Job Order
           </Button>
@@ -121,8 +136,9 @@ export default function JobOrdersPage() {
           <div className="mt-4">
             <JobOrderList 
               jobOrders={jobOrders} 
-              onEdit={handleOpenModal}
+              onEdit={handleOpenFormModal}
               onDelete={handleDeleteJobOrder}
+              onView={handleOpenViewModal}
             />
           </div>
         </TabsContent>
@@ -133,12 +149,21 @@ export default function JobOrdersPage() {
             <p>Job Order Settings will go here.</p>
         </TabsContent>
       </Tabs>
-      <JobOrderFormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveJobOrder}
-        jobOrder={editingJobOrder}
-      />
+      {isFormModalOpen && (
+        <JobOrderFormModal
+            isOpen={isFormModalOpen}
+            onClose={handleCloseFormModal}
+            onSave={handleSaveJobOrder}
+            jobOrder={editingJobOrder}
+        />
+      )}
+      {viewingJobOrder && (
+          <JobOrderViewModal
+            isOpen={!!viewingJobOrder}
+            onClose={handleCloseViewModal}
+            jobOrder={viewingJobOrder}
+          />
+      )}
     </div>
   );
 }

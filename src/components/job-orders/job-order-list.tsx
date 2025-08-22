@@ -9,12 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -31,9 +25,10 @@ interface JobOrderListProps {
     jobOrders: JobOrder[];
     onEdit: (jobOrder: JobOrder) => void;
     onDelete: (jobOrderId: string) => void;
+    onView: (jobOrder: JobOrder) => void;
 }
 
-export default function JobOrderList({ jobOrders, onEdit, onDelete }: JobOrderListProps) {
+export default function JobOrderList({ jobOrders, onEdit, onDelete, onView }: JobOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [jobOrderToDelete, setJobOrderToDelete] = useState<JobOrder | null>(null);
 
@@ -104,7 +99,7 @@ export default function JobOrderList({ jobOrders, onEdit, onDelete }: JobOrderLi
                                         <TableCell className="flex items-center justify-center gap-1">
                                              <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Button variant="ghost" size="icon" onClick={() => {}}>
+                                                    <Button variant="ghost" size="icon" onClick={() => onView(jobOrder)}>
                                                         <Eye className="h-4 w-4 text-blue-500" />
                                                     </Button>
                                                 </TooltipTrigger>
