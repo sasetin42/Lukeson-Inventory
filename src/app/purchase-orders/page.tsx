@@ -53,14 +53,16 @@ export default function PurchaseOrdersPage() {
 
   const handleSavePurchaseOrder = async (purchaseOrderData: Omit<PurchaseOrder, 'id'> & { id?: string }) => {
       try {
-          if (purchaseOrderData.id) {
+          if (purchaseOrderData.id && editingPurchaseOrder) { // check for editingPurchaseOrder to be sure
               const { id, ...dataToSave } = purchaseOrderData;
               const poRef = doc(db, "purchaseOrders", id);
               await setDoc(poRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
               toast({ title: "Success", description: "Purchase Order updated successfully.", variant: "success" });
           } else {
               const { id, ...dataToSave } = purchaseOrderData;
-              await addDoc(collection(db, "purchaseOrders"), { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+              const docId = id as string; // The formatted ID is passed from the form
+              const poRef = doc(db, "purchaseOrders", docId);
+              await setDoc(poRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
               toast({ title: "Success", description: "Purchase Order added successfully.", variant: "success" });
           }
           handleCloseModal();
