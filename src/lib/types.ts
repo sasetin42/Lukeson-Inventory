@@ -23,7 +23,7 @@ export type User = {
     id: string;
     name: string;
     email: string;
-    role: 'Admin' | 'Manager' | 'Viewer' | 'Inventory Manager' | 'Sales' | 'Purchasing' | 'Finance' | 'Auditor';
+    role: 'Admin' | 'Manager' | 'Viewer';
     status: 'active' | 'inactive';
     lastLoginAt?: Date | FieldValue | string;
     createdAt: Date | FieldValue | string;
@@ -140,24 +140,15 @@ export type JobOrder = {
     modifiedAt?: Date | FieldValue | string;
 };
 
-export type SalesInvoice = {
+export type Invoice = {
     id:string; // INV-YYYY-XXXX
     salesOrderId: string;
-    invoiceDate: Date;
+    date: Date;
     dueDate: Date;
     status: 'Draft' | 'Posted' | 'Paid' | 'Overdue';
-    totalAmount: number;
+    amount: number;
     paidAmount: number;
     balance: number;
-    lines: DocumentLine[];
-};
-
-export type Payment = {
-    id: string;
-    invoiceId: string;
-    paymentDate: Date;
-    amount: number;
-    paymentMethod: string;
 };
 
 
