@@ -13,6 +13,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import JobOrderTemplate from '@/components/job-orders/job-order-template';
 
 export default function JobOrdersPage() {
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
@@ -126,7 +127,7 @@ export default function JobOrdersPage() {
           </div>
         </TabsContent>
         <TabsContent value="templates" className="mt-4">
-            <p>Job Order Template settings will go here.</p>
+            <JobOrderTemplate />
         </TabsContent>
         <TabsContent value="settings" className="mt-4">
             <p>Job Order Settings will go here.</p>
