@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function JobOrdersPage() {
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
@@ -96,24 +97,41 @@ export default function JobOrdersPage() {
           </Button>
         }
       />
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((kpi, index) => (
-          <KpiCard
-            key={index}
-            title={kpi.title}
-            value={kpi.value as string}
-            icon={kpi.icon}
-            color={kpi.color}
-            style={{ animationDelay: `${index * 100}ms` }}
-            className="fade-in-up"
-          />
-        ))}
-      </div>
-      <JobOrderList 
-        jobOrders={jobOrders} 
-        onEdit={handleOpenModal}
-        onDelete={handleDeleteJobOrder}
-      />
+       <Tabs defaultValue="job-orders">
+        <TabsList>
+          <TabsTrigger value="job-orders">Job Orders</TabsTrigger>
+          <TabsTrigger value="templates">Job Order Template</TabsTrigger>
+          <TabsTrigger value="settings">Job Order Settings</TabsTrigger>
+        </TabsList>
+        <TabsContent value="job-orders" className="mt-4">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {kpis.map((kpi, index) => (
+              <KpiCard
+                key={index}
+                title={kpi.title}
+                value={kpi.value as string}
+                icon={kpi.icon}
+                color={kpi.color}
+                style={{ animationDelay: `${index * 100}ms` }}
+                className="fade-in-up"
+              />
+            ))}
+          </div>
+          <div className="mt-4">
+            <JobOrderList 
+              jobOrders={jobOrders} 
+              onEdit={handleOpenModal}
+              onDelete={handleDeleteJobOrder}
+            />
+          </div>
+        </TabsContent>
+        <TabsContent value="templates" className="mt-4">
+            <p>Job Order Template settings will go here.</p>
+        </TabsContent>
+        <TabsContent value="settings" className="mt-4">
+            <p>Job Order Settings will go here.</p>
+        </TabsContent>
+      </Tabs>
       <JobOrderFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
