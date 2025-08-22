@@ -75,6 +75,10 @@ export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }
         } else {
             generatePurchaseOrderId();
             setLines([]);
+            setSupplierId('');
+            setOrderDate(new Date());
+            setExpectedDeliveryDate(undefined);
+            setStatus('Draft');
         }
     }, [purchaseOrder]);
     
@@ -130,7 +134,7 @@ export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }
         try {
             const supplier = suppliers.find(s => s.id === supplierId);
             const purchaseOrderData = {
-                id: purchaseOrder?.id,
+                id: purchaseOrder?.id || purchaseOrderId,
                 supplierId,
                 supplierName: supplier?.name || 'N/A',
                 orderDate,
@@ -238,3 +242,5 @@ export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }
         </div>
     );
 }
+
+    
