@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Home, Package, FileText, Users, LogOut, Settings, LifeBuoy, BarChart3, List, FilePlus, FileMinus, Goal, Building, ChevronDown, LayoutGrid, BarChart2, ShoppingCart, ShoppingBag, FileCode, Warehouse, Truck, Users2, File, FileCog, Shield, DatabaseBackup, Banknote, Briefcase, PlusCircle } from 'lucide-react';
+import { Home, Package, FileText, Users, LogOut, Settings, LifeBuoy, BarChart3, List, FilePlus, FileMinus, Goal, Building, ChevronDown, LayoutGrid, BarChart2, ShoppingCart, ShoppingBag, FileCode, Warehouse, Truck, Users2, File, FileCog, Shield, DatabaseBackup, Banknote, Briefcase, PlusCircle, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from '@/components/icons/logo';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, SidebarContent, SidebarSeparator } from '@/components/ui/sidebar';
@@ -39,6 +39,7 @@ const navGroups = [
         links: [
           { href: '/products', icon: Package, label: 'Products', color: 'text-blue-500' },
           { href: '/warehouses', icon: Warehouse, label: 'Warehouses', color: 'text-green-500' },
+          { href: '/stock-alerts', icon: AlertTriangle, label: 'Stock Alerts', color: 'text-red-500' },
           { href: '/inventory-settings', icon: Settings, label: 'Settings', color: 'text-yellow-500' },
         ],
       },
