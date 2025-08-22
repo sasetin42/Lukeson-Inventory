@@ -7,50 +7,94 @@ import { AlertTriangle, Download, Package, ShoppingCart } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Product } from '@/lib/types';
+import { Product, PurchaseOrder } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, doc, addDoc, serverTimestamp } from 'firebase/firestore';
 import ProductImage from '@/components/products/product-image';
 import KpiCard from '@/components/kpi-card';
+import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-form-modal';
 
 export default function StockAlertsPage() {
     const [lowStockProducts, setLowStockProducts] = useState<Product[]>([]);
     const [outOfStockProducts, setOutOfStockProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingPurchaseOrder, setEditingPurchaseOrder] = useState<PurchaseOrder | null>(null);
 
+    const fetchStockData = async () => {
+        setLoading(true);
+        try {
+            const productsRef = collection(db, 'products');
+
+            const productsSnapshot = await getDocs(productsRef);
+            const allProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+            
+            const lowStock = allProducts.filter(p => p.stock > 0 && p.stock <= p.reOrderLevel);
+            const outOfStock = allProducts.filter(p => p.stock === 0);
+
+            setLowStockProducts(lowStock);
+            setOutOfStockProducts(outOfStock);
+
+        } catch (error) {
+            console.error("Error fetching stock data: ", error);
+            toast({
+                title: "Error",
+                description: "Failed to load stock alerts.",
+                variant: "destructive"
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+    
     useEffect(() => {
-        const fetchStockData = async () => {
-            setLoading(true);
-            try {
-                const productsRef = collection(db, 'products');
-
-                // Can't use inequality on different fields, so we fetch all and filter client-side.
-                // For larger datasets, this should be handled differently (e.g. a 'status' field).
-                const productsSnapshot = await getDocs(productsRef);
-                const allProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-                
-                const lowStock = allProducts.filter(p => p.stock > 0 && p.stock <= p.reOrderLevel);
-                const outOfStock = allProducts.filter(p => p.stock === 0);
-
-                setLowStockProducts(lowStock);
-                setOutOfStockProducts(outOfStock);
-
-            } catch (error) {
-                console.error("Error fetching stock data: ", error);
-                toast({
-                    title: "Error",
-                    description: "Failed to load stock alerts.",
-                    variant: "destructive"
-                });
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchStockData();
     }, [toast]);
     
+    const handleOpenModal = (purchaseOrder: PurchaseOrder | null) => {
+        setEditingPurchaseOrder(purchaseOrder);
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setEditingPurchaseOrder(null);
+    }
+    
+    const handleSavePurchaseOrder = async (purchaseOrderData: Omit<PurchaseOrder, 'id'> & { id?: string }) => {
+        try {
+            const { id, ...dataToSave } = purchaseOrderData;
+            await addDoc(collection(db, "purchaseOrders"), { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+            toast({ title: "Success", description: "Purchase Order added successfully.", variant: "success" });
+            handleCloseModal();
+        } catch (error) {
+            console.error("Error saving purchase order: ", error);
+            toast({ title: "Error", description: "Failed to save purchase order.", variant: "destructive" });
+        }
+    };
+
+    const handleCreatePO = (product: Product) => {
+        const newPO: Partial<PurchaseOrder> = {
+            supplierId: '', // You might need to select this in the form
+            supplierName: product.supplier.name,
+            status: 'Draft',
+            lines: [{
+                id: `line-${Date.now()}`,
+                itemId: product.id,
+                description: product.name,
+                quantity: product.reOrderLevel,
+                uom: product.uom,
+                unitPrice: product.price, // Assuming price is cost price for PO
+                taxRate: 0.12,
+                total: product.reOrderLevel * product.price * 1.12,
+                vatType: 'VATable',
+            }]
+        };
+        handleOpenModal(newPO as PurchaseOrder);
+    }
+
     const totalValueLowStock = lowStockProducts.reduce((acc, p) => acc + (p.price * p.stock), 0);
     const totalValueOutOfStock = outOfStockProducts.reduce((acc, p) => acc + (p.price * p.reOrderLevel), 0); // Estimated loss based on reorder level
 
@@ -87,7 +131,7 @@ export default function StockAlertsPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <StockAlertsTable products={lowStockProducts} />
+                    <StockAlertsTable products={lowStockProducts} onCreatePO={handleCreatePO} />
                 </CardContent>
             </Card>
 
@@ -99,16 +143,24 @@ export default function StockAlertsPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <StockAlertsTable products={outOfStockProducts} isOutOfStock />
+                    <StockAlertsTable products={outOfStockProducts} isOutOfStock onCreatePO={handleCreatePO}/>
                 </CardContent>
             </Card>
 
+            {isModalOpen && (
+                <PurchaseOrderFormModal
+                  isOpen={isModalOpen}
+                  onClose={handleCloseModal}
+                  onSave={handleSavePurchaseOrder}
+                  purchaseOrder={editingPurchaseOrder}
+                />
+            )}
         </div>
     );
 }
 
 
-function StockAlertsTable({ products, isOutOfStock = false }: { products: Product[], isOutOfStock?: boolean }) {
+function StockAlertsTable({ products, isOutOfStock = false, onCreatePO }: { products: Product[], isOutOfStock?: boolean, onCreatePO: (product: Product) => void }) {
     return (
         <Table>
             <TableHeader>
@@ -143,7 +195,7 @@ function StockAlertsTable({ products, isOutOfStock = false }: { products: Produc
                         </TableCell>
                         <TableCell className="text-right">{product.reOrderLevel}</TableCell>
                         <TableCell className="text-center">
-                            <Button size="sm">
+                            <Button size="sm" onClick={() => onCreatePO(product)}>
                                 <ShoppingCart className="mr-2 h-4 w-4" />
                                 Create PO
                             </Button>
