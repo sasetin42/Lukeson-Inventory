@@ -1,151 +1,265 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import PageHeader from "@/components/page-header";
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign, ShoppingBag } from "lucide-react";
-import PurchaseOrderList from "@/components/purchase-orders/purchase-order-list";
-import { PurchaseOrder } from '@/lib/types';
-import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-form-modal';
-import { useToast } from '@/hooks/use-toast';
-import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
-import KpiCard from '@/components/kpi-card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { Upload, Save } from 'lucide-react';
+import Image from 'next/image';
+
+export default function PurchaseRequestTemplate() {
+    const [accentColor, setAccentColor] = useState('#0A3BA3');
+    const [showDueDate, setShowDueDate] = useState(true);
+    const [showNotes, setShowNotes] = useState(true);
+    const [showVat, setShowVat] = useState(true);
+
+    const [companyName, setCompanyName] = useState('YAMASHITA MOLD PHILIPPINES CORPORATION');
+    const [address, setAddress] = useState('Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines');
+    const [phone, setPhone] = useState('Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463');
+    const [email, setEmail] = useState('contact@yamashitamold.ph');
+    const [website, setWebsite] = useState('www.yamashitamold.ph');
+
+    const [preparedByLabel, setPreparedByLabel] = useState('Prepared by:');
+    const [preparedByName, setPreparedByName] = useState('YMP / MCB / MJTS');
+    const [receivedByLabel, setReceivedByLabel] = useState('Received by:');
+    const [receivedByName, setReceivedByName] = useState('JUAN DELA CRUZ');
+    const [verifiedByLabel, setVerifiedByLabel] = useState('Verified by:');
+    const [verifiedByName, setVerifiedByName] = useState('HIROYOSHI KANAZAWA - VP');
 
 
-export default function PurchaseRequestsPage() {
-  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingPurchaseOrder, setEditingPurchaseOrder] = useState<PurchaseOrder | null>(null);
-  const { toast } = useToast();
+    return (
+        <div>
+            <div className="flex justify-between items-center mb-4">
+                <h1 className="text-2xl font-bold">Purchase Order Template Customizer</h1>
+                <Button>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Template
+                </Button>
+            </div>
+            <p className="text-muted-foreground mb-6">
+                Changes made here will be reflected on all generated purchase orders. Click Save to apply.
+            </p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-1 space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Appearance</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Label htmlFor="accent-color">Accent Color</Label>
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    id="accent-color"
+                                    type="color"
+                                    value={accentColor}
+                                    onChange={(e) => setAccentColor(e.target.value)}
+                                    className="p-1 h-10 w-14"
+                                />
+                                <Input
+                                    value={accentColor}
+                                    onChange={(e) => setAccentColor(e.target.value)}
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
 
-  const fetchPurchaseOrders = async () => {
-    try {
-      const poRef = collection(db, 'purchaseOrders');
-      const snapshot = await getDocs(poRef);
-      const loadedPOs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PurchaseOrder));
-      setPurchaseOrders(loadedPOs);
-    } catch (error) {
-      console.error("Error fetching purchase orders: ", error);
-      toast({
-        title: "Error",
-        description: "Failed to load purchase orders. Please check your connection and permissions.",
-        variant: "destructive"
-      });
-    }
-  };
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Content</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="show-due-date">Show Due Date</Label>
+                                <Switch id="show-due-date" checked={showDueDate} onCheckedChange={setShowDueDate} />
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="show-notes">Show Notes Section</Label>
+                                <Switch id="show-notes" checked={showNotes} onCheckedChange={setShowNotes} />
+                            </div>
+                             <div className="flex items-center justify-between">
+                                <Label htmlFor="show-vat">Show VAT Breakdown</Label>
+                                <Switch id="show-vat" checked={showVat} onCheckedChange={setShowVat} />
+                            </div>
+                        </CardContent>
+                    </Card>
 
-  useEffect(() => {
-    fetchPurchaseOrders();
-  }, []);
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Company Details</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div>
+                                <Label>Invoice & Purchase Order Logo</Label>
+                                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md">
+                                    <div className="space-y-1 text-center">
+                                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                                        <div className="flex text-sm text-gray-600">
+                                            <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-focus">
+                                                <span>Upload a file</span>
+                                                <input id="file-upload" name="file-upload" type="file" className="sr-only" />
+                                            </label>
+                                            <p className="pl-1">or drag and drop</p>
+                                        </div>
+                                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <Label htmlFor="company-name">Company Name</Label>
+                                <Input id="company-name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
+                            </div>
+                             <div>
+                                <Label htmlFor="address">Address</Label>
+                                <Textarea id="address" value={address} onChange={(e) => setAddress(e.target.value)} />
+                            </div>
+                             <div>
+                                <Label htmlFor="phone">Phone</Label>
+                                <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                            </div>
+                             <div>
+                                <Label htmlFor="email">Email</Label>
+                                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                            </div>
+                             <div>
+                                <Label htmlFor="website">Website</Label>
+                                <Input id="website" value={website} onChange={(e) => setWebsite(e.target.value)} />
+                            </div>
+                        </CardContent>
+                    </Card>
 
-  const handleOpenModal = (purchaseOrder: PurchaseOrder | null) => {
-    setEditingPurchaseOrder(purchaseOrder);
-    setIsModalOpen(true);
-  };
-  
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingPurchaseOrder(null);
-  }
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Footer Settings</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div>
+                                <Label htmlFor="prepared-by-label">"Prepared by" Label</Label>
+                                <Input id="prepared-by-label" value={preparedByLabel} onChange={(e) => setPreparedByLabel(e.target.value)} />
+                            </div>
+                             <div>
+                                <Label htmlFor="prepared-by-name">Name</Label>
+                                <Input id="prepared-by-name" value={preparedByName} onChange={(e) => setPreparedByName(e.target.value)} />
+                            </div>
+                             <div>
+                                <Label htmlFor="received-by-label">"Received by" Label</Label>
+                                <Input id="received-by-label" value={receivedByLabel} onChange={(e) => setReceivedByLabel(e.target.value)} />
+                            </div>
+                             <div>
+                                <Label htmlFor="received-by-name">Name</Label>
+                                <Input id="received-by-name" value={receivedByName} onChange={(e) => setReceivedByName(e.target.value)} />
+                            </div>
+                             <div>
+                                <Label htmlFor="verified-by-label">"Verified by" Label</Label>
+                                <Input id="verified-by-label" value={verifiedByLabel} onChange={(e) => setVerifiedByLabel(e.target.value)} />
+                            </div>
+                             <div>
+                                <Label htmlFor="verified-by-name">Name</Label>
+                                <Input id="verified-by-name" value={verifiedByName} onChange={(e) => setVerifiedByName(e.target.value)} />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
 
-  const handleSavePurchaseOrder = async (purchaseOrderData: Omit<PurchaseOrder, 'id'> & { id?: string }) => {
-      try {
-          if (purchaseOrderData.id) {
-              const { id, ...dataToSave } = purchaseOrderData;
-              const poRef = doc(db, "purchaseOrders", id);
-              await setDoc(poRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
-              toast({ title: "Success", description: "Purchase Order updated successfully.", variant: "success" });
-          } else {
-              const { id, ...dataToSave } = purchaseOrderData;
-              await addDoc(collection(db, "purchaseOrders"), { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
-              toast({ title: "Success", description: "Purchase Order added successfully.", variant: "success" });
-          }
-          handleCloseModal();
-          fetchPurchaseOrders();
-      } catch (error) {
-          console.error("Error saving purchase order: ", error);
-          toast({ title: "Error", description: "Failed to save purchase order.", variant: "destructive" });
-      }
-  };
+                {/* Preview Section */}
+                <div className="lg:col-span-2">
+                    <Card className="p-8">
+                        <div className="flex justify-between items-start">
+                             <div className="flex items-center gap-4">
+                                <Image src="https://placehold.co/100x50.png" width={100} height={50} alt="Company Logo" data-ai-hint="logo" />
+                                <div className="text-xs">
+                                    <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
+                                    <p>{address}</p>
+                                    <p>{phone}</p>
+                                    <p>{website}</p>
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <h2 className="text-3xl font-bold" style={{ color: accentColor }}>PURCHASE ORDER</h2>
+                                <p className="text-sm"><strong>Invoice ID:</strong> PO-2025-001</p>
+                                <p className="text-sm"><strong>Date:</strong> Jan 15, 2024</p>
+                                {showDueDate && <p className="text-sm"><strong>Due Date:</strong> Feb 14, 2024</p>}
+                                <p className="text-sm"><strong>Delivery Receipt Number:</strong> PO-2025-002</p>
+                            </div>
+                        </div>
 
+                        <div className="mt-8">
+                            <p className="font-bold">BILL TO:</p>
+                            <p>Metro Construction Inc.</p>
+                            <p>123 Main Street, Makati City</p>
+                        </div>
+                        
+                        <table className="w-full mt-4 border-collapse">
+                            <thead>
+                                <tr>
+                                    <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Description</th>
+                                    <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Qty</th>
+                                    <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Unit Price</th>
+                                    <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr className="border-b">
+                                    <td className="p-2">Product A</td>
+                                    <td className="p-2">2</td>
+                                    <td className="p-2">P5,000.00</td>
+                                    <td className="p-2">P10,000.00</td>
+                                </tr>
+                                <tr className="border-b">
+                                    <td className="p-2">Service B</td>
+                                    <td className="p-2">1</td>
+                                    <td className="p-2">P1,500.00</td>
+                                    <td className="p-2">P1,500.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div className="flex justify-end mt-4">
+                            <div className="w-1/3 text-sm">
+                                {showVat && (
+                                    <>
+                                        <div className="flex justify-between"><span>Vatable Sales:</span> <span>P0.00</span></div>
+                                        <div className="flex justify-between"><span>VAT-Exempt Sales:</span> <span>P0.00</span></div>
+                                        <div className="flex justify-between"><span>Zero-Rated Sales:</span> <span>P0.00</span></div>
+                                    </>
+                                )}
+                                <div className="flex justify-between font-bold"><span>Total Sales:</span> <span>P11,500.00</span></div>
+                                <div className="flex justify-between"><span>Subtotal:</span> <span>P11,500.00</span></div>
+                                {showVat && <div className="flex justify-between"><span>VAT (12%):</span> <span>P1,380.00</span></div>}
+                                <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
+                                    <span>Total:</span>
+                                    <span>P12,880.00</span>
+                                </div>
+                            </div>
+                        </div>
 
-  const handleDeletePurchaseOrder = async (purchaseOrderId: string) => {
-    await deleteDoc(doc(db, "purchaseOrders", purchaseOrderId));
-    toast({ title: "Success", description: "Purchase Order deleted successfully.", variant: "success" });
-    fetchPurchaseOrders();
-  };
+                         {showNotes && (
+                            <div className="mt-8">
+                                <h4 className="font-bold">Notes:</h4>
+                                <p className="text-sm text-muted-foreground">Sample notes for the purchase order...</p>
+                            </div>
+                        )}
 
-  const totalReceived = purchaseOrders.filter(po => po.status === 'Received').length;
-  const totalPending = purchaseOrders.filter(po => po.status === 'Sent' || po.status === 'Confirmed').length;
-  const totalCancelled = purchaseOrders.filter(po => po.status === 'Cancelled').length;
-  const totalValue = purchaseOrders.reduce((sum, po) => sum + po.totalAmount, 0);
-
-  const kpis = [
-      { title: "Total PO Value", value: `₱${totalValue.toLocaleString()}`, icon: DollarSign, color: "green" as const },
-      { title: "Received Orders", value: totalReceived, icon: CheckCircle, color: "blue" as const },
-      { title: "Pending Orders", value: totalPending, icon: Clock, color: "yellow" as const },
-      { title: "Cancelled Orders", value: totalCancelled, icon: XCircle, color: "red" as const }
-  ];
-
-  return (
-    <div className="flex flex-col gap-4">
-      <PageHeader
-        title="Purchase Orders"
-        description="Manage purchase orders for your suppliers."
-        icon={<ShoppingBag className="h-6 w-6 text-blue-500" />}
-        actions={
-          <Button onClick={() => handleOpenModal(null)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Purchase Order
-          </Button>
-        }
-      />
-      <Tabs defaultValue="purchase-orders">
-        <TabsList>
-          <TabsTrigger value="purchase-orders">Purchase Orders</TabsTrigger>
-          <TabsTrigger value="templates">Purchase Order Template</TabsTrigger>
-          <TabsTrigger value="settings">Purchase Order Settings</TabsTrigger>
-        </TabsList>
-        <TabsContent value="purchase-orders" className="mt-4">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {kpis.map((kpi, index) => (
-              <KpiCard
-                key={index}
-                title={kpi.title}
-                value={kpi.value as string}
-                icon={kpi.icon}
-                color={kpi.color}
-                style={{ animationDelay: `${index * 100}ms` }}
-                className="fade-in-up"
-              />
-            ))}
-          </div>
-          <div className="mt-4">
-            <PurchaseOrderList
-              purchaseOrders={purchaseOrders}
-              onEdit={handleOpenModal}
-              onDelete={handleDeletePurchaseOrder}
-            />
-          </div>
-        </TabsContent>
-        <TabsContent value="templates" className="mt-4">
-          <p>Purchase Order Template settings will go here.</p>
-        </TabsContent>
-        <TabsContent value="settings" className="mt-4">
-          <p>Purchase Order Settings will go here.</p>
-        </TabsContent>
-      </Tabs>
-      {isModalOpen && (
-        <PurchaseOrderFormModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          onSave={handleSavePurchaseOrder}
-          purchaseOrder={editingPurchaseOrder}
-        />
-      )}
-    </div>
-  );
+                        <div className="flex justify-between mt-24 text-center">
+                            <div>
+                                <p className="font-bold">{preparedByName}</p>
+                                <p className="text-sm border-t border-black pt-1 mt-1">{preparedByLabel}</p>
+                            </div>
+                             <div>
+                                <p className="font-bold">{receivedByName}</p>
+                                <p className="text-sm border-t border-black pt-1 mt-1">{receivedByLabel}</p>
+                            </div>
+                             <div>
+                                <p className="font-bold">{verifiedByName}</p>
+                                <p className="text-sm border-t border-black pt-1 mt-1">{verifiedByLabel}</p>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            </div>
+        </div>
+    );
 }

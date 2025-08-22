@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign } from "lucide-react";
+import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign, ShoppingBag } from "lucide-react";
 import PurchaseOrderList from "@/components/purchase-orders/purchase-order-list";
 import { PurchaseOrder } from '@/lib/types';
 import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-form-modal';
@@ -12,6 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 
 export default function PurchaseOrdersPage() {
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
@@ -93,7 +95,7 @@ export default function PurchaseOrdersPage() {
       <PageHeader
         title="Purchase Orders"
         description="Manage purchase orders for your suppliers."
-        icon={<ShoppingCart className="h-6 w-6 text-orange-500" />}
+        icon={<ShoppingBag className="h-6 w-6 text-blue-500" />}
         actions={
           <Button onClick={() => handleOpenModal(null)}>
             <PlusCircle className="mr-2 h-4 w-4" />
@@ -101,24 +103,41 @@ export default function PurchaseOrdersPage() {
           </Button>
         }
       />
-       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {kpis.map((kpi, index) => (
-          <KpiCard
-            key={index}
-            title={kpi.title}
-            value={kpi.value as string}
-            icon={kpi.icon}
-            color={kpi.color}
-            style={{ animationDelay: `${index * 100}ms` }}
-            className="fade-in-up"
-          />
-        ))}
-      </div>
-      <PurchaseOrderList
-        purchaseOrders={purchaseOrders}
-        onEdit={handleOpenModal}
-        onDelete={handleDeletePurchaseOrder}
-      />
+      <Tabs defaultValue="purchase-orders">
+        <TabsList>
+          <TabsTrigger value="purchase-orders">Purchase Orders</TabsTrigger>
+          <TabsTrigger value="templates">Purchase Order Template</TabsTrigger>
+          <TabsTrigger value="settings">Purchase Order Settings</TabsTrigger>
+        </TabsList>
+        <TabsContent value="purchase-orders" className="mt-4">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {kpis.map((kpi, index) => (
+              <KpiCard
+                key={index}
+                title={kpi.title}
+                value={kpi.value as string}
+                icon={kpi.icon}
+                color={kpi.color}
+                style={{ animationDelay: `${index * 100}ms` }}
+                className="fade-in-up"
+              />
+            ))}
+          </div>
+          <div className="mt-4">
+            <PurchaseOrderList
+              purchaseOrders={purchaseOrders}
+              onEdit={handleOpenModal}
+              onDelete={handleDeletePurchaseOrder}
+            />
+          </div>
+        </TabsContent>
+        <TabsContent value="templates" className="mt-4">
+          <p>Purchase Order Template settings will go here.</p>
+        </TabsContent>
+        <TabsContent value="settings" className="mt-4">
+          <p>Purchase Order Settings will go here.</p>
+        </TabsContent>
+      </Tabs>
       {isModalOpen && (
         <PurchaseOrderFormModal
           isOpen={isModalOpen}

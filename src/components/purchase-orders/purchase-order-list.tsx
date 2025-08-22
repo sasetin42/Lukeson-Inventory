@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface PurchaseOrderListProps {
     purchaseOrders: PurchaseOrder[];
@@ -93,10 +94,11 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete }: 
                                 <TableHead>Expected Delivery</TableHead>
                                 <TableHead>Amount</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
+                                <TableHead className="w-[150px] text-center">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
+                            <TooltipProvider>
                             {purchaseOrders.map((purchaseOrder) => (
                                 <TableRow key={purchaseOrder.id}>
                                     <TableCell className="font-medium">{purchaseOrder.id}</TableCell>
@@ -107,31 +109,35 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete }: 
                                     <TableCell>
                                         <Badge variant={getStatusVariant(purchaseOrder.status)}>{purchaseOrder.status}</Badge>
                                     </TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon">
-                                                    <MoreHorizontal className="h-4 w-4" />
+                                    <TableCell className="flex items-center justify-center gap-2">
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button variant="ghost" size="icon" onClick={() => handleViewPo(purchaseOrder)}>
+                                                    <Eye className="h-4 w-4 text-blue-500" />
                                                 </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => handleViewPo(purchaseOrder)}>
-                                                    <Eye className="mr-2 h-4 w-4 text-blue-500" />
-                                                    View PO
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => onEdit(purchaseOrder)}>
-                                                    <Edit className="mr-2 h-4 w-4 text-green-500" />
-                                                    Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-red-500" onClick={() => openDeleteAlert(purchaseOrder)}>
-                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                    Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                            </TooltipTrigger>
+                                            <TooltipContent>View PO</TooltipContent>
+                                        </Tooltip>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button variant="ghost" size="icon" onClick={() => onEdit(purchaseOrder)}>
+                                                    <Edit className="h-4 w-4 text-green-500" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Edit PO</TooltipContent>
+                                        </Tooltip>
+                                        <Tooltip>
+                                             <TooltipTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => openDeleteAlert(purchaseOrder)}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>Delete PO</TooltipContent>
+                                        </Tooltip>
                                     </TableCell>
                                 </TableRow>
                             ))}
+                            </TooltipProvider>
                         </TableBody>
                     </Table>
                     {purchaseOrders.length === 0 && (
