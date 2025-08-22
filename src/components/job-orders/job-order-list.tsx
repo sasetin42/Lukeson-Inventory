@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { format } from 'date-fns';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface JobOrderListProps {
     jobOrders: JobOrder[];
@@ -85,41 +86,42 @@ export default function JobOrderList({ jobOrders, onEdit, onDelete }: JobOrderLi
                                 <TableHead>Completion Date</TableHead>
                                 <TableHead>Amount</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
+                                <TableHead className="w-[100px] text-center">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {jobOrders.map((jobOrder) => (
-                                <TableRow key={jobOrder.id}>
-                                    <TableCell className="font-medium">{jobOrder.id}</TableCell>
-                                    <TableCell>{jobOrder.customerName}</TableCell>
-                                    <TableCell>{formatDate(jobOrder.jobOrderDate)}</TableCell>
-                                    <TableCell>{formatDate(jobOrder.expectedCompletionDate)}</TableCell>
-                                    <TableCell>₱{jobOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={getStatusVariant(jobOrder.status)}>{jobOrder.status}</Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon">
-                                                    <MoreHorizontal className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => onEdit(jobOrder)}>
-                                                    <Edit className="mr-2 h-4 w-4" />
-                                                    Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-red-500" onClick={() => openDeleteAlert(jobOrder)}>
-                                                    <Trash2 className="mr-2 h-4 w-4" />
-                                                    Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                            <TooltipProvider>
+                                {jobOrders.map((jobOrder) => (
+                                    <TableRow key={jobOrder.id}>
+                                        <TableCell className="font-medium">{jobOrder.id}</TableCell>
+                                        <TableCell>{jobOrder.customerName}</TableCell>
+                                        <TableCell>{formatDate(jobOrder.jobOrderDate)}</TableCell>
+                                        <TableCell>{formatDate(jobOrder.expectedCompletionDate)}</TableCell>
+                                        <TableCell>₱{jobOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={getStatusVariant(jobOrder.status)}>{jobOrder.status}</Badge>
+                                        </TableCell>
+                                        <TableCell className="flex items-center justify-center gap-1">
+                                             <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" onClick={() => {}}>
+                                                        <Eye className="h-4 w-4 text-blue-500" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>View Job Order</TooltipContent>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => openDeleteAlert(jobOrder)}>
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>Delete</TooltipContent>
+                                            </Tooltip>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TooltipProvider>
                         </TableBody>
                     </Table>
                     {jobOrders.length === 0 && (
