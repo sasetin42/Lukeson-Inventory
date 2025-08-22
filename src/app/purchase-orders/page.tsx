@@ -8,6 +8,7 @@ import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign, Shop
 import PurchaseOrderList from "@/components/purchase-orders/purchase-order-list";
 import { PurchaseOrder } from '@/lib/types';
 import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-form-modal';
+import PurchaseOrderViewModal from '@/components/purchase-orders/purchase-order-view-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -19,6 +20,7 @@ export default function PurchaseOrdersPage() {
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPurchaseOrder, setEditingPurchaseOrder] = useState<PurchaseOrder | null>(null);
+  const [viewingPurchaseOrder, setViewingPurchaseOrder] = useState<PurchaseOrder | null>(null);
   const { toast } = useToast();
 
   const fetchPurchaseOrders = async () => {
@@ -49,6 +51,14 @@ export default function PurchaseOrdersPage() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingPurchaseOrder(null);
+  }
+
+  const handleOpenViewModal = (purchaseOrder: PurchaseOrder) => {
+    setViewingPurchaseOrder(purchaseOrder);
+  }
+  
+  const handleCloseViewModal = () => {
+    setViewingPurchaseOrder(null);
   }
 
   const handleSavePurchaseOrder = async (purchaseOrderData: Omit<PurchaseOrder, 'id'> & { id?: string }) => {
@@ -130,6 +140,7 @@ export default function PurchaseOrdersPage() {
               purchaseOrders={purchaseOrders}
               onEdit={handleOpenModal}
               onDelete={handleDeletePurchaseOrder}
+              onView={handleOpenViewModal}
             />
           </div>
         </TabsContent>
@@ -146,6 +157,13 @@ export default function PurchaseOrdersPage() {
           onClose={handleCloseModal}
           onSave={handleSavePurchaseOrder}
           purchaseOrder={editingPurchaseOrder}
+        />
+      )}
+      {viewingPurchaseOrder && (
+        <PurchaseOrderViewModal
+          isOpen={!!viewingPurchaseOrder}
+          onClose={handleCloseViewModal}
+          purchaseOrder={viewingPurchaseOrder}
         />
       )}
     </div>

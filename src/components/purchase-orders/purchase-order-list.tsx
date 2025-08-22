@@ -9,12 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -32,9 +26,10 @@ interface PurchaseOrderListProps {
     purchaseOrders: PurchaseOrder[];
     onEdit: (purchaseOrder: PurchaseOrder) => void;
     onDelete: (purchaseOrderId: string) => void;
+    onView: (purchaseOrder: PurchaseOrder) => void;
 }
 
-export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete }: PurchaseOrderListProps) {
+export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, onView }: PurchaseOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [purchaseOrderToDelete, setPurchaseOrderToDelete] = useState<PurchaseOrder | null>(null);
     const { toast } = useToast();
@@ -70,11 +65,7 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete }: 
     }
 
     const handleViewPo = (po: PurchaseOrder) => {
-        toast({
-            title: "Purchase Order Sent",
-            description: `PO #${po.id} has been sent to ${po.supplierName}.`,
-            variant: "success",
-        });
+        onView(po);
     }
 
     return (
