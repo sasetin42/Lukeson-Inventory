@@ -3,10 +3,14 @@
 
 import type { ReactNode } from 'react';
 import { Button } from './ui/button';
-import { Zap } from 'lucide-react';
+import { Zap, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
+import { db } from '@/lib/firebase';
+import { collection, getDocs, onSnapshot } from 'firebase/firestore';
+import { Product } from '@/lib/types';
+import Link from 'next/link';
 
 type PageHeaderProps = {
   title: string;
@@ -19,13 +23,25 @@ function HeaderActions() {
     const { toast } = useToast();
     const [dateTime, setDateTime] = useState<Date | null>(null);
     const [mounted, setMounted] = useState(false);
+    const [lowStockCount, setLowStockCount] = useState(0);
 
     useEffect(() => {
         setMounted(true);
         const timer = setInterval(() => {
             setDateTime(new Date());
         }, 1000);
-        return () => clearInterval(timer);
+
+        const productsRef = collection(db, 'products');
+        const unsubscribe = onSnapshot(productsRef, (snapshot) => {
+            const products = snapshot.docs.map(doc => doc.data() as Product);
+            const lowStockItems = products.filter(p => p.stock <= p.reOrderLevel);
+            setLowStockCount(lowStockItems.length);
+        });
+
+        return () => {
+            clearInterval(timer);
+            unsubscribe();
+        };
     }, []);
 
     const handleOptimize = () => {
@@ -38,6 +54,14 @@ function HeaderActions() {
 
     return (
         <div className="flex items-center gap-4">
+            {lowStockCount > 0 && (
+                <Button variant="destructive" size="sm" asChild className="animate-blink">
+                    <Link href="/stock-alerts">
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        Stock Alert ({lowStockCount})
+                    </Link>
+                </Button>
+            )}
             <div className="text-sm text-muted-foreground font-medium hidden md:block">
                 {mounted && dateTime ? format(dateTime, 'E, MMM d, yyyy, h:mm:ss a') : 'Loading...'}
             </div>
