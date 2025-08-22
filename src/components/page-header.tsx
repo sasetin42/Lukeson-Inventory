@@ -34,7 +34,7 @@ function HeaderActions() {
         const productsRef = collection(db, 'products');
         const unsubscribe = onSnapshot(productsRef, (snapshot) => {
             const products = snapshot.docs.map(doc => doc.data() as Product);
-            const lowStockItems = products.filter(p => p.stock <= p.reOrderLevel);
+            const lowStockItems = products.filter(p => p.stock > 0 && p.stock <= p.reOrderLevel);
             setLowStockCount(lowStockItems.length);
         });
 
