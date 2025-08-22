@@ -11,6 +11,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, onSnapshot } from 'firebase/firestore';
 import { Product } from '@/lib/types';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 type PageHeaderProps = {
   title: string;
@@ -54,14 +55,17 @@ function HeaderActions() {
 
     return (
         <div className="flex items-center gap-4">
-            {lowStockCount > 0 && (
-                <Button variant="destructive" size="sm" asChild className="animate-blink">
-                    <Link href="/stock-alerts">
-                        <AlertTriangle className="h-4 w-4 mr-2" />
-                        Stock Alert ({lowStockCount})
-                    </Link>
-                </Button>
-            )}
+            <Button 
+                variant={lowStockCount > 0 ? "destructive" : "outline"} 
+                size="sm" 
+                asChild 
+                className={cn(lowStockCount > 0 && "animate-blink")}
+            >
+                <Link href="/stock-alerts">
+                    <AlertTriangle className="h-4 w-4 mr-2" />
+                    Stock Alert ({lowStockCount})
+                </Link>
+            </Button>
             <div className="text-sm text-muted-foreground font-medium hidden md:block">
                 {mounted && dateTime ? format(dateTime, 'E, MMM d, yyyy, h:mm:ss a') : 'Loading...'}
             </div>
