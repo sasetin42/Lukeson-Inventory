@@ -158,7 +158,7 @@ export type PurchaseOrder = {
     supplierId: string;
     supplierName: string;
     orderDate: Date | FieldValue | string;
-    expectedDeliveryDate: Date | FieldValue | string;
+    expectedDeliveryDate: Date | FieldValue | string | null;
     status: 'Draft' | 'Sent' | 'Confirmed' | 'Partially Received' | 'Received' | 'Billed' | 'Cancelled';
     totalAmount: number;
     lines: DocumentLine[];

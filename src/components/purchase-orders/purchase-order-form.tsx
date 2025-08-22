@@ -88,6 +88,7 @@ export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }
             unitPrice: 0,
             taxRate: 0.12, // Default tax
             total: 0,
+            vatType: 'VATable',
         };
         setLines([...lines, newLine]);
     };
@@ -133,12 +134,12 @@ export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }
                 supplierId,
                 supplierName: supplier?.name || 'N/A',
                 orderDate,
-                expectedDeliveryDate,
+                expectedDeliveryDate: expectedDeliveryDate || null,
                 status,
                 lines,
                 totalAmount: calculateTotalAmount(),
             };
-            onSuccess(purchaseOrderData);
+            onSuccess(purchaseOrderData as any);
         } catch (error) {
             console.error("Failed to save purchase order:", error);
             toast({ title: "Error", description: "Failed to save purchase order.", variant: "destructive" });
