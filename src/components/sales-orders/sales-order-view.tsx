@@ -5,13 +5,14 @@ import { useMemo, useState, useEffect } from 'react';
 import { SalesOrder, VatType } from '@/lib/types';
 import { format } from 'date-fns';
 import Image from 'next/image';
+import { db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface SalesOrderViewProps {
   salesOrder: SalesOrder;
 }
 
-const TEMPLATE_STORAGE_KEY = 'salesOrderTemplateSettings';
-const DEFAULT_TAX_RATE = 0.12;
+const TEMPLATE_DOC_ID = 'salesOrder';
 
 export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
     const [templateSettings, setTemplateSettings] = useState({
@@ -31,12 +32,20 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
         verifiedByLabel: 'Verified by:',
         verifiedByName: 'HIROYOSHI KANAZAWA - VP',
     });
-
+    
     useEffect(() => {
-        const savedSettings = localStorage.getItem(TEMPLATE_STORAGE_KEY);
-        if (savedSettings) {
-            setTemplateSettings(JSON.parse(savedSettings));
-        }
+        const fetchSettings = async () => {
+            try {
+                const templateRef = doc(db, 'templates', TEMPLATE_DOC_ID);
+                const docSnap = await getDoc(templateRef);
+                if (docSnap.exists()) {
+                    setTemplateSettings(docSnap.data() as typeof templateSettings);
+                }
+            } catch (error) {
+                console.error("Error fetching template settings for view:", error);
+            }
+        };
+        fetchSettings();
     }, []);
 
     const { accentColor, companyName, address, phone, website, logo, showNotes, showVat, preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName } = templateSettings;
