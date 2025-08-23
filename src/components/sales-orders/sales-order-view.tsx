@@ -114,10 +114,10 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
                 </div>
                 <div className="text-right">
                     <h2 className="font-bold" style={{ color: accentColor, fontSize: '20px', lineHeight: '25px' }}>SALES ORDER</h2>
-                    <p className="text-sm"><strong>SO:</strong> {salesOrder.id}</p>
-                    <p className="text-sm"><strong>Date:</strong> {formatDate(salesOrder.orderDate)}</p>
-                    <p className="text-sm"><strong>Delivery Date:</strong> {formatDate(salesOrder.deliveryDate)}</p>
-                    {salesOrder.quotationId && <p className="text-sm"><strong>Quotation ID:</strong> {salesOrder.quotationId}</p>}
+                    <p style={{ fontSize: '13px' }}><strong>SO:</strong> {salesOrder.id}</p>
+                    <p style={{ fontSize: '13px' }}><strong>Date:</strong> {formatDate(salesOrder.orderDate)}</p>
+                    <p style={{ fontSize: '13px' }}><strong>Delivery Date:</strong> {formatDate(salesOrder.deliveryDate)}</p>
+                    {salesOrder.quotationId && <p style={{ fontSize: '13px' }}><strong>Quotation ID:</strong> {salesOrder.quotationId}</p>}
                 </div>
             </div>
 
