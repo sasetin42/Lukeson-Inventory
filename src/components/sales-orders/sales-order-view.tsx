@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import Image from 'next/image';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { Badge } from '../ui/badge';
 
 interface SalesOrderViewProps {
   salesOrder: SalesOrder;
@@ -100,6 +101,23 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     };
 
+    const getStatusVariant = (status: SalesOrder['status']): "default" | "secondary" | "destructive" | "outline" | "success" | "confirmed" => {
+        switch (status) {
+            case 'Fulfilled':
+                return 'success';
+            case 'Confirmed':
+                return 'confirmed';
+            case 'Draft':
+                return 'outline';
+            case 'Cancelled':
+                return 'destructive';
+            case 'Invoiced':
+                 return 'destructive';
+            default:
+                return 'outline';
+        }
+    };
+
     return (
         <div className="p-8 bg-white text-black">
             <div className="flex justify-between items-center">
@@ -118,6 +136,7 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
                     <p style={{ fontSize: '13px' }}><strong>Date:</strong> {formatDate(salesOrder.orderDate)}</p>
                     <p style={{ fontSize: '13px' }}><strong>Delivery Date:</strong> {formatDate(salesOrder.deliveryDate)}</p>
                     {salesOrder.quotationId && <p style={{ fontSize: '13px' }}><strong>Quotation ID:</strong> {salesOrder.quotationId}</p>}
+                    <Badge variant={getStatusVariant(salesOrder.status)} className="mt-2 text-white">{salesOrder.status}</Badge>
                 </div>
             </div>
 
