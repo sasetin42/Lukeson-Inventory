@@ -81,10 +81,10 @@ export default function QuotationList({ quotations, onView, onEdit, onDelete, on
                             <TableRow>
                                 <TableHead>Quotation ID</TableHead>
                                 <TableHead>Customer</TableHead>
+                                <TableHead>Status</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Expiry Date</TableHead>
                                 <TableHead>Amount</TableHead>
-                                <TableHead>Status</TableHead>
                                 <TableHead className="w-[150px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -97,12 +97,12 @@ export default function QuotationList({ quotations, onView, onEdit, onDelete, on
                                             {quotation.customerName || quotation.customerId}
                                         </Link>
                                     </TableCell>
-                                    <TableCell>{formatDate(quotation.qtnDate)}</TableCell>
-                                    <TableCell>{formatDate(quotation.expiryDate)}</TableCell>
-                                    <TableCell>₱{quotation.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                     <TableCell>
                                         <Badge variant={getStatusVariant(quotation.status)}>{quotation.status}</Badge>
                                     </TableCell>
+                                    <TableCell>{formatDate(quotation.qtnDate)}</TableCell>
+                                    <TableCell>{formatDate(quotation.expiryDate)}</TableCell>
+                                    <TableCell>₱{quotation.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                     <TableCell className="flex items-center gap-1">
                                         <Tooltip>
                                             <TooltipTrigger asChild>
