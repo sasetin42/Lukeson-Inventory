@@ -102,7 +102,6 @@ export default function SalesOrderList({ salesOrders, quotations, onEdit, onDele
                                 <TableHead>Date</TableHead>
                                 <TableHead>Amount</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead>QTN Status</TableHead>
                                 <TableHead className="w-[150px] text-center">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -113,18 +112,20 @@ export default function SalesOrderList({ salesOrders, quotations, onEdit, onDele
                                     return (
                                         <TableRow key={salesOrder.id}>
                                             <TableCell className="font-medium">{salesOrder.id}</TableCell>
-                                            <TableCell>{salesOrder.customerName}</TableCell>
+                                            <TableCell>
+                                                <div className="font-medium">{salesOrder.customerName}</div>
+                                                <div className="text-muted-foreground" style={{fontSize: '12px'}}>
+                                                    {quotation ? (
+                                                        <span>Quotation: <Badge variant={getQuotationStatusVariant(quotation.status)} className="text-[10px] px-1.5 py-0">{quotation.status}</Badge></span>
+                                                    ) : (
+                                                        <span>No linked quotation</span>
+                                                    )}
+                                                </div>
+                                            </TableCell>
                                             <TableCell>{formatDate(salesOrder.orderDate)}</TableCell>
                                             <TableCell>₱{salesOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                             <TableCell>
                                                 <Badge variant={getStatusVariant(salesOrder.status)}>{salesOrder.status}</Badge>
-                                            </TableCell>
-                                            <TableCell>
-                                                {quotation ? (
-                                                    <Badge variant={getQuotationStatusVariant(quotation.status)}>{quotation.status}</Badge>
-                                                ) : (
-                                                    <Badge variant="outline">N/A</Badge>
-                                                )}
                                             </TableCell>
                                             <TableCell className="flex justify-center items-center gap-2">
                                                 <Tooltip>
