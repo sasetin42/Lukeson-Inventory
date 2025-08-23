@@ -5,7 +5,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign, AlertCircle } from "lucide-react";
+import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign, AlertCircle, Trash2 } from "lucide-react";
 import SalesOrderList from "@/components/sales-orders/sales-order-list";
 import { SalesOrder, Customer, Quotation } from '@/lib/types';
 import SalesOrderFormModal from "@/components/sales-orders/sales-order-form-modal";
