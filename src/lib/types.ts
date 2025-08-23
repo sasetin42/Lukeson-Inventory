@@ -34,6 +34,8 @@ export type Customer = {
     id: string;
     name: string;
     tin?: string;
+    email?: string;
+    phone?: string;
     billingAddress: string;
     shippingAddress?: string;
     termsDays: number;

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Customer } from '@/lib/types';
 import { Button } from '../ui/button';
-import { User, Hash, MapPin, Calendar, CreditCard, Truck, Mail, Phone } from 'lucide-react';
+import { User, Hash, MapPin, Calendar, CreditCard, Truck, Mail, Phone, DollarSign } from 'lucide-react';
 import { Separator } from '../ui/separator';
 
 interface CustomerViewModalProps {
@@ -26,15 +26,6 @@ export default function CustomerViewModal({
   onClose,
 }: CustomerViewModalProps) {
   if (!customer) return null;
-
-  const details = [
-    { label: 'TIN', value: customer.tin || 'N/A', icon: Hash },
-    { label: 'Billing Address', value: customer.billingAddress, icon: MapPin },
-    { label: 'Shipping Address', value: customer.shippingAddress || 'Same as billing', icon: Truck },
-    { label: 'Payment Terms', value: `${customer.termsDays} days`, icon: Calendar },
-    { label: 'Credit Limit', value: `₱${customer.creditLimit.toLocaleString()}`, icon: CreditCard },
-    { label: 'Balance', value: `₱${customer.balance.toLocaleString()}`, icon: DollarSign },
-  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -54,6 +45,18 @@ export default function CustomerViewModal({
         </DialogHeader>
         <div className="py-4 space-y-4">
           <div className="grid grid-cols-1 gap-y-3">
+            {customer.email && (
+                <div className="flex items-center gap-3">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{customer.email}</span>
+                </div>
+            )}
+             {customer.phone && (
+                <div className="flex items-center gap-3">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">{customer.phone}</span>
+                </div>
+            )}
              <div className="flex items-start gap-3">
                 <MapPin className="h-4 w-4 mt-1 text-muted-foreground" />
                 <div>
@@ -100,6 +103,3 @@ export default function CustomerViewModal({
     </Dialog>
   );
 }
-
-// Re-added DollarSign to imports, it was missing.
-import { DollarSign } from 'lucide-react';

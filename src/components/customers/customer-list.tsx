@@ -99,9 +99,19 @@ export default function CustomerList({ customers, onEdit, onDelete }: CustomerLi
               <p className="text-sm font-semibold">Billing Address</p>
               <p className="text-sm text-muted-foreground">{customer.billingAddress}</p>
             </div>
-            <div>
-              <p className="text-sm font-semibold">Shipping Address</p>
-              <p className="text-sm text-muted-foreground">{customer.shippingAddress || 'Same as billing'}</p>
+             <div className="flex flex-col gap-2">
+                {customer.email && (
+                    <div className="flex items-center gap-2 text-sm">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <span>{customer.email}</span>
+                    </div>
+                )}
+                {customer.phone && (
+                    <div className="flex items-center gap-2 text-sm">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <span>{customer.phone}</span>
+                    </div>
+                )}
             </div>
             <div className="flex justify-between items-center text-xs text-muted-foreground pt-2 border-t mt-2">
                 <span>Terms: {customer.termsDays} days</span>

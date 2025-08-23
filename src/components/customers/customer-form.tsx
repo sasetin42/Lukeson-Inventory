@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Customer } from '@/lib/types';
 import { Textarea } from '../ui/textarea';
-import { Loader2, User, Hash, MapPin, Calendar, CreditCard, Truck } from 'lucide-react';
+import { Loader2, User, Hash, MapPin, Calendar, CreditCard, Truck, Mail, Phone } from 'lucide-react';
 
 interface CustomerFormProps {
   customer: Customer | null;
@@ -21,6 +21,8 @@ export default function CustomerForm({ customer, onSuccess, onCancel }: Customer
     // Form state
     const [name, setName] = useState('');
     const [tin, setTin] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [billingAddress, setBillingAddress] = useState('');
     const [shippingAddress, setShippingAddress] = useState('');
     const [termsDays, setTermsDays] = useState('30');
@@ -30,6 +32,8 @@ export default function CustomerForm({ customer, onSuccess, onCancel }: Customer
         if (customer) {
             setName(customer.name || '');
             setTin(customer.tin || '');
+            setEmail(customer.email || '');
+            setPhone(customer.phone || '');
             setBillingAddress(customer.billingAddress || '');
             setShippingAddress(customer.shippingAddress || '');
             setTermsDays(customer.termsDays?.toString() || '30');
@@ -42,6 +46,8 @@ export default function CustomerForm({ customer, onSuccess, onCancel }: Customer
     const resetForm = () => {
         setName('');
         setTin('');
+        setEmail('');
+        setPhone('');
         setBillingAddress('');
         setShippingAddress('');
         setTermsDays('30');
@@ -55,6 +61,8 @@ export default function CustomerForm({ customer, onSuccess, onCancel }: Customer
                 id: customer?.id,
                 name,
                 tin,
+                email,
+                phone,
                 billingAddress,
                 shippingAddress,
                 termsDays: Number(termsDays) || 0,
@@ -83,6 +91,17 @@ export default function CustomerForm({ customer, onSuccess, onCancel }: Customer
                 </div>
             </div>
             
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Mail className="h-4 w-4" /> Email Address</Label>
+                    <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="e.g. juan@example.com" />
+                </div>
+                <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Phone className="h-4 w-4" /> Phone Number</Label>
+                    <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. 0917-123-4567" />
+                </div>
+            </div>
+
             <div className="space-y-2">
                 <Label className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Billing Address</Label>
                 <Textarea value={billingAddress} onChange={(e) => setBillingAddress(e.target.value)} placeholder="Enter billing address" />
