@@ -91,67 +91,69 @@ export default function QuotationDetailsModal({
              <Badge variant={getStatusVariant(quotation.status)} className="capitalize h-fit">{quotation.status}</Badge>
           </div>
         </DialogHeader>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
-            <div className="space-y-1">
-                <h4 className="font-semibold flex items-center gap-2 text-sm"><User className="h-4 w-4 text-blue-500" /> Customer</h4>
-                <p className="text-muted-foreground pl-6">{quotation.customerName}</p>
-            </div>
-             <div className="space-y-1">
-                <h4 className="font-semibold flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-green-500" /> Quotation Date</h4>
-                <p className="text-muted-foreground pl-6">{formatDate(quotation.qtnDate)}</p>
-            </div>
-             <div className="space-y-1">
-                <h4 className="font-semibold flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-red-500" /> Expiry Date</h4>
-                <p className="text-muted-foreground pl-6">{formatDate(quotation.expiryDate)}</p>
-            </div>
-        </div>
-        <Separator />
-         <div className="space-y-2 py-2">
-            <h4 className="font-semibold">Line Items</h4>
-            <div className="border rounded-md">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Product</TableHead>
-                            <TableHead className="text-right">Qty</TableHead>
-                            <TableHead className="text-right">UOM</TableHead>
-                            <TableHead className="text-right">Unit Price</TableHead>
-                            <TableHead className="text-right">Tax</TableHead>
-                            <TableHead className="text-right">Total</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {quotation.lines.map((line, index) => (
-                            <TableRow key={index}>
-                                <TableCell>{line.description}</TableCell>
-                                <TableCell className="text-right">{line.quantity}</TableCell>
-                                <TableCell className="text-right">{line.uom}</TableCell>
-                                <TableCell className="text-right">₱{line.unitPrice.toFixed(2)}</TableCell>
-                                <TableCell className="text-right">{(line.taxRate * 100).toFixed(0)}%</TableCell>
-                                <TableCell className="text-right">₱{line.total.toFixed(2)}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
-        </div>
-        {quotation.notes && (
-            <>
-                <Separator />
-                <div className="space-y-2 py-2">
-                    <h4 className="font-semibold">Notes</h4>
-                    <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">{quotation.notes}</p>
+        <div className="max-h-[60vh] overflow-y-auto pr-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+                <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-sm"><User className="h-4 w-4 text-blue-500" /> Customer</h4>
+                    <p className="text-muted-foreground pl-6">{quotation.customerName}</p>
                 </div>
-            </>
-        )}
-        <Separator />
-        <div className="flex justify-end items-center gap-4">
-             <div className="text-right">
-                <p className="text-sm text-muted-foreground">Total Amount</p>
-                <h3 className="text-2xl font-bold">₱{quotation.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
-             </div>
+                <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-green-500" /> Quotation Date</h4>
+                    <p className="text-muted-foreground pl-6">{formatDate(quotation.qtnDate)}</p>
+                </div>
+                <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-red-500" /> Expiry Date</h4>
+                    <p className="text-muted-foreground pl-6">{formatDate(quotation.expiryDate)}</p>
+                </div>
+            </div>
+            <Separator />
+            <div className="space-y-2 py-2">
+                <h4 className="font-semibold">Line Items</h4>
+                <div className="border rounded-md">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Product</TableHead>
+                                <TableHead className="text-right">Qty</TableHead>
+                                <TableHead className="text-right">UOM</TableHead>
+                                <TableHead className="text-right">Unit Price</TableHead>
+                                <TableHead className="text-right">Tax</TableHead>
+                                <TableHead className="text-right">Total</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {quotation.lines.map((line, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{line.description}</TableCell>
+                                    <TableCell className="text-right">{line.quantity}</TableCell>
+                                    <TableCell className="text-right">{line.uom}</TableCell>
+                                    <TableCell className="text-right">₱{line.unitPrice.toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">{(line.taxRate * 100).toFixed(0)}%</TableCell>
+                                    <TableCell className="text-right">₱{line.total.toFixed(2)}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+            {quotation.notes && (
+                <>
+                    <Separator />
+                    <div className="space-y-2 py-2">
+                        <h4 className="font-semibold">Notes</h4>
+                        <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">{quotation.notes}</p>
+                    </div>
+                </>
+            )}
+            <Separator />
+            <div className="flex justify-end items-center gap-4 pt-4">
+                <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Total Amount</p>
+                    <h3 className="text-2xl font-bold">₱{quotation.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+                </div>
+            </div>
         </div>
-        <DialogFooter className="sm:justify-between">
+        <DialogFooter className="sm:justify-between pt-4 border-t">
             <div>
                 {quotation.status === 'Accepted' && (
                     <Button onClick={handleCreateSalesOrder}>
