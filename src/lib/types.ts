@@ -116,6 +116,7 @@ export type SalesOrder = {
     customerId: string;
     customerName?: string;
     orderDate: Date | FieldValue | string;
+    deliveryDate?: Date | FieldValue | string;
     status: 'Draft' | 'Confirmed' | 'Fulfilled' | 'Invoiced' | 'Cancelled';
     totalAmount: number;
     lines: DocumentLine[];

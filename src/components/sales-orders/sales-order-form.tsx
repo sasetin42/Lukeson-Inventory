@@ -38,6 +38,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
     const [salesOrderId, setSalesOrderId] = useState('');
     const [customerId, setCustomerId] = useState('');
     const [orderDate, setOrderDate] = useState<Date | undefined>(new Date());
+    const [deliveryDate, setDeliveryDate] = useState<Date | undefined>();
     const [status, setStatus] = useState<SalesOrder['status'] | 'Confirmed'>('Draft');
     const [lines, setLines] = useState<DocumentLine[]>([]);
     const [isStatusDisabled, setIsStatusDisabled] = useState(true);
@@ -97,6 +98,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
             }
             setCustomerId(salesOrder.customerId || '');
             setOrderDate(salesOrder.orderDate ? (salesOrder.orderDate instanceof Date ? salesOrder.orderDate : (salesOrder.orderDate as any).toDate()) : new Date());
+            setDeliveryDate(salesOrder.deliveryDate ? (salesOrder.deliveryDate instanceof Date ? salesOrder.deliveryDate : (salesOrder.deliveryDate as any).toDate()) : undefined);
             setLines(salesOrder.lines || []);
             setNotes(salesOrder.notes || '');
             setDiscountType(salesOrder.discountType || 'Fixed');
@@ -108,6 +110,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
             setStatus('Draft');
             setCustomerId('');
             setOrderDate(new Date());
+            setDeliveryDate(undefined);
             setIsStatusDisabled(true);
             setNotes('');
             setDiscountType('Fixed');
@@ -240,6 +243,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
                 customerId,
                 customerName: customer?.name || 'N/A',
                 orderDate,
+                deliveryDate,
                 status: status as SalesOrder['status'],
                 lines,
                 notes,
@@ -259,7 +263,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
 
     return (
         <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><User className="h-4 w-4" /> Customer</Label>
                     <Select onValueChange={handleCustomerChange} value={customerId}>
@@ -272,6 +276,10 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
                  <div className="space-y-2">
                     <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Order Date</Label>
                     <DatePicker date={orderDate} setDate={setOrderDate} />
+                </div>
+                 <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Delivery Date</Label>
+                    <DatePicker date={deliveryDate} setDate={setDeliveryDate} />
                 </div>
                  <div className="space-y-2">
                     <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Status</Label>
