@@ -17,10 +17,10 @@ interface InvoiceListProps {
 }
 
 export default function InvoiceList({ invoices }: InvoiceListProps) {
-    const getStatusVariant = (status: string) => {
+    const getStatusVariant = (status: string): "success" | "secondary" | "destructive" | "outline" => {
         switch (status) {
             case 'Paid':
-                return 'default';
+                return 'success';
             case 'Pending':
                 return 'secondary';
             case 'Overdue':

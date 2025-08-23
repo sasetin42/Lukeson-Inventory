@@ -45,9 +45,9 @@ export default function JobOrderList({ jobOrders, onEdit, onDelete, onView }: Jo
         }
     };
     
-    const getStatusVariant = (status: JobOrder['status']) => {
+    const getStatusVariant = (status: JobOrder['status']): "success" | "secondary" | "destructive" | "outline" => {
         switch (status) {
-            case 'Completed': return 'default';
+            case 'Completed': return 'success';
             case 'In Progress':
             case 'Scheduled':
                 return 'secondary';
