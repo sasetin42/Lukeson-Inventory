@@ -48,12 +48,12 @@ export default function SalesOrderList({ salesOrders, quotations, onEdit, onDele
         }
     };
     
-    const getStatusVariant = (status: SalesOrder['status']): "default" | "secondary" | "destructive" | "outline" | "success" => {
+    const getStatusVariant = (status: SalesOrder['status']): "default" | "secondary" | "destructive" | "outline" | "success" | "confirmed" => {
         switch (status) {
             case 'Fulfilled':
                 return 'default';
             case 'Confirmed':
-                return 'success';
+                return 'confirmed';
             case 'Draft':
                 return 'outline';
             case 'Cancelled':
