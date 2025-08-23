@@ -1,12 +1,13 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, DollarSign, CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
 import JobOrderList from "@/components/job-orders/job-order-list";
-import { JobOrder } from '@/lib/types';
+import { JobOrder, SalesOrder } from '@/lib/types';
 import JobOrderFormModal from '@/components/job-orders/job-order-form-modal';
 import JobOrderViewModal from '@/components/job-orders/job-order-view-modal';
 import { useToast } from '@/hooks/use-toast';
@@ -16,12 +17,37 @@ import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import JobOrderTemplate from '@/components/job-orders/job-order-template';
 
-export default function JobOrdersPage() {
+function JobOrdersContent() {
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingJobOrder, setEditingJobOrder] = useState<JobOrder | null>(null);
   const [viewingJobOrder, setViewingJobOrder] = useState<JobOrder | null>(null);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const fromSalesOrder = searchParams.get('fromSalesOrder');
+
+  useEffect(() => {
+    if (fromSalesOrder) {
+      try {
+        const soData: SalesOrder = JSON.parse(decodeURIComponent(fromSalesOrder));
+        const newJobOrder: Omit<JobOrder, 'id' | 'createdAt' | 'modifiedAt'> = {
+          customerId: soData.customerId,
+          customerName: soData.customerName,
+          salesOrderId: soData.id,
+          jobOrderDate: new Date(),
+          status: 'Draft',
+          lines: soData.lines,
+          totalAmount: soData.totalAmount,
+          notes: soData.notes,
+        };
+        setEditingJobOrder(newJobOrder as JobOrder);
+        setIsFormModalOpen(true);
+      } catch (error) {
+        console.error("Error parsing sales order data:", error);
+        toast({ title: "Error", description: "Could not create job order from sales order.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
+      }
+    }
+  }, [fromSalesOrder, toast]);
 
   const fetchJobOrders = async () => {
     try {
@@ -168,4 +194,12 @@ export default function JobOrdersPage() {
       )}
     </div>
   );
+}
+
+export default function JobOrdersPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <JobOrdersContent />
+        </Suspense>
+    )
 }

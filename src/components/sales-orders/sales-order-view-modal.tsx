@@ -12,8 +12,9 @@ import {
 import { SalesOrder } from '@/lib/types';
 import { Button } from '../ui/button';
 import SalesOrderView from './sales-order-view';
-import { Printer } from 'lucide-react';
+import { Printer, Link as LinkIcon } from 'lucide-react';
 import { useRef } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface SalesOrderViewModalProps {
   salesOrder: SalesOrder | null;
@@ -27,6 +28,7 @@ export default function SalesOrderViewModal({
   onClose,
 }: SalesOrderViewModalProps) {
   const printableRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   if (!salesOrder) return null;
 
@@ -37,13 +39,11 @@ export default function SalesOrderViewModal({
         if (printWindow) {
             printWindow.document.write('<html><head><title>Print Sales Order</title>');
             
-            // Copy all style and link tags from the main document
             const headElements = document.querySelectorAll('head > link[rel="stylesheet"], head > style');
             headElements.forEach(el => {
                 printWindow.document.head.appendChild(el.cloneNode(true));
             });
 
-            // Add a print-specific style to ensure content fits
             const printStyles = printWindow.document.createElement('style');
             printStyles.innerHTML = `
                 @media print {
@@ -65,7 +65,6 @@ export default function SalesOrderViewModal({
             printWindow.document.write('</div></body></html>');
             printWindow.document.close();
 
-            // Use a small timeout to ensure all assets are loaded before printing
             setTimeout(() => {
                 printWindow.focus();
                 printWindow.print();
@@ -73,7 +72,12 @@ export default function SalesOrderViewModal({
             }, 500);
         }
     }
-};
+  };
+  
+  const handleLinkToJobOrder = () => {
+    const salesOrderData = encodeURIComponent(JSON.stringify(salesOrder));
+    router.push(`/job-orders?fromSalesOrder=${salesOrderData}`);
+  };
 
 
   return (
@@ -90,12 +94,22 @@ export default function SalesOrderViewModal({
             <SalesOrderView salesOrder={salesOrder} />
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={handlePrint}>
-            <Printer className="mr-2 h-4 w-4" />
-            Print
-          </Button>
-          <Button onClick={onClose}>Close</Button>
+        <DialogFooter className="justify-between">
+            <Button 
+              variant="outline" 
+              onClick={handleLinkToJobOrder} 
+              disabled={salesOrder.status !== 'Confirmed'}
+            >
+              <LinkIcon className="mr-2 h-4 w-4" />
+              Link to Job Order
+            </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handlePrint}>
+              <Printer className="mr-2 h-4 w-4" />
+              Print
+            </Button>
+            <Button onClick={onClose}>Close</Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
