@@ -271,39 +271,24 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[30%]">Product/Service</TableHead>
-                                <TableHead>Qty</TableHead>
-                                <TableHead>Unit Price</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
+                                <TableHead className="w-[40%]">Product/Service</TableHead>
+                                <TableHead className="text-right">Qty</TableHead>
+                                <TableHead className="text-right">Unit Price</TableHead>
+                                <TableHead className="text-right">Total</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {lines.map((line, index) => (
+                            {lines.map((line) => (
                                 <TableRow key={line.id}>
-                                    <TableCell>
-                                        {line.description}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Input type="number" value={line.quantity} onChange={e => handleLineChange(index, 'quantity', Number(e.target.value))} className="w-20" />
-                                    </TableCell>
-                                    <TableCell>
-                                        <Input type="number" value={line.unitPrice} onChange={e => handleLineChange(index, 'unitPrice', Number(e.target.value))} className="w-28" />
-                                    </TableCell>
-                                    <TableCell>₱{line.total.toFixed(2)}</TableCell>
-                                    <TableCell>
-                                        <Button variant="ghost" size="icon" onClick={() => handleRemoveLine(index)}>
-                                            <Trash2 className="h-4 w-4 text-red-500" />
-                                        </Button>
-                                    </TableCell>
+                                    <TableCell>{line.description}</TableCell>
+                                    <TableCell className="text-right">{line.quantity}</TableCell>
+                                    <TableCell className="text-right">₱{line.unitPrice.toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">₱{line.total.toFixed(2)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                 </div>
-                <Button variant="outline" size="sm" onClick={handleAddLine} className="mt-2">
-                    <PlusCircle className="mr-2 h-4 w-4"/> Add Line Item
-                </Button>
             </div>
 
             <div className="space-y-2">
