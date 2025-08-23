@@ -5,13 +5,13 @@ import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { JobOrder, DocumentLine, Customer, Product, SalesOrder, VatType } from '@/lib/types';
+import { JobOrder, DocumentLine, Customer, Product, SalesOrder, VatType, Quotation } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
 import { Loader2, User, Calendar, Hash, FileText, PlusCircle, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { DatePicker } from '../ui/date-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from 'date-fns';
@@ -50,6 +50,8 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
     const [status, setStatus] = useState<JobOrder['status']>('Draft');
     const [lines, setLines] = useState<DocumentLine[]>([]);
     const [notes, setNotes] = useState('');
+    const [quotationNotes, setQuotationNotes] = useState('');
+    const [salesOrderNotes, setSalesOrderNotes] = useState('');
     
     useEffect(() => {
         const fetchData = async () => {
@@ -101,6 +103,8 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             setExpectedCompletionDate(undefined);
             setSalesOrderDeliveryDate(undefined);
             setNotes('');
+            setQuotationNotes('');
+            setSalesOrderNotes('');
         }
     }, [jobOrder]);
     
@@ -132,14 +136,25 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
     }, [customerId, toast, jobOrder?.salesOrderId]);
 
 
-    const handleSalesOrderChange = (selectedSOId: string) => {
+    const handleSalesOrderChange = async (selectedSOId: string) => {
         setSalesOrderId(selectedSOId);
         const so = salesOrders.find(s => s.id === selectedSOId);
         if (so) {
             setLines(so.lines);
-            setNotes(so.notes || '');
+            setSalesOrderNotes(so.notes || '');
             setSalesOrderDeliveryDate(safeToDate(so.deliveryDate));
             toast({ title: 'Sales Order Loaded', description: `Details from ${so.id} have been loaded.`})
+
+            if (so.quotationId) {
+                const qtnRef = doc(db, "quotations", so.quotationId);
+                const qtnSnap = await getDoc(qtnRef);
+                if (qtnSnap.exists()) {
+                    const qtnData = qtnSnap.data() as Quotation;
+                    setQuotationNotes(qtnData.notes || '');
+                }
+            } else {
+                setQuotationNotes('');
+            }
         }
     };
     
@@ -254,9 +269,20 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                 </div>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="quotation-notes">Quotation Notes</Label>
+                    <Textarea id="quotation-notes" value={quotationNotes} placeholder="Notes from the linked quotation..." readOnly className="bg-muted/50" />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="sales-order-notes">Sales Order Notes</Label>
+                    <Textarea id="sales-order-notes" value={salesOrderNotes} placeholder="Notes from the linked sales order..." readOnly className="bg-muted/50" />
+                </div>
+            </div>
+
             <div className="space-y-2">
-                <Label htmlFor="notes">Sales Order Notes</Label>
-                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes from the linked sales order will appear here..." readOnly/>
+                <Label htmlFor="notes">Job Order Notes</Label>
+                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add any notes specific to this job order..."/>
             </div>
 
             <div className="flex justify-end items-center gap-6 mt-4">
