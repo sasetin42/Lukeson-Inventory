@@ -163,6 +163,7 @@ export default function JobOrdersPage() {
             isOpen={!!viewingJobOrder}
             onClose={handleCloseViewModal}
             jobOrder={viewingJobOrder}
+            onEdit={handleOpenFormModal}
           />
       )}
     </div>

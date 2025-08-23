@@ -12,19 +12,21 @@ import {
 import { JobOrder } from '@/lib/types';
 import { Button } from '../ui/button';
 import JobOrderView from './job-order-view';
-import { Printer } from 'lucide-react';
+import { Printer, Edit } from 'lucide-react';
 import { useRef } from 'react';
 
 interface JobOrderViewModalProps {
   jobOrder: JobOrder | null;
   isOpen: boolean;
   onClose: () => void;
+  onEdit: (jobOrder: JobOrder) => void;
 }
 
 export default function JobOrderViewModal({
   jobOrder,
   isOpen,
   onClose,
+  onEdit,
 }: JobOrderViewModalProps) {
   const printableRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +44,11 @@ export default function JobOrderViewModal({
     }
   };
 
+  const handleEdit = () => {
+    onClose();
+    onEdit(jobOrder);
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl">
@@ -56,12 +63,18 @@ export default function JobOrderViewModal({
             <JobOrderView jobOrder={jobOrder} />
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={handlePrint}>
-            <Printer className="mr-2 h-4 w-4" />
-            Print
+        <DialogFooter className="justify-between">
+          <Button variant="outline" onClick={handleEdit}>
+            <Edit className="mr-2 h-4 w-4" />
+            Edit
           </Button>
-          <Button onClick={onClose}>Close</Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handlePrint}>
+              <Printer className="mr-2 h-4 w-4" />
+              Print
+            </Button>
+            <Button onClick={onClose}>Close</Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
