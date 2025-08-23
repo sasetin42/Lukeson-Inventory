@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2, Eye, CheckCircle } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, CheckCircle, User } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -102,7 +102,8 @@ export default function QuotationList({ quotations, customers, onView, onEdit, o
                                 <TableRow key={quotation.id}>
                                     <TableCell className="font-medium">{quotation.id}</TableCell>
                                     <TableCell>
-                                        <Button variant="link" className="p-0 h-auto" onClick={() => handleViewCustomer(quotation.customerId)}>
+                                        <Button variant="ghost" className="p-0 h-auto gap-2" onClick={() => handleViewCustomer(quotation.customerId)}>
+                                            <User className="h-4 w-4 text-blue-500" />
                                             {quotation.customerName || quotation.customerId}
                                         </Button>
                                     </TableCell>
