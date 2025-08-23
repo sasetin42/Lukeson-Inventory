@@ -189,7 +189,7 @@ export default function SalesOrderTemplate() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div>
-                                <Label>Invoice & Purchase Order Logo</Label>
+                                <Label>Sales Order LOGO</Label>
                                 <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md">
                                     <div className="space-y-1 text-center">
                                         <Upload className="mx-auto h-12 w-12 text-gray-400" />
