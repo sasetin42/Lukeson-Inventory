@@ -111,7 +111,14 @@ export default function SalesOrderList({ salesOrders, quotations, onEdit, onDele
                                     const quotation = salesOrder.quotationId ? quotations.find(q => q.id === salesOrder.quotationId) : null;
                                     return (
                                         <TableRow key={salesOrder.id}>
-                                            <TableCell className="font-medium">{salesOrder.id}</TableCell>
+                                            <TableCell>
+                                                <div className="font-medium">{salesOrder.id}</div>
+                                                {salesOrder.quotationId && (
+                                                    <div className="text-muted-foreground" style={{fontSize: '12px'}}>
+                                                        QTN: {salesOrder.quotationId}
+                                                    </div>
+                                                )}
+                                            </TableCell>
                                             <TableCell>
                                                 <div className="font-medium">{salesOrder.customerName}</div>
                                                 <div className="text-muted-foreground" style={{fontSize: '12px'}}>
