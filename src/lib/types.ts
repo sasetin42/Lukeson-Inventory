@@ -120,6 +120,7 @@ export type SalesOrder = {
     totalAmount: number;
     lines: DocumentLine[];
     quotationId?: string; // Link to the original quotation
+    quotationStatus?: Quotation['status'];
     notes?: string;
     discountType?: 'Fixed' | 'Percent';
     discountValue?: number;

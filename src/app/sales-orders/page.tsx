@@ -19,6 +19,7 @@ import SalesOrderViewModal from '@/components/sales-orders/sales-order-view-moda
 
 function SalesOrdersContent() {
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
+  const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [editingSalesOrder, setEditingSalesOrder] = useState<SalesOrder | null>(null);
@@ -55,7 +56,9 @@ function SalesOrdersContent() {
   const fetchSalesOrders = async () => {
     try {
       const salesOrdersRef = collection(db, 'salesOrders');
+      const quotationsRef = collection(db, 'quotations');
       let q = query(salesOrdersRef);
+
       if (customerIdFilter) {
         q = query(salesOrdersRef, where("customerId", "==", customerIdFilter));
         const customerRef = doc(db, 'customers', customerIdFilter);
@@ -65,9 +68,15 @@ function SalesOrdersContent() {
         }
       }
       
-      const snapshot = await getDocs(q);
-      const loadedSalesOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
+      const soSnapshot = await getDocs(q);
+      const loadedSalesOrders = soSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
+      
+      const qtnSnapshot = await getDocs(quotationsRef);
+      const loadedQuotations = qtnSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
+
       setSalesOrders(loadedSalesOrders);
+      setQuotations(loadedQuotations);
+
     } catch (error) {
       console.error("Error fetching sales orders: ", error);
       toast({
@@ -80,7 +89,7 @@ function SalesOrdersContent() {
   
   useEffect(() => {
     fetchSalesOrders();
-  }, [customerIdFilter]);
+  }, [customerIdFilter, toast]);
 
   const handleOpenModal = (salesOrder: SalesOrder | null) => {
     setEditingSalesOrder(salesOrder);
@@ -178,6 +187,7 @@ function SalesOrdersContent() {
           <div className="mt-4">
             <SalesOrderList
                 salesOrders={salesOrders}
+                quotations={quotations}
                 onEdit={handleOpenModal}
                 onDelete={handleDeleteSalesOrder}
                 onView={handleOpenViewModal}
