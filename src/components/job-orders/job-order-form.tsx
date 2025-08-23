@@ -185,13 +185,13 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                 customerName: customer?.name || 'N/A',
                 salesOrderId,
                 jobOrderDate,
-                expectedCompletionDate,
+                expectedCompletionDate: expectedCompletionDate || null,
                 status: finalStatus,
                 lines,
                 notes,
                 totalAmount: calculateTotalAmount(),
             };
-            onSuccess(jobOrderData);
+            onSuccess(jobOrderData as Omit<JobOrder, 'id'> & {id?: string});
         } catch (error) {
             console.error("Failed to save job order:", error);
             toast({ title: "Error", description: "Failed to save job order.", variant: "destructive" });
