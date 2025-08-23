@@ -12,7 +12,7 @@ import {
 import { SalesOrder } from '@/lib/types';
 import { Button } from '../ui/button';
 import SalesOrderView from './sales-order-view';
-import { Printer, Link as LinkIcon } from 'lucide-react';
+import { Printer, PlusCircle } from 'lucide-react';
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -74,7 +74,7 @@ export default function SalesOrderViewModal({
     }
   };
   
-  const handleLinkToJobOrder = () => {
+  const handleCreateJobOrder = () => {
     const salesOrderData = encodeURIComponent(JSON.stringify(salesOrder));
     router.push(`/job-orders?fromSalesOrder=${salesOrderData}`);
   };
@@ -97,11 +97,11 @@ export default function SalesOrderViewModal({
         <DialogFooter className="justify-between">
             <Button 
               variant="outline" 
-              onClick={handleLinkToJobOrder} 
+              onClick={handleCreateJobOrder} 
               disabled={salesOrder.status !== 'Confirmed'}
             >
-              <LinkIcon className="mr-2 h-4 w-4" />
-              Link to Job Order
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Create Job Order
             </Button>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handlePrint}>
