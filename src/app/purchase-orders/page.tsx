@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign, ShoppingBag } from "lucide-react";
+import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign, ShoppingBag, AlertCircle } from "lucide-react";
 import PurchaseOrderList from "@/components/purchase-orders/purchase-order-list";
 import { PurchaseOrder } from '@/lib/types';
 import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-form-modal';
@@ -34,7 +34,8 @@ export default function PurchaseOrdersPage() {
       toast({
         title: "Error",
         description: "Failed to load purchase orders. Please check your connection and permissions.",
-        variant: "destructive"
+        variant: "destructive",
+        icon: <AlertCircle className="h-5 w-5" />
       });
     }
   };
@@ -67,26 +68,26 @@ export default function PurchaseOrdersPage() {
               const { id, ...dataToSave } = purchaseOrderData;
               const poRef = doc(db, "purchaseOrders", id);
               await setDoc(poRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
-              toast({ title: "Success", description: "Purchase Order updated successfully.", variant: "success" });
+              toast({ title: "Success", description: "Purchase Order updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           } else {
               const { id, ...dataToSave } = purchaseOrderData;
               const docId = id as string; // The formatted ID is passed from the form
               const poRef = doc(db, "purchaseOrders", docId);
               await setDoc(poRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
-              toast({ title: "Success", description: "Purchase Order added successfully.", variant: "success" });
+              toast({ title: "Success", description: "Purchase Order added successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           }
           handleCloseModal();
           fetchPurchaseOrders();
       } catch (error) {
           console.error("Error saving purchase order: ", error);
-          toast({ title: "Error", description: "Failed to save purchase order.", variant: "destructive" });
+          toast({ title: "Error", description: "Failed to save purchase order.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
       }
   };
 
 
   const handleDeletePurchaseOrder = async (purchaseOrderId: string) => {
     await deleteDoc(doc(db, "purchaseOrders", purchaseOrderId));
-    toast({ title: "Success", description: "Purchase Order deleted successfully.", variant: "success" });
+    toast({ title: "Success", description: "Purchase Order deleted successfully.", variant: "destructive" });
     fetchPurchaseOrders();
   };
 

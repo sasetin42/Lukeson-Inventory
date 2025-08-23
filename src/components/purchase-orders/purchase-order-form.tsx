@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PurchaseOrder, DocumentLine, Supplier, Product } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Loader2, Truck, Calendar, Hash, FileText, PlusCircle, Trash2 } from 'lucide-react';
+import { Loader2, Truck, Calendar, Hash, FileText, PlusCircle, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
@@ -51,7 +51,7 @@ export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }
                 setProducts(loadedProducts);
             } catch (error) {
                 console.error("Error fetching data:", error);
-                toast({ title: "Error", description: "Failed to load suppliers and products.", variant: "destructive"});
+                toast({ title: "Error", description: "Failed to load suppliers and products.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" />});
             }
         };
         fetchData();
@@ -148,7 +148,7 @@ export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }
             onSuccess(purchaseOrderData as any);
         } catch (error) {
             console.error("Failed to save purchase order:", error);
-            toast({ title: "Error", description: "Failed to save purchase order.", variant: "destructive" });
+            toast({ title: "Error", description: "Failed to save purchase order.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
         } finally {
             setIsSaving(false);
         }

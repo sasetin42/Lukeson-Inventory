@@ -5,7 +5,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign } from "lucide-react";
+import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign, AlertCircle } from "lucide-react";
 import SalesOrderList from "@/components/sales-orders/sales-order-list";
 import { SalesOrder, Customer, Quotation } from '@/lib/types';
 import SalesOrderFormModal from "@/components/sales-orders/sales-order-form-modal";
@@ -48,7 +48,7 @@ function SalesOrdersContent() {
         setIsModalOpen(true);
       } catch (error) {
         console.error("Error parsing quotation data:", error);
-        toast({ title: "Error", description: "Could not create sales order from quotation.", variant: "destructive" });
+        toast({ title: "Error", description: "Could not create sales order from quotation.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
       }
     }
   }, [fromQuotation, toast]);
@@ -82,7 +82,8 @@ function SalesOrdersContent() {
       toast({
         title: "Error",
         description: "Failed to load sales orders. Please check your connection and permissions.",
-        variant: "destructive"
+        variant: "destructive",
+        icon: <AlertCircle className="h-5 w-5" />,
       });
     }
   };
@@ -117,24 +118,24 @@ function SalesOrdersContent() {
           if (editingSalesOrder && editingSalesOrder.id) { // This is an update
               const soRef = doc(db, "salesOrders", editingSalesOrder.id);
               await setDoc(soRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
-              toast({ title: "Success", description: "Sales Order updated successfully.", variant: "success" });
+              toast({ title: "Success", description: "Sales Order updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           } else { // This is a new record
               const soRef = doc(db, "salesOrders", id as string);
               await setDoc(soRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
-              toast({ title: "Success", description: "Sales Order added successfully.", variant: "success" });
+              toast({ title: "Success", description: "Sales Order added successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           }
           handleCloseModal();
           fetchSalesOrders();
       } catch (error) {
           console.error("Error saving sales order: ", error);
-          toast({ title: "Error", description: "Failed to save sales order.", variant: "destructive" });
+          toast({ title: "Error", description: "Failed to save sales order.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
       }
   };
 
 
   const handleDeleteSalesOrder = async (salesOrderId: string) => {
     await deleteDoc(doc(db, "salesOrders", salesOrderId));
-    toast({ title: "Success", description: "Sales Order deleted successfully.", variant: "success" });
+    toast({ title: "Success", description: "Sales Order deleted successfully.", variant: "destructive" });
     fetchSalesOrders();
   };
 

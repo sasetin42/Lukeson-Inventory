@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileText, PlusCircle, HelpCircle, Check, Clock, DollarSign } from "lucide-react";
+import { FileText, PlusCircle, HelpCircle, Check, Clock, DollarSign, CheckCircle, AlertCircle } from "lucide-react";
 import QuotationList from "@/components/quotations/quotation-list";
 import { Quotation } from '@/lib/types';
 import QuotationFormModal from '@/components/quotations/quotation-form-modal';
@@ -33,7 +33,8 @@ export default function QuotationsPage() {
       toast({
         title: "Error",
         description: "Failed to load quotations. Please check your connection and permissions.",
-        variant: "destructive"
+        variant: "destructive",
+        icon: <AlertCircle className="h-5 w-5" />,
       });
     }
   };
@@ -69,26 +70,26 @@ export default function QuotationsPage() {
         const { id, ...dataToSave } = quotationData;
         const docRef = doc(db, "quotations", editingQuotation.id);
         await setDoc(docRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
-        toast({ title: "Success", description: "Quotation updated successfully.", variant: "success" });
+        toast({ title: "Success", description: "Quotation updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
       } else { // We are creating
         const { id, ...dataToSave } = quotationData;
         const docRef = doc(db, "quotations", id as string);
         await setDoc(docRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
-        toast({ title: "Success", description: "Quotation added successfully.", variant: "success" });
+        toast({ title: "Success", description: "Quotation added successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
       }
 
       handleCloseFormModal();
       fetchQuotations();
     } catch (error) {
       console.error("Error saving quotation: ", error);
-      toast({ title: "Error", description: "Failed to save quotation.", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to save quotation.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
     }
   };
 
 
   const handleDeleteQuotation = async (quotationId: string) => {
     await deleteDoc(doc(db, "quotations", quotationId));
-    toast({ title: "Success", description: "Quotation deleted successfully.", variant: "success" });
+    toast({ title: "Success", description: "Quotation deleted successfully.", variant: "destructive" });
     fetchQuotations();
   };
 
@@ -96,11 +97,11 @@ export default function QuotationsPage() {
     const docRef = doc(db, "quotations", quotation.id);
     try {
         await setDoc(docRef, { status: 'Accepted', modifiedAt: serverTimestamp() }, { merge: true });
-        toast({ title: 'Success', description: `Quotation ${quotation.id} has been approved.`, variant: 'success' });
+        toast({ title: 'Success', description: `Quotation ${quotation.id} has been approved.`, variant: 'success', icon: <CheckCircle className="h-5 w-5" /> });
         fetchQuotations();
     } catch (error) {
         console.error("Error approving quotation: ", error);
-        toast({ title: 'Error', description: 'Failed to approve quotation.', variant: 'destructive' });
+        toast({ title: 'Error', description: 'Failed to approve quotation.', variant: 'destructive', icon: <AlertCircle className="h-5 w-5" /> });
     }
   }
 

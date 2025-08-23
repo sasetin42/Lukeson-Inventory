@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, DollarSign, CheckCircle, Clock, XCircle } from "lucide-react";
+import { PlusCircle, DollarSign, CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
 import JobOrderList from "@/components/job-orders/job-order-list";
 import { JobOrder } from '@/lib/types';
 import JobOrderFormModal from '@/components/job-orders/job-order-form-modal';
@@ -34,7 +34,8 @@ export default function JobOrdersPage() {
       toast({
         title: "Error",
         description: "Failed to load job orders. Please check your connection and permissions.",
-        variant: "destructive"
+        variant: "destructive",
+        icon: <AlertCircle className="h-5 w-5" />
       });
     }
   };
@@ -67,24 +68,24 @@ export default function JobOrdersPage() {
               const { id, ...dataToSave } = jobOrderData;
               const joRef = doc(db, "jobOrders", id);
               await setDoc(joRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
-              toast({ title: "Success", description: "Job Order updated successfully.", variant: "success" });
+              toast({ title: "Success", description: "Job Order updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           } else {
               const { id, ...dataToSave } = jobOrderData;
               await addDoc(collection(db, "jobOrders"), { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
-              toast({ title: "Success", description: "Job Order added successfully.", variant: "success" });
+              toast({ title: "Success", description: "Job Order added successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           }
           handleCloseFormModal();
           fetchJobOrders();
       } catch (error) {
           console.error("Error saving job order: ", error);
-          toast({ title: "Error", description: "Failed to save job order.", variant: "destructive" });
+          toast({ title: "Error", description: "Failed to save job order.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
       }
   };
 
 
   const handleDeleteJobOrder = async (jobOrderId: string) => {
     await deleteDoc(doc(db, "jobOrders", jobOrderId));
-    toast({ title: "Success", description: "Job Order deleted successfully.", variant: "success" });
+    toast({ title: "Success", description: "Job Order deleted successfully.", variant: "destructive" });
     fetchJobOrders();
   };
 
