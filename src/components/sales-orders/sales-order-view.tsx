@@ -140,13 +140,22 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
                 </div>
             </div>
 
-            <div className="mt-8 text-sm">
-                <p className="font-bold">BILL TO:</p>
-                <p>{salesOrder.customerName}</p>
-                {salesOrder.customerTin && <p>TIN: {salesOrder.customerTin}</p>}
-                {salesOrder.customerEmail && <p>Email: {salesOrder.customerEmail}</p>}
-                {salesOrder.customerPhone && <p>Phone: {salesOrder.customerPhone}</p>}
-                {salesOrder.customerShippingAddress && <p>Shipping Address: {salesOrder.customerShippingAddress}</p>}
+            <div className="mt-8 text-sm flex">
+                <div className="w-1/2">
+                    <p className="font-bold">BILL TO:</p>
+                    <p>{salesOrder.customerName}</p>
+                    {salesOrder.customerTin && <p>TIN: {salesOrder.customerTin}</p>}
+                    {salesOrder.customerEmail && <p>Email: {salesOrder.customerEmail}</p>}
+                    {salesOrder.customerPhone && <p>Phone: {salesOrder.customerPhone}</p>}
+                </div>
+                <div className="w-1/2">
+                    <p className="font-bold">SHIPPING ADDRESS:</p>
+                    {salesOrder.customerShippingAddress ? (
+                        <p>{salesOrder.customerShippingAddress}</p>
+                    ) : (
+                        <p>Same as billing address.</p>
+                    )}
+                </div>
             </div>
             
             <table className="w-full mt-4 border-collapse text-sm">
