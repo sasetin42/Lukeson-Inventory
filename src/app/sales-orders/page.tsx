@@ -135,7 +135,7 @@ function SalesOrdersContent() {
 
   const handleDeleteSalesOrder = async (salesOrderId: string) => {
     await deleteDoc(doc(db, "salesOrders", salesOrderId));
-    toast({ title: "Success", description: "Sales Order deleted successfully.", variant: "destructive" });
+    toast({ title: "Success", description: "Sales Order deleted successfully.", variant: "destructive", icon: <Trash2 className="h-5 w-5" /> });
     fetchSalesOrders();
   };
 
