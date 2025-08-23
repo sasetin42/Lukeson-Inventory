@@ -23,6 +23,14 @@ interface JobOrderFormProps {
 
 const DEFAULT_TAX_RATE = 0.12;
 
+const safeToDate = (date: any): Date | undefined => {
+    if (!date) return undefined;
+    if (date.toDate) return date.toDate(); // Firestore Timestamp
+    if (date instanceof Date) return date; // Javascript Date
+    if (typeof date === 'string' || typeof date === 'number') return new Date(date); // ISO string or milliseconds
+    return undefined;
+}
+
 export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrderFormProps) {
     const { toast } = useToast();
     const [customers, setCustomers] = useState<Customer[]>([]);
@@ -75,8 +83,8 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             setJobOrderId(jobOrder.id || '');
             setCustomerId(jobOrder.customerId || '');
             setSalesOrderId(jobOrder.salesOrderId);
-            setJobOrderDate(jobOrder.jobOrderDate ? (jobOrder.jobOrderDate as any).toDate() : new Date());
-            setExpectedCompletionDate(jobOrder.expectedCompletionDate ? (jobOrder.expectedCompletionDate as any).toDate() : undefined);
+            setJobOrderDate(safeToDate(jobOrder.jobOrderDate) || new Date());
+            setExpectedCompletionDate(safeToDate(jobOrder.expectedCompletionDate));
             setStatus(jobOrder.status || 'Draft');
             setLines(jobOrder.lines || []);
             setNotes(jobOrder.notes || '');
