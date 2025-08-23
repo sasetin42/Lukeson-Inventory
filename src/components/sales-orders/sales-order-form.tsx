@@ -43,6 +43,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
     const [lines, setLines] = useState<DocumentLine[]>([]);
     const [isStatusDisabled, setIsStatusDisabled] = useState(true);
     const [notes, setNotes] = useState('');
+    const [quotationNotes, setQuotationNotes] = useState('');
     const [discountType, setDiscountType] = useState<'Fixed' | 'Percent'>('Fixed');
     const [discountValue, setDiscountValue] = useState(0);
     const [quotationId, setQuotationId] = useState<string | undefined>(undefined);
@@ -104,6 +105,14 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
             setDiscountType(salesOrder.discountType || 'Fixed');
             setDiscountValue(salesOrder.discountValue || 0);
             setQuotationId(salesOrder.quotationId);
+            if (salesOrder.quotationId) {
+                const linkedQuotation = quotations.find(q => q.id === salesOrder.quotationId);
+                if (linkedQuotation) {
+                    setQuotationNotes(linkedQuotation.notes || '');
+                }
+            } else {
+                setQuotationNotes('');
+            }
         } else {
             generateSalesOrderId();
             setLines([]);
@@ -113,11 +122,12 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
             setDeliveryDate(undefined);
             setIsStatusDisabled(true);
             setNotes('');
+            setQuotationNotes('');
             setDiscountType('Fixed');
             setDiscountValue(0);
             setQuotationId(undefined);
         }
-    }, [salesOrder, onIdGenerated]);
+    }, [salesOrder, onIdGenerated, quotations]);
 
     const handleCustomerChange = (selectedCustomerId: string) => {
         setCustomerId(selectedCustomerId);
@@ -128,6 +138,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
             setStatus('Confirmed');
             setIsStatusDisabled(false);
             setNotes(approvedQuotation.notes || '');
+            setQuotationNotes(approvedQuotation.notes || '');
             setQuotationId(approvedQuotation.id);
             toast({
                 title: "Quotation Found",
@@ -139,6 +150,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
             setStatus('Draft');
             setIsStatusDisabled(true);
             setNotes('');
+            setQuotationNotes('');
             setQuotationId(undefined);
         }
     }
@@ -377,8 +389,16 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
             
             <div className="flex gap-8">
                 <div className="w-1/2 space-y-2">
-                    <Label htmlFor="notes">Notes (Optional)</Label>
-                    <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add any notes for this sales order..."/>
+                    {quotationId && (
+                        <div className="space-y-2">
+                            <Label htmlFor="quotation-notes">Quotation Notes (from {quotationId})</Label>
+                            <Textarea id="quotation-notes" value={quotationNotes} readOnly rows={3} className="bg-muted/50" />
+                        </div>
+                    )}
+                    <div className="space-y-2">
+                        <Label htmlFor="notes">Sales Order Notes (Optional)</Label>
+                        <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add any notes for this sales order..."/>
+                    </div>
                 </div>
                 <div className="w-1/2 space-y-2">
                     <div className="flex justify-between items-center py-1">
@@ -425,7 +445,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
 
             <div className="flex justify-end items-center gap-6 mt-4">
                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={onCancel} disabled={isSaving}>Cancel</Button>
+                    <Button variant="cancel" onClick={onCancel} disabled={isSaving}>Cancel</Button>
                     <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {isSaving ? 'Saving...' : (salesOrder?.id ? 'Save Changes' : 'Create Sales Order')}
