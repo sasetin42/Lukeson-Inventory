@@ -105,7 +105,7 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
             <div className="flex justify-between items-center">
                  <div className="flex items-center gap-4">
                     <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo"/>
-                    <div className="text-xs">
+                    <div style={{ fontSize: '13px' }}>
                         <p className="font-bold" style={{ color: accentColor, fontSize: '20px', lineHeight: '25px' }}>{companyName}</p>
                         <p>{address}</p>
                         <p>{phone}</p>
