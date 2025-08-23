@@ -100,6 +100,7 @@ export default function SalesOrderList({ salesOrders, quotations, onEdit, onDele
                                 <TableHead>Sales Order ID</TableHead>
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Date</TableHead>
+                                <TableHead>Delivery Date</TableHead>
                                 <TableHead>Amount</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="w-[150px] text-center">Actions</TableHead>
@@ -130,6 +131,7 @@ export default function SalesOrderList({ salesOrders, quotations, onEdit, onDele
                                                 </div>
                                             </TableCell>
                                             <TableCell>{formatDate(salesOrder.orderDate)}</TableCell>
+                                            <TableCell>{formatDate(salesOrder.deliveryDate)}</TableCell>
                                             <TableCell>₱{salesOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                             <TableCell>
                                                 <Badge variant={getStatusVariant(salesOrder.status)}>{salesOrder.status}</Badge>
