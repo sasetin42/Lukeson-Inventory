@@ -234,6 +234,15 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
     }, [lines, discountType, discountValue]);
 
     const handleSubmit = async () => {
+        if (!deliveryDate) {
+            toast({
+                title: "Missing Field",
+                description: "Please select a delivery date.",
+                variant: "destructive",
+            });
+            return;
+        }
+
         setIsSaving(true);
         try {
             const customer = customers.find(c => c.id === customerId);
@@ -278,7 +287,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
                     <DatePicker date={orderDate} setDate={setOrderDate} />
                 </div>
                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Delivery Date</Label>
+                    <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Delivery Date <span className="text-red-500">*</span></Label>
                     <DatePicker date={deliveryDate} setDate={setDeliveryDate} />
                 </div>
                  <div className="space-y-2">
