@@ -14,6 +14,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { DatePicker } from '../ui/date-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { format } from 'date-fns';
 
 interface JobOrderFormProps {
   jobOrder: JobOrder | null;
@@ -128,7 +129,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             }
         }
         fetchSalesOrders();
-    }, [customerId, toast, jobOrder?.salesOrderId, salesOrders]);
+    }, [customerId, toast, jobOrder?.salesOrderId]);
 
 
     const handleSalesOrderChange = (selectedSOId: string) => {
@@ -198,14 +199,10 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Job Order Date</Label>
                     <DatePicker date={jobOrderDate} setDate={setJobOrderDate} />
-                </div>
-                <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> SO Delivery Date</Label>
-                    <DatePicker date={salesOrderDeliveryDate} setDate={() => {}} disabled={true} />
                 </div>
                  <div className="space-y-2">
                     <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Expected Completion</Label>
@@ -228,7 +225,15 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             </div>
             
             <div className="space-y-2">
-                <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Line Items</Label>
+                <div className="flex justify-between items-center">
+                    <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Line Items</Label>
+                    {salesOrderDeliveryDate && (
+                        <div className="flex items-center gap-2 text-sm">
+                            <Label>SO Delivery Date:</Label>
+                            <Input value={format(salesOrderDeliveryDate, 'PP')} disabled className="w-auto bg-muted/50" />
+                        </div>
+                    )}
+                </div>
                 <div className="border rounded-md">
                     <Table>
                         <TableHeader>
