@@ -234,6 +234,16 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
     }, [lines, discountType, discountValue]);
 
     const handleSubmit = async () => {
+        if (!customerId) {
+            toast({
+                title: "Missing Field",
+                description: "Please select a customer.",
+                variant: "destructive",
+                icon: <AlertCircle className="h-5 w-5" />
+            });
+            return;
+        }
+
         if (!deliveryDate) {
             toast({
                 title: "Missing Field",
@@ -275,7 +285,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
         <div className="grid gap-6 py-4">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><User className="h-4 w-4" /> Customer</Label>
+                    <Label className="flex items-center gap-2"><User className="h-4 w-4" /> Customer <span className="text-red-500">*</span></Label>
                     <Select onValueChange={handleCustomerChange} value={customerId}>
                         <SelectTrigger><SelectValue placeholder="Select a customer" /></SelectTrigger>
                         <SelectContent>
