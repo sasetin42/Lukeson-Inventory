@@ -120,7 +120,7 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
 
     return (
         <div className="p-8 bg-white text-black">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-start">
                  <div className="flex items-center gap-4">
                     <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo"/>
                     <div style={{ fontSize: '13px' }}>
