@@ -45,10 +45,10 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
     const [salesOrderId, setSalesOrderId] = useState<string | undefined>();
     const [jobOrderDate, setJobOrderDate] = useState<Date | undefined>(new Date());
     const [expectedCompletionDate, setExpectedCompletionDate] = useState<Date | undefined>();
+    const [salesOrderDeliveryDate, setSalesOrderDeliveryDate] = useState<Date | undefined>();
     const [status, setStatus] = useState<JobOrder['status']>('Draft');
     const [lines, setLines] = useState<DocumentLine[]>([]);
     const [notes, setNotes] = useState('');
-    const [maxCompletionDate, setMaxCompletionDate] = useState<Date | undefined>();
     
     useEffect(() => {
         const fetchData = async () => {
@@ -98,8 +98,8 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             setSalesOrderId(undefined);
             setJobOrderDate(new Date());
             setExpectedCompletionDate(undefined);
+            setSalesOrderDeliveryDate(undefined);
             setNotes('');
-            setMaxCompletionDate(undefined);
         }
     }, [jobOrder]);
     
@@ -115,11 +115,11 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                 const loadedSOs = soSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
                 setSalesOrders(loadedSOs);
 
-                // If editing a job order, ensure its SO is loaded and max date is set.
+                // If editing a job order, ensure its SO is loaded and dates are set.
                 if (jobOrder?.salesOrderId) {
-                     const so = loadedSOs.find(s => s.id === jobOrder.salesOrderId);
+                     const so = loadedSOs.find(s => s.id === jobOrder.salesOrderId) || salesOrders.find(s => s.id === jobOrder.salesOrderId);
                     if (so) {
-                        setMaxCompletionDate(safeToDate(so.deliveryDate));
+                        setSalesOrderDeliveryDate(safeToDate(so.deliveryDate));
                     }
                 }
             } catch (error) {
@@ -128,7 +128,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             }
         }
         fetchSalesOrders();
-    }, [customerId, toast, jobOrder?.salesOrderId]);
+    }, [customerId, toast, jobOrder?.salesOrderId, salesOrders]);
 
 
     const handleSalesOrderChange = (selectedSOId: string) => {
@@ -137,7 +137,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
         if (so) {
             setLines(so.lines);
             setNotes(so.notes || '');
-            setMaxCompletionDate(safeToDate(so.deliveryDate));
+            setSalesOrderDeliveryDate(safeToDate(so.deliveryDate));
             toast({ title: 'Sales Order Loaded', description: `Details from ${so.id} have been loaded.`})
         }
     };
@@ -198,14 +198,18 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Job Order Date</Label>
                     <DatePicker date={jobOrderDate} setDate={setJobOrderDate} />
                 </div>
+                <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> SO Delivery Date</Label>
+                    <DatePicker date={salesOrderDeliveryDate} setDate={() => {}} disabled={true} />
+                </div>
                  <div className="space-y-2">
                     <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Expected Completion</Label>
-                    <DatePicker date={expectedCompletionDate} setDate={setExpectedCompletionDate} toDate={maxCompletionDate} />
+                    <DatePicker date={expectedCompletionDate} setDate={setExpectedCompletionDate} toDate={salesOrderDeliveryDate} />
                 </div>
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Status</Label>
