@@ -255,19 +255,14 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             <div className="space-y-2">
                 <div className="flex justify-between items-center">
                     <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Line Items</Label>
-                    {salesOrderDeliveryDate && (
-                        <div className="flex items-center gap-2 text-sm">
-                            <Label>SO Delivery Date:</Label>
-                            <Input value={format(salesOrderDeliveryDate, 'PP')} disabled className="w-auto bg-muted/50" />
-                        </div>
-                    )}
                 </div>
                 <div className="border rounded-md">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[80%]" style={{ backgroundColor: '#588D00', color: '#FFFFFF' }}>Product/Service</TableHead>
+                                <TableHead style={{ backgroundColor: '#588D00', color: '#FFFFFF' }}>Product/Service</TableHead>
                                 <TableHead className="text-right" style={{ backgroundColor: '#588D00', color: '#FFFFFF' }}>Qty</TableHead>
+                                <TableHead className="text-right" style={{ backgroundColor: '#588D00', color: '#FFFFFF' }}>Sales Order Delivery Date</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -275,6 +270,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                                 <TableRow key={line.id}>
                                     <TableCell>{line.description}</TableCell>
                                     <TableCell className="text-right">{line.quantity}</TableCell>
+                                    <TableCell className="text-right">{salesOrderDeliveryDate ? format(salesOrderDeliveryDate, 'PP') : 'N/A'}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
