@@ -6,33 +6,47 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle, HelpCircle, Check, Clock, DollarSign, CheckCircle, AlertCircle } from "lucide-react";
 import QuotationList from "@/components/quotations/quotation-list";
-import { Quotation } from '@/lib/types';
+import { Quotation, Customer } from '@/lib/types';
 import QuotationFormModal from '@/components/quotations/quotation-form-modal';
 import QuotationDetailsModal from '@/components/quotations/quotation-details-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
+import CustomerViewModal from '@/components/customers/customer-view-modal';
 
 export default function QuotationsPage() {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [editingQuotation, setEditingQuotation] = useState<Quotation | null>(null);
   const [viewingQuotation, setViewingQuotation] = useState<Quotation | null>(null);
+  const [viewingCustomer, setViewingCustomer] = useState<Customer | null>(null);
   const { toast } = useToast();
 
-  const fetchQuotations = async () => {
+  const fetchQuotationsAndCustomers = async () => {
     try {
       const quotationsRef = collection(db, 'quotations');
-      const snapshot = await getDocs(quotationsRef);
-      const loadedQuotations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
+      const customersRef = collection(db, 'customers');
+      
+      const [quotationsSnapshot, customersSnapshot] = await Promise.all([
+        getDocs(quotationsRef),
+        getDocs(customersRef)
+      ]);
+
+      const loadedQuotations = quotationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
       setQuotations(loadedQuotations);
+
+      const loadedCustomers = customersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer));
+      setCustomers(loadedCustomers);
+
     } catch (error) {
-      console.error("Error fetching quotations: ", error);
+      console.error("Error fetching data: ", error);
       toast({
         title: "Error",
-        description: "Failed to load quotations. Please check your connection and permissions.",
+        description: "Failed to load data. Please check your connection and permissions.",
         variant: "destructive",
         icon: <AlertCircle className="h-5 w-5" />,
       });
@@ -40,7 +54,7 @@ export default function QuotationsPage() {
   };
 
   useEffect(() => {
-    fetchQuotations();
+    fetchQuotationsAndCustomers();
   }, []);
 
   const handleOpenFormModal = (quotation: Quotation | null) => {
@@ -63,6 +77,16 @@ export default function QuotationsPage() {
     setIsDetailsModalOpen(false);
     setViewingQuotation(null);
   }
+  
+  const handleOpenCustomerModal = (customer: Customer) => {
+    setViewingCustomer(customer);
+    setIsCustomerModalOpen(true);
+  }
+
+  const handleCloseCustomerModal = () => {
+    setIsCustomerModalOpen(false);
+    setViewingCustomer(null);
+  }
 
   const handleSaveQuotation = async (quotationData: Omit<Quotation, 'id'> & { id?: string }) => {
     try {
@@ -79,7 +103,7 @@ export default function QuotationsPage() {
       }
 
       handleCloseFormModal();
-      fetchQuotations();
+      fetchQuotationsAndCustomers();
     } catch (error) {
       console.error("Error saving quotation: ", error);
       toast({ title: "Error", description: "Failed to save quotation.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
@@ -90,7 +114,7 @@ export default function QuotationsPage() {
   const handleDeleteQuotation = async (quotationId: string) => {
     await deleteDoc(doc(db, "quotations", quotationId));
     toast({ title: "Success", description: "Quotation deleted successfully.", variant: "destructive" });
-    fetchQuotations();
+    fetchQuotationsAndCustomers();
   };
 
   const handleApproveQuotation = async (quotation: Quotation) => {
@@ -98,7 +122,7 @@ export default function QuotationsPage() {
     try {
         await setDoc(docRef, { status: 'Accepted', modifiedAt: serverTimestamp() }, { merge: true });
         toast({ title: 'Success', description: `Quotation ${quotation.id} has been approved.`, variant: 'success', icon: <CheckCircle className="h-5 w-5" /> });
-        fetchQuotations();
+        fetchQuotationsAndCustomers();
     } catch (error) {
         console.error("Error approving quotation: ", error);
         toast({ title: 'Error', description: 'Failed to approve quotation.', variant: 'destructive', icon: <AlertCircle className="h-5 w-5" /> });
@@ -147,10 +171,12 @@ export default function QuotationsPage() {
       </div>
       <QuotationList
         quotations={quotations}
+        customers={customers}
         onView={handleOpenDetailsModal}
         onEdit={handleOpenFormModal}
         onDelete={handleDeleteQuotation}
         onApprove={handleApproveQuotation}
+        onViewCustomer={handleOpenCustomerModal}
       />
       {isFormModalOpen && (
         <QuotationFormModal
@@ -167,6 +193,13 @@ export default function QuotationsPage() {
           onEdit={handleOpenFormModal}
           quotation={viewingQuotation}
         />
+      )}
+      {isCustomerModalOpen && (
+          <CustomerViewModal 
+            isOpen={isCustomerModalOpen}
+            onClose={handleCloseCustomerModal}
+            customer={viewingCustomer}
+          />
       )}
     </div>
   );

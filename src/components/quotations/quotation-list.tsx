@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react';
-import { Quotation } from '@/lib/types';
+import { Quotation, Customer } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -24,13 +24,15 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/comp
 
 interface QuotationListProps {
     quotations: Quotation[];
+    customers: Customer[];
     onView: (quotation: Quotation) => void;
     onEdit: (quotation: Quotation) => void;
     onDelete: (quotationId: string) => void;
     onApprove: (quotation: Quotation) => void;
+    onViewCustomer: (customer: Customer) => void;
 }
 
-export default function QuotationList({ quotations, onView, onEdit, onDelete, onApprove }: QuotationListProps) {
+export default function QuotationList({ quotations, customers, onView, onEdit, onDelete, onApprove, onViewCustomer }: QuotationListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [quotationToDelete, setQuotationToDelete] = useState<Quotation | null>(null);
 
@@ -67,6 +69,13 @@ export default function QuotationList({ quotations, onView, onEdit, onDelete, on
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     }
 
+    const handleViewCustomer = (customerId: string) => {
+        const customer = customers.find(c => c.id === customerId);
+        if (customer) {
+            onViewCustomer(customer);
+        }
+    }
+
     return (
         <>
             <Card>
@@ -83,8 +92,8 @@ export default function QuotationList({ quotations, onView, onEdit, onDelete, on
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Expiry Date</TableHead>
-                                <TableHead>Amount</TableHead>
                                 <TableHead>Status</TableHead>
+                                <TableHead>Amount</TableHead>
                                 <TableHead className="w-[150px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -93,16 +102,16 @@ export default function QuotationList({ quotations, onView, onEdit, onDelete, on
                                 <TableRow key={quotation.id}>
                                     <TableCell className="font-medium">{quotation.id}</TableCell>
                                     <TableCell>
-                                        <Link href={`/customer?customerId=${quotation.customerId}`} className="text-blue-600 hover:underline">
+                                        <Button variant="link" className="p-0 h-auto" onClick={() => handleViewCustomer(quotation.customerId)}>
                                             {quotation.customerName || quotation.customerId}
-                                        </Link>
+                                        </Button>
                                     </TableCell>
                                     <TableCell>{formatDate(quotation.qtnDate)}</TableCell>
                                     <TableCell>{formatDate(quotation.expiryDate)}</TableCell>
-                                    <TableCell>₱{quotation.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                     <TableCell>
                                         <Badge variant={getStatusVariant(quotation.status)}>{quotation.status}</Badge>
                                     </TableCell>
+                                    <TableCell>₱{quotation.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                     <TableCell className="flex items-center gap-1">
                                         <Tooltip>
                                             <TooltipTrigger asChild>
