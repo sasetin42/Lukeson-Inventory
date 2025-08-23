@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -256,7 +255,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                     <p className="text-2xl font-bold">₱{calculateTotalAmount().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={onCancel} disabled={isSaving}>Cancel</Button>
+                    <Button variant="cancel" onClick={onCancel} disabled={isSaving}>Cancel</Button>
                     <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {isSaving ? 'Saving...' : (jobOrder ? 'Save Changes' : 'Create Job Order')}

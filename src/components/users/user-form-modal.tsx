@@ -142,7 +142,7 @@ export default function UserFormModal({
                      )}
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={onClose} disabled={isSaving}>Cancel</Button>
+                    <Button variant="cancel" onClick={onClose} disabled={isSaving}>Cancel</Button>
                     <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {user ? 'Save Changes' : 'Add User'}

@@ -613,7 +613,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
            {renderFormFields()}
             {category && (
                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" onClick={onCancel} disabled={isSaving}>Cancel</Button>
+                    <Button variant="cancel" onClick={onCancel} disabled={isSaving}>Cancel</Button>
                     <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         {isSaving ? 'Saving...' : (product ? 'Save Changes' : 'Add Product')}
@@ -623,5 +623,3 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         </div>
     );
 }
-
-    

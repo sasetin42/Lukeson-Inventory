@@ -124,7 +124,7 @@ export default function CustomerForm({ customer, onSuccess, onCancel }: Customer
             </div>
 
             <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={onCancel} disabled={isSaving}>Cancel</Button>
+                <Button variant="cancel" onClick={onCancel} disabled={isSaving}>Cancel</Button>
                 <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {isSaving ? 'Saving...' : (customer ? 'Save Changes' : 'Add Customer')}
