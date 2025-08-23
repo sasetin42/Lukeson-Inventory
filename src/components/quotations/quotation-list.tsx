@@ -35,6 +35,8 @@ interface QuotationListProps {
 export default function QuotationList({ quotations, customers, onView, onEdit, onDelete, onApprove, onViewCustomer }: QuotationListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [quotationToDelete, setQuotationToDelete] = useState<Quotation | null>(null);
+    const [isApproveAlertOpen, setIsApproveAlertOpen] = useState(false);
+    const [quotationToApprove, setQuotationToApprove] = useState<Quotation | null>(null);
 
     const openDeleteAlert = (quotation: Quotation) => {
         setQuotationToDelete(quotation);
@@ -49,6 +51,19 @@ export default function QuotationList({ quotations, customers, onView, onEdit, o
         }
     };
     
+    const openApproveAlert = (quotation: Quotation) => {
+        setQuotationToApprove(quotation);
+        setIsApproveAlertOpen(true);
+    };
+
+    const handleApproveConfirm = () => {
+        if (quotationToApprove) {
+            onApprove(quotationToApprove);
+            setIsApproveAlertOpen(false);
+            setQuotationToApprove(null);
+        }
+    };
+
     const getStatusVariant = (status: Quotation['status']): "default" | "secondary" | "destructive" | "outline" | "success" | "draft" => {
         switch (status) {
             case 'Accepted':
@@ -124,7 +139,7 @@ export default function QuotationList({ quotations, customers, onView, onEdit, o
                                         </Tooltip>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button variant="ghost" size="icon" onClick={() => onApprove(quotation)} disabled={quotation.status === 'Accepted'}>
+                                                <Button variant="ghost" size="icon" onClick={() => openApproveAlert(quotation)} disabled={quotation.status === 'Accepted'}>
                                                     <CheckCircle className="h-4 w-4 text-green-500" />
                                                 </Button>
                                             </TooltipTrigger>
@@ -162,6 +177,20 @@ export default function QuotationList({ quotations, customers, onView, onEdit, o
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            <AlertDialog open={isApproveAlertOpen} onOpenChange={setIsApproveAlertOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure you want to accept this quotation?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will mark the quotation as 'Accepted' and it cannot be reverted.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleApproveConfirm}>Accept</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
