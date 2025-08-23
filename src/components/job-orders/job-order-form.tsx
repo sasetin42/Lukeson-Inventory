@@ -229,10 +229,8 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[40%]" style={{ backgroundColor: '#588D00', color: '#FFFFFF' }}>Product/Service</TableHead>
+                                <TableHead className="w-[80%]" style={{ backgroundColor: '#588D00', color: '#FFFFFF' }}>Product/Service</TableHead>
                                 <TableHead className="text-right" style={{ backgroundColor: '#588D00', color: '#FFFFFF' }}>Qty</TableHead>
-                                <TableHead className="text-right" style={{ backgroundColor: '#588D00', color: '#FFFFFF' }}>Unit Price</TableHead>
-                                <TableHead className="text-right" style={{ backgroundColor: '#588D00', color: '#FFFFFF' }}>Total</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -240,8 +238,6 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                                 <TableRow key={line.id}>
                                     <TableCell>{line.description}</TableCell>
                                     <TableCell className="text-right">{line.quantity}</TableCell>
-                                    <TableCell className="text-right">₱{line.unitPrice.toFixed(2)}</TableCell>
-                                    <TableCell className="text-right">₱{line.total.toFixed(2)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -250,8 +246,8 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="notes">Notes (Optional)</Label>
-                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add any notes for this job order..."/>
+                <Label htmlFor="notes">Notes (from Sales Order)</Label>
+                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes from the linked sales order will appear here..." readOnly/>
             </div>
 
             <div className="flex justify-end items-center gap-6 mt-4">
