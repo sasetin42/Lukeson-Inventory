@@ -115,7 +115,7 @@ export default function SalesOrderList({ salesOrders, quotations, onEdit, onDele
                                                 <div className="font-medium">{salesOrder.id}</div>
                                                 {salesOrder.quotationId && (
                                                     <div className="text-muted-foreground" style={{fontSize: '12px'}}>
-                                                        QTN: {salesOrder.quotationId}
+                                                        {salesOrder.quotationId}
                                                     </div>
                                                 )}
                                             </TableCell>
