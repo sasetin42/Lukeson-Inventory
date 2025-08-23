@@ -84,20 +84,17 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             setJobOrderId(jobOrder.id || '');
             setCustomerId(jobOrder.customerId || '');
             setSalesOrderId(jobOrder.salesOrderId);
-            setJobOrderDate(safeToDate(jobOrder.jobOrderDate) || new Date());
+            setJobOrderDate(safeToDate(jobOrder.jobOrderDate));
             setExpectedCompletionDate(safeToDate(jobOrder.expectedCompletionDate));
             setStatus(jobOrder.status || 'Draft');
             setLines(jobOrder.lines || []);
             setNotes(jobOrder.notes || '');
 
-            if (jobOrder.salesOrderId) {
-                 const fetchSalesOrderDeliveryDate = async () => {
-                    const so = salesOrders.find(s => s.id === jobOrder.salesOrderId)
-                    if (so) {
-                        setMaxCompletionDate(safeToDate(so.deliveryDate));
-                    }
+            if (jobOrder.salesOrderId && salesOrders.length > 0) {
+                const so = salesOrders.find(s => s.id === jobOrder.salesOrderId);
+                if (so) {
+                    setMaxCompletionDate(safeToDate(so.deliveryDate));
                 }
-                fetchSalesOrderDeliveryDate();
             }
         } else {
             generateJobOrderId();
@@ -106,6 +103,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             setCustomerId('');
             setSalesOrderId(undefined);
             setJobOrderDate(new Date());
+            setExpectedCompletionDate(undefined);
             setNotes('');
             setMaxCompletionDate(undefined);
         }

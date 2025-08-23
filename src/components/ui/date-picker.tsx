@@ -17,9 +17,11 @@ import {
 interface DatePickerProps {
     date: Date | undefined;
     setDate: (date: Date | undefined) => void;
+    toDate?: Date;
+    fromDate?: Date;
 }
 
-export function DatePicker({ date, setDate }: DatePickerProps) {
+export function DatePicker({ date, setDate, toDate, fromDate }: DatePickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -40,6 +42,8 @@ export function DatePicker({ date, setDate }: DatePickerProps) {
           selected={date}
           onSelect={setDate}
           initialFocus
+          toDate={toDate}
+          fromDate={fromDate}
         />
       </PopoverContent>
     </Popover>
