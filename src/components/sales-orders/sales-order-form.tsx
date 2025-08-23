@@ -302,12 +302,12 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[25%]">Product</TableHead>
-                                <TableHead>Qty</TableHead>
-                                <TableHead>Unit Price</TableHead>
-                                <TableHead>VAT Type</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
+                                <TableHead className="w-[35%]">Product</TableHead>
+                                <TableHead className="w-[10%]">Qty</TableHead>
+                                <TableHead className="w-[15%]">Unit Price</TableHead>
+                                <TableHead className="w-[20%]">VAT Type</TableHead>
+                                <TableHead className="w-[15%] text-right">Total</TableHead>
+                                <TableHead className="w-[5%]"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -322,14 +322,14 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
                                         </Select>
                                     </TableCell>
                                     <TableCell>
-                                        <Input type="number" value={line.quantity} onChange={e => handleLineChange(index, 'quantity', Number(e.target.value))} className="w-20" />
+                                        <Input type="number" value={line.quantity} onChange={e => handleLineChange(index, 'quantity', Number(e.target.value))} />
                                     </TableCell>
                                     <TableCell>
-                                        <Input type="number" value={line.unitPrice} onChange={e => handleLineChange(index, 'unitPrice', Number(e.target.value))} className="w-28" />
+                                        <Input type="number" value={line.unitPrice} onChange={e => handleLineChange(index, 'unitPrice', Number(e.target.value))} />
                                     </TableCell>
                                     <TableCell>
                                         <Select value={line.vatType} onValueChange={(v: VatType) => handleLineChange(index, 'vatType', v)}>
-                                            <SelectTrigger className="w-[150px]"><SelectValue/></SelectTrigger>
+                                            <SelectTrigger><SelectValue/></SelectTrigger>
                                             <SelectContent>
                                                 {vatTypes.map(vt => <SelectItem key={vt} value={vt}>{vt}</SelectItem>)}
                                             </SelectContent>
