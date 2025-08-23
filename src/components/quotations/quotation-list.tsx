@@ -102,8 +102,8 @@ export default function QuotationList({ quotations, customers, onView, onEdit, o
                                 <TableRow key={quotation.id}>
                                     <TableCell className="font-medium">{quotation.id}</TableCell>
                                     <TableCell>
-                                        <Button variant="ghost" className="p-0 h-auto gap-2" onClick={() => handleViewCustomer(quotation.customerId)}>
-                                            <User className="h-4 w-4 text-blue-500" />
+                                        <Button className="bg-[#2463EB] text-white hover:bg-[#2463EB]/90 px-2 py-1 h-auto text-sm" onClick={() => handleViewCustomer(quotation.customerId)}>
+                                            <User className="h-4 w-4 mr-2" />
                                             {quotation.customerName || quotation.customerId}
                                         </Button>
                                     </TableCell>
