@@ -8,14 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, Save } from 'lucide-react';
+import { Upload, Save, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
+import { db } from '@/lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-const TEMPLATE_STORAGE_KEY = 'salesOrderTemplateSettings';
+const TEMPLATE_DOC_ID = 'salesOrder';
 
 export default function SalesOrderTemplate() {
     const { toast } = useToast();
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+
     const [accentColor, setAccentColor] = useState('#0A3BA3');
     const [showDueDate, setShowDueDate] = useState(true);
     const [showNotes, setShowNotes] = useState(true);
@@ -35,41 +40,72 @@ export default function SalesOrderTemplate() {
     const [verifiedByLabel, setVerifiedByLabel] = useState('Verified by:');
     const [verifiedByName, setVerifiedByName] = useState('HIROYOSHI KANAZAWA - VP');
 
-    // Load settings from localStorage on mount
     useEffect(() => {
-        const savedSettings = localStorage.getItem(TEMPLATE_STORAGE_KEY);
-        if (savedSettings) {
-            const settings = JSON.parse(savedSettings);
-            setAccentColor(settings.accentColor || '#0A3BA3');
-            setShowDueDate(settings.showDueDate !== false);
-            setShowNotes(settings.showNotes !== false);
-            setShowVat(settings.showVat !== false);
-            setCompanyName(settings.companyName || 'YAMASHITA MOLD PHILIPPINES CORPORATION');
-            setAddress(settings.address || 'Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines');
-            setPhone(settings.phone || 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463');
-            setEmail(settings.email || 'contact@yamashitamold.ph');
-            setWebsite(settings.website || 'www.yamashitamold.ph');
-            setLogo(settings.logo || 'https://placehold.co/100x50.png');
-            setPreparedByLabel(settings.preparedByLabel || 'Prepared by:');
-            setPreparedByName(settings.preparedByName || 'YMP / MCB / MJTS');
-            setReceivedByLabel(settings.receivedByLabel || 'Received by:');
-            setReceivedByName(settings.receivedByName || 'JUAN DELA CRUZ');
-            setVerifiedByLabel(settings.verifiedByLabel || 'Verified by:');
-            setVerifiedByName(settings.verifiedByName || 'HIROYOSHI KANAZAWA - VP');
-        }
-    }, []);
+        const fetchSettings = async () => {
+            setIsLoading(true);
+            try {
+                const templateRef = doc(db, 'templates', TEMPLATE_DOC_ID);
+                const docSnap = await getDoc(templateRef);
 
-    const handleSave = () => {
+                if (docSnap.exists()) {
+                    const settings = docSnap.data();
+                    setAccentColor(settings.accentColor || '#0A3BA3');
+                    setShowDueDate(settings.showDueDate !== false);
+                    setShowNotes(settings.showNotes !== false);
+                    setShowVat(settings.showVat !== false);
+                    setCompanyName(settings.companyName || 'YAMASHITA MOLD PHILIPPINES CORPORATION');
+                    setAddress(settings.address || 'Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines');
+                    setPhone(settings.phone || 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463');
+                    setEmail(settings.email || 'contact@yamashitamold.ph');
+                    setWebsite(settings.website || 'www.yamashitamold.ph');
+                    setLogo(settings.logo || 'https://placehold.co/100x50.png');
+                    setPreparedByLabel(settings.preparedByLabel || 'Prepared by:');
+                    setPreparedByName(settings.preparedByName || 'YMP / MCB / MJTS');
+                    setReceivedByLabel(settings.receivedByLabel || 'Received by:');
+                    setReceivedByName(settings.receivedByName || 'JUAN DELA CRUZ');
+                    setVerifiedByLabel(settings.verifiedByLabel || 'Verified by:');
+                    setVerifiedByName(settings.verifiedByName || 'HIROYOSHI KANAZAWA - VP');
+                }
+            } catch (error) {
+                console.error("Error fetching template settings:", error);
+                toast({
+                    title: "Error Loading Template",
+                    description: "Could not load saved template settings. Reverting to default.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchSettings();
+    }, [toast]);
+
+    const handleSave = async () => {
+        setIsSaving(true);
         const settings = {
             accentColor, showDueDate, showNotes, showVat, companyName, address, phone, email, website, logo,
             preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName,
         };
-        localStorage.setItem(TEMPLATE_STORAGE_KEY, JSON.stringify(settings));
-        toast({
-            title: 'Template Saved',
-            description: 'Your sales order template has been updated.',
-            variant: 'success',
-        });
+
+        try {
+            const templateRef = doc(db, 'templates', TEMPLATE_DOC_ID);
+            await setDoc(templateRef, settings, { merge: true });
+            toast({
+                title: 'Template Saved',
+                description: 'Your sales order template has been updated.',
+                variant: 'success',
+            });
+        } catch (error) {
+            console.error("Error saving template settings:", error);
+            toast({
+                title: "Error Saving Template",
+                description: "Could not save your template settings.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -83,14 +119,21 @@ export default function SalesOrderTemplate() {
         }
     };
 
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center h-96">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
 
     return (
         <div>
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">Sales Order Template Customizer</h1>
-                <Button onClick={handleSave}>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Template
+                <Button onClick={handleSave} disabled={isSaving}>
+                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    {isSaving ? 'Saving...' : 'Save Template'}
                 </Button>
             </div>
             <p className="text-muted-foreground mb-6">
