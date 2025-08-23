@@ -75,8 +75,8 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, on
                     <CardTitle>Purchase Orders</CardTitle>
                     <CardDescription>A list of all your purchase orders.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <Table>
+                <CardContent className="overflow-x-auto">
+                    <Table className="min-w-[800px]">
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Order ID</TableHead>

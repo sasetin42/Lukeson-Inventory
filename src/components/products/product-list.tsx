@@ -137,24 +137,24 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
         <Card>
         <CardHeader>
             <Tabs defaultValue="products">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <TabsList>
                 <TabsTrigger value="products">Products ({filteredProducts.length})</TabsTrigger>
                 <TabsTrigger value="orders">Orders</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
                 </TabsList>
-                <div className="flex items-center gap-4">
-                <div className="relative">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                <div className="relative flex-1 sm:flex-auto">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input 
-                        placeholder="Search products by name or SKU..." 
-                        className="pl-10 w-64"
+                        placeholder="Search products..." 
+                        className="pl-10 w-full"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
@@ -177,12 +177,12 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                 </div>
             </div>
             <TabsContent value="products" className="mt-6">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                     <div>
                         <CardTitle>Products</CardTitle>
                         <CardDescription>Your current inventory of products.</CardDescription>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                         <Button variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-50 hover:text-purple-700" onClick={onAddCategory}>
                             <LayoutGrid className="mr-2 h-4 w-4" />
                             Add Category
@@ -201,84 +201,86 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                         </Button>
                     </div>
                 </div>
-                <Table className="mt-4">
-                <TableHeader>
-                    <TableRow>
-                    <TableHead className="w-[80px]">Image</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Stock Status</TableHead>
-                    <TableHead>Date Created</TableHead>
-                    <TableHead>Date Modified</TableHead>
-                    <TableHead className="w-[50px]"></TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {filteredProducts.map((product) => {
-                      const createdAt = formatDateTime(product.createdAt);
-                      const modifiedAt = formatDateTime(product.modifiedAt);
-                      const stockStatus = getStockStatus(product.stock, product.reOrderLevel);
-                      return (
-                        <TableRow key={product.id}>
-                            <TableCell>
-                            <ProductImage 
-                                path={product.productImage}
-                                alt={product.name}
-                                width={48}
-                                height={48} 
-                                className="rounded-md"
-                                data-ai-hint="product image"
-                            />
-                            </TableCell>
-                            <TableCell>
-                                <div className="font-medium">{product.name}</div>
-                                <div className="text-xs text-muted-foreground">{product.productCode}</div>
-                                <div className="text-[12px] text-muted-foreground">SKU: {product.sku}</div>
-                            </TableCell>
-                            <TableCell>{product.category}</TableCell>
-                            <TableCell>₱{product.price.toFixed(2)}</TableCell>
-                            <TableCell>
-                                <div className="flex flex-col gap-1">
-                                    <span>{product.stock} units</span>
-                                    <Progress value={stockStatus.percentage} className="h-2 [&>*]:bg-none" style={{'--tw-bg-opacity': '1', backgroundColor: 'hsl(var(--muted))'}}>
-                                      <div className={`h-full rounded-full`} style={{ width: `${stockStatus.percentage}%`, backgroundColor: stockStatus.color }} />
-                                    </Progress>
-                                </div>
-                            </TableCell>
-                            <TableCell>
-                              <div>{createdAt.date}</div>
-                              <div className="text-muted-foreground" style={{fontSize: '12px'}}>{createdAt.time}</div>
-                            </TableCell>
-                            <TableCell>
-                              <div>{modifiedAt.date}</div>
-                              <div className="text-muted-foreground" style={{fontSize: '12px'}}>{modifiedAt.time}</div>
-                            </TableCell>
-                            <TableCell>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => setSelectedProduct(product)}>
-                                    <Eye className="mr-2 h-4 w-4 text-blue-500" />
-                                    View Details
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteAlert(product)}>
-                                    <Trash2 className="mr-2 h-4 w-4 text-red-500" />
-                                    Delete
-                                </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                            </TableCell>
+                <div className="overflow-x-auto">
+                    <Table className="mt-4 min-w-[800px]">
+                    <TableHeader>
+                        <TableRow>
+                        <TableHead className="w-[80px]">Image</TableHead>
+                        <TableHead>Product</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Stock Status</TableHead>
+                        <TableHead>Date Created</TableHead>
+                        <TableHead>Date Modified</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
-                      );
-                    })}
-                </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                        {filteredProducts.map((product) => {
+                        const createdAt = formatDateTime(product.createdAt);
+                        const modifiedAt = formatDateTime(product.modifiedAt);
+                        const stockStatus = getStockStatus(product.stock, product.reOrderLevel);
+                        return (
+                            <TableRow key={product.id}>
+                                <TableCell>
+                                <ProductImage 
+                                    path={product.productImage}
+                                    alt={product.name}
+                                    width={48}
+                                    height={48} 
+                                    className="rounded-md"
+                                    data-ai-hint="product image"
+                                />
+                                </TableCell>
+                                <TableCell>
+                                    <div className="font-medium">{product.name}</div>
+                                    <div className="text-xs text-muted-foreground">{product.productCode}</div>
+                                    <div className="text-[12px] text-muted-foreground">SKU: {product.sku}</div>
+                                </TableCell>
+                                <TableCell>{product.category}</TableCell>
+                                <TableCell>₱{product.price.toFixed(2)}</TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col gap-1 w-[100px]">
+                                        <span>{product.stock} units</span>
+                                        <Progress value={stockStatus.percentage} className="h-2 [&>*]:bg-none" style={{'--tw-bg-opacity': '1', backgroundColor: 'hsl(var(--muted))'}}>
+                                        <div className={`h-full rounded-full`} style={{ width: `${stockStatus.percentage}%`, backgroundColor: stockStatus.color }} />
+                                        </Progress>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                <div>{createdAt.date}</div>
+                                <div className="text-muted-foreground" style={{fontSize: '12px'}}>{createdAt.time}</div>
+                                </TableCell>
+                                <TableCell>
+                                <div>{modifiedAt.date}</div>
+                                <div className="text-muted-foreground" style={{fontSize: '12px'}}>{modifiedAt.time}</div>
+                                </TableCell>
+                                <TableCell>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => setSelectedProduct(product)}>
+                                        <Eye className="mr-2 h-4 w-4 text-blue-500" />
+                                        View Details
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteAlert(product)}>
+                                        <Trash2 className="mr-2 h-4 w-4 text-red-500" />
+                                        Delete
+                                    </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                </TableCell>
+                            </TableRow>
+                        );
+                        })}
+                    </TableBody>
+                    </Table>
+                </div>
                  {filteredProducts.length === 0 && (
                     <div className="text-center py-10 text-muted-foreground">
                         No products found.

@@ -82,7 +82,7 @@ function HeaderActions() {
     }
 
     return (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
             <Button 
                 variant={lowStockCount > 0 ? "destructive" : "outline"} 
                 size="sm" 
@@ -94,12 +94,13 @@ function HeaderActions() {
                     Stock Alert ({lowStockCount})
                 </Link>
             </Button>
-            <div className="text-sm text-muted-foreground font-medium hidden md:block">
+            <div className="text-sm text-muted-foreground font-medium hidden lg:block">
                 {dateTime ? format(dateTime, 'E, MMM d, yyyy, h:mm:ss a') : 'Loading...'}
             </div>
             <Button variant="outline" size="sm" onClick={handleOptimize}>
                 <Zap className="h-4 w-4 mr-2" />
-                Optimize System
+                <span className="hidden sm:inline">Optimize System</span>
+                <span className="sm:hidden">Optimize</span>
             </Button>
         </div>
     )
@@ -109,15 +110,15 @@ function HeaderActions() {
 export default function PageHeader({ title, description, icon, actions }: PageHeaderProps) {
   return (
     <div className="space-y-2 sticky top-0 bg-background z-10 -mx-4 px-4 md:-mx-6 md:px-6 border-b">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between py-2 gap-2">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 gap-4">
+        <div className="flex items-center gap-3 flex-1">
           {icon && <div className="[&>svg]:size-7 [&>svg]:transition-all [&>svg]:duration-300 header-[data-scrolled=true]_[&>svg]:size-6">{icon}</div>}
           <div className="grid gap-0">
             <h1 className="text-lg md:text-xl font-bold tracking-tight leading-tight transition-all duration-300 header-[data-scrolled=true]_&]:text-lg">{title}</h1>
             {description && <p className="text-muted-foreground text-xs md:text-[13px] leading-tight md:leading-[18px] transition-all duration-300 header-[data-scrolled=true]_&]:text-xs header-[data-scrolled=true]_&]:hidden">{description}</p>}
           </div>
         </div>
-        <div className="flex items-center justify-between md:justify-end gap-2 md:gap-4">
+        <div className="flex items-center justify-between sm:justify-end gap-2">
             <HeaderActions />
             {actions && <div className="transition-all duration-300 header-[data-scrolled=true]_&]:scale-90 header-[data-scrolled=true]_&]:-translate-y-px">{actions}</div>}
         </div>

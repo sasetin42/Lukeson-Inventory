@@ -93,8 +93,8 @@ export default function SalesOrderList({ salesOrders, quotations, onEdit, onDele
                     <CardTitle>Sales Orders</CardTitle>
                     <CardDescription>A list of all your sales orders. (e.g. SO-2025-001)</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <Table>
+                <CardContent className="overflow-x-auto">
+                    <Table className="min-w-[800px]">
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Sales Order ID</TableHead>
