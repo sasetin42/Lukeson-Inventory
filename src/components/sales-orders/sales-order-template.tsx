@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,8 +10,12 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, Save } from 'lucide-react';
 import Image from 'next/image';
+import { useToast } from '@/hooks/use-toast';
+
+const TEMPLATE_STORAGE_KEY = 'salesOrderTemplateSettings';
 
 export default function SalesOrderTemplate() {
+    const { toast } = useToast();
     const [accentColor, setAccentColor] = useState('#0A3BA3');
     const [showDueDate, setShowDueDate] = useState(true);
     const [showNotes, setShowNotes] = useState(true);
@@ -22,6 +26,7 @@ export default function SalesOrderTemplate() {
     const [phone, setPhone] = useState('Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463');
     const [email, setEmail] = useState('contact@yamashitamold.ph');
     const [website, setWebsite] = useState('www.yamashitamold.ph');
+    const [logo, setLogo] = useState('https://placehold.co/100x50.png');
 
     const [preparedByLabel, setPreparedByLabel] = useState('Prepared by:');
     const [preparedByName, setPreparedByName] = useState('YMP / MCB / MJTS');
@@ -30,12 +35,60 @@ export default function SalesOrderTemplate() {
     const [verifiedByLabel, setVerifiedByLabel] = useState('Verified by:');
     const [verifiedByName, setVerifiedByName] = useState('HIROYOSHI KANAZAWA - VP');
 
+    // Load settings from localStorage on mount
+    useEffect(() => {
+        const savedSettings = localStorage.getItem(TEMPLATE_STORAGE_KEY);
+        if (savedSettings) {
+            const settings = JSON.parse(savedSettings);
+            setAccentColor(settings.accentColor || '#0A3BA3');
+            setShowDueDate(settings.showDueDate !== false);
+            setShowNotes(settings.showNotes !== false);
+            setShowVat(settings.showVat !== false);
+            setCompanyName(settings.companyName || 'YAMASHITA MOLD PHILIPPINES CORPORATION');
+            setAddress(settings.address || 'Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines');
+            setPhone(settings.phone || 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463');
+            setEmail(settings.email || 'contact@yamashitamold.ph');
+            setWebsite(settings.website || 'www.yamashitamold.ph');
+            setLogo(settings.logo || 'https://placehold.co/100x50.png');
+            setPreparedByLabel(settings.preparedByLabel || 'Prepared by:');
+            setPreparedByName(settings.preparedByName || 'YMP / MCB / MJTS');
+            setReceivedByLabel(settings.receivedByLabel || 'Received by:');
+            setReceivedByName(settings.receivedByName || 'JUAN DELA CRUZ');
+            setVerifiedByLabel(settings.verifiedByLabel || 'Verified by:');
+            setVerifiedByName(settings.verifiedByName || 'HIROYOSHI KANAZAWA - VP');
+        }
+    }, []);
+
+    const handleSave = () => {
+        const settings = {
+            accentColor, showDueDate, showNotes, showVat, companyName, address, phone, email, website, logo,
+            preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName,
+        };
+        localStorage.setItem(TEMPLATE_STORAGE_KEY, JSON.stringify(settings));
+        toast({
+            title: 'Template Saved',
+            description: 'Your sales order template has been updated.',
+            variant: 'success',
+        });
+    };
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setLogo(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
 
     return (
         <div>
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-2xl font-bold">Sales Order Template Customizer</h1>
-                <Button>
+                <Button onClick={handleSave}>
                     <Save className="mr-2 h-4 w-4" />
                     Save Template
                 </Button>
@@ -100,7 +153,7 @@ export default function SalesOrderTemplate() {
                                         <div className="flex text-sm text-gray-600">
                                             <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-focus">
                                                 <span>Upload a file</span>
-                                                <input id="file-upload" name="file-upload" type="file" className="sr-only" />
+                                                <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleImageUpload}/>
                                             </label>
                                             <p className="pl-1">or drag and drop</p>
                                         </div>
@@ -169,7 +222,7 @@ export default function SalesOrderTemplate() {
                     <Card className="p-8">
                         <div className="flex justify-between items-start">
                              <div className="flex items-center gap-4">
-                                <Image src="https://placehold.co/100x50.png" width={100} height={50} alt="Company Logo" data-ai-hint="logo" />
+                                <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo"/>
                                 <div className="text-xs">
                                     <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
                                     <p>{address}</p>

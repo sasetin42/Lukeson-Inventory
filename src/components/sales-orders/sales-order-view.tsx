@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { SalesOrder, VatType } from '@/lib/types';
 import { format } from 'date-fns';
 import Image from 'next/image';
@@ -10,14 +10,36 @@ interface SalesOrderViewProps {
   salesOrder: SalesOrder;
 }
 
+const TEMPLATE_STORAGE_KEY = 'salesOrderTemplateSettings';
 const DEFAULT_TAX_RATE = 0.12;
 
 export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
-    const accentColor = '#0A3BAA'; // This would be loaded from settings in a real app
-    const companyName = 'YAMASHITA MOLD PHILIPPINES CORPORATION';
-    const address = 'Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines';
-    const phone = 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463';
-    const website = 'www.yamashitamold.ph';
+    const [templateSettings, setTemplateSettings] = useState({
+        accentColor: '#0A3BAA',
+        companyName: 'YAMASHITA MOLD PHILIPPINES CORPORATION',
+        address: 'Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines',
+        phone: 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463',
+        website: 'www.yamashitamold.ph',
+        logo: 'https://placehold.co/100x50.png',
+        showDueDate: true,
+        showNotes: true,
+        showVat: true,
+        preparedByLabel: 'Prepared by:',
+        preparedByName: 'YMP / MCB / MJTS',
+        receivedByLabel: 'Received by:',
+        receivedByName: 'JUAN DELA CRUZ',
+        verifiedByLabel: 'Verified by:',
+        verifiedByName: 'HIROYOSHI KANAZAWA - VP',
+    });
+
+    useEffect(() => {
+        const savedSettings = localStorage.getItem(TEMPLATE_STORAGE_KEY);
+        if (savedSettings) {
+            setTemplateSettings(JSON.parse(savedSettings));
+        }
+    }, []);
+
+    const { accentColor, companyName, address, phone, website, logo, showNotes, showVat, preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName } = templateSettings;
 
     const totals = useMemo(() => {
         const totalSales = salesOrder.lines.reduce((acc, l) => acc + l.total, 0);
@@ -73,7 +95,7 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
         <div className="p-8 bg-white text-black">
             <div className="flex justify-between items-start">
                  <div className="flex items-center gap-4">
-                    <Image src="https://placehold.co/100x50.png" width={100} height={50} alt="Company Logo" data-ai-hint="logo"/>
+                    <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo"/>
                     <div className="text-xs">
                         <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
                         <p>{address}</p>
@@ -117,13 +139,17 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
             
             <div className="flex justify-end mt-4">
                 <div className="w-1/2 text-sm">
-                    <div className="flex justify-between"><span>Vatable Sales:</span> <span>₱{totals.vatableSales.toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span>VAT-Exempt Sales:</span> <span>₱{totals.vatExemptSales.toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span>Zero-Rated Sales:</span> <span>₱{totals.zeroRatedSales.toFixed(2)}</span></div>
+                    {showVat && (
+                        <>
+                            <div className="flex justify-between"><span>Vatable Sales:</span> <span>₱{totals.vatableSales.toFixed(2)}</span></div>
+                            <div className="flex justify-between"><span>VAT-Exempt Sales:</span> <span>₱{totals.vatExemptSales.toFixed(2)}</span></div>
+                            <div className="flex justify-between"><span>Zero-Rated Sales:</span> <span>₱{totals.zeroRatedSales.toFixed(2)}</span></div>
+                        </>
+                    )}
                     <div className="flex justify-between font-bold"><span>Total Sales:</span> <span>₱{totals.totalSales.toFixed(2)}</span></div>
                     <div className="flex justify-between"><span>Discount:</span> <span>- ₱{totals.discountAmount.toFixed(2)}</span></div>
                     <div className="flex justify-between"><span>Subtotal:</span> <span>₱{(totals.totalSales - totals.discountAmount).toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span>VAT (12%):</span> <span>₱{totals.vatAmount.toFixed(2)}</span></div>
+                    {showVat && <div className="flex justify-between"><span>VAT (12%):</span> <span>₱{totals.vatAmount.toFixed(2)}</span></div>}
                     <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
                         <span>Total:</span>
                         <span>₱{salesOrder.totalAmount.toFixed(2)}</span>
@@ -131,7 +157,7 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
                 </div>
             </div>
 
-             {salesOrder.notes && (
+             {showNotes && salesOrder.notes && (
                 <div className="mt-8">
                     <h4 className="font-bold">Notes:</h4>
                     <p className="text-sm text-muted-foreground">{salesOrder.notes}</p>
@@ -140,16 +166,16 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
 
             <div className="flex justify-between mt-24 text-center text-xs">
                 <div>
-                    <p className="font-bold">YMP / MCB / MJTS</p>
-                    <p className="border-t border-black pt-1 mt-1">Prepared by:</p>
+                    <p className="font-bold">{preparedByName}</p>
+                    <p className="border-t border-black pt-1 mt-1">{preparedByLabel}</p>
                 </div>
                  <div>
-                    <p className="font-bold">JUAN DELA CRUZ</p>
-                    <p className="border-t border-black pt-1 mt-1">Received by:</p>
+                    <p className="font-bold">{receivedByName}</p>
+                    <p className="border-t border-black pt-1 mt-1">{receivedByLabel}</p>
                 </div>
                  <div>
-                    <p className="font-bold">HIROYOSHI KANAZAWA - VP</p>
-                    <p className="border-t border-black pt-1 mt-1">Verified by:</p>
+                    <p className="font-bold">{verifiedByName}</p>
+                    <p className="border-t border-black pt-1 mt-1">{verifiedByLabel}</p>
                 </div>
             </div>
         </div>
