@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { SalesOrder } from '@/lib/types';
 import SalesOrderForm from './sales-order-form';
+import { useState } from "react";
 
 interface SalesOrderFormModalProps {
   isOpen: boolean;
@@ -24,17 +25,23 @@ export default function SalesOrderFormModal({
     salesOrder, 
     onSave,
 }: SalesOrderFormModalProps) {
+    const [salesOrderId, setSalesOrderId] = useState<string | null>(null);
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-            <DialogTitle>{salesOrder ? 'Edit Sales Order' : 'Add New Sales Order'}</DialogTitle>
+            <DialogTitle>{salesOrder ? 'Edit Sales Order' : 'Add New Sales Order'} {salesOrderId && <span className="text-primary font-mono">{salesOrderId}</span>}</DialogTitle>
             <DialogDescription>
                 {salesOrder ? 'Update the details of this sales order.' : 'Fill in the details below to add a new sales order.'}
             </DialogDescription>
             </DialogHeader>
-            <SalesOrderForm salesOrder={salesOrder} onSuccess={onSave} onCancel={onClose}/>
+            <SalesOrderForm 
+                salesOrder={salesOrder} 
+                onSuccess={onSave} 
+                onCancel={onClose}
+                onIdGenerated={setSalesOrderId}
+            />
         </DialogContent>
         </Dialog>
     );

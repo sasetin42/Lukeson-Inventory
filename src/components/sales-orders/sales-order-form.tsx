@@ -20,12 +20,13 @@ interface SalesOrderFormProps {
   salesOrder: SalesOrder | null;
   onSuccess: (salesOrderData: Omit<SalesOrder, 'id'> & {id?: string}) => void;
   onCancel: () => void;
+  onIdGenerated: (id: string) => void;
 }
 
 const vatTypes: VatType[] = ['VATable', 'VAT-Exempt', 'Zero-Rated'];
 const DEFAULT_TAX_RATE = 0.12;
 
-export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: SalesOrderFormProps) {
+export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGenerated }: SalesOrderFormProps) {
     const { toast } = useToast();
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
@@ -78,12 +79,15 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             const snapshot = await getDocs(soRef);
             const soCount = snapshot.size;
             const year = new Date().getFullYear();
-            setSalesOrderId(`SO-${year}-${(soCount + 1).toString().padStart(4, '0')}`);
+            const newId = `SO-${year}-${(soCount + 1).toString().padStart(4, '0')}`;
+            setSalesOrderId(newId);
+            onIdGenerated(newId);
         };
 
         if (salesOrder) {
              if (salesOrder.id) { 
                 setSalesOrderId(salesOrder.id);
+                onIdGenerated(salesOrder.id);
                 setStatus(salesOrder.status || 'Draft');
                 setIsStatusDisabled(false);
             } else { 
@@ -110,7 +114,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
             setDiscountValue(0);
             setQuotationId(undefined);
         }
-    }, [salesOrder]);
+    }, [salesOrder, onIdGenerated]);
 
     const handleCustomerChange = (selectedCustomerId: string) => {
         setCustomerId(selectedCustomerId);
@@ -255,11 +259,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
 
     return (
         <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Hash className="h-4 w-4" /> Sales Order ID</Label>
-                    <Input value={salesOrderId} disabled />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><User className="h-4 w-4" /> Customer</Label>
                     <Select onValueChange={handleCustomerChange} value={customerId}>
