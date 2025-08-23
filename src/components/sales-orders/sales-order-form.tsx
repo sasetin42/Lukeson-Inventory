@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SalesOrder, DocumentLine, Customer, Product, Quotation, VatType } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Loader2, User, Calendar, Hash, FileText, PlusCircle, Trash2 } from 'lucide-react';
+import { Loader2, User, Calendar, Hash, FileText, PlusCircle, Trash2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -239,6 +239,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
                 title: "Missing Field",
                 description: "Please select a delivery date.",
                 variant: "destructive",
+                icon: <AlertCircle className="h-5 w-5" />
             });
             return;
         }
