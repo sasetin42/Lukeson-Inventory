@@ -48,9 +48,9 @@ export default function SalesOrderViewModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
-            <DialogTitle>Sales Order</DialogTitle>
+            <DialogTitle>Sales Order: <span className="font-semibold text-primary">{salesOrder.id}</span></DialogTitle>
             <DialogDescription>
-                Viewing sales order <span className="font-semibold text-primary">{salesOrder.id}</span>
+                Review the details of the sales order below.
             </DialogDescription>
         </DialogHeader>
         <div className="max-h-[70vh] overflow-y-auto p-1">
