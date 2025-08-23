@@ -9,12 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -53,7 +47,7 @@ export default function SalesOrderList({ salesOrders, onEdit, onDelete, onView }
         }
     };
     
-    const getStatusVariant = (status: SalesOrder['status']) => {
+    const getStatusVariant = (status: SalesOrder['status']): "default" | "secondary" | "destructive" | "outline" | "success" => {
         switch (status) {
             case 'Fulfilled':
                 return 'default';

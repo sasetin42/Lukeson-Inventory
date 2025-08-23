@@ -47,10 +47,10 @@ export default function QuotationList({ quotations, onView, onEdit, onDelete, on
         }
     };
     
-    const getStatusVariant = (status: Quotation['status']) => {
+    const getStatusVariant = (status: Quotation['status']): "default" | "secondary" | "destructive" | "outline" | "success" => {
         switch (status) {
             case 'Accepted':
-                return 'default';
+                return 'success';
             case 'Sent':
                 return 'secondary';
             case 'Draft':
