@@ -33,13 +33,30 @@ export default function SalesOrderViewModal({
   const handlePrint = () => {
     const printContent = printableRef.current;
     if (printContent) {
-      const originalContents = document.body.innerHTML;
-      const printContents = printContent.innerHTML;
-      document.body.innerHTML = printContents;
-      window.print();
-      document.body.innerHTML = originalContents;
-      // We need to re-attach the event listeners after restoring the body
-      window.location.reload();
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write('<html><head><title>Print Sales Order</title>');
+        const styles = Array.from(document.styleSheets)
+          .map(styleSheet => {
+            try {
+              return Array.from(styleSheet.cssRules).map(rule => rule.cssText).join('');
+            } catch (e) {
+              console.warn('Could not read stylesheet rules', e);
+              return '';
+            }
+          }).join('\n');
+        printWindow.document.write(`<style>${styles}</style>`);
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(printContent.innerHTML);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.focus();
+        // Use a small timeout to ensure content is loaded before printing
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 250);
+      }
     }
   };
 
