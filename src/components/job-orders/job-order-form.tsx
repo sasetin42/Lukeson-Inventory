@@ -90,12 +90,6 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             setLines(jobOrder.lines || []);
             setNotes(jobOrder.notes || '');
 
-            if (jobOrder.salesOrderId && salesOrders.length > 0) {
-                const so = salesOrders.find(s => s.id === jobOrder.salesOrderId);
-                if (so) {
-                    setMaxCompletionDate(safeToDate(so.deliveryDate));
-                }
-            }
         } else {
             generateJobOrderId();
             setLines([]);
@@ -107,8 +101,8 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             setNotes('');
             setMaxCompletionDate(undefined);
         }
-    }, [jobOrder, salesOrders]);
-
+    }, [jobOrder]);
+    
     useEffect(() => {
         const fetchSalesOrders = async () => {
             if (!customerId) {
@@ -120,13 +114,22 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                 const soSnapshot = await getDocs(soQuery);
                 const loadedSOs = soSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
                 setSalesOrders(loadedSOs);
+
+                // If editing a job order, ensure its SO is loaded and max date is set.
+                if (jobOrder?.salesOrderId) {
+                     const so = loadedSOs.find(s => s.id === jobOrder.salesOrderId);
+                    if (so) {
+                        setMaxCompletionDate(safeToDate(so.deliveryDate));
+                    }
+                }
             } catch (error) {
                  console.error("Error fetching sales orders:", error);
                  toast({ title: "Error", description: "Failed to load sales orders for customer.", variant: "destructive"});
             }
         }
         fetchSalesOrders();
-    }, [customerId, toast]);
+    }, [customerId, toast, jobOrder?.salesOrderId]);
+
 
     const handleSalesOrderChange = (selectedSOId: string) => {
         setSalesOrderId(selectedSOId);
@@ -243,7 +246,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="notes">Notes (from Sales Order)</Label>
+                <Label htmlFor="notes">Sales Order Notes</Label>
                 <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notes from the linked sales order will appear here..." readOnly/>
             </div>
 
