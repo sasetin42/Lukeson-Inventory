@@ -97,14 +97,14 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
                  <div className="flex items-center gap-4">
                     <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo"/>
                     <div className="text-xs">
-                        <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
+                        <p className="font-bold" style={{ color: accentColor, fontSize: '25px' }}>{companyName}</p>
                         <p>{address}</p>
                         <p>{phone}</p>
                         <p>{website}</p>
                     </div>
                 </div>
                 <div className="text-right">
-                    <h2 className="text-3xl font-bold" style={{ color: accentColor }}>SALES ORDER</h2>
+                    <h2 className="font-bold" style={{ color: accentColor, fontSize: '25px' }}>SALES ORDER</h2>
                     <p className="text-sm"><strong>Invoice ID:</strong> {salesOrder.id}</p>
                     <p className="text-sm"><strong>Date:</strong> {formatDate(salesOrder.orderDate)}</p>
                 </div>
@@ -113,7 +113,10 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
             <div className="mt-8">
                 <p className="font-bold">BILL TO:</p>
                 <p>{salesOrder.customerName}</p>
-                {/* Add customer address if available in the future */}
+                {salesOrder.customerTin && <p>TIN: {salesOrder.customerTin}</p>}
+                {salesOrder.customerEmail && <p>Email: {salesOrder.customerEmail}</p>}
+                {salesOrder.customerPhone && <p>Phone: {salesOrder.customerPhone}</p>}
+                {salesOrder.customerShippingAddress && <p>Shipping Address: {salesOrder.customerShippingAddress}</p>}
             </div>
             
             <table className="w-full mt-4 border-collapse text-sm">

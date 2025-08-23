@@ -117,6 +117,10 @@ export type SalesOrder = {
     id: string; // SO-YYYY-XXXX
     customerId: string;
     customerName?: string;
+    customerTin?: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    customerShippingAddress?: string;
     orderDate: Date | FieldValue | string;
     deliveryDate?: Date | FieldValue | string;
     status: 'Draft' | 'Confirmed' | 'Fulfilled' | 'Invoiced' | 'Cancelled';
