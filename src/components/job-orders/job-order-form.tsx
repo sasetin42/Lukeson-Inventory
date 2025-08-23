@@ -96,7 +96,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
         } else {
             generateJobOrderId();
             setLines([]);
-            setStatus('Draft');
+            setStatus('Scheduled');
             setCustomerId('');
             setSalesOrderId(undefined);
             setJobOrderDate(new Date());
@@ -166,6 +166,10 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
         setIsSaving(true);
         try {
             const customer = customers.find(c => c.id === customerId);
+            
+            // If new, set to In Progress, otherwise keep existing status
+            const finalStatus = !jobOrder?.id ? 'In Progress' : status;
+
             const jobOrderData = {
                 id: jobOrder?.id || jobOrderId,
                 customerId,
@@ -173,7 +177,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                 salesOrderId,
                 jobOrderDate,
                 expectedCompletionDate,
-                status,
+                status: finalStatus,
                 lines,
                 notes,
                 totalAmount: calculateTotalAmount(),
