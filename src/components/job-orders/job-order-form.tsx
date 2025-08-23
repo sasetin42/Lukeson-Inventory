@@ -142,48 +142,6 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
         }
     };
     
-    const handleAddLine = () => {
-        const newLine: DocumentLine = {
-            id: `line-${Date.now()}`,
-            itemId: '',
-            description: '',
-            quantity: 1,
-            uom: '',
-            unitPrice: 0,
-            vatType: 'VATable',
-            taxRate: DEFAULT_TAX_RATE,
-            total: 0,
-        };
-        setLines([...lines, newLine]);
-    };
-
-    const handleRemoveLine = (index: number) => {
-        const newLines = [...lines];
-        newLines.splice(index, 1);
-        setLines(newLines);
-    };
-
-    const handleLineChange = (index: number, field: keyof DocumentLine, value: any) => {
-        const newLines = [...lines];
-        (newLines[index] as any)[field] = value;
-
-        if (field === 'itemId') {
-            const product = products.find(p => p.id === value);
-            if (product) {
-                newLines[index].description = product.name;
-                newLines[index].unitPrice = product.price;
-                newLines[index].uom = product.uom;
-            }
-        }
-        
-        // Recalculate total
-        const line = newLines[index];
-        const subtotal = line.quantity * line.unitPrice;
-        line.total = subtotal;
-
-        setLines(newLines);
-    };
-
     const calculateTotalAmount = () => {
         return lines.reduce((acc, line) => acc + line.total, 0);
     };
@@ -271,10 +229,10 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[40%]">Product/Service</TableHead>
-                                <TableHead className="text-right">Qty</TableHead>
-                                <TableHead className="text-right">Unit Price</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
+                                <TableHead className="w-[40%]" style={{ backgroundColor: '#588D00', color: '#FFFFFF' }}>Product/Service</TableHead>
+                                <TableHead className="text-right" style={{ backgroundColor: '#588D00', color: '#FFFFFF' }}>Qty</TableHead>
+                                <TableHead className="text-right" style={{ backgroundColor: '#588D00', color: '#FFFFFF' }}>Unit Price</TableHead>
+                                <TableHead className="text-right" style={{ backgroundColor: '#588D00', color: '#FFFFFF' }}>Total</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
