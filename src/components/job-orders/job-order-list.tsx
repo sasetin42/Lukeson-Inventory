@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react';
-import { JobOrder } from '@/lib/types';
+import { JobOrder, SalesOrder } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -23,12 +23,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 
 interface JobOrderListProps {
     jobOrders: JobOrder[];
+    salesOrders: SalesOrder[];
     onEdit: (jobOrder: JobOrder) => void;
     onDelete: (jobOrderId: string) => void;
     onView: (jobOrder: JobOrder) => void;
 }
 
-export default function JobOrderList({ jobOrders, onEdit, onDelete, onView }: JobOrderListProps) {
+export default function JobOrderList({ jobOrders, salesOrders, onEdit, onDelete, onView }: JobOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [jobOrderToDelete, setJobOrderToDelete] = useState<JobOrder | null>(null);
 
@@ -79,20 +80,22 @@ export default function JobOrderList({ jobOrders, onEdit, onDelete, onView }: Jo
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Job Order Date</TableHead>
                                 <TableHead>Completion Date</TableHead>
-                                <TableHead>Amount</TableHead>
+                                <TableHead>Sales Orders Delivery Date</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="w-[100px] text-center">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             <TooltipProvider>
-                                {jobOrders.map((jobOrder) => (
+                                {jobOrders.map((jobOrder) => {
+                                    const salesOrder = salesOrders.find(so => so.id === jobOrder.salesOrderId);
+                                    return (
                                     <TableRow key={jobOrder.id}>
                                         <TableCell className="font-medium">{jobOrder.id}</TableCell>
                                         <TableCell>{jobOrder.customerName}</TableCell>
                                         <TableCell>{formatDate(jobOrder.jobOrderDate)}</TableCell>
                                         <TableCell>{formatDate(jobOrder.expectedCompletionDate)}</TableCell>
-                                        <TableCell>₱{jobOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                                        <TableCell>{salesOrder ? formatDate(salesOrder.deliveryDate) : 'N/A'}</TableCell>
                                         <TableCell>
                                             <Badge variant={getStatusVariant(jobOrder.status)}>{jobOrder.status}</Badge>
                                         </TableCell>
@@ -107,11 +110,11 @@ export default function JobOrderList({ jobOrders, onEdit, onDelete, onView }: Jo
                                             </Tooltip>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Button variant="ghost" size="icon" onClick={() => onView(jobOrder)}>
+                                                    <Button variant="ghost" size="icon" onClick={() => onEdit(jobOrder)}>
                                                         <Edit className="h-4 w-4 text-green-500" />
                                                     </Button>
                                                 </TooltipTrigger>
-                                                <TooltipContent>View Job Order</TooltipContent>
+                                                <TooltipContent>Edit Job Order</TooltipContent>
                                             </Tooltip>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
@@ -123,7 +126,7 @@ export default function JobOrderList({ jobOrders, onEdit, onDelete, onView }: Jo
                                             </Tooltip>
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                )})}
                             </TooltipProvider>
                         </TableBody>
                     </Table>

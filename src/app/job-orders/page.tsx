@@ -19,6 +19,7 @@ import JobOrderTemplate from '@/components/job-orders/job-order-template';
 
 function JobOrdersContent() {
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
+  const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingJobOrder, setEditingJobOrder] = useState<JobOrder | null>(null);
   const [viewingJobOrder, setViewingJobOrder] = useState<JobOrder | null>(null);
@@ -52,9 +53,19 @@ function JobOrdersContent() {
   const fetchJobOrders = async () => {
     try {
       const joRef = collection(db, 'jobOrders');
-      const snapshot = await getDocs(joRef);
-      const loadedJOs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
+      const soRef = collection(db, 'salesOrders');
+
+      const [joSnapshot, soSnapshot] = await Promise.all([
+          getDocs(joRef),
+          getDocs(soRef)
+      ]);
+      
+      const loadedJOs = joSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
       setJobOrders(loadedJOs);
+      
+      const loadedSOs = soSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
+      setSalesOrders(loadedSOs);
+
     } catch (error) {
       console.error("Error fetching job orders: ", error);
       toast({
@@ -163,6 +174,7 @@ function JobOrdersContent() {
           <div className="mt-4">
             <JobOrderList 
               jobOrders={jobOrders} 
+              salesOrders={salesOrders}
               onEdit={handleOpenFormModal}
               onDelete={handleDeleteJobOrder}
               onView={handleOpenViewModal}

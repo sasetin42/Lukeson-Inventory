@@ -125,6 +125,15 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                      const so = loadedSOs.find(s => s.id === jobOrder.salesOrderId) || salesOrders.find(s => s.id === jobOrder.salesOrderId);
                     if (so) {
                         setSalesOrderDeliveryDate(safeToDate(so.deliveryDate));
+                        setSalesOrderNotes(so.notes || '');
+                        if (so.quotationId) {
+                            const qtnRef = doc(db, "quotations", so.quotationId);
+                            const qtnSnap = await getDoc(qtnRef);
+                            if (qtnSnap.exists()) {
+                                const qtnData = qtnSnap.data() as Quotation;
+                                setQuotationNotes(qtnData.notes || '');
+                            }
+                        }
                     }
                 }
             } catch (error) {
