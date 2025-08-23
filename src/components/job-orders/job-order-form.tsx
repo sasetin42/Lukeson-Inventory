@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -48,6 +49,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
     const [status, setStatus] = useState<JobOrder['status']>('Draft');
     const [lines, setLines] = useState<DocumentLine[]>([]);
     const [notes, setNotes] = useState('');
+    const [maxCompletionDate, setMaxCompletionDate] = useState<Date | undefined>();
     
     useEffect(() => {
         const fetchData = async () => {
@@ -88,6 +90,16 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             setStatus(jobOrder.status || 'Draft');
             setLines(jobOrder.lines || []);
             setNotes(jobOrder.notes || '');
+
+            if (jobOrder.salesOrderId) {
+                 const fetchSalesOrderDeliveryDate = async () => {
+                    const so = salesOrders.find(s => s.id === jobOrder.salesOrderId)
+                    if (so) {
+                        setMaxCompletionDate(safeToDate(so.deliveryDate));
+                    }
+                }
+                fetchSalesOrderDeliveryDate();
+            }
         } else {
             generateJobOrderId();
             setLines([]);
@@ -96,8 +108,9 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             setSalesOrderId(undefined);
             setJobOrderDate(new Date());
             setNotes('');
+            setMaxCompletionDate(undefined);
         }
-    }, [jobOrder]);
+    }, [jobOrder, salesOrders]);
 
     useEffect(() => {
         const fetchSalesOrders = async () => {
@@ -124,6 +137,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
         if (so) {
             setLines(so.lines);
             setNotes(so.notes || '');
+            setMaxCompletionDate(safeToDate(so.deliveryDate));
             toast({ title: 'Sales Order Loaded', description: `Details from ${so.id} have been loaded.`})
         }
     };
@@ -233,7 +247,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                 </div>
                  <div className="space-y-2">
                     <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Expected Completion</Label>
-                    <DatePicker date={expectedCompletionDate} setDate={setExpectedCompletionDate} />
+                    <DatePicker date={expectedCompletionDate} setDate={setExpectedCompletionDate} toDate={maxCompletionDate} />
                 </div>
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Status</Label>
@@ -268,7 +282,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
                             {lines.map((line, index) => (
                                 <TableRow key={line.id}>
                                     <TableCell>
-                                        <Input value={line.description} onChange={e => handleLineChange(index, 'description', e.target.value)} />
+                                        {line.description}
                                     </TableCell>
                                     <TableCell>
                                         <Input type="number" value={line.quantity} onChange={e => handleLineChange(index, 'quantity', Number(e.target.value))} className="w-20" />
