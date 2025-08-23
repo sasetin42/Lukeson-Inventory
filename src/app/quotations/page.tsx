@@ -65,14 +65,14 @@ export default function QuotationsPage() {
 
   const handleSaveQuotation = async (quotationData: Omit<Quotation, 'id'> & { id?: string }) => {
     try {
-      const { id, ...dataToSave } = quotationData;
-      const docId = id || `QTN-${new Date().getFullYear()}-${(quotations.length + 1).toString().padStart(4, '0')}`;
-      const docRef = doc(db, "quotations", docId);
-      
       if (editingQuotation) { // We are editing
+        const { id, ...dataToSave } = quotationData;
+        const docRef = doc(db, "quotations", editingQuotation.id);
         await setDoc(docRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
         toast({ title: "Success", description: "Quotation updated successfully.", variant: "success" });
       } else { // We are creating
+        const { id, ...dataToSave } = quotationData;
+        const docRef = doc(db, "quotations", id as string);
         await setDoc(docRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
         toast({ title: "Success", description: "Quotation added successfully.", variant: "success" });
       }
