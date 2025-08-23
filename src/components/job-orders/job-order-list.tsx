@@ -107,11 +107,11 @@ export default function JobOrderList({ jobOrders, onEdit, onDelete, onView }: Jo
                                             </Tooltip>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Button variant="ghost" size="icon" onClick={() => onEdit(jobOrder)}>
+                                                    <Button variant="ghost" size="icon" onClick={() => onView(jobOrder)}>
                                                         <Edit className="h-4 w-4 text-green-500" />
                                                     </Button>
                                                 </TooltipTrigger>
-                                                <TooltipContent>Edit Job Order</TooltipContent>
+                                                <TooltipContent>View Job Order</TooltipContent>
                                             </Tooltip>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
