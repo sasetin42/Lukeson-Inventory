@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Quotation, DocumentLine, Customer, Product } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
-import { Loader2, User, Calendar, Hash, FileText, PlusCircle, Trash2 } from 'lucide-react';
+import { Loader2, User, Calendar, Hash, FileText, PlusCircle, Trash2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
@@ -96,6 +96,7 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
             unitPrice: 0,
             taxRate: 0.12, // Default tax
             total: 0,
+            vatType: 'VATable'
         };
         setLines([...lines, newLine]);
     };
@@ -134,6 +135,16 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
     };
 
     const handleSubmit = async () => {
+        if (!customerId) {
+            toast({
+                title: "Missing Field",
+                description: "Please select a customer.",
+                variant: "destructive",
+                icon: <AlertCircle className="h-5 w-5" />
+            });
+            return;
+        }
+
         setIsSaving(true);
         try {
             const customer = customers.find(c => c.id === customerId);
@@ -165,7 +176,7 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
                     <Input value={quotationId} disabled />
                 </div>
                 <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><User className="h-4 w-4" /> Customer</Label>
+                    <Label className="flex items-center gap-2"><User className="h-4 w-4" /> Customer <span className="text-red-500">*</span></Label>
                     <Select onValueChange={setCustomerId} value={customerId}>
                         <SelectTrigger><SelectValue placeholder="Select a customer" /></SelectTrigger>
                         <SelectContent>
