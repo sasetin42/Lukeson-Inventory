@@ -118,7 +118,7 @@ export default function QuotationList({ quotations, onView, onEdit, onDelete, on
                                                     <CheckCircle className="h-4 w-4 text-green-500" />
                                                 </Button>
                                             </TooltipTrigger>
-                                            <TooltipContent>Approve</TooltipContent>
+                                            <TooltipContent>Confirm</TooltipContent>
                                         </Tooltip>
                                         <Tooltip>
                                             <TooltipTrigger asChild>

@@ -37,7 +37,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
     const [salesOrderId, setSalesOrderId] = useState('');
     const [customerId, setCustomerId] = useState('');
     const [orderDate, setOrderDate] = useState<Date | undefined>(new Date());
-    const [status, setStatus] = useState<SalesOrder['status'] | 'Approved'>('Draft');
+    const [status, setStatus] = useState<SalesOrder['status'] | 'Confirmed'>('Draft');
     const [lines, setLines] = useState<DocumentLine[]>([]);
     const [isStatusDisabled, setIsStatusDisabled] = useState(true);
     const [notes, setNotes] = useState('');
@@ -88,7 +88,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                 setIsStatusDisabled(false);
             } else { 
                 generateSalesOrderId();
-                setStatus('Approved');
+                setStatus('Confirmed');
                 setIsStatusDisabled(false);
             }
             setCustomerId(salesOrder.customerId || '');
@@ -118,7 +118,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
 
         if (approvedQuotation) {
             setLines(approvedQuotation.lines);
-            setStatus('Approved');
+            setStatus('Confirmed');
             setIsStatusDisabled(false);
             setNotes(approvedQuotation.notes || '');
             setQuotationId(approvedQuotation.id);
@@ -230,14 +230,13 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
         setIsSaving(true);
         try {
             const customer = customers.find(c => c.id === customerId);
-            const finalStatus = status === 'Approved' ? 'Confirmed' : status;
             
             const salesOrderData = {
                 id: salesOrder?.id || salesOrderId,
                 customerId,
                 customerName: customer?.name || 'N/A',
                 orderDate,
-                status: finalStatus as SalesOrder['status'],
+                status: status as SalesOrder['status'],
                 lines,
                 notes,
                 totalAmount: totals.totalAmount,
@@ -275,12 +274,11 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel }: Sale
                     <DatePicker date={orderDate} setDate={setOrderDate} />
                 </div>
                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Quotations Status</Label>
-                    <Select value={status} onValueChange={(value) => setStatus(value as SalesOrder['status'] | 'Approved')} disabled={isStatusDisabled}>
+                    <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Status</Label>
+                    <Select value={status} onValueChange={(value) => setStatus(value as SalesOrder['status'])}>
                         <SelectTrigger><SelectValue/></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Draft">Draft</SelectItem>
-                            <SelectItem value="Approved">Approved</SelectItem>
                             <SelectItem value="Confirmed">Confirmed</SelectItem>
                             <SelectItem value="Fulfilled">Fulfilled</SelectItem>
                             <SelectItem value="Invoiced">Invoiced</SelectItem>
