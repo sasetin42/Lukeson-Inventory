@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { JobOrder } from '@/lib/types';
+import { JobOrder, Quotation, SalesOrder } from '@/lib/types';
 import { Button } from '../ui/button';
 import JobOrderView from './job-order-view';
 import { Printer, Edit, FileText } from 'lucide-react';
@@ -19,6 +19,8 @@ import { useRouter } from 'next/navigation';
 
 interface JobOrderViewModalProps {
   jobOrder: JobOrder | null;
+  salesOrder?: SalesOrder;
+  quotation?: Quotation;
   isOpen: boolean;
   onClose: () => void;
   onEdit: (jobOrder: JobOrder) => void;
@@ -26,6 +28,8 @@ interface JobOrderViewModalProps {
 
 export default function JobOrderViewModal({
   jobOrder,
+  salesOrder,
+  quotation,
   isOpen,
   onClose,
   onEdit,
@@ -105,7 +109,7 @@ export default function JobOrderViewModal({
           </div>
         </DialogHeader>
         <div className="max-h-[70vh] overflow-y-auto p-1">
-          <JobOrderView jobOrder={jobOrder} />
+          <JobOrderView jobOrder={jobOrder} salesOrder={salesOrder} quotation={quotation} />
         </div>
         <DialogFooter className="justify-between">
             <div>

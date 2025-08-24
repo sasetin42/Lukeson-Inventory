@@ -7,7 +7,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, DollarSign, CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
 import JobOrderList from "@/components/job-orders/job-order-list";
-import { JobOrder, SalesOrder } from '@/lib/types';
+import { JobOrder, Quotation, SalesOrder } from '@/lib/types';
 import JobOrderFormModal from '@/components/job-orders/job-order-form-modal';
 import JobOrderViewModal from '@/components/job-orders/job-order-view-modal';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +20,7 @@ import JobOrderTemplate from '@/components/job-orders/job-order-template';
 function JobOrdersContent() {
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
+  const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingJobOrder, setEditingJobOrder] = useState<JobOrder | null>(null);
   const [viewingJobOrder, setViewingJobOrder] = useState<JobOrder | null>(null);
@@ -54,10 +55,12 @@ function JobOrdersContent() {
     try {
       const joRef = collection(db, 'jobOrders');
       const soRef = collection(db, 'salesOrders');
+      const qtnRef = collection(db, 'quotations');
 
-      const [joSnapshot, soSnapshot] = await Promise.all([
+      const [joSnapshot, soSnapshot, qtnSnapshot] = await Promise.all([
           getDocs(joRef),
-          getDocs(soRef)
+          getDocs(soRef),
+          getDocs(qtnRef)
       ]);
       
       const loadedJOs = joSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
@@ -65,6 +68,9 @@ function JobOrdersContent() {
       
       const loadedSOs = soSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
       setSalesOrders(loadedSOs);
+      
+      const loadedQtns = qtnSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
+      setQuotations(loadedQtns);
 
     } catch (error) {
       console.error("Error fetching job orders: ", error);
@@ -101,16 +107,17 @@ function JobOrdersContent() {
 
   const handleSaveJobOrder = async (jobOrderData: Omit<JobOrder, 'id'> & {id?: string}) => {
       try {
+          const { id, ...dataToSave } = jobOrderData;
+          const finalStatus = !jobOrderData.id ? 'In Progress' : jobOrderData.status;
+
           if (jobOrderData.id && editingJobOrder) { // check for editingJobOrder to be sure
-              const { id, ...dataToSave } = jobOrderData;
-              const joRef = doc(db, "jobOrders", id);
-              await setDoc(joRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
+              const joRef = doc(db, "jobOrders", id as string);
+              await setDoc(joRef, { ...dataToSave, status: finalStatus, modifiedAt: serverTimestamp() }, { merge: true });
               toast({ title: "Success", description: "Job Order updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           } else {
-              const { id, ...dataToSave } = jobOrderData;
               const docId = id as string; // The formatted ID is passed from the form
               const joRef = doc(db, "jobOrders", docId);
-              await setDoc(joRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+              await setDoc(joRef, { ...dataToSave, status: finalStatus, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
               toast({ title: "Success", description: "Job Order added successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           }
           handleCloseFormModal();
@@ -203,6 +210,8 @@ function JobOrdersContent() {
             isOpen={!!viewingJobOrder}
             onClose={handleCloseViewModal}
             jobOrder={viewingJobOrder}
+            salesOrder={salesOrders.find(so => so.id === viewingJobOrder.salesOrderId)}
+            quotation={quotations.find(q => q.id === salesOrders.find(so => so.id === viewingJobOrder.salesOrderId)?.quotationId)}
             onEdit={handleOpenFormModal}
           />
       )}
