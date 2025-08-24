@@ -98,23 +98,40 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
 
     return (
         <div className="py-4 text-xs">
-            <div className="flex flex-col items-center text-center mb-4">
-                <Image src={logo} alt="Company Logo" width={60} height={60} className="mb-2" data-ai-hint="company logo" />
-                <h2 className="text-lg font-bold">{companyName}</h2>
-                <p className="text-xs text-muted-foreground">{address}</p>
-                <p className="text-xs text-muted-foreground">{phone}</p>
-                <p className="text-xs text-muted-foreground">{website}</p>
+            <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-4">
+                    <Image src={logo} alt="Company Logo" width={60} height={60} className="mb-2" data-ai-hint="company logo" />
+                    <div>
+                        <h2 className="text-lg font-bold">{companyName}</h2>
+                        <p className="text-xs text-muted-foreground">{address}</p>
+                        <p className="text-xs text-muted-foreground">{phone}</p>
+                        <p className="text-xs text-muted-foreground">{website}</p>
+                    </div>
+                </div>
+                <div className="text-right">
+                    <h3 className="text-xl font-bold" style={{ color: templateSettings.accentColor }}>JOB ORDER</h3>
+                    <div className="flex items-center justify-end gap-2">
+                        <span className="text-sm text-muted-foreground">{jobOrder.id}</span>
+                        <Badge variant={getStatusVariant(jobOrder.status)} className="capitalize h-fit">{jobOrder.status}</Badge>
+                    </div>
+                </div>
             </div>
             
-            <div className="text-center my-4">
-                 <h3 className="text-xl font-bold" style={{ color: templateSettings.accentColor }}>JOB ORDER</h3>
-                 <div className="flex items-center justify-center gap-2">
-                    <span className="text-sm text-muted-foreground">{jobOrder.id}</span>
-                    <Badge variant={getStatusVariant(jobOrder.status)} className="capitalize h-fit">{jobOrder.status}</Badge>
-                 </div>
+            <Separator />
+
+             <div className="grid grid-cols-2 gap-x-4 gap-y-2 py-3 text-xs">
+                <div>
+                    <h4 className="font-semibold mb-1">BILL TO:</h4>
+                    <p className="text-muted-foreground">{salesOrder?.customerName || jobOrder.customerName}</p>
+                    <p className="text-muted-foreground">{salesOrder?.customerTin ? `TIN: ${salesOrder.customerTin}` : ''}</p>
+                </div>
+                 <div>
+                    <h4 className="font-semibold mb-1">SHIPPING ADDRESS:</h4>
+                    <p className="text-muted-foreground">{salesOrder?.customerShippingAddress || 'N/A'}</p>
+                </div>
             </div>
 
-            <Separator />
+
             <div className="grid grid-cols-4 gap-x-4 gap-y-2 py-3 text-xs">
                 <div className="space-y-1">
                     <h4 className="font-semibold flex items-center gap-1"><User className="h-3 w-3" /> Customer</h4>
@@ -199,3 +216,4 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         </div>
     );
 }
+
