@@ -15,6 +15,7 @@ import AppLayout from '@/components/app-layout';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import UserProfileModal from '@/components/users/user-profile-modal';
 
 
 // export const metadata: Metadata = {
@@ -116,6 +117,7 @@ const navGroups = [
 function AppContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   
   const handleAccordionChange = (value: string[]) => {
       const alwaysOpen = ['Overview', 'Inventory', 'Sales'];
@@ -213,11 +215,9 @@ function AppContent({ children }: { children: React.ReactNode }) {
               <DropdownMenuContent side="right" align="start" className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                   <Link href="/settings">
+                <DropdownMenuItem onClick={() => setIsProfileModalOpen(true)}>
                     <User className="mr-2 h-4 w-4 text-purple-500" />
                     <span>Profile</span>
-                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings">
@@ -241,6 +241,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
         <AppLayout>
           {children}
         </AppLayout>
+        <UserProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
       </SidebarProvider>
   );
 }
