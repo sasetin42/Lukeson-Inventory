@@ -81,6 +81,20 @@ export default function SalesOrderList({ salesOrders, quotations, jobOrders, onE
                 return 'outline';
         }
     };
+
+    const getJobOrderStatusVariant = (status?: JobOrder['status']): "success" | "secondary" | "destructive" | "outline" | "inProgress" => {
+        if (!status) return 'outline';
+        switch (status) {
+            case 'Completed': return 'success';
+            case 'In Progress': return 'inProgress';
+            case 'Scheduled': return 'secondary';
+            case 'Draft':
+            case 'On Hold':
+                return 'outline';
+            case 'Cancelled': return 'destructive';
+            default: return 'outline';
+        }
+    };
     
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -101,9 +115,9 @@ export default function SalesOrderList({ salesOrders, quotations, jobOrders, onE
                                 <TableHead>Sales Order ID</TableHead>
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Date</TableHead>
-                                <TableHead>Delivery Date</TableHead>
                                 <TableHead>Amount</TableHead>
-                                <TableHead>Status</TableHead>
+                                <TableHead>SO Status</TableHead>
+                                <TableHead>Job Order Status</TableHead>
                                 <TableHead className="w-[150px] text-center">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -111,6 +125,7 @@ export default function SalesOrderList({ salesOrders, quotations, jobOrders, onE
                             <TooltipProvider>
                                 {salesOrders.map((salesOrder) => {
                                     const quotation = salesOrder.quotationId ? quotations.find(q => q.id === salesOrder.quotationId) : null;
+                                    const jobOrder = jobOrders.find(jo => jo.salesOrderId === salesOrder.id);
                                     return (
                                         <TableRow key={salesOrder.id}>
                                             <TableCell>
@@ -132,10 +147,16 @@ export default function SalesOrderList({ salesOrders, quotations, jobOrders, onE
                                                 </div>
                                             </TableCell>
                                             <TableCell>{formatDate(salesOrder.orderDate)}</TableCell>
-                                            <TableCell>{formatDate(salesOrder.deliveryDate)}</TableCell>
                                             <TableCell>₱{salesOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                             <TableCell>
                                                 <Badge variant={getStatusVariant(salesOrder.status)}>{salesOrder.status}</Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                {jobOrder ? (
+                                                    <Badge variant={getJobOrderStatusVariant(jobOrder.status)}>{jobOrder.status}</Badge>
+                                                ) : (
+                                                    <Badge variant="outline">N/A</Badge>
+                                                )}
                                             </TableCell>
                                             <TableCell className="flex justify-center items-center gap-2">
                                                 <Tooltip>
