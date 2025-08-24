@@ -127,12 +127,6 @@ export default function InvoicesPage() {
         title="Sales Invoices"
         description="Manage your invoices and track payments."
         icon={<FileText className="h-6 w-6 text-purple-500" />}
-        actions={
-          <Button onClick={() => handleOpenModal(null)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Invoice
-          </Button>
-        }
       />
       <Tabs defaultValue="sales-invoices">
         <TabsList>
@@ -156,8 +150,16 @@ export default function InvoicesPage() {
         <div className="mt-4">
             <Card>
               <CardHeader>
-                  <CardTitle>Invoice List</CardTitle>
-                  <CardDescription>A list of all your sales invoices.</CardDescription>
+                  <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle>Invoice List</CardTitle>
+                        <CardDescription>A list of all your sales invoices.</CardDescription>
+                    </div>
+                    <Button onClick={() => handleOpenModal(null)}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Create Invoice
+                    </Button>
+                  </div>
                   <div className="flex items-center gap-2 pt-4">
                       <div className="relative w-full">
                           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
