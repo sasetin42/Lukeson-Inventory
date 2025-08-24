@@ -118,6 +118,14 @@ function AppContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState({ name: 'Admin User', avatar: 'https://placehold.co/40x40.png' });
+
+  useEffect(() => {
+    const storedProfile = localStorage.getItem('user_profile');
+    if (storedProfile) {
+        setUserProfile(JSON.parse(storedProfile));
+    }
+  }, []);
   
   const handleAccordionChange = (value: string[]) => {
       const alwaysOpen = ['Overview', 'Inventory', 'Sales'];
@@ -203,11 +211,11 @@ function AppContent({ children }: { children: React.ReactNode }) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="justify-start w-full gap-2 p-2 h-auto">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="https://placehold.co/40x40.png" alt="Admin" data-ai-hint="user avatar" />
-                    <AvatarFallback>A</AvatarFallback>
+                    <AvatarImage src={userProfile.avatar} alt={userProfile.name} data-ai-hint="user avatar" />
+                    <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="text-left">
-                    <p className="text-sm font-medium text-foreground">Admin User</p>
+                    <p className="text-sm font-medium text-foreground">{userProfile.name}</p>
                     <p className="text-xs text-muted-foreground">admin@example.com</p>
                   </div>
                 </Button>
@@ -241,7 +249,11 @@ function AppContent({ children }: { children: React.ReactNode }) {
         <AppLayout>
           {children}
         </AppLayout>
-        <UserProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} />
+        <UserProfileModal 
+          isOpen={isProfileModalOpen} 
+          onClose={() => setIsProfileModalOpen(false)} 
+          onProfileUpdate={setUserProfile}
+        />
       </SidebarProvider>
   );
 }
