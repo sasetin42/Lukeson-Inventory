@@ -12,7 +12,7 @@ import JobOrderFormModal from '@/components/job-orders/job-order-form-modal';
 import JobOrderViewModal from '@/components/job-orders/job-order-view-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import JobOrderSettings from '@/components/job-orders/job-order-settings';
@@ -120,6 +120,17 @@ function JobOrdersContent() {
               await setDoc(joRef, { ...dataToSave, status: finalStatus, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
               toast({ title: "Success", description: "Job Order added successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           }
+
+          // If job order is completed, update the sales order status to fulfilled
+          if (finalStatus === 'Completed' && jobOrderData.salesOrderId) {
+            const soRef = doc(db, "salesOrders", jobOrderData.salesOrderId);
+            await updateDoc(soRef, {
+                status: 'Fulfilled',
+                modifiedAt: serverTimestamp()
+            });
+            toast({ title: "Sales Order Updated", description: `Sales Order ${jobOrderData.salesOrderId} has been marked as Fulfilled.`, variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
+          }
+
           handleCloseFormModal();
           fetchJobOrders();
       } catch (error) {
