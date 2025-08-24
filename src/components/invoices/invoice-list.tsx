@@ -36,12 +36,13 @@ export default function InvoiceList({ invoices, onView, onMarkAsPaid, onDelete }
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
 
-    const getStatusVariant = (status: string): "success" | "secondary" | "destructive" | "outline" => {
+    const getStatusVariant = (status: string): "success" | "secondary" | "destructive" | "outline" | "posted" => {
         switch (status) {
             case 'Paid':
                 return 'success';
-            case 'Pending':
             case 'Posted':
+                return 'posted';
+            case 'Pending':
                 return 'secondary';
             case 'Overdue':
                 return 'destructive';

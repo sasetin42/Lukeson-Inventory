@@ -23,6 +23,7 @@ const badgeVariants = cva(
         fulfilled: "border-transparent bg-[#F2CC8F] text-black",
         completed: "border-transparent bg-[#165C75] text-[#FFFFFF]",
         quotation: "border-transparent bg-[#3D405B] text-[#FFFFFF]",
+        posted: "border-transparent bg-[#302F6B] text-[#FFFFFF]",
       },
     },
     defaultVariants: {
