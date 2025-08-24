@@ -156,6 +156,9 @@ function JobOrdersContent() {
       { title: "Cancelled Jobs", value: totalCancelled, icon: XCircle, color: "red" as const }
   ];
 
+  const viewingSalesOrder = viewingJobOrder ? salesOrders.find(so => so.id === viewingJobOrder.salesOrderId) : undefined;
+  const viewingQuotation = viewingSalesOrder ? quotations.find(q => q.id === viewingSalesOrder.quotationId) : undefined;
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -215,8 +218,8 @@ function JobOrdersContent() {
             isOpen={!!viewingJobOrder}
             onClose={handleCloseViewModal}
             jobOrder={viewingJobOrder}
-            salesOrder={salesOrders.find(so => so.id === viewingJobOrder.salesOrderId)}
-            quotation={quotations.find(q => q.id === salesOrders.find(so => so.id === viewingJobOrder.salesOrderId)?.quotationId)}
+            salesOrder={viewingSalesOrder}
+            quotation={viewingQuotation}
             onEdit={handleOpenFormModal}
           />
       )}
