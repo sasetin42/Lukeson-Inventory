@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { SalesOrder } from '@/lib/types';
+import { SalesOrder, JobOrder } from '@/lib/types';
 import SalesOrderForm from './sales-order-form';
 import { useState } from "react";
 
@@ -17,6 +17,7 @@ interface SalesOrderFormModalProps {
   onClose: () => void;
   salesOrder: SalesOrder | null;
   onSave: (salesOrderData: Omit<SalesOrder, 'id'> & {id?: string}) => void;
+  jobOrders: JobOrder[];
 }
 
 export default function SalesOrderFormModal({ 
@@ -24,6 +25,7 @@ export default function SalesOrderFormModal({
     onClose, 
     salesOrder, 
     onSave,
+    jobOrders,
 }: SalesOrderFormModalProps) {
     const [salesOrderId, setSalesOrderId] = useState<string | null>(null);
 
@@ -41,8 +43,11 @@ export default function SalesOrderFormModal({
                 onSuccess={onSave} 
                 onCancel={onClose}
                 onIdGenerated={setSalesOrderId}
+                jobOrders={jobOrders}
             />
         </DialogContent>
         </Dialog>
     );
 }
+
+    

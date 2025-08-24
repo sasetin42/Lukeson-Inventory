@@ -5,7 +5,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SalesOrder, DocumentLine, Customer, Product, Quotation, VatType } from '@/lib/types';
+import { SalesOrder, DocumentLine, Customer, Product, Quotation, VatType, JobOrder } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Loader2, User, Calendar, Hash, FileText, PlusCircle, Trash2, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -21,12 +21,13 @@ interface SalesOrderFormProps {
   onSuccess: (salesOrderData: Omit<SalesOrder, 'id'> & {id?: string}) => void;
   onCancel: () => void;
   onIdGenerated: (id: string) => void;
+  jobOrders: JobOrder[];
 }
 
 const vatTypes: VatType[] = ['VATable', 'VAT-Exempt', 'Zero-Rated'];
 const DEFAULT_TAX_RATE = 0.12;
 
-export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGenerated }: SalesOrderFormProps) {
+export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGenerated, jobOrders }: SalesOrderFormProps) {
     const { toast } = useToast();
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
@@ -85,13 +86,16 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
             setSalesOrderId(newId);
             onIdGenerated(newId);
         };
+        
+        const hasJobOrder = salesOrder && jobOrders.some(jo => jo.salesOrderId === salesOrder.id);
+
 
         if (salesOrder) {
              if (salesOrder.id) { 
                 setSalesOrderId(salesOrder.id);
                 onIdGenerated(salesOrder.id);
                 setStatus(salesOrder.status || 'Draft');
-                setIsStatusDisabled(false);
+                setIsStatusDisabled(hasJobOrder); // Disable if job order exists
             } else { 
                 generateSalesOrderId();
                 setStatus('Confirmed');
@@ -127,7 +131,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
             setDiscountValue(0);
             setQuotationId(undefined);
         }
-    }, [salesOrder, onIdGenerated, quotations]);
+    }, [salesOrder, onIdGenerated, quotations, jobOrders]);
 
     const handleCustomerChange = (selectedCustomerId: string) => {
         setCustomerId(selectedCustomerId);
@@ -319,7 +323,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
                 </div>
                  <div className="space-y-2">
                     <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Status</Label>
-                    <Select value={status} onValueChange={(value) => setStatus(value as SalesOrder['status'])}>
+                    <Select value={status} onValueChange={(value) => setStatus(value as SalesOrder['status'])} disabled={isStatusDisabled}>
                         <SelectTrigger><SelectValue/></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Draft">Draft</SelectItem>
@@ -455,3 +459,5 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
         </div>
     );
 }
+
+    

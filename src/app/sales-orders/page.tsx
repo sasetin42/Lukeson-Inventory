@@ -258,6 +258,7 @@ function SalesOrdersContent() {
           onClose={handleCloseModal}
           onSave={handleSaveSalesOrder}
           salesOrder={editingSalesOrder}
+          jobOrders={jobOrders}
         />
       )}
       
@@ -310,3 +311,5 @@ export default function SalesOrdersPage() {
         </Suspense>
     )
 }
+
+    
