@@ -131,6 +131,7 @@ export type SalesOrder = {
     notes?: string;
     discountType?: 'Fixed' | 'Percent';
     discountValue?: number;
+    invoicedStatus?: 'Not Invoiced' | 'Partially Invoiced' | 'Fully Invoiced';
 };
 
 export type JobOrder = {
@@ -151,13 +152,16 @@ export type JobOrder = {
 export type Invoice = {
     id:string; // INV-YYYY-XXXX
     salesOrderId: string;
+    customerId: string;
     customerName?: string;
-    date: Date;
-    dueDate: Date;
+    date: Date | FieldValue | string;
+    dueDate: Date | FieldValue | string;
     status: 'Draft' | 'Posted' | 'Paid' | 'Overdue';
     amount: number;
     paidAmount: number;
     balance: number;
+    lines: DocumentLine[];
+    notes?: string;
 };
 
 

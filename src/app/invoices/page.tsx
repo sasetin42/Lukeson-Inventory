@@ -4,24 +4,27 @@
 import { useState, useEffect, useMemo } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileText, PlusCircle, DollarSign, CheckCircle, XCircle, Search } from "lucide-react";
+import { FileText, PlusCircle, DollarSign, CheckCircle, XCircle, Search, AlertCircle } from "lucide-react";
 import InvoiceList from "@/components/invoices/invoice-list";
 import { Invoice } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InvoiceTemplate from '@/components/invoices/invoice-template';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import InvoiceFormModal from '@/components/invoices/invoice-form-modal';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
 
   useEffect(() => {
     const invoicesRef = collection(db, 'invoices');
@@ -60,6 +63,36 @@ export default function InvoicesPage() {
       { title: "Total Overdue", value: `₱${totalOverdue.toLocaleString()}`, icon: XCircle, color: "red" as const },
   ];
 
+  const handleOpenModal = (invoice: Invoice | null) => {
+    setEditingInvoice(invoice);
+    setIsModalOpen(true);
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingInvoice(null);
+  }
+
+  const handleSaveInvoice = async (invoiceData: Omit<Invoice, 'id'> & {id?: string}) => {
+    try {
+        const { id, ...dataToSave } = invoiceData;
+        const docRef = doc(db, "invoices", id as string);
+        await setDoc(docRef, { ...dataToSave, createdAt: serverTimestamp() });
+        toast({ title: "Success", description: "Invoice created successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
+        
+        // Update Sales Order status
+        if (invoiceData.salesOrderId) {
+            const soRef = doc(db, "salesOrders", invoiceData.salesOrderId);
+            await setDoc(soRef, { status: 'Invoiced', invoicedStatus: 'Fully Invoiced' }, { merge: true });
+        }
+
+        handleCloseModal();
+    } catch (error) {
+        console.error("Error saving invoice: ", error);
+        toast({ title: "Error", description: "Failed to save invoice.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
+    }
+  };
+
 
   return (
     <div className="flex flex-col gap-4">
@@ -68,7 +101,7 @@ export default function InvoicesPage() {
         description="Manage your invoices and track payments."
         icon={<FileText className="h-6 w-6 text-purple-500" />}
         actions={
-          <Button>
+          <Button onClick={() => handleOpenModal(null)}>
             <PlusCircle className="mr-2 h-4 w-4" />
             Create Invoice
           </Button>
@@ -115,7 +148,7 @@ export default function InvoicesPage() {
                           <SelectContent>
                               <SelectItem value="all">All Statuses</SelectItem>
                               <SelectItem value="Paid">Paid</SelectItem>
-                              <SelectItem value="Pending">Pending</SelectItem>
+                              <SelectItem value="Posted">Posted</SelectItem>
                               <SelectItem value="Overdue">Overdue</SelectItem>
                               <SelectItem value="Draft">Draft</SelectItem>
                           </SelectContent>
@@ -132,6 +165,15 @@ export default function InvoicesPage() {
             <InvoiceTemplate />
         </TabsContent>
       </Tabs>
+      
+      {isModalOpen && (
+          <InvoiceFormModal 
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            onSave={handleSaveInvoice}
+            invoice={editingInvoice}
+          />
+      )}
     </div>
   );
 }
