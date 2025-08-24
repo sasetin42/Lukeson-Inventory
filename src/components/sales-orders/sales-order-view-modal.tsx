@@ -12,7 +12,7 @@ import {
 import { SalesOrder, JobOrder } from '@/lib/types';
 import { Button } from '../ui/button';
 import SalesOrderView from './sales-order-view';
-import { Printer, PlusCircle } from 'lucide-react';
+import { Printer, PlusCircle, Edit } from 'lucide-react';
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
@@ -131,11 +131,24 @@ export default function SalesOrderViewModal({
             </Tooltip>
           </TooltipProvider>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handlePrint}>
+            <Button variant="outline" onClick={() => {/* TODO: Implement Edit Functionality */}}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+            </Button>
+            <Button 
+                variant="outline" 
+                onClick={handlePrint}
+                className="bg-[#2C2C2C] text-[#FFFFFF] hover:bg-[#2C2C2C]/90"
+            >
               <Printer className="mr-2 h-4 w-4" />
               Print
             </Button>
-            <Button onClick={onClose}>Close</Button>
+            <Button 
+                onClick={onClose}
+                className="bg-[#588B00] text-[#FFFFFF] hover:bg-[#588B00]/90"
+            >
+                Close
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>
