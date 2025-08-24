@@ -4,17 +4,51 @@
 import { PurchaseOrder } from '@/lib/types';
 import { format } from 'date-fns';
 import Image from 'next/image';
+import { db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 
 interface PurchaseOrderViewProps {
   purchaseOrder: PurchaseOrder;
 }
 
+const TEMPLATE_DOC_ID = 'purchaseOrder';
+
 export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewProps) {
-    const accentColor = '#0A3BAA';
-    const companyName = 'YAMASHITA MOLD PHILIPPINES CORPORATION';
-    const address = 'Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines';
-    const phone = 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463';
-    const website = 'www.yamashitamold.ph';
+    const [templateSettings, setTemplateSettings] = useState({
+        accentColor: '#0A3BAA',
+        companyName: 'YAMASHITA MOLD PHILIPPINES CORPORATION',
+        address: 'Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines',
+        phone: 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463',
+        website: 'www.yamashitamold.ph',
+        logo: 'https://placehold.co/100x50.png',
+        showDueDate: true,
+        showNotes: true,
+        showVat: true,
+        preparedByLabel: 'Prepared by:',
+        preparedByName: 'YMP / MCB / MJTS',
+        receivedByLabel: 'Received by:',
+        receivedByName: 'JUAN DELA CRUZ',
+        verifiedByLabel: 'Verified by:',
+        verifiedByName: 'HIROYOSHI KANAZAWA - VP',
+    });
+    
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const templateRef = doc(db, 'templates', TEMPLATE_DOC_ID);
+                const docSnap = await getDoc(templateRef);
+                if (docSnap.exists()) {
+                    setTemplateSettings(docSnap.data() as typeof templateSettings);
+                }
+            } catch (error) {
+                console.error("Error fetching template settings for view:", error);
+            }
+        };
+        fetchSettings();
+    }, []);
+
+    const { accentColor, companyName, address, phone, website, logo, showDueDate, showNotes, preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName } = templateSettings;
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -25,7 +59,7 @@ export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewPr
         <div className="p-8 bg-white text-black">
             <div className="flex justify-between items-start">
                  <div className="flex items-center gap-4">
-                    <Image src="https://placehold.co/100x50.png" width={100} height={50} alt="Company Logo" data-ai-hint="logo" />
+                    <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo" />
                     <div className="text-xs">
                         <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
                         <p>{address}</p>
@@ -37,7 +71,7 @@ export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewPr
                     <h2 className="text-3xl font-bold" style={{ color: accentColor }}>PURCHASE ORDER</h2>
                     <p className="text-sm"><strong>PO ID:</strong> {purchaseOrder.id}</p>
                     <p className="text-sm"><strong>Date:</strong> {formatDate(purchaseOrder.orderDate)}</p>
-                    <p className="text-sm"><strong>Expected Delivery:</strong> {formatDate(purchaseOrder.expectedDeliveryDate)}</p>
+                    {showDueDate && <p className="text-sm"><strong>Expected Delivery:</strong> {formatDate(purchaseOrder.expectedDeliveryDate)}</p>}
                 </div>
             </div>
 
@@ -76,18 +110,25 @@ export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewPr
                 </div>
             </div>
 
+            {showNotes && (
+                 <div className="mt-8">
+                    <h4 className="font-bold">Notes:</h4>
+                    <p className="text-sm text-muted-foreground">Sample notes for the purchase order...</p>
+                </div>
+            )}
+
             <div className="flex justify-between mt-24 text-center text-xs">
                 <div>
-                    <p className="font-bold">YMP / MCB / MJTS</p>
-                    <p className="border-t border-black pt-1 mt-1">Prepared by:</p>
+                    <p className="font-bold">{preparedByName}</p>
+                    <p className="border-t border-black pt-1 mt-1">{preparedByLabel}</p>
                 </div>
                  <div>
-                    <p className="font-bold">JUAN DELA CRUZ</p>
-                    <p className="border-t border-black pt-1 mt-1">Received by:</p>
+                    <p className="font-bold">{receivedByName}</p>
+                    <p className="border-t border-black pt-1 mt-1">{receivedByLabel}</p>
                 </div>
                  <div>
-                    <p className="font-bold">HIROYOSHI KANAZAWA - VP</p>
-                    <p className="border-t border-black pt-1 mt-1">Verified by:</p>
+                    <p className="font-bold">{verifiedByName}</p>
+                    <p className="border-t border-black pt-1 mt-1">{verifiedByLabel}</p>
                 </div>
             </div>
         </div>

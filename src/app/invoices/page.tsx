@@ -65,7 +65,6 @@ export default function InvoicesPage() {
         <TabsList>
             <TabsTrigger value="sales-invoices">Sales Invoices</TabsTrigger>
             <TabsTrigger value="templates">Sales Invoices Template</TabsTrigger>
-            <TabsTrigger value="settings">Sales Invoices Settings</TabsTrigger>
         </TabsList>
         <TabsContent value="sales-invoices" className="mt-4">
             <div className="grid gap-6 md:grid-cols-3">
@@ -87,9 +86,6 @@ export default function InvoicesPage() {
         </TabsContent>
         <TabsContent value="templates" className="mt-4">
             <InvoiceTemplate />
-        </TabsContent>
-        <TabsContent value="settings" className="mt-4">
-            <p>Sales Invoices Settings will go here.</p>
         </TabsContent>
       </Tabs>
     </div>

@@ -14,9 +14,9 @@ import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
-const TEMPLATE_DOC_ID = 'invoice';
+const TEMPLATE_DOC_ID = 'purchaseOrder';
 
-export default function InvoiceTemplate() {
+export default function PurchaseOrderTemplate() {
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -93,7 +93,7 @@ export default function InvoiceTemplate() {
             await setDoc(templateRef, settings, { merge: true });
             toast({
                 title: 'Template Saved',
-                description: 'Your invoice template has been updated.',
+                description: 'Your purchase order template has been updated.',
                 variant: 'success',
             });
         } catch (error) {
@@ -127,17 +127,18 @@ export default function InvoiceTemplate() {
         );
     }
 
+
     return (
         <div>
             <div className="flex justify-between items-center mb-4">
-                <h1 className="text-2xl font-bold">Invoice Template Customizer</h1>
+                <h1 className="text-2xl font-bold">Purchase Order Template Customizer</h1>
                 <Button onClick={handleSave} disabled={isSaving}>
                     {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                     {isSaving ? 'Saving...' : 'Save Template'}
                 </Button>
             </div>
             <p className="text-muted-foreground mb-6">
-                Changes made here will be reflected on all generated invoices. Click Save to apply.
+                Changes made here will be reflected on all generated purchase orders. Click Save to apply.
             </p>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-1 space-y-6">
@@ -189,7 +190,7 @@ export default function InvoiceTemplate() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div>
-                                <Label>Invoice & Purchase Order Logo</Label>
+                                <Label>Purchase Order Logo</Label>
                                 <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md">
                                     <div className="space-y-1 text-center">
                                         <Upload className="mx-auto h-12 w-12 text-gray-400" />
@@ -274,10 +275,11 @@ export default function InvoiceTemplate() {
                                 </div>
                             </div>
                             <div className="text-right">
-                                <h2 className="text-3xl font-bold" style={{ color: accentColor }}>INVOICE</h2>
-                                <p className="text-sm"><strong>Invoice ID:</strong> INV-2025-001</p>
+                                <h2 className="text-3xl font-bold" style={{ color: accentColor }}>PURCHASE ORDER</h2>
+                                <p className="text-sm"><strong>Invoice ID:</strong> PO-2025-001</p>
                                 <p className="text-sm"><strong>Date:</strong> Jan 15, 2024</p>
                                 {showDueDate && <p className="text-sm"><strong>Due Date:</strong> Feb 14, 2024</p>}
+                                <p className="text-sm"><strong>Delivery Receipt Number:</strong> PO-2025-002</p>
                             </div>
                         </div>
 
@@ -334,7 +336,7 @@ export default function InvoiceTemplate() {
                          {showNotes && (
                             <div className="mt-8">
                                 <h4 className="font-bold">Notes:</h4>
-                                <p className="text-sm text-muted-foreground">Sample notes for the invoice...</p>
+                                <p className="text-sm text-muted-foreground">Sample notes for the purchase order...</p>
                             </div>
                         )}
 

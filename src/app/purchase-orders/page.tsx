@@ -14,6 +14,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import PurchaseOrderTemplate from '@/components/purchase-orders/purchase-order-template';
 
 
 export default function PurchaseOrdersPage() {
@@ -146,7 +147,7 @@ export default function PurchaseOrdersPage() {
           </div>
         </TabsContent>
         <TabsContent value="templates" className="mt-4">
-          <p>Purchase Order Template settings will go here.</p>
+          <PurchaseOrderTemplate />
         </TabsContent>
         <TabsContent value="settings" className="mt-4">
           <p>Purchase Order Settings will go here.</p>
