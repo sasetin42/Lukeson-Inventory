@@ -138,6 +138,7 @@ export default function InvoicesPage() {
       } catch (error) {
           console.error("Error updating invoice status: ", error);
           toast({ title: "Error", description: "Failed to update invoice status.", variant: "destructive" });
+          handleClosePaymentModal();
       }
   }
 
