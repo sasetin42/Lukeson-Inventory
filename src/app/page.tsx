@@ -9,15 +9,16 @@ import InventoryOverview from "@/components/dashboard/inventory-overview";
 import RecentTransactions from "@/components/dashboard/recent-transactions";
 import QuickStats from "@/components/dashboard/quick-stats";
 import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
-import { Product, SalesOrder, ItemCategory, PurchaseOrder } from '@/lib/types';
+import { Product, SalesOrder, ItemCategory, PurchaseOrder, Quotation, JobOrder, Invoice, RecentTransaction } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, addDoc, serverTimestamp, orderBy, query, limit } from 'firebase/firestore';
 import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-form-modal';
 
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [sales, setSales] = useState<SalesOrder[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<RecentTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPurchaseOrder, setEditingPurchaseOrder] = useState<PurchaseOrder | null>(null);
@@ -29,10 +30,18 @@ export default function DashboardPage() {
       try {
         const productsRef = collection(db, 'products');
         const salesRef = collection(db, 'salesOrders');
+        const quotationsRef = collection(db, 'quotations');
+        const jobOrdersRef = collection(db, 'jobOrders');
+        const invoicesRef = collection(db, 'invoices');
 
-        const [productsSnapshot, salesSnapshot] = await Promise.all([
+        const recentSalesQuery = query(salesRef, orderBy("orderDate", "desc"), limit(10));
+
+        const [productsSnapshot, salesSnapshot, quotationsSnapshot, jobOrdersSnapshot, invoicesSnapshot] = await Promise.all([
             getDocs(productsRef),
-            getDocs(salesRef)
+            getDocs(recentSalesQuery),
+            getDocs(quotationsRef),
+            getDocs(jobOrdersRef),
+            getDocs(invoicesRef),
         ]);
 
         const loadedProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
@@ -40,6 +49,25 @@ export default function DashboardPage() {
 
         const loadedSales = salesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
         setSales(loadedSales);
+
+        const loadedQuotations = quotationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
+        const loadedJobOrders = jobOrdersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
+        const loadedInvoices = invoicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
+        
+        const enrichedTransactions = loadedSales.map(sale => {
+            const quotation = sale.quotationId ? loadedQuotations.find(q => q.id === sale.quotationId) : undefined;
+            const jobOrder = loadedJobOrders.find(j => j.salesOrderId === sale.id);
+            const invoice = loadedInvoices.find(i => i.salesOrderId === sale.id);
+
+            return {
+                salesOrder: sale,
+                quotation: quotation,
+                jobOrder: jobOrder,
+                invoice: invoice
+            };
+        });
+
+        setRecentTransactions(enrichedTransactions);
 
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -132,7 +160,7 @@ export default function DashboardPage() {
           <SlowMovingItems products={products} sales={flatSales} />
       </div>
 
-      <RecentTransactions sales={flatSales} />
+      <RecentTransactions transactions={recentTransactions} />
 
       {isModalOpen && (
           <PurchaseOrderFormModal

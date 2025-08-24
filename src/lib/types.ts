@@ -139,7 +139,7 @@ export type JobOrder = {
     customerName?: string;
     salesOrderId?: string;
     jobOrderDate: Date | FieldValue | string;
-    expectedCompletionDate?: Date | FieldValue | string;
+    expectedCompletionDate?: Date | FieldValue | string | null;
     status: 'Draft' | 'Scheduled' | 'In Progress' | 'On Hold' | 'Completed' | 'Cancelled';
     totalAmount: number;
     lines: DocumentLine[];
@@ -151,6 +151,7 @@ export type JobOrder = {
 export type Invoice = {
     id:string; // INV-YYYY-XXXX
     salesOrderId: string;
+    customerName?: string;
     date: Date;
     dueDate: Date;
     status: 'Draft' | 'Posted' | 'Paid' | 'Overdue';
@@ -313,4 +314,11 @@ export type FlatSale = {
     date: Date | FieldValue | string;
     quantity: number;
     total: number;
+};
+
+export type RecentTransaction = {
+    salesOrder: SalesOrder;
+    quotation?: Quotation;
+    jobOrder?: JobOrder;
+    invoice?: Invoice;
 };
