@@ -222,12 +222,6 @@ function JobOrdersContent() {
         title="Job Orders"
         description="Manage job orders for your customers."
         icon={<PlusCircle className="h-6 w-6 text-orange-500" />}
-        actions={
-          <Button onClick={() => handleOpenFormModal(null)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Job Order
-          </Button>
-        }
       />
        <Tabs defaultValue="job-orders">
         <TabsList>
@@ -253,6 +247,7 @@ function JobOrdersContent() {
               jobOrders={filteredJobOrders} 
               salesOrders={salesOrders}
               customers={customers}
+              onCreate={() => handleOpenFormModal(null)}
               onEdit={handleOpenFormModal}
               onDelete={handleDeleteJobOrder}
               onView={handleOpenViewModal}

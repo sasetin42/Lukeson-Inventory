@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2, Eye, User, Search } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, User, Search, PlusCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +27,7 @@ interface JobOrderListProps {
     jobOrders: JobOrder[];
     salesOrders: SalesOrder[];
     customers: Customer[];
+    onCreate: () => void;
     onEdit: (jobOrder: JobOrder) => void;
     onDelete: (jobOrderId: string) => void;
     onView: (jobOrder: JobOrder) => void;
@@ -41,6 +42,7 @@ export default function JobOrderList({
     jobOrders, 
     salesOrders, 
     customers, 
+    onCreate,
     onEdit, 
     onDelete, 
     onView, 
@@ -97,8 +99,16 @@ export default function JobOrderList({
         <>
             <Card>
                 <CardHeader>
-                    <CardTitle>Job Orders</CardTitle>
-                    <CardDescription>A list of all your job orders.</CardDescription>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle>Job Orders</CardTitle>
+                            <CardDescription>A list of all your job orders.</CardDescription>
+                        </div>
+                        <Button onClick={onCreate}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Create Job Order
+                        </Button>
+                    </div>
                      <div className="flex items-center gap-2 pt-4">
                         <div className="relative w-full">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
