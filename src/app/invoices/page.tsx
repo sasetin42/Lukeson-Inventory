@@ -9,7 +9,7 @@ import InvoiceList from "@/components/invoices/invoice-list";
 import { Invoice } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InvoiceTemplate from '@/components/invoices/invoice-template';
@@ -19,22 +19,20 @@ export default function InvoicesPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        const invoicesRef = collection(db, 'invoices');
-        const snapshot = await getDocs(invoicesRef);
-        const loadedInvoices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
-        setInvoices(loadedInvoices);
-      } catch (error) {
-        console.error("Error fetching invoices: ", error);
-        toast({
-          title: "Error",
-          description: "Failed to load invoices. Please check your connection and permissions.",
-          variant: "destructive"
-        });
-      }
-    };
-    fetchInvoices();
+    const invoicesRef = collection(db, 'invoices');
+    const unsubscribe = onSnapshot(invoicesRef, (snapshot) => {
+      const loadedInvoices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
+      setInvoices(loadedInvoices);
+    }, (error) => {
+      console.error("Error fetching invoices: ", error);
+      toast({
+        title: "Error",
+        description: "Failed to load invoices. Please check your connection and permissions.",
+        variant: "destructive"
+      });
+    });
+
+    return () => unsubscribe();
   }, [toast]);
   
   const totalInvoiced = invoices.reduce((acc, inv) => acc + inv.amount, 0);

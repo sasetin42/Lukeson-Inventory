@@ -13,7 +13,7 @@ import ProductFormModal from '@/components/products/product-form-modal';
 import CategoryFormModal from '@/components/category/category-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -25,38 +25,34 @@ export default function ProductsPage() {
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const { toast } = useToast();
     
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const productsRef = collection(db, 'products');
-            const categoriesRef = collection(db, 'categories');
-
-            const [productsSnapshot, categoriesSnapshot] = await Promise.all([
-                getDocs(productsRef),
-                getDocs(categoriesRef)
-            ]);
-
-            const loadedProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-            setProducts(loadedProducts);
-
-            const loadedCategories = categoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
-            setCategories(loadedCategories);
-
-        } catch (error) {
-            console.error("Error fetching data:", error);
-            toast({
-                title: "Error",
-                description: "Failed to load product data. Please check permissions.",
-                variant: "destructive",
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
-    
     useEffect(() => {
-        fetchData();
-    }, []);
+        setLoading(true);
+        const productsRef = collection(db, 'products');
+        const categoriesRef = collection(db, 'categories');
+
+        const unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
+            const loadedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+            setProducts(loadedProducts);
+            setLoading(false);
+        }, (error) => {
+            console.error("Error fetching products:", error);
+            toast({ title: "Error", description: "Failed to load product data.", variant: "destructive" });
+            setLoading(false);
+        });
+
+        const unsubscribeCategories = onSnapshot(categoriesRef, (snapshot) => {
+            const loadedCategories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ItemCategory));
+            setCategories(loadedCategories);
+        }, (error) => {
+            console.error("Error fetching categories:", error);
+            toast({ title: "Error", description: "Failed to load category data.", variant: "destructive" });
+        });
+
+        return () => {
+            unsubscribeProducts();
+            unsubscribeCategories();
+        };
+    }, [toast]);
     
     const totalProducts = products.length;
     const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
@@ -93,31 +89,25 @@ export default function ProductsPage() {
     const handleDeleteProduct = async (productToDelete: Product) => {
         await deleteDoc(doc(db, "products", productToDelete.id));
         toast({ title: "Success", description: "Product deleted.", variant: "success" });
-        fetchData(); // Refetch data
     }
 
     const handleProductSave = async (productData: Omit<Product, 'id' | 'createdAt'> & {id?: string; imageFile?: File | null}) => {
         const { imageFile, id, ...dataToSave } = productData;
         
-        // In a real app, you would handle image uploads to a storage service like Firebase Storage
-        // and get back a URL. For now, we will continue using a placeholder or existing URL.
         const imageUrl = productData.productImage || 'https://placehold.co/300x300.png';
 
         const finalData = { ...dataToSave, productImage: imageUrl };
 
         try {
             if (id) {
-                // This is an existing product, update it.
                 const productRef = doc(db, "products", id);
                 await updateDoc(productRef, { ...finalData, modifiedAt: serverTimestamp() });
                 toast({ title: "Success", description: "Product updated successfully.", variant: "success" });
             } else {
-                // This is a new product, create it.
                 await addDoc(collection(db, "products"), { ...finalData, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
                 toast({ title: "Success", description: "Product added successfully.", variant: "success" });
             }
             handleCloseProductModal();
-            fetchData(); // Refetch data
         } catch (error) {
             console.error(error);
             toast({ title: "Error", description: "Failed to save product.", variant: "destructive" });
@@ -128,7 +118,6 @@ export default function ProductsPage() {
         const { imageFile, id, ...dataToSave } = categoryData;
         let imageUrl = categoryData.productImage || 'https://placehold.co/300x300.png';
             
-        // Again, placeholder for image handling
         const finalData = { ...dataToSave, productImage: imageUrl };
 
         try {
@@ -140,7 +129,6 @@ export default function ProductsPage() {
                 await addDoc(collection(db, "categories"), { ...finalData, createdAt: serverTimestamp() });
                 toast({ title: "Success", description: "Category added successfully.", variant: "success" });
             }
-            fetchData(); // Refetch data
         } catch(error) {
             toast({ title: "Error", description: "Failed to save category.", variant: "destructive" });
         }
@@ -149,7 +137,6 @@ export default function ProductsPage() {
     const handleCategoryDelete = async (categoryId: string) => {
         await deleteDoc(doc(db, `categories/${categoryId}`));
         toast({ title: "Success", description: "Category deleted successfully.", variant: "success" });
-        fetchData(); // Refetch data
     }
 
 

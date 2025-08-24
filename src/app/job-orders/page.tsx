@@ -12,7 +12,7 @@ import JobOrderFormModal from '@/components/job-orders/job-order-form-modal';
 import JobOrderViewModal from '@/components/job-orders/job-order-view-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import JobOrderSettings from '@/components/job-orders/job-order-settings';
@@ -51,41 +51,41 @@ function JobOrdersContent() {
     }
   }, [fromSalesOrder, toast]);
 
-  const fetchJobOrders = async () => {
-    try {
-      const joRef = collection(db, 'jobOrders');
-      const soRef = collection(db, 'salesOrders');
-      const qtnRef = collection(db, 'quotations');
-
-      const [joSnapshot, soSnapshot, qtnSnapshot] = await Promise.all([
-          getDocs(joRef),
-          getDocs(soRef),
-          getDocs(qtnRef)
-      ]);
-      
-      const loadedJOs = joSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
-      setJobOrders(loadedJOs);
-      
-      const loadedSOs = soSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
-      setSalesOrders(loadedSOs);
-      
-      const loadedQtns = qtnSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
-      setQuotations(loadedQtns);
-
-    } catch (error) {
-      console.error("Error fetching job orders: ", error);
-      toast({
-        title: "Error",
-        description: "Failed to load job orders. Please check your connection and permissions.",
-        variant: "destructive",
-        icon: <AlertCircle className="h-5 w-5" />
-      });
-    }
-  };
-
   useEffect(() => {
-    fetchJobOrders();
-  }, []);
+    const joRef = collection(db, 'jobOrders');
+    const soRef = collection(db, 'salesOrders');
+    const qtnRef = collection(db, 'quotations');
+
+    const unsubscribeJOs = onSnapshot(joRef, (snapshot) => {
+        const loadedJOs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
+        setJobOrders(loadedJOs);
+    }, (error) => {
+        console.error("Error fetching job orders:", error);
+        toast({ title: "Error", description: "Failed to load job orders.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
+    });
+
+    const unsubscribeSOs = onSnapshot(soRef, (snapshot) => {
+        const loadedSOs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
+        setSalesOrders(loadedSOs);
+    }, (error) => {
+        console.error("Error fetching sales orders:", error);
+        toast({ title: "Error", description: "Failed to load sales orders.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
+    });
+
+    const unsubscribeQtns = onSnapshot(qtnRef, (snapshot) => {
+        const loadedQtns = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
+        setQuotations(loadedQtns);
+    }, (error) => {
+        console.error("Error fetching quotations:", error);
+        toast({ title: "Error", description: "Failed to load quotations.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
+    });
+
+    return () => {
+        unsubscribeJOs();
+        unsubscribeSOs();
+        unsubscribeQtns();
+    };
+  }, [toast]);
 
   const handleOpenFormModal = (jobOrder: JobOrder | null) => {
     setEditingJobOrder(jobOrder);
@@ -132,7 +132,6 @@ function JobOrdersContent() {
           }
 
           handleCloseFormModal();
-          fetchJobOrders();
       } catch (error) {
           console.error("Error saving job order: ", error);
           toast({ title: "Error", description: "Failed to save job order.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
@@ -143,7 +142,6 @@ function JobOrdersContent() {
   const handleDeleteJobOrder = async (jobOrderId: string) => {
     await deleteDoc(doc(db, "jobOrders", jobOrderId));
     toast({ title: "Success", description: "Job Order deleted successfully.", variant: "destructive" });
-    fetchJobOrders();
   };
 
   const totalValue = jobOrders.reduce((sum, jo) => sum + jo.totalAmount, 0);

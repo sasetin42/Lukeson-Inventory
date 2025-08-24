@@ -12,7 +12,7 @@ import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
 import { Product, SalesOrder, ItemCategory, PurchaseOrder, Quotation, JobOrder, Invoice, RecentTransaction } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, addDoc, serverTimestamp, orderBy, query, limit } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, addDoc, serverTimestamp, orderBy, query, limit } from 'firebase/firestore';
 import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-form-modal';
 
 export default function DashboardPage() {
@@ -25,62 +25,43 @@ export default function DashboardPage() {
   const { toast } = useToast();
   
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const productsRef = collection(db, 'products');
-        const salesRef = collection(db, 'salesOrders');
-        const quotationsRef = collection(db, 'quotations');
-        const jobOrdersRef = collection(db, 'jobOrders');
-        const invoicesRef = collection(db, 'invoices');
+    setLoading(true);
+    const productsRef = collection(db, 'products');
+    const salesRef = collection(db, 'salesOrders');
+    const quotationsRef = collection(db, 'quotations');
+    const jobOrdersRef = collection(db, 'jobOrders');
+    const invoicesRef = collection(db, 'invoices');
+    
+    const recentSalesQuery = query(salesRef, orderBy("orderDate", "desc"), limit(10));
 
-        const recentSalesQuery = query(salesRef, orderBy("orderDate", "desc"), limit(10));
+    const unsubscribes = [
+      onSnapshot(productsRef, (snapshot) => setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product))), (err) => { console.error(err); toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });}),
+      onSnapshot(recentSalesQuery, (snapshot) => setSales(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder))), (err) => { console.error(err); toast({ title: "Error", description: "Failed to load sales.", variant: "destructive" });}),
+      onSnapshot(quotationsRef, (quotationsSnapshot) => {
+          onSnapshot(jobOrdersRef, (jobOrdersSnapshot) => {
+              onSnapshot(invoicesRef, (invoicesSnapshot) => {
+                  onSnapshot(recentSalesQuery, (salesSnapshot) => {
+                      const loadedQuotations = quotationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
+                      const loadedJobOrders = jobOrdersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
+                      const loadedInvoices = invoicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
+                      const loadedSales = salesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
 
-        const [productsSnapshot, salesSnapshot, quotationsSnapshot, jobOrdersSnapshot, invoicesSnapshot] = await Promise.all([
-            getDocs(productsRef),
-            getDocs(recentSalesQuery),
-            getDocs(quotationsRef),
-            getDocs(jobOrdersRef),
-            getDocs(invoicesRef),
-        ]);
+                      const enrichedTransactions = loadedSales.map(sale => {
+                          const quotation = sale.quotationId ? loadedQuotations.find(q => q.id === sale.quotationId) : undefined;
+                          const jobOrder = loadedJobOrders.find(j => j.salesOrderId === sale.id);
+                          const invoice = loadedInvoices.find(i => i.salesOrderId === sale.id);
+                          return { salesOrder: sale, quotation, jobOrder, invoice };
+                      });
+                      setRecentTransactions(enrichedTransactions);
+                      setLoading(false);
+                  });
+              });
+          });
+      }, (err) => { console.error(err); toast({ title: "Error", description: "Failed to load dashboard data.", variant: "destructive" });})
+    ];
 
-        const loadedProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        setProducts(loadedProducts);
+    return () => unsubscribes.forEach(unsub => unsub());
 
-        const loadedSales = salesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
-        setSales(loadedSales);
-
-        const loadedQuotations = quotationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
-        const loadedJobOrders = jobOrdersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
-        const loadedInvoices = invoicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
-        
-        const enrichedTransactions = loadedSales.map(sale => {
-            const quotation = sale.quotationId ? loadedQuotations.find(q => q.id === sale.quotationId) : undefined;
-            const jobOrder = loadedJobOrders.find(j => j.salesOrderId === sale.id);
-            const invoice = loadedInvoices.find(i => i.salesOrderId === sale.id);
-
-            return {
-                salesOrder: sale,
-                quotation: quotation,
-                jobOrder: jobOrder,
-                invoice: invoice
-            };
-        });
-
-        setRecentTransactions(enrichedTransactions);
-
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load dashboard data. Please check permissions.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
   }, [toast]);
 
   // Transform sales orders to a flat list of sales for compatibility with existing components

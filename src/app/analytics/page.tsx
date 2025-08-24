@@ -21,7 +21,7 @@ import { Product, SalesOrder, Supplier } from '@/lib/types';
 import SupplierOnTimeChart from '@/components/analytics/supplier-on-time-chart';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 export default function AnalyticsPage() {
   const [dateRange, setDateRange] = useState("30");
@@ -32,33 +32,39 @@ export default function AnalyticsPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const productsRef = collection(db, 'products');
-        const salesRef = collection(db, 'salesOrders');
-        const suppliersRef = collection(db, 'suppliers');
+    const productsRef = collection(db, 'products');
+    const salesRef = collection(db, 'salesOrders');
+    const suppliersRef = collection(db, 'suppliers');
 
-        const productsSnapshot = await getDocs(productsRef);
-        const loadedProducts = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
-        setProducts(loadedProducts);
+    const unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
+      const loadedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+      setProducts(loadedProducts);
+    }, (error) => {
+      console.error("Error fetching products: ", error);
+      toast({ title: "Error", description: "Failed to load product data.", variant: "destructive" });
+    });
 
-        const salesSnapshot = await getDocs(salesRef);
-        const loadedSales = salesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
-        setSales(loadedSales);
+    const unsubscribeSales = onSnapshot(salesRef, (snapshot) => {
+      const loadedSales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
+      setSales(loadedSales);
+    }, (error) => {
+      console.error("Error fetching sales: ", error);
+      toast({ title: "Error", description: "Failed to load sales data.", variant: "destructive" });
+    });
+    
+    const unsubscribeSuppliers = onSnapshot(suppliersRef, (snapshot) => {
+      const loadedSuppliers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
+      setSuppliers(loadedSuppliers);
+    }, (error) => {
+      console.error("Error fetching suppliers: ", error);
+      toast({ title: "Error", description: "Failed to load supplier data.", variant: "destructive" });
+    });
 
-        const suppliersSnapshot = await getDocs(suppliersRef);
-        const loadedSuppliers = suppliersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Supplier));
-        setSuppliers(loadedSuppliers);
-      } catch (error) {
-        console.error("Error fetching data: ", error);
-        toast({
-          title: "Error",
-          description: "Failed to load analytics data. Please check your connection and permissions.",
-          variant: "destructive"
-        })
-      }
-    };
-    fetchData();
+    return () => {
+      unsubscribeProducts();
+      unsubscribeSales();
+      unsubscribeSuppliers();
+    }
   }, [toast]);
 
   useEffect(() => {

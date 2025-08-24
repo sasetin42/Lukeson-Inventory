@@ -11,7 +11,7 @@ import { SalesOrder, Customer, Quotation, JobOrder } from '@/lib/types';
 import SalesOrderFormModal from "@/components/sales-orders/sales-order-form-modal";
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, query, where, getDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp, query, where, getDoc } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SalesOrderTemplate from '@/components/sales-orders/sales-order-template';
@@ -57,50 +57,45 @@ function SalesOrdersContent() {
     }
   }, [fromQuotation, toast]);
 
-  const fetchSalesOrders = async () => {
-    try {
-      const salesOrdersRef = collection(db, 'salesOrders');
-      const quotationsRef = collection(db, 'quotations');
-      const jobOrdersRef = collection(db, 'jobOrders');
+  useEffect(() => {
+    const salesOrdersRef = collection(db, 'salesOrders');
+    const quotationsRef = collection(db, 'quotations');
+    const jobOrdersRef = collection(db, 'jobOrders');
 
-      let q = query(salesOrdersRef);
-
-      if (customerIdFilter) {
-        q = query(salesOrdersRef, where("customerId", "==", customerIdFilter));
-        const customerRef = doc(db, 'customers', customerIdFilter);
-        const customerSnap = await getDoc(customerRef);
-        if (customerSnap.exists()) {
-          setCustomerName(customerSnap.data().name);
-        }
-      }
-      
-      const [soSnapshot, qtnSnapshot, joSnapshot] = await Promise.all([
-        getDocs(q),
-        getDocs(quotationsRef),
-        getDocs(jobOrdersRef),
-      ]);
-
-      const loadedSalesOrders = soSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
-      const loadedQuotations = qtnSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
-      const loadedJobOrders = joSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
-
-      setSalesOrders(loadedSalesOrders);
-      setQuotations(loadedQuotations);
-      setJobOrders(loadedJobOrders);
-
-    } catch (error) {
-      console.error("Error fetching sales orders: ", error);
-      toast({
-        title: "Error",
-        description: "Failed to load sales orders. Please check your connection and permissions.",
-        variant: "destructive",
-        icon: <AlertCircle className="h-5 w-5" />,
+    let q = query(salesOrdersRef);
+    if (customerIdFilter) {
+      q = query(salesOrdersRef, where("customerId", "==", customerIdFilter));
+      getDoc(doc(db, 'customers', customerIdFilter)).then(customerSnap => {
+        if (customerSnap.exists()) setCustomerName(customerSnap.data().name);
       });
     }
-  };
-  
-  useEffect(() => {
-    fetchSalesOrders();
+
+    const unsubSOs = onSnapshot(q, (snapshot) => {
+        setSalesOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder)));
+    }, (error) => {
+        console.error("Error fetching sales orders:", error);
+        toast({ title: "Error", description: "Failed to load sales orders.", variant: "destructive" });
+    });
+
+    const unsubQtns = onSnapshot(quotationsRef, (snapshot) => {
+        setQuotations(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation)));
+    }, (error) => {
+        console.error("Error fetching quotations:", error);
+        toast({ title: "Error", description: "Failed to load quotations.", variant: "destructive" });
+    });
+
+    const unsubJOs = onSnapshot(jobOrdersRef, (snapshot) => {
+        setJobOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder)));
+    }, (error) => {
+        console.error("Error fetching job orders:", error);
+        toast({ title: "Error", description: "Failed to load job orders.", variant: "destructive" });
+    });
+    
+    return () => {
+        unsubSOs();
+        unsubQtns();
+        unsubJOs();
+    };
   }, [customerIdFilter, toast]);
 
   const handleOpenModal = (salesOrder: SalesOrder | null) => {
@@ -147,7 +142,6 @@ function SalesOrdersContent() {
               toast({ title: "Success", description: "Sales Order added successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           }
           handleCloseModal();
-          fetchSalesOrders();
       } catch (error) {
           console.error("Error saving sales order: ", error);
           toast({ title: "Error", description: "Failed to save sales order.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
@@ -158,7 +152,6 @@ function SalesOrdersContent() {
   const handleDeleteSalesOrder = async (salesOrderId: string) => {
     await deleteDoc(doc(db, "salesOrders", salesOrderId));
     toast({ title: "Success", description: "Sales Order deleted successfully.", variant: "destructive", icon: <Trash2 className="h-5 w-5" /> });
-    fetchSalesOrders();
   };
 
   const totalFulfilled = salesOrders.filter(so => so.status === 'Fulfilled').length;
@@ -254,8 +247,6 @@ function SalesOrdersContent() {
             salesOrder={salesOrders.find(so => so.id === viewingJobOrder.salesOrderId)}
             quotation={quotations.find(q => q.id === salesOrders.find(so => so.id === viewingJobOrder.salesOrderId)?.quotationId)}
             onEdit={() => {
-                // This is a bit complex. For now, we just close the modal.
-                // A better solution might involve routing to the job order page with an edit state.
                 handleCloseJoViewModal();
                 toast({title: "Info", description: "To edit a Job Order, please go to the Job Orders page."});
             }}

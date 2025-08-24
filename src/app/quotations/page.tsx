@@ -11,7 +11,7 @@ import QuotationFormModal from '@/components/quotations/quotation-form-modal';
 import QuotationDetailsModal from '@/components/quotations/quotation-details-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import CustomerViewModal from '@/components/customers/customer-view-modal';
 
@@ -26,36 +26,31 @@ export default function QuotationsPage() {
   const [viewingCustomer, setViewingCustomer] = useState<Customer | null>(null);
   const { toast } = useToast();
 
-  const fetchQuotationsAndCustomers = async () => {
-    try {
-      const quotationsRef = collection(db, 'quotations');
-      const customersRef = collection(db, 'customers');
-      
-      const [quotationsSnapshot, customersSnapshot] = await Promise.all([
-        getDocs(quotationsRef),
-        getDocs(customersRef)
-      ]);
-
-      const loadedQuotations = quotationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
-      setQuotations(loadedQuotations);
-
-      const loadedCustomers = customersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer));
-      setCustomers(loadedCustomers);
-
-    } catch (error) {
-      console.error("Error fetching data: ", error);
-      toast({
-        title: "Error",
-        description: "Failed to load data. Please check your connection and permissions.",
-        variant: "destructive",
-        icon: <AlertCircle className="h-5 w-5" />,
-      });
-    }
-  };
-
   useEffect(() => {
-    fetchQuotationsAndCustomers();
-  }, []);
+    const quotationsRef = collection(db, 'quotations');
+    const customersRef = collection(db, 'customers');
+
+    const unsubscribeQtns = onSnapshot(quotationsRef, (snapshot) => {
+        const loadedQuotations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
+        setQuotations(loadedQuotations);
+    }, (error) => {
+        console.error("Error fetching quotations:", error);
+        toast({ title: "Error", description: "Failed to load quotations.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
+    });
+
+    const unsubscribeCustomers = onSnapshot(customersRef, (snapshot) => {
+        const loadedCustomers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer));
+        setCustomers(loadedCustomers);
+    }, (error) => {
+        console.error("Error fetching customers:", error);
+        toast({ title: "Error", description: "Failed to load customers.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
+    });
+
+    return () => {
+        unsubscribeQtns();
+        unsubscribeCustomers();
+    };
+  }, [toast]);
 
   const handleOpenFormModal = (quotation: Quotation | null) => {
     setEditingQuotation(quotation);
@@ -103,7 +98,6 @@ export default function QuotationsPage() {
       }
 
       handleCloseFormModal();
-      fetchQuotationsAndCustomers();
     } catch (error) {
       console.error("Error saving quotation: ", error);
       toast({ title: "Error", description: "Failed to save quotation.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
@@ -114,7 +108,6 @@ export default function QuotationsPage() {
   const handleDeleteQuotation = async (quotationId: string) => {
     await deleteDoc(doc(db, "quotations", quotationId));
     toast({ title: "Success", description: "Quotation deleted successfully.", variant: "destructive" });
-    fetchQuotationsAndCustomers();
   };
 
   const handleApproveQuotation = async (quotation: Quotation) => {
@@ -122,7 +115,6 @@ export default function QuotationsPage() {
     try {
         await setDoc(docRef, { status: 'Accepted', modifiedAt: serverTimestamp() }, { merge: true });
         toast({ title: 'Success', description: `Quotation ${quotation.id} has been approved.`, variant: 'success', icon: <CheckCircle className="h-5 w-5" /> });
-        fetchQuotationsAndCustomers();
     } catch (error) {
         console.error("Error approving quotation: ", error);
         toast({ title: 'Error', description: 'Failed to approve quotation.', variant: 'destructive', icon: <AlertCircle className="h-5 w-5" /> });
