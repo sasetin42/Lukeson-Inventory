@@ -116,7 +116,7 @@ export default function SalesOrderList({ salesOrders, quotations, jobOrders, onE
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Amount</TableHead>
-                                <TableHead>SO Status</TableHead>
+                                <TableHead>Sales Order Status</TableHead>
                                 <TableHead>Job Order Status</TableHead>
                                 <TableHead className="w-[150px] text-center">Actions</TableHead>
                             </TableRow>
