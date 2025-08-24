@@ -240,6 +240,7 @@ function SalesOrdersContent() {
           isOpen={isViewModalOpen}
           onClose={handleCloseViewModal}
           salesOrder={viewingSalesOrder}
+          quotations={quotations}
           jobOrders={jobOrders}
           onEdit={handleOpenModal}
         />

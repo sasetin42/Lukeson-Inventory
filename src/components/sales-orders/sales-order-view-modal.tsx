@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { SalesOrder, JobOrder } from '@/lib/types';
+import { SalesOrder, JobOrder, Quotation } from '@/lib/types';
 import { Button } from '../ui/button';
 import SalesOrderView from './sales-order-view';
 import { Printer, PlusCircle, Edit } from 'lucide-react';
@@ -19,6 +19,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 
 interface SalesOrderViewModalProps {
   salesOrder: SalesOrder | null;
+  quotations: Quotation[];
   jobOrders: JobOrder[];
   isOpen: boolean;
   onClose: () => void;
@@ -27,6 +28,7 @@ interface SalesOrderViewModalProps {
 
 export default function SalesOrderViewModal({
   salesOrder,
+  quotations,
   jobOrders,
   isOpen,
   onClose,
@@ -99,6 +101,8 @@ export default function SalesOrderViewModal({
     tooltipMessage = 'A Job Order for this Sales Order already exists.';
   }
 
+  const quotation = quotations.find(q => q.id === salesOrder?.quotationId);
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -111,7 +115,7 @@ export default function SalesOrderViewModal({
         </DialogHeader>
         <div className="max-h-[70vh] overflow-y-auto p-1">
           <div ref={printableRef}>
-            <SalesOrderView salesOrder={salesOrder} />
+            <SalesOrderView salesOrder={salesOrder} quotation={quotation} />
           </div>
         </div>
         <DialogFooter className="justify-between">

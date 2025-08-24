@@ -2,7 +2,7 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
-import { SalesOrder, VatType } from '@/lib/types';
+import { SalesOrder, VatType, Quotation } from '@/lib/types';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { db } from '@/lib/firebase';
@@ -11,11 +11,12 @@ import { Badge } from '../ui/badge';
 
 interface SalesOrderViewProps {
   salesOrder: SalesOrder;
+  quotation?: Quotation;
 }
 
 const TEMPLATE_DOC_ID = 'salesOrder';
 
-export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
+export default function SalesOrderView({ salesOrder, quotation }: SalesOrderViewProps) {
     const [templateSettings, setTemplateSettings] = useState({
         accentColor: '#0A3BAA',
         companyName: 'YAMASHITA MOLD PHILIPPINES CORPORATION',
@@ -117,6 +118,17 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
                 return 'outline';
         }
     };
+    
+    const getQuotationStatusVariant = (status?: Quotation['status']): "default" | "secondary" | "destructive" | "outline" | "success" => {
+        if (!status) return 'outline';
+        switch (status) {
+            case 'Accepted': return 'success';
+            case 'Sent': return 'secondary';
+            case 'Draft': return 'outline';
+            case 'Expired': return 'destructive';
+            default: return 'outline';
+        }
+    };
 
     return (
         <div className="p-8 bg-white text-black">
@@ -136,7 +148,17 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
                     <p style={{ fontSize: '13px' }}><strong>Date:</strong> {formatDate(salesOrder.orderDate)}</p>
                     <p style={{ fontSize: '13px' }}><strong>Delivery Date:</strong> {formatDate(salesOrder.deliveryDate)}</p>
                     {salesOrder.quotationId && <p style={{ fontSize: '13px' }}><strong>Quotation ID:</strong> {salesOrder.quotationId}</p>}
-                    <Badge variant={getStatusVariant(salesOrder.status)} className="mt-2 text-white">{salesOrder.status}</Badge>
+                    <div className="flex justify-end items-center gap-2 mt-2">
+                        {quotation && (
+                            <>
+                                <span className="text-xs font-semibold">Quotation:</span>
+                                <Badge variant={getQuotationStatusVariant(quotation.status)} className="text-white">{quotation.status}</Badge>
+                                <span className="text-xs font-semibold">|</span>
+                            </>
+                        )}
+                        <span className="text-xs font-semibold">Sales Order:</span>
+                        <Badge variant={getStatusVariant(salesOrder.status)} className="text-white">{salesOrder.status}</Badge>
+                    </div>
                 </div>
             </div>
 
