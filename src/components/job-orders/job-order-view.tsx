@@ -89,8 +89,7 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
             <Separator />
             <div className="flex justify-end items-center gap-4 pt-4">
                 <div className="text-right">
-                    <p className="text-sm text-muted-foreground">Total Amount</p>
-                    <h3 className="text-2xl font-bold">₱{jobOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+                    <p className="text-2xl font-bold">₱{jobOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
             </div>
         </div>
