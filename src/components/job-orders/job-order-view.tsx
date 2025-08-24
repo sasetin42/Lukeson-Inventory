@@ -53,7 +53,7 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         fetchSettings();
     }, []);
 
-    const { companyName, address, phone, website, logo } = templateSettings;
+    const { companyName, address, phone, website, logo, preparedByName, preparedByLabel, receivedByName, receivedByLabel, verifiedByName, verifiedByLabel } = templateSettings;
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -126,6 +126,21 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
                      <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md min-h-[80px]">
                         {salesOrder?.notes || 'No sales order notes available.'}
                     </p>
+                </div>
+            </div>
+
+            <div className="flex justify-between mt-24 text-center">
+                <div>
+                    <p className="font-bold">{preparedByName}</p>
+                    <p className="text-sm border-t border-black pt-1 mt-1">{preparedByLabel}</p>
+                </div>
+                    <div>
+                    <p className="font-bold">{receivedByName}</p>
+                    <p className="text-sm border-t border-black pt-1 mt-1">{receivedByLabel}</p>
+                </div>
+                    <div>
+                    <p className="font-bold">{verifiedByName}</p>
+                    <p className="text-sm border-t border-black pt-1 mt-1">{verifiedByLabel}</p>
                 </div>
             </div>
         </div>
