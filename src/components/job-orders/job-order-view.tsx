@@ -162,22 +162,22 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
             </div>
             <Separator />
             <div className="space-y-1 py-2">
-                <h4 className="font-semibold text-xs">Line Items</h4>
+                <h4 className="font-semibold text-sm">Line Items</h4>
                 <div className="border rounded-md">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead style={{ backgroundColor: '#578C00', color: '#FFFFFF' }} className="py-1 px-2 text-xs h-auto">Product</TableHead>
-                                <TableHead className="text-right py-1 px-2 text-xs h-auto" style={{ backgroundColor: '#578C00', color: '#FFFFFF' }}>Qty</TableHead>
-                                <TableHead className="text-right py-1 px-2 text-xs h-auto" style={{ backgroundColor: '#578C00', color: '#FFFFFF' }}>UOM</TableHead>
+                                <TableHead style={{ backgroundColor: '#578C00', color: '#FFFFFF' }} className="py-2 px-3 text-sm h-auto">Product</TableHead>
+                                <TableHead className="text-right py-2 px-3 text-sm h-auto" style={{ backgroundColor: '#578C00', color: '#FFFFFF' }}>Qty</TableHead>
+                                <TableHead className="text-right py-2 px-3 text-sm h-auto" style={{ backgroundColor: '#578C00', color: '#FFFFFF' }}>UOM</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {jobOrder.lines.map((line, index) => (
                                 <TableRow key={index}>
-                                    <TableCell className="py-1 px-2">{line.description}</TableCell>
-                                    <TableCell className="text-right py-1 px-2">{line.quantity}</TableCell>
-                                    <TableCell className="text-right py-1 px-2">{line.uom}</TableCell>
+                                    <TableCell className="py-2 px-3 text-sm">{line.description}</TableCell>
+                                    <TableCell className="text-right py-2 px-3 text-sm">{line.quantity}</TableCell>
+                                    <TableCell className="text-right py-2 px-3 text-sm">{line.uom}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
