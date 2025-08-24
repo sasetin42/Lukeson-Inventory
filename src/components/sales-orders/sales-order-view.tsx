@@ -102,10 +102,10 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     };
 
-    const getStatusVariant = (status: SalesOrder['status']): "default" | "secondary" | "destructive" | "outline" | "success" | "confirmed" => {
+    const getStatusVariant = (status: SalesOrder['status']): "fulfilled" | "secondary" | "destructive" | "outline" | "success" | "confirmed" => {
         switch (status) {
             case 'Fulfilled':
-                return 'success';
+                return 'fulfilled';
             case 'Confirmed':
                 return 'confirmed';
             case 'Draft':

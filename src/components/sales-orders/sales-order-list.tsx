@@ -49,14 +49,14 @@ export default function SalesOrderList({ salesOrders, quotations, jobOrders, onD
         }
     };
     
-    const getStatusVariant = (status: SalesOrder['status']): "default" | "secondary" | "destructive" | "outline" | "success" | "confirmed" => {
+    const getStatusVariant = (status: SalesOrder['status']): "fulfilled" | "secondary" | "destructive" | "outline" | "success" | "confirmed" | "draft" => {
         switch (status) {
             case 'Fulfilled':
-                return 'default';
+                return 'fulfilled';
             case 'Confirmed':
                 return 'confirmed';
             case 'Draft':
-                return 'outline';
+                return 'draft';
             case 'Cancelled':
                 return 'destructive';
             case 'Invoiced':
@@ -82,10 +82,10 @@ export default function SalesOrderList({ salesOrders, quotations, jobOrders, onD
         }
     };
 
-    const getJobOrderStatusVariant = (status?: JobOrder['status']): "success" | "secondary" | "destructive" | "outline" | "inProgress" => {
+    const getJobOrderStatusVariant = (status?: JobOrder['status']): "completed" | "secondary" | "destructive" | "outline" | "inProgress" => {
         if (!status) return 'outline';
         switch (status) {
-            case 'Completed': return 'success';
+            case 'Completed': return 'completed';
             case 'In Progress': return 'inProgress';
             case 'Scheduled': return 'secondary';
             case 'Draft':

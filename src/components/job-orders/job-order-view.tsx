@@ -61,12 +61,12 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     };
     
-    const getStatusVariant = (status: JobOrder['status']): "success" | "secondary" | "destructive" | "outline" | "inProgress" => {
+    const getStatusVariant = (status: JobOrder['status']): "completed" | "secondary" | "destructive" | "outline" | "inProgress" | "draft" => {
         switch (status) {
-            case 'Completed': return 'success';
+            case 'Completed': return 'completed';
             case 'In Progress': return 'inProgress';
             case 'Scheduled': return 'secondary';
-            case 'Draft': 
+            case 'Draft': return 'draft';
             case 'On Hold': return 'outline';
             case 'Cancelled': return 'destructive';
             default: return 'outline';
@@ -84,10 +84,10 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         }
     };
 
-    const getSalesOrderStatusVariant = (status?: SalesOrder['status']): "default" | "secondary" | "destructive" | "outline" | "success" | "confirmed" => {
+    const getSalesOrderStatusVariant = (status?: SalesOrder['status']): "fulfilled" | "secondary" | "destructive" | "outline" | "success" | "confirmed" => {
         if (!status) return 'outline';
         switch (status) {
-            case 'Fulfilled': return 'success';
+            case 'Fulfilled': return 'fulfilled';
             case 'Confirmed': return 'confirmed';
             case 'Draft': return 'outline';
             case 'Cancelled': return 'destructive';
