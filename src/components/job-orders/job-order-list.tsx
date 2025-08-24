@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2, Eye, User } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, User, Search } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { format } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Input } from '../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 interface JobOrderListProps {
     jobOrders: JobOrder[];
@@ -29,9 +31,25 @@ interface JobOrderListProps {
     onDelete: (jobOrderId: string) => void;
     onView: (jobOrder: JobOrder) => void;
     onViewCustomer: (customer: Customer) => void;
+    searchQuery: string;
+    setSearchQuery: (query: string) => void;
+    statusFilter: string;
+    setStatusFilter: (status: string) => void;
 }
 
-export default function JobOrderList({ jobOrders, salesOrders, customers, onEdit, onDelete, onView, onViewCustomer }: JobOrderListProps) {
+export default function JobOrderList({ 
+    jobOrders, 
+    salesOrders, 
+    customers, 
+    onEdit, 
+    onDelete, 
+    onView, 
+    onViewCustomer,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter
+}: JobOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [jobOrderToDelete, setJobOrderToDelete] = useState<JobOrder | null>(null);
 
@@ -81,6 +99,31 @@ export default function JobOrderList({ jobOrders, salesOrders, customers, onEdit
                 <CardHeader>
                     <CardTitle>Job Orders</CardTitle>
                     <CardDescription>A list of all your job orders.</CardDescription>
+                     <div className="flex items-center gap-2 pt-4">
+                        <div className="relative w-full">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search by Job Order ID or Customer..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-8 sm:w-1/2"
+                            />
+                        </div>
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Statuses</SelectItem>
+                                <SelectItem value="Draft">Draft</SelectItem>
+                                <SelectItem value="Scheduled">Scheduled</SelectItem>
+                                <SelectItem value="In Progress">In Progress</SelectItem>
+                                <SelectItem value="On Hold">On Hold</SelectItem>
+                                <SelectItem value="Completed">Completed</SelectItem>
+                                <SelectItem value="Cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Table>

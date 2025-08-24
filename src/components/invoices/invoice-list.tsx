@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 
 interface InvoiceListProps {
     invoices: Invoice[];
@@ -31,38 +32,51 @@ export default function InvoiceList({ invoices }: InvoiceListProps) {
     };
   
     return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {invoices.map((invoice) => (
-        <Card key={invoice.id}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div className="grid gap-1">
-                <CardTitle className="text-lg">{invoice.id}</CardTitle>
-                <CardDescription>{invoice.customerName}</CardDescription>
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>View Details</DropdownMenuItem>
-                <DropdownMenuItem>Mark as Paid</DropdownMenuItem>
-                <DropdownMenuItem>Delete</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <span>Due Date: {format(invoice.date, 'PP')}</span>
-              <Badge variant={getStatusVariant(invoice.status)}>{invoice.status}</Badge>
-            </div>
-            <div className="text-lg font-semibold text-right">
-              ₱{invoice.amount.toFixed(2)}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead>Invoice ID</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Due Date</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {invoices.map((invoice) => (
+                    <TableRow key={invoice.id}>
+                        <TableCell className="font-medium">{invoice.id}</TableCell>
+                        <TableCell>{invoice.customerName}</TableCell>
+                        <TableCell>{format(invoice.date, 'PP')}</TableCell>
+                        <TableCell>₱{invoice.amount.toFixed(2)}</TableCell>
+                        <TableCell>
+                            <Badge variant={getStatusVariant(invoice.status)}>{invoice.status}</Badge>
+                        </TableCell>
+                        <TableCell>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem>View Details</DropdownMenuItem>
+                                    <DropdownMenuItem>Mark as Paid</DropdownMenuItem>
+                                    <DropdownMenuItem>Delete</DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </TableCell>
+                    </TableRow>
+                ))}
+                {invoices.length === 0 && (
+                    <TableRow>
+                        <TableCell colSpan={6} className="h-24 text-center">
+                            No invoices found.
+                        </TableCell>
+                    </TableRow>
+                )}
+            </TableBody>
+        </Table>
+    );
 }

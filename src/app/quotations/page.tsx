@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileText, PlusCircle, HelpCircle, Check, Clock, DollarSign, CheckCircle, AlertCircle } from "lucide-react";
+import { FileText, PlusCircle, Check, Clock, DollarSign, CheckCircle, AlertCircle, Search } from "lucide-react";
 import QuotationList from "@/components/quotations/quotation-list";
 import { Quotation, Customer, SalesOrder, JobOrder } from '@/lib/types';
 import QuotationFormModal from '@/components/quotations/quotation-form-modal';
@@ -16,6 +16,8 @@ import KpiCard from '@/components/kpi-card';
 import CustomerViewModal from '@/components/customers/customer-view-modal';
 import SalesOrderViewModal from '@/components/sales-orders/sales-order-view-modal';
 import JobOrderViewModal from '@/components/job-orders/job-order-view-modal';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function QuotationsPage() {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
@@ -34,6 +36,8 @@ export default function QuotationsPage() {
   const [viewingSalesOrder, setViewingSalesOrder] = useState<SalesOrder | null>(null);
   const [viewingJobOrder, setViewingJobOrder] = useState<JobOrder | null>(null);
   const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     const quotationsRef = collection(db, 'quotations');
@@ -81,6 +85,16 @@ export default function QuotationsPage() {
         unsubscribeJobOrders();
     };
   }, [toast]);
+
+  const filteredQuotations = useMemo(() => {
+    return quotations.filter(quotation => {
+      const matchesSearch =
+        quotation.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (quotation.customerName && quotation.customerName.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesStatus = statusFilter === 'all' || quotation.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [quotations, searchQuery, statusFilter]);
 
   const handleOpenFormModal = (quotation: Quotation | null) => {
     setEditingQuotation(quotation);
@@ -213,7 +227,7 @@ export default function QuotationsPage() {
         ))}
       </div>
       <QuotationList
-        quotations={quotations}
+        quotations={filteredQuotations}
         customers={customers}
         salesOrders={salesOrders}
         onView={handleOpenDetailsModal}
@@ -222,6 +236,10 @@ export default function QuotationsPage() {
         onApprove={handleApproveQuotation}
         onViewCustomer={handleOpenCustomerModal}
         onViewSalesOrder={handleOpenSalesOrderModal}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
       />
       {isFormModalOpen && (
         <QuotationFormModal

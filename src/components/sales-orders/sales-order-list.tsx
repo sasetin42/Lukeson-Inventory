@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2, Eye, AlertCircle } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, AlertCircle, Search } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +21,8 @@ import {
 import { format } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
+import { Input } from '../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 interface SalesOrderListProps {
     salesOrders: SalesOrder[];
@@ -30,9 +32,25 @@ interface SalesOrderListProps {
     onView: (salesOrder: SalesOrder) => void;
     onViewJobOrder: (jobOrder: JobOrder) => void;
     onViewQuotation: (quotation: Quotation) => void;
+    searchQuery: string;
+    setSearchQuery: (query: string) => void;
+    statusFilter: string;
+    setStatusFilter: (status: string) => void;
 }
 
-export default function SalesOrderList({ salesOrders, quotations, jobOrders, onDelete, onView, onViewJobOrder, onViewQuotation }: SalesOrderListProps) {
+export default function SalesOrderList({ 
+    salesOrders, 
+    quotations, 
+    jobOrders, 
+    onDelete, 
+    onView, 
+    onViewJobOrder, 
+    onViewQuotation,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter
+}: SalesOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [salesOrderToDelete, setSalesOrderToDelete] = useState<SalesOrder | null>(null);
     const { toast } = useToast();
@@ -108,6 +126,30 @@ export default function SalesOrderList({ salesOrders, quotations, jobOrders, onD
                 <CardHeader>
                     <CardTitle>Sales Orders</CardTitle>
                     <CardDescription>A list of all your sales orders. (e.g. SO-2025-001)</CardDescription>
+                    <div className="flex items-center gap-2 pt-4">
+                        <div className="relative w-full">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search by SO ID, Quotation ID, or Customer..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-8 sm:w-1/2"
+                            />
+                        </div>
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Statuses</SelectItem>
+                                <SelectItem value="Draft">Draft</SelectItem>
+                                <SelectItem value="Confirmed">Confirmed</SelectItem>
+                                <SelectItem value="Fulfilled">Fulfilled</SelectItem>
+                                <SelectItem value="Invoiced">Invoiced</SelectItem>
+                                <SelectItem value="Cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </CardHeader>
                 <CardContent className="overflow-x-auto">
                     <Table className="min-w-[800px]">

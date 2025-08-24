@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign, AlertCircle, Trash2 } from "lucide-react";
+import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign, AlertCircle, Trash2, Search } from "lucide-react";
 import SalesOrderList from "@/components/sales-orders/sales-order-list";
 import { SalesOrder, Customer, Quotation, JobOrder } from '@/lib/types';
 import SalesOrderFormModal from "@/components/sales-orders/sales-order-form-modal";
@@ -18,6 +18,8 @@ import SalesOrderTemplate from '@/components/sales-orders/sales-order-template';
 import SalesOrderViewModal from '@/components/sales-orders/sales-order-view-modal';
 import JobOrderViewModal from '@/components/job-orders/job-order-view-modal';
 import QuotationDetailsModal from '@/components/quotations/quotation-details-modal';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 function SalesOrdersContent() {
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
@@ -36,6 +38,8 @@ function SalesOrdersContent() {
   const customerIdFilter = searchParams.get('customerId');
   const fromQuotation = searchParams.get('fromQuotation');
   const [customerName, setCustomerName] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     if (fromQuotation) {
@@ -100,6 +104,17 @@ function SalesOrdersContent() {
         unsubJOs();
     };
   }, [customerIdFilter, toast]);
+
+  const filteredSalesOrders = useMemo(() => {
+    return salesOrders.filter(so => {
+      const matchesSearch =
+        so.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (so.quotationId && so.quotationId.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (so.customerName && so.customerName.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesStatus = statusFilter === 'all' || so.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [salesOrders, searchQuery, statusFilter]);
 
   const handleOpenModal = (salesOrder: SalesOrder | null) => {
     setEditingSalesOrder(salesOrder);
@@ -215,13 +230,17 @@ function SalesOrdersContent() {
           </div>
           <div className="mt-4">
             <SalesOrderList
-                salesOrders={salesOrders}
+                salesOrders={filteredSalesOrders}
                 quotations={quotations}
                 jobOrders={jobOrders}
                 onDelete={handleDeleteSalesOrder}
                 onView={handleOpenViewModal}
                 onViewJobOrder={handleOpenJoViewModal}
                 onViewQuotation={handleOpenQtnViewModal}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
             />
           </div>
         </TabsContent>
@@ -276,6 +295,7 @@ function SalesOrdersContent() {
               toast({title: "Info", description: "To edit a Quotation, please go to the Quotations page."});
           }}
           quotation={viewingQuotation}
+          salesOrders={salesOrders}
         />
       )}
     </div>

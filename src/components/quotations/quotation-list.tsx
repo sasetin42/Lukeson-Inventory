@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2, Eye, CheckCircle, User } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, CheckCircle, User, Search } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +21,8 @@ import {
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Input } from '../ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 interface QuotationListProps {
     quotations: Quotation[];
@@ -32,9 +34,27 @@ interface QuotationListProps {
     onApprove: (quotation: Quotation) => void;
     onViewCustomer: (customer: Customer) => void;
     onViewSalesOrder: (salesOrder: SalesOrder) => void;
+    searchQuery: string;
+    setSearchQuery: (query: string) => void;
+    statusFilter: string;
+    setStatusFilter: (status: string) => void;
 }
 
-export default function QuotationList({ quotations, customers, salesOrders, onView, onEdit, onDelete, onApprove, onViewCustomer, onViewSalesOrder }: QuotationListProps) {
+export default function QuotationList({ 
+    quotations, 
+    customers, 
+    salesOrders, 
+    onView, 
+    onEdit, 
+    onDelete, 
+    onApprove, 
+    onViewCustomer, 
+    onViewSalesOrder,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter
+}: QuotationListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [quotationToDelete, setQuotationToDelete] = useState<Quotation | null>(null);
     const [isApproveAlertOpen, setIsApproveAlertOpen] = useState(false);
@@ -117,6 +137,29 @@ export default function QuotationList({ quotations, customers, salesOrders, onVi
                 <CardHeader>
                     <CardTitle>Quotations</CardTitle>
                     <CardDescription>A list of all your quotations.</CardDescription>
+                    <div className="flex items-center gap-2 pt-4">
+                        <div className="relative w-full">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search by Quotation ID or Customer..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-8 sm:w-1/2"
+                            />
+                        </div>
+                        <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Statuses</SelectItem>
+                                <SelectItem value="Draft">Draft</SelectItem>
+                                <SelectItem value="Sent">Sent</SelectItem>
+                                <SelectItem value="Accepted">Accepted</SelectItem>
+                                <SelectItem value="Expired">Expired</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <TooltipProvider>

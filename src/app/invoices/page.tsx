@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { FileText, PlusCircle, DollarSign, CheckCircle, XCircle } from "lucide-react";
+import { FileText, PlusCircle, DollarSign, CheckCircle, XCircle, Search } from "lucide-react";
 import InvoiceList from "@/components/invoices/invoice-list";
 import { Invoice } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
@@ -13,10 +13,14 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InvoiceTemplate from '@/components/invoices/invoice-template';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const { toast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     const invoicesRef = collection(db, 'invoices');
@@ -34,6 +38,16 @@ export default function InvoicesPage() {
 
     return () => unsubscribe();
   }, [toast]);
+
+  const filteredInvoices = useMemo(() => {
+    return invoices.filter(invoice => {
+      const matchesSearch =
+        invoice.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (invoice.customerName && invoice.customerName.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [invoices, searchQuery, statusFilter]);
   
   const totalInvoiced = invoices.reduce((acc, inv) => acc + inv.amount, 0);
   const totalPaid = invoices.filter(inv => inv.status === 'Paid').reduce((acc, inv) => acc + inv.amount, 0);
@@ -79,7 +93,38 @@ export default function InvoicesPage() {
             ))}
         </div>
         <div className="mt-4">
-            <InvoiceList invoices={invoices} />
+            <Card>
+              <CardHeader>
+                  <CardTitle>Invoice List</CardTitle>
+                  <CardDescription>A list of all your sales invoices.</CardDescription>
+                  <div className="flex items-center gap-2 pt-4">
+                      <div className="relative w-full">
+                          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                          <Input
+                              placeholder="Search by Invoice ID or Customer..."
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              className="pl-8 sm:w-1/2"
+                          />
+                      </div>
+                      <Select value={statusFilter} onValueChange={setStatusFilter}>
+                          <SelectTrigger className="w-[180px]">
+                              <SelectValue placeholder="Filter by status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="all">All Statuses</SelectItem>
+                              <SelectItem value="Paid">Paid</SelectItem>
+                              <SelectItem value="Pending">Pending</SelectItem>
+                              <SelectItem value="Overdue">Overdue</SelectItem>
+                              <SelectItem value="Draft">Draft</SelectItem>
+                          </SelectContent>
+                      </Select>
+                  </div>
+              </CardHeader>
+              <CardContent>
+                  <InvoiceList invoices={filteredInvoices} />
+              </CardContent>
+          </Card>
         </div>
         </TabsContent>
         <TabsContent value="templates" className="mt-4">

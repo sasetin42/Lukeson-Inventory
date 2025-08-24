@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, DollarSign, CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
+import { PlusCircle, DollarSign, CheckCircle, Clock, XCircle, AlertCircle, Search } from "lucide-react";
 import JobOrderList from "@/components/job-orders/job-order-list";
 import { JobOrder, Quotation, SalesOrder, Customer } from '@/lib/types';
 import JobOrderFormModal from '@/components/job-orders/job-order-form-modal';
@@ -17,6 +17,8 @@ import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import JobOrderSettings from '@/components/job-orders/job-order-settings';
 import CustomerViewModal from '@/components/customers/customer-view-modal';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 function JobOrdersContent() {
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
@@ -31,6 +33,8 @@ function JobOrdersContent() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const fromSalesOrder = searchParams.get('fromSalesOrder');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     if (fromSalesOrder) {
@@ -100,6 +104,16 @@ function JobOrdersContent() {
         unsubscribeCustomers();
     };
   }, [toast]);
+
+  const filteredJobOrders = useMemo(() => {
+    return jobOrders.filter(jo => {
+      const matchesSearch =
+        jo.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (jo.customerName && jo.customerName.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesStatus = statusFilter === 'all' || jo.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [jobOrders, searchQuery, statusFilter]);
 
   const handleOpenFormModal = (jobOrder: JobOrder | null) => {
     setEditingJobOrder(jobOrder);
@@ -236,13 +250,17 @@ function JobOrdersContent() {
           </div>
           <div className="mt-4">
             <JobOrderList 
-              jobOrders={jobOrders} 
+              jobOrders={filteredJobOrders} 
               salesOrders={salesOrders}
               customers={customers}
               onEdit={handleOpenFormModal}
               onDelete={handleDeleteJobOrder}
               onView={handleOpenViewModal}
               onViewCustomer={handleOpenCustomerModal}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
             />
           </div>
         </TabsContent>
