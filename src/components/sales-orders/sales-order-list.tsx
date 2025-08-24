@@ -169,14 +169,6 @@ export default function SalesOrderList({ salesOrders, quotations, jobOrders, onE
                                                 </Tooltip>
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
-                                                        <Button variant="ghost" size="icon" onClick={() => onEdit(salesOrder)}>
-                                                            <Edit className="h-4 w-4 text-green-500" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>Edit Sales Order</TooltipContent>
-                                                </Tooltip>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
                                                          <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => openDeleteAlert(salesOrder)}>
                                                             <Trash2 className="h-4 w-4" />
                                                         </Button>
