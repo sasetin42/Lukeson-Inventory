@@ -51,7 +51,6 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
                                 <TableHead className="text-right">UOM</TableHead>
                                 <TableHead className="text-right">Unit Price</TableHead>
                                 <TableHead className="text-right">Tax</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -62,7 +61,6 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
                                     <TableCell className="text-right">{line.uom}</TableCell>
                                     <TableCell className="text-right">₱{line.unitPrice.toFixed(2)}</TableCell>
                                     <TableCell className="text-right">{(line.taxRate * 100).toFixed(0)}%</TableCell>
-                                    <TableCell className="text-right">₱{line.total.toFixed(2)}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -83,13 +81,6 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
                      <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md min-h-[80px]">
                         {salesOrder?.notes || 'No sales order notes available.'}
                     </p>
-                </div>
-            </div>
-            
-            <Separator />
-            <div className="flex justify-end items-center gap-4 pt-4">
-                <div className="text-right">
-                    <p className="text-2xl font-bold">₱{jobOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
             </div>
         </div>
