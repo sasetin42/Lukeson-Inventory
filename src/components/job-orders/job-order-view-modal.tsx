@@ -140,7 +140,7 @@ export default function JobOrderViewModal({
                 <Button
                     variant="outline"
                     onClick={handleEdit}
-                    className="bg-[#2C2C2C] text-white hover:bg-[#151515]"
+                    className="bg-[#2C2C2C] text-white hover:bg-[#151515] hover:text-white"
                 >
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
