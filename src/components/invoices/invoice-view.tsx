@@ -56,6 +56,8 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         if (!date) return 'N/A';
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     };
+    
+    const totalSales = invoice.lines.reduce((acc, line) => acc + line.total, 0);
 
     return (
         <div className="p-8 bg-white text-black">
@@ -104,8 +106,20 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
             </table>
             
             <div className="flex justify-end mt-4">
-                <div className="w-1/2 text-sm">
-                     <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
+                <div className="w-1/2 text-sm space-y-1">
+                    {showVat && (
+                        <>
+                            <div className="flex justify-between"><span>Vatable Sales:</span> <span>₱{(invoice.vatableSales || 0).toFixed(2)}</span></div>
+                            <div className="flex justify-between"><span>VAT-Exempt Sales:</span> <span>₱{(invoice.vatExemptSales || 0).toFixed(2)}</span></div>
+                            <div className="flex justify-between"><span>Zero-Rated Sales:</span> <span>₱{(invoice.zeroRatedSales || 0).toFixed(2)}</span></div>
+                            <Separator className="my-1"/>
+                        </>
+                    )}
+                    <div className="flex justify-between font-bold"><span>Total Sales:</span> <span>₱{totalSales.toFixed(2)}</span></div>
+                    <div className="flex justify-between"><span>Discount:</span> <span>- ₱{(invoice.discountValue || 0).toFixed(2)}</span></div>
+                     <div className="flex justify-between"><span>Subtotal:</span> <span>₱{(totalSales - (invoice.discountValue || 0)).toFixed(2)}</span></div>
+                    {showVat && <div className="flex justify-between"><span>VAT (12%):</span> <span>₱{(invoice.vatAmount || 0).toFixed(2)}</span></div>}
+                    <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
                         <span>Total Amount Due:</span>
                         <span>₱{invoice.amount.toFixed(2)}</span>
                     </div>

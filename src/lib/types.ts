@@ -162,6 +162,12 @@ export type Invoice = {
     balance: number;
     lines: DocumentLine[];
     notes?: string;
+    discountType?: 'Fixed' | 'Percent';
+    discountValue?: number;
+    vatableSales?: number;
+    vatExemptSales?: number;
+    zeroRatedSales?: number;
+    vatAmount?: number;
 };
 
 
