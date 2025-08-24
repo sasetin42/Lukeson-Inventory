@@ -7,7 +7,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, DollarSign, CheckCircle, Clock, XCircle, AlertCircle } from "lucide-react";
 import JobOrderList from "@/components/job-orders/job-order-list";
-import { JobOrder, Quotation, SalesOrder } from '@/lib/types';
+import { JobOrder, Quotation, SalesOrder, Customer } from '@/lib/types';
 import JobOrderFormModal from '@/components/job-orders/job-order-form-modal';
 import JobOrderViewModal from '@/components/job-orders/job-order-view-modal';
 import { useToast } from '@/hooks/use-toast';
@@ -16,14 +16,18 @@ import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import JobOrderSettings from '@/components/job-orders/job-order-settings';
+import CustomerViewModal from '@/components/customers/customer-view-modal';
 
 function JobOrdersContent() {
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
   const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingJobOrder, setEditingJobOrder] = useState<JobOrder | null>(null);
   const [viewingJobOrder, setViewingJobOrder] = useState<JobOrder | null>(null);
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [viewingCustomer, setViewingCustomer] = useState<Customer | null>(null);
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const fromSalesOrder = searchParams.get('fromSalesOrder');
@@ -55,6 +59,7 @@ function JobOrdersContent() {
     const joRef = collection(db, 'jobOrders');
     const soRef = collection(db, 'salesOrders');
     const qtnRef = collection(db, 'quotations');
+    const customersRef = collection(db, 'customers');
 
     const unsubscribeJOs = onSnapshot(joRef, (snapshot) => {
         const loadedJOs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
@@ -80,10 +85,19 @@ function JobOrdersContent() {
         toast({ title: "Error", description: "Failed to load quotations.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
     });
 
+    const unsubscribeCustomers = onSnapshot(customersRef, (snapshot) => {
+        const loadedCustomers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer));
+        setCustomers(loadedCustomers);
+    }, (error) => {
+        console.error("Error fetching customers:", error);
+        toast({ title: "Error", description: "Failed to load customers.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
+    });
+
     return () => {
         unsubscribeJOs();
         unsubscribeSOs();
         unsubscribeQtns();
+        unsubscribeCustomers();
     };
   }, [toast]);
 
@@ -103,6 +117,16 @@ function JobOrdersContent() {
   
   const handleCloseViewModal = () => {
     setViewingJobOrder(null);
+  }
+
+  const handleOpenCustomerModal = (customer: Customer) => {
+    setViewingCustomer(customer);
+    setIsCustomerModalOpen(true);
+  }
+
+  const handleCloseCustomerModal = () => {
+    setIsCustomerModalOpen(false);
+    setViewingCustomer(null);
   }
 
   const handleSaveJobOrder = async (jobOrderData: Omit<JobOrder, 'id'> & {id?: string}) => {
@@ -133,7 +157,7 @@ function JobOrdersContent() {
                     break;
                 case 'In Progress':
                     soUpdate = { status: 'Confirmed', modifiedAt: serverTimestamp() };
-                    soToastMessage = `Sales Order ${jobOrderData.salesOrderId} has been reverted to Confirmed.`;
+                    soToastMessage = `Sales Order ${jobOrderData.salesOrderId} is now Confirmed.`;
                     break;
                 case 'Draft':
                 case 'Scheduled':
@@ -214,9 +238,11 @@ function JobOrdersContent() {
             <JobOrderList 
               jobOrders={jobOrders} 
               salesOrders={salesOrders}
+              customers={customers}
               onEdit={handleOpenFormModal}
               onDelete={handleDeleteJobOrder}
               onView={handleOpenViewModal}
+              onViewCustomer={handleOpenCustomerModal}
             />
           </div>
         </TabsContent>
@@ -241,6 +267,13 @@ function JobOrdersContent() {
             quotation={viewingQuotation}
             onEdit={handleOpenFormModal}
           />
+      )}
+      {isCustomerModalOpen && (
+        <CustomerViewModal
+            isOpen={isCustomerModalOpen}
+            onClose={handleCloseCustomerModal}
+            customer={viewingCustomer}
+        />
       )}
     </div>
   );

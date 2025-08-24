@@ -2,12 +2,12 @@
 'use client'
 
 import { useState } from 'react';
-import { JobOrder, SalesOrder } from '@/lib/types';
+import { JobOrder, SalesOrder, Customer } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, User } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,12 +24,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 interface JobOrderListProps {
     jobOrders: JobOrder[];
     salesOrders: SalesOrder[];
+    customers: Customer[];
     onEdit: (jobOrder: JobOrder) => void;
     onDelete: (jobOrderId: string) => void;
     onView: (jobOrder: JobOrder) => void;
+    onViewCustomer: (customer: Customer) => void;
 }
 
-export default function JobOrderList({ jobOrders, salesOrders, onEdit, onDelete, onView }: JobOrderListProps) {
+export default function JobOrderList({ jobOrders, salesOrders, customers, onEdit, onDelete, onView, onViewCustomer }: JobOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [jobOrderToDelete, setJobOrderToDelete] = useState<JobOrder | null>(null);
 
@@ -66,6 +68,13 @@ export default function JobOrderList({ jobOrders, salesOrders, onEdit, onDelete,
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     }
 
+    const handleViewCustomer = (customerId: string) => {
+        const customer = customers.find(c => c.id === customerId);
+        if (customer) {
+            onViewCustomer(customer);
+        }
+    }
+
     return (
         <>
             <Card>
@@ -93,7 +102,12 @@ export default function JobOrderList({ jobOrders, salesOrders, onEdit, onDelete,
                                     return (
                                     <TableRow key={jobOrder.id}>
                                         <TableCell className="font-medium">{jobOrder.id}</TableCell>
-                                        <TableCell>{jobOrder.customerName}</TableCell>
+                                        <TableCell>
+                                            <Button className="bg-[#2463EB] text-white hover:bg-[#2463EB]/90 px-2 py-1 h-auto text-sm" onClick={() => handleViewCustomer(jobOrder.customerId)}>
+                                                <User className="h-4 w-4 mr-2" />
+                                                {jobOrder.customerName}
+                                            </Button>
+                                        </TableCell>
                                         <TableCell>{formatDate(jobOrder.jobOrderDate)}</TableCell>
                                         <TableCell>{formatDate(jobOrder.expectedCompletionDate)}</TableCell>
                                         <TableCell>{salesOrder ? formatDate(salesOrder.deliveryDate) : 'N/A'}</TableCell>
