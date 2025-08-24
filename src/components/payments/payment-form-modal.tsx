@@ -94,10 +94,8 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
         try {
             const fileUrl = await uploadFile();
             await onSave(invoice.id, paymentMethod, fileUrl);
-            onClose();
         } catch (error) {
             toast({ title: "Error", description: "Failed to upload transaction proof.", variant: "destructive" });
-        } finally {
             setIsSaving(false);
         }
     };
@@ -106,7 +104,6 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
         setIsSaving(true);
         try {
             await onSave(invoice.id, undefined, undefined);
-            onClose();
         } catch (error) {
             console.error("Error marking as posted:", error);
         } finally {
@@ -154,13 +151,13 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
                              </div>
                          ) : (
                             <div className="flex items-center justify-center w-full">
-                                <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80`}>
+                                <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isSaving ? 'cursor-not-allowed bg-muted/50' : 'cursor-pointer bg-muted hover:bg-muted/80'}`}>
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                         <Upload className="w-8 h-8 mb-4 text-primary" />
                                         <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                                         <p className="text-xs text-muted-foreground">PNG, JPG, or PDF (MAX. 5MB)</p>
                                     </div>
-                                    <Input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} accept="image/jpeg,image/png,application/pdf" />
+                                    <Input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} accept="image/jpeg,image/png,application/pdf" disabled={isSaving} />
                                 </label>
                             </div>
                          )}
