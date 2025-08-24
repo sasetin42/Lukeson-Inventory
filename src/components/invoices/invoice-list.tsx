@@ -23,12 +23,24 @@ export default function InvoiceList({ invoices }: InvoiceListProps) {
             case 'Paid':
                 return 'success';
             case 'Pending':
+            case 'Posted':
                 return 'secondary';
             case 'Overdue':
                 return 'destructive';
             default:
                 return 'outline';
         }
+    };
+
+    const formatDate = (date: any): string => {
+        if (!date) return 'N/A';
+        if (date.toDate) { // Firestore Timestamp
+            return format(date.toDate(), 'PP');
+        }
+        if (typeof date === 'string' || date instanceof Date) {
+            return format(new Date(date), 'PP');
+        }
+        return 'Invalid Date';
     };
   
     return (
@@ -48,7 +60,7 @@ export default function InvoiceList({ invoices }: InvoiceListProps) {
                     <TableRow key={invoice.id}>
                         <TableCell className="font-medium">{invoice.id}</TableCell>
                         <TableCell>{invoice.customerName}</TableCell>
-                        <TableCell>{format(invoice.date, 'PP')}</TableCell>
+                        <TableCell>{formatDate(invoice.dueDate)}</TableCell>
                         <TableCell>₱{invoice.amount.toFixed(2)}</TableCell>
                         <TableCell>
                             <Badge variant={getStatusVariant(invoice.status)}>{invoice.status}</Badge>
