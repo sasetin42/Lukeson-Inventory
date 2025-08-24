@@ -6,7 +6,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle, DollarSign, CheckCircle, XCircle, Search, AlertCircle } from "lucide-react";
 import InvoiceList from "@/components/invoices/invoice-list";
-import { Invoice } from '@/lib/types';
+import { Invoice, PaymentMethod } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
@@ -18,15 +18,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import InvoiceFormModal from '@/components/invoices/invoice-form-modal';
 import InvoiceViewModal from '@/components/invoices/invoice-view-modal';
+import PaymentFormModal from '@/components/payments/payment-form-modal';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null);
+  const [invoiceToPay, setInvoiceToPay] = useState<Invoice | null>(null);
 
   useEffect(() => {
     const invoicesRef = collection(db, 'invoices');
@@ -65,13 +68,13 @@ export default function InvoicesPage() {
       { title: "Total Overdue", value: `₱${totalOverdue.toLocaleString()}`, icon: XCircle, color: "red" as const },
   ];
 
-  const handleOpenModal = (invoice: Invoice | null) => {
+  const handleOpenFormModal = (invoice: Invoice | null) => {
     setEditingInvoice(invoice);
-    setIsModalOpen(true);
+    setIsFormModalOpen(true);
   }
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseFormModal = () => {
+    setIsFormModalOpen(false);
     setEditingInvoice(null);
   }
 
@@ -88,7 +91,7 @@ export default function InvoicesPage() {
             await setDoc(soRef, { status: 'Invoiced', invoicedStatus: 'Fully Invoiced' }, { merge: true });
         }
 
-        handleCloseModal();
+        handleCloseFormModal();
     } catch (error) {
         console.error("Error saving invoice: ", error);
         toast({ title: "Error", description: "Failed to save invoice.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
@@ -98,17 +101,46 @@ export default function InvoicesPage() {
   const handleViewInvoice = (invoice: Invoice) => {
     setViewingInvoice(invoice);
   }
-
-  const handleMarkAsPaid = async (invoice: Invoice) => {
-    try {
-      const invoiceRef = doc(db, "invoices", invoice.id);
-      await setDoc(invoiceRef, { status: 'Paid', paidAmount: invoice.amount, balance: 0, paidDate: serverTimestamp() }, { merge: true });
-      toast({ title: "Success", description: "Invoice marked as paid.", variant: "success" });
-    } catch (error) {
-      console.error("Error marking as paid: ", error);
-      toast({ title: "Error", description: "Failed to update invoice status.", variant: "destructive" });
-    }
+  
+  const handleOpenPaymentModal = (invoice: Invoice) => {
+      setInvoiceToPay(invoice);
+      setIsPaymentModalOpen(true);
   }
+
+  const handleClosePaymentModal = () => {
+      setIsPaymentModalOpen(false);
+      setInvoiceToPay(null);
+  }
+  
+  const handleRecordPayment = async (invoiceId: string, paymentMethod?: PaymentMethod, transactionProofUrl?: string) => {
+      try {
+          const invoiceRef = doc(db, "invoices", invoiceId);
+          const invoiceSnap = await getDoc(invoiceRef);
+          if(!invoiceSnap.exists()) throw new Error("Invoice not found");
+
+          const invoiceData = invoiceSnap.data() as Invoice;
+          const isPaid = !!(paymentMethod && transactionProofUrl);
+          const newStatus = isPaid ? 'Paid' : 'Posted';
+          const newPaidAmount = isPaid ? invoiceData.amount : invoiceData.paidAmount;
+          const newBalance = isPaid ? 0 : invoiceData.amount;
+          
+          await setDoc(invoiceRef, { 
+              status: newStatus, 
+              paidAmount: newPaidAmount,
+              balance: newBalance,
+              paidDate: isPaid ? serverTimestamp() : null,
+              paymentMethod: paymentMethod || null,
+              transactionProofUrl: transactionProofUrl || null
+          }, { merge: true });
+          
+          toast({ title: "Success", description: `Invoice has been marked as ${newStatus}.`, variant: "success" });
+          handleClosePaymentModal();
+      } catch (error) {
+          console.error("Error updating invoice status: ", error);
+          toast({ title: "Error", description: "Failed to update invoice status.", variant: "destructive" });
+      }
+  }
+
 
   const handleDeleteInvoice = async (invoiceId: string) => {
     try {
@@ -155,7 +187,7 @@ export default function InvoicesPage() {
                         <CardTitle>Sales Invoices List</CardTitle>
                         <CardDescription>A list of all your sales invoices.</CardDescription>
                     </div>
-                    <Button onClick={() => handleOpenModal(null)}>
+                    <Button onClick={() => handleOpenFormModal(null)}>
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Create Invoice
                     </Button>
@@ -188,7 +220,7 @@ export default function InvoicesPage() {
                   <InvoiceList 
                     invoices={filteredInvoices}
                     onView={handleViewInvoice}
-                    onMarkAsPaid={handleMarkAsPaid}
+                    onMarkAsPaid={handleOpenPaymentModal}
                     onDelete={handleDeleteInvoice}
                   />
               </CardContent>
@@ -200,10 +232,10 @@ export default function InvoicesPage() {
         </TabsContent>
       </Tabs>
       
-      {isModalOpen && (
+      {isFormModalOpen && (
           <InvoiceFormModal 
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
+            isOpen={isFormModalOpen}
+            onClose={handleCloseFormModal}
             onSave={handleSaveInvoice}
             invoice={editingInvoice}
           />
@@ -215,8 +247,16 @@ export default function InvoicesPage() {
             invoice={viewingInvoice}
             onEdit={(invoiceToEdit) => {
               setViewingInvoice(null);
-              handleOpenModal(invoiceToEdit);
+              handleOpenFormModal(invoiceToEdit);
             }}
+          />
+      )}
+      {isPaymentModalOpen && invoiceToPay && (
+          <PaymentFormModal
+            isOpen={isPaymentModalOpen}
+            onClose={handleClosePaymentModal}
+            invoice={invoiceToPay}
+            onSave={handleRecordPayment}
           />
       )}
     </div>

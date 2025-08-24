@@ -149,6 +149,8 @@ export type JobOrder = {
     modifiedAt?: Date | FieldValue | string;
 };
 
+export type PaymentMethod = 'Cash' | 'Gcash' | 'Maya' | 'Credit Card' | 'Bank Transfer';
+
 export type Invoice = {
     id:string; // INV-YYYY-XXXX
     salesOrderId: string;
@@ -168,6 +170,9 @@ export type Invoice = {
     vatExemptSales?: number;
     zeroRatedSales?: number;
     vatAmount?: number;
+    paidDate?: Date | FieldValue | string;
+    paymentMethod?: PaymentMethod;
+    transactionProofUrl?: string;
 };
 
 

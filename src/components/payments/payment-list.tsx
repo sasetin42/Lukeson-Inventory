@@ -27,10 +27,6 @@ export default function PaymentList({ invoices }: PaymentListProps) {
                         <CardTitle>Payment History</CardTitle>
                         <CardDescription>A list of all successfully paid invoices.</CardDescription>
                     </div>
-                    <Button>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Record Payment
-                    </Button>
                 </div>
             </CardHeader>
             <CardContent>
@@ -50,7 +46,7 @@ export default function PaymentList({ invoices }: PaymentListProps) {
                                 <TableCell className="font-medium">{invoice.id}</TableCell>
                                 <TableCell>{invoice.customerName}</TableCell>
                                 <TableCell>{formatDate((invoice as any).paidDate || invoice.dueDate)}</TableCell>
-                                <TableCell>Bank Transfer</TableCell>
+                                <TableCell>{invoice.paymentMethod || 'N/A'}</TableCell>
                                 <TableCell className="text-right">₱{invoice.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
                             </TableRow>
                         ))}

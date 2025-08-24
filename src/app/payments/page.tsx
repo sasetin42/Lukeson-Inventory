@@ -8,7 +8,7 @@ import { Banknote, PlusCircle, CheckCircle, Clock, Calendar } from "lucide-react
 import { Invoice } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, onSnapshot } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import PaymentList from '@/components/payments/payment-list';
 import { differenceInDays } from 'date-fns';
@@ -19,33 +19,31 @@ export default function PaymentsPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        const invoicesRef = collection(db, 'invoices');
-        const snapshot = await getDocs(invoicesRef);
+    const invoicesRef = collection(db, 'invoices');
+    const unsubscribe = onSnapshot(invoicesRef, (snapshot) => {
         const loadedInvoices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
         setInvoices(loadedInvoices);
-      } catch (error) {
+    }, (error) => {
         console.error("Error fetching invoices: ", error);
         toast({
           title: "Error",
           description: "Failed to load payment data. Please check your connection and permissions.",
           variant: "destructive"
         });
-      }
-    };
-    fetchInvoices();
+    });
+    return () => unsubscribe();
   }, [toast]);
   
   const paidInvoices = invoices.filter(inv => inv.status === 'Paid');
   const totalCollected = paidInvoices.reduce((acc, inv) => acc + inv.amount, 0);
-  const pendingCollection = invoices.filter(inv => inv.status === 'Pending' || inv.status === 'Overdue').reduce((acc, inv) => acc + inv.balance, 0);
+  const pendingCollection = invoices.filter(inv => inv.status === 'Posted' || inv.status === 'Overdue' || inv.status === 'Draft').reduce((acc, inv) => acc + inv.balance, 0);
   
   const collectionTimes = paidInvoices.map(inv => {
     const issueDate = (inv.date as any).toDate ? (inv.date as any).toDate() : new Date(inv.date as string);
     const paidDate = (inv as any).paidDate ? ((inv as any).paidDate.toDate ? (inv as any).paidDate.toDate() : new Date((inv as any).paidDate as string)) : new Date();
     return differenceInDays(paidDate, issueDate);
-  });
+  }).filter(days => days >= 0);
+
   const avgCollectionTime = collectionTimes.length > 0 ? collectionTimes.reduce((a, b) => a + b, 0) / collectionTimes.length : 0;
 
 
