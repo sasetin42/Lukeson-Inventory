@@ -152,7 +152,7 @@ export default function InvoicesPage() {
               <CardHeader>
                   <div className="flex justify-between items-center">
                     <div>
-                        <CardTitle>Invoice List</CardTitle>
+                        <CardTitle>Sales Invoices List</CardTitle>
                         <CardDescription>A list of all your sales invoices.</CardDescription>
                     </div>
                     <Button onClick={() => handleOpenModal(null)}>
