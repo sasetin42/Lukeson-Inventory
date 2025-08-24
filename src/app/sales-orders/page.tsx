@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SalesOrderTemplate from '@/components/sales-orders/sales-order-template';
 import SalesOrderViewModal from '@/components/sales-orders/sales-order-view-modal';
 import JobOrderViewModal from '@/components/job-orders/job-order-view-modal';
+import QuotationDetailsModal from '@/components/quotations/quotation-details-modal';
 
 function SalesOrdersContent() {
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
@@ -25,9 +26,11 @@ function SalesOrdersContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isJoViewModalOpen, setIsJoViewModalOpen] = useState(false);
+  const [isQtnViewModalOpen, setIsQtnViewModalOpen] = useState(false);
   const [editingSalesOrder, setEditingSalesOrder] = useState<SalesOrder | null>(null);
   const [viewingSalesOrder, setViewingSalesOrder] = useState<SalesOrder | null>(null);
   const [viewingJobOrder, setViewingJobOrder] = useState<JobOrder | null>(null);
+  const [viewingQuotation, setViewingQuotation] = useState<Quotation | null>(null);
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const customerIdFilter = searchParams.get('customerId');
@@ -129,6 +132,16 @@ function SalesOrdersContent() {
     setViewingJobOrder(null);
   }
 
+  const handleOpenQtnViewModal = (quotation: Quotation) => {
+    setViewingQuotation(quotation);
+    setIsQtnViewModalOpen(true);
+  }
+
+  const handleCloseQtnViewModal = () => {
+    setIsQtnViewModalOpen(false);
+    setViewingQuotation(null);
+  }
+
   const handleSaveSalesOrder = async (salesOrderData: Omit<SalesOrder, 'id'> & { id?: string }) => {
       try {
           const { id, ...dataToSave } = salesOrderData;
@@ -208,6 +221,7 @@ function SalesOrdersContent() {
                 onDelete={handleDeleteSalesOrder}
                 onView={handleOpenViewModal}
                 onViewJobOrder={handleOpenJoViewModal}
+                onViewQuotation={handleOpenQtnViewModal}
             />
           </div>
         </TabsContent>
@@ -251,6 +265,18 @@ function SalesOrdersContent() {
                 toast({title: "Info", description: "To edit a Job Order, please go to the Job Orders page."});
             }}
           />
+      )}
+
+      {isQtnViewModalOpen && viewingQuotation && (
+        <QuotationDetailsModal
+          isOpen={isQtnViewModalOpen}
+          onClose={handleCloseQtnViewModal}
+          onEdit={() => {
+              handleCloseQtnViewModal();
+              toast({title: "Info", description: "To edit a Quotation, please go to the Quotations page."});
+          }}
+          quotation={viewingQuotation}
+        />
       )}
     </div>
   );

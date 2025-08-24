@@ -29,9 +29,10 @@ interface SalesOrderListProps {
     onDelete: (salesOrderId: string) => void;
     onView: (salesOrder: SalesOrder) => void;
     onViewJobOrder: (jobOrder: JobOrder) => void;
+    onViewQuotation: (quotation: Quotation) => void;
 }
 
-export default function SalesOrderList({ salesOrders, quotations, jobOrders, onDelete, onView, onViewJobOrder }: SalesOrderListProps) {
+export default function SalesOrderList({ salesOrders, quotations, jobOrders, onDelete, onView, onViewJobOrder, onViewQuotation }: SalesOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [salesOrderToDelete, setSalesOrderToDelete] = useState<SalesOrder | null>(null);
     const { toast } = useToast();
@@ -140,7 +141,11 @@ export default function SalesOrderList({ salesOrders, quotations, jobOrders, onD
                                                 <div className="font-medium">{salesOrder.customerName}</div>
                                                 <div className="text-muted-foreground" style={{fontSize: '12px'}}>
                                                     {quotation ? (
-                                                        <span>Quotation: <Badge variant={getQuotationStatusVariant(quotation.status)} className="text-[10px] px-1.5 py-0">{quotation.status}</Badge></span>
+                                                        <span>Quotation: 
+                                                            <Button variant="link" className="p-0 h-auto ml-1" onClick={() => onViewQuotation(quotation)}>
+                                                                <Badge variant={getQuotationStatusVariant(quotation.status)} className="text-[10px] px-1.5 py-0 cursor-pointer">{quotation.status}</Badge>
+                                                            </Button>
+                                                        </span>
                                                     ) : (
                                                         <span>No linked quotation</span>
                                                     )}
