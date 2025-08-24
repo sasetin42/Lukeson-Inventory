@@ -129,6 +129,13 @@ function JobOrdersContent() {
                 modifiedAt: serverTimestamp()
             });
             toast({ title: "Sales Order Updated", description: `Sales Order ${jobOrderData.salesOrderId} has been marked as Fulfilled.`, variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
+          } else if (finalStatus === 'In Progress' && jobOrderData.salesOrderId) {
+            const soRef = doc(db, "salesOrders", jobOrderData.salesOrderId);
+            await updateDoc(soRef, {
+                status: 'Confirmed',
+                modifiedAt: serverTimestamp()
+            });
+            toast({ title: "Sales Order Updated", description: `Sales Order ${jobOrderData.salesOrderId} has been reverted to Confirmed.`, variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           }
 
           handleCloseFormModal();
