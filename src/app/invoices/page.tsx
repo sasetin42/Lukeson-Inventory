@@ -9,7 +9,7 @@ import InvoiceList from "@/components/invoices/invoice-list";
 import { Invoice } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InvoiceTemplate from '@/components/invoices/invoice-template';
@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import InvoiceFormModal from '@/components/invoices/invoice-form-modal';
+import InvoiceViewModal from '@/components/invoices/invoice-view-modal';
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -25,6 +26,7 @@ export default function InvoicesPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null);
 
   useEffect(() => {
     const invoicesRef = collection(db, 'invoices');
@@ -93,6 +95,31 @@ export default function InvoicesPage() {
     }
   };
 
+  const handleViewInvoice = (invoice: Invoice) => {
+    setViewingInvoice(invoice);
+  }
+
+  const handleMarkAsPaid = async (invoice: Invoice) => {
+    try {
+      const invoiceRef = doc(db, "invoices", invoice.id);
+      await setDoc(invoiceRef, { status: 'Paid', paidAmount: invoice.amount, balance: 0, paidDate: serverTimestamp() }, { merge: true });
+      toast({ title: "Success", description: "Invoice marked as paid.", variant: "success" });
+    } catch (error) {
+      console.error("Error marking as paid: ", error);
+      toast({ title: "Error", description: "Failed to update invoice status.", variant: "destructive" });
+    }
+  }
+
+  const handleDeleteInvoice = async (invoiceId: string) => {
+    try {
+      await deleteDoc(doc(db, "invoices", invoiceId));
+      toast({ title: "Success", description: "Invoice deleted successfully.", variant: "success" });
+    } catch (error) {
+      console.error("Error deleting invoice: ", error);
+      toast({ title: "Error", description: "Failed to delete invoice.", variant: "destructive" });
+    }
+  }
+
 
   return (
     <div className="flex flex-col gap-4">
@@ -156,7 +183,12 @@ export default function InvoicesPage() {
                   </div>
               </CardHeader>
               <CardContent>
-                  <InvoiceList invoices={filteredInvoices} />
+                  <InvoiceList 
+                    invoices={filteredInvoices}
+                    onView={handleViewInvoice}
+                    onMarkAsPaid={handleMarkAsPaid}
+                    onDelete={handleDeleteInvoice}
+                  />
               </CardContent>
           </Card>
         </div>
@@ -172,6 +204,13 @@ export default function InvoicesPage() {
             onClose={handleCloseModal}
             onSave={handleSaveInvoice}
             invoice={editingInvoice}
+          />
+      )}
+      {viewingInvoice && (
+          <InvoiceViewModal 
+            isOpen={!!viewingInvoice}
+            onClose={() => setViewingInvoice(null)}
+            invoice={viewingInvoice}
           />
       )}
     </div>
