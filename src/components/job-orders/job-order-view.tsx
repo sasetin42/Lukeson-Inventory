@@ -7,6 +7,9 @@ import { Separator } from '../ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { User, Calendar } from 'lucide-react';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 interface JobOrderViewProps {
   jobOrder: JobOrder;
@@ -14,7 +17,44 @@ interface JobOrderViewProps {
   quotation?: Quotation;
 }
 
+const TEMPLATE_DOC_ID = 'jobOrder';
+
 export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrderViewProps) {
+    const [templateSettings, setTemplateSettings] = useState({
+        accentColor: '#0A3BAA',
+        companyName: 'LUKESON LIGHTING COMPANY',
+        address: '20 Genoveva, Novaliches, Quezon City, Metro Manila',
+        phone: 'Phone: +63 912 378 5841',
+        website: 'https://lukesonlighting.com.ph/',
+        logo: 'https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/e903a953-ab33-4f9e-953e-5390916e6373.png?alt=media',
+        showDueDate: true,
+        showNotes: true,
+        showVat: true,
+        preparedByLabel: 'Prepared by:',
+        preparedByName: 'YMP / MCB / MJTS',
+        receivedByLabel: 'Received by:',
+        receivedByName: 'JUAN DELA CRUZ',
+        verifiedByLabel: 'Verified by:',
+        verifiedByName: 'HIROYOSHI KANAZAWA - VP',
+    });
+    
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const templateRef = doc(db, 'templates', TEMPLATE_DOC_ID);
+                const docSnap = await getDoc(templateRef);
+                if (docSnap.exists()) {
+                    setTemplateSettings(docSnap.data() as typeof templateSettings);
+                }
+            } catch (error) {
+                console.error("Error fetching template settings for view:", error);
+            }
+        };
+        fetchSettings();
+    }, []);
+
+    const { companyName, address, phone, website, logo } = templateSettings;
+
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
@@ -23,11 +63,11 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
     return (
         <div className="py-4">
             <div className="flex flex-col items-center text-center mb-6">
-                <Image src="https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/e903a953-ab33-4f9e-953e-5390916e6373.png?alt=media" alt="Lukeson Lighting Company Logo" width={80} height={80} className="mb-4" data-ai-hint="company logo" />
-                <h2 className="text-xl font-bold">LUKESON LIGHTING COMPANY</h2>
-                <p className="text-sm text-muted-foreground">20 Genoveva, Novaliches, Quezon City, Metro Manila</p>
-                <p className="text-sm text-muted-foreground">Phone: +63 912 378 5841</p>
-                <p className="text-sm text-muted-foreground">https://lukesonlighting.com.ph/</p>
+                <Image src={logo} alt="Company Logo" width={80} height={80} className="mb-4" data-ai-hint="company logo" />
+                <h2 className="text-xl font-bold">{companyName}</h2>
+                <p className="text-sm text-muted-foreground">{address}</p>
+                <p className="text-sm text-muted-foreground">{phone}</p>
+                <p className="text-sm text-muted-foreground">{website}</p>
             </div>
             <Separator />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 py-4">

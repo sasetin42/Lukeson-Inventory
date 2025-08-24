@@ -16,6 +16,7 @@ import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } 
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import JobOrderTemplate from '@/components/job-orders/job-order-template';
+import JobOrderSettings from '@/components/job-orders/job-order-settings';
 
 function JobOrdersContent() {
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
@@ -194,7 +195,7 @@ function JobOrdersContent() {
             <JobOrderTemplate />
         </TabsContent>
         <TabsContent value="settings" className="mt-4">
-            <p>Job Order Settings will go here.</p>
+            <JobOrderSettings />
         </TabsContent>
       </Tabs>
       {isFormModalOpen && (
