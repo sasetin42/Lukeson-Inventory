@@ -15,6 +15,7 @@ import SalesOrderView from './sales-order-view';
 import { Printer, PlusCircle } from 'lucide-react';
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface SalesOrderViewModalProps {
   salesOrder: SalesOrder | null;
@@ -82,6 +83,14 @@ export default function SalesOrderViewModal({
   };
   
   const hasJobOrder = jobOrders.some(jo => jo.salesOrderId === salesOrder.id);
+  const isButtonDisabled = salesOrder.status !== 'Confirmed' || hasJobOrder;
+  
+  let tooltipMessage = '';
+  if (salesOrder.status !== 'Confirmed') {
+    tooltipMessage = 'Job Order can only be created from a "Confirmed" Sales Order.';
+  } else if (hasJobOrder) {
+    tooltipMessage = 'A Job Order for this Sales Order already exists.';
+  }
 
 
   return (
@@ -99,14 +108,28 @@ export default function SalesOrderViewModal({
           </div>
         </div>
         <DialogFooter className="justify-between">
-            <Button 
-              onClick={handleCreateJobOrder} 
-              disabled={salesOrder.status !== 'Confirmed' || hasJobOrder}
-              className="bg-[#F97316] text-white hover:bg-[#F97316]/90"
-            >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create Job Order
-            </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div tabIndex={isButtonDisabled ? 0 : -1}>
+                  <Button 
+                    onClick={handleCreateJobOrder} 
+                    disabled={isButtonDisabled}
+                    className="bg-[#F97316] text-white hover:bg-[#F97316]/90"
+                    style={isButtonDisabled ? { pointerEvents: 'none' } : {}}
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create Job Order
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              {isButtonDisabled && (
+                <TooltipContent>
+                  <p>{tooltipMessage}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
           <div className="flex gap-2">
             <Button variant="outline" onClick={handlePrint}>
               <Printer className="mr-2 h-4 w-4" />
