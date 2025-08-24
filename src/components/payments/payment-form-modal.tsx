@@ -23,7 +23,7 @@ import { Progress } from '../ui/progress';
 interface PaymentFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (invoiceId: string, paymentMethod?: PaymentMethod, transactionProofUrl?: string) => void;
+  onSave: (invoiceId: string, paymentMethod?: PaymentMethod, transactionProofUrl?: string) => Promise<void>;
   invoice: Invoice;
 }
 
@@ -81,7 +81,7 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
         setIsSaving(true);
         try {
             const fileUrl = await uploadFile();
-            onSave(invoice.id, paymentMethod, fileUrl);
+            await onSave(invoice.id, paymentMethod, fileUrl);
         } catch (error) {
             toast({ title: "Error", description: "Failed to upload transaction proof.", variant: "destructive" });
         } finally {
@@ -89,8 +89,15 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
         }
     };
     
-    const handleMarkAsPosted = () => {
-        onSave(invoice.id, undefined, undefined);
+    const handleMarkAsPosted = async () => {
+        setIsSaving(true);
+        try {
+            await onSave(invoice.id, undefined, undefined);
+        } catch (error) {
+            console.error("Error marking as posted:", error);
+        } finally {
+            setIsSaving(false);
+        }
     }
 
     return (

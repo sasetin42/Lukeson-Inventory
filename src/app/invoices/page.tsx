@@ -9,7 +9,7 @@ import InvoiceList from "@/components/invoices/invoice-list";
 import { Invoice, PaymentMethod } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, setDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, serverTimestamp, deleteDoc, getDoc } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InvoiceTemplate from '@/components/invoices/invoice-template';
@@ -121,7 +121,7 @@ export default function InvoicesPage() {
           const invoiceData = invoiceSnap.data() as Invoice;
           const isPaid = !!(paymentMethod && transactionProofUrl);
           const newStatus = isPaid ? 'Paid' : 'Posted';
-          const newPaidAmount = isPaid ? invoiceData.amount : invoiceData.paidAmount;
+          const newPaidAmount = isPaid ? invoiceData.amount : (invoiceData.paidAmount || 0);
           const newBalance = isPaid ? 0 : invoiceData.amount;
           
           await setDoc(invoiceRef, { 
