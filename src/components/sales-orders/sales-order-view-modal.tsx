@@ -22,6 +22,7 @@ interface SalesOrderViewModalProps {
   jobOrders: JobOrder[];
   isOpen: boolean;
   onClose: () => void;
+  onEdit: (salesOrder: SalesOrder) => void;
 }
 
 export default function SalesOrderViewModal({
@@ -29,6 +30,7 @@ export default function SalesOrderViewModal({
   jobOrders,
   isOpen,
   onClose,
+  onEdit,
 }: SalesOrderViewModalProps) {
   const printableRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -81,6 +83,11 @@ export default function SalesOrderViewModal({
     const salesOrderData = encodeURIComponent(JSON.stringify(salesOrder));
     router.push(`/job-orders?fromSalesOrder=${salesOrderData}`);
   };
+
+  const handleEditClick = () => {
+    onClose();
+    onEdit(salesOrder);
+  };
   
   const hasJobOrder = jobOrders.some(jo => jo.salesOrderId === salesOrder.id);
   const isButtonDisabled = salesOrder.status !== 'Confirmed' || hasJobOrder;
@@ -131,7 +138,7 @@ export default function SalesOrderViewModal({
             </Tooltip>
           </TooltipProvider>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => {/* TODO: Implement Edit Functionality */}}>
+            <Button variant="outline" onClick={handleEditClick}>
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
             </Button>

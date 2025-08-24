@@ -106,6 +106,7 @@ function SalesOrdersContent() {
   const handleOpenModal = (salesOrder: SalesOrder | null) => {
     setEditingSalesOrder(salesOrder);
     setIsModalOpen(true);
+    setIsViewModalOpen(false); // Ensure view modal is closed
   };
   
   const handleCloseModal = () => {
@@ -240,6 +241,7 @@ function SalesOrdersContent() {
           onClose={handleCloseViewModal}
           salesOrder={viewingSalesOrder}
           jobOrders={jobOrders}
+          onEdit={handleOpenModal}
         />
       )}
 
