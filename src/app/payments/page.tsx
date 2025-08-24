@@ -62,12 +62,6 @@ export default function PaymentsPage() {
         title="Payments Received"
         description="Track and manage all customer payments."
         icon={<Banknote className="h-6 w-6 text-indigo-500" />}
-        actions={
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Record Payment
-          </Button>
-        }
       />
       <div className="grid gap-6 md:grid-cols-3">
         {kpis.map((kpi, index) => (

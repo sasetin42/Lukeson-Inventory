@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Invoice } from "@/lib/types";
 import { format } from "date-fns";
+import { Button } from "../ui/button";
+import { PlusCircle } from "lucide-react";
 
 interface PaymentListProps {
     invoices: Invoice[];
@@ -20,8 +22,16 @@ export default function PaymentList({ invoices }: PaymentListProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Payment History</CardTitle>
-                <CardDescription>A list of all successfully paid invoices.</CardDescription>
+                <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle>Payment History</CardTitle>
+                        <CardDescription>A list of all successfully paid invoices.</CardDescription>
+                    </div>
+                    <Button>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Record Payment
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent>
                 <Table>
