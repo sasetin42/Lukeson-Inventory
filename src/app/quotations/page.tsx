@@ -176,6 +176,7 @@ export default function QuotationsPage() {
       <QuotationList
         quotations={quotations}
         customers={customers}
+        salesOrders={salesOrders}
         onView={handleOpenDetailsModal}
         onEdit={handleOpenFormModal}
         onDelete={handleDeleteQuotation}

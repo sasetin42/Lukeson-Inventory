@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react';
-import { Quotation, Customer } from '@/lib/types';
+import { Quotation, Customer, SalesOrder } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,7 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/comp
 interface QuotationListProps {
     quotations: Quotation[];
     customers: Customer[];
+    salesOrders: SalesOrder[];
     onView: (quotation: Quotation) => void;
     onEdit: (quotation: Quotation) => void;
     onDelete: (quotationId: string) => void;
@@ -32,7 +33,7 @@ interface QuotationListProps {
     onViewCustomer: (customer: Customer) => void;
 }
 
-export default function QuotationList({ quotations, customers, onView, onEdit, onDelete, onApprove, onViewCustomer }: QuotationListProps) {
+export default function QuotationList({ quotations, customers, salesOrders, onView, onEdit, onDelete, onApprove, onViewCustomer }: QuotationListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [quotationToDelete, setQuotationToDelete] = useState<Quotation | null>(null);
     const [isApproveAlertOpen, setIsApproveAlertOpen] = useState(false);
@@ -78,6 +79,24 @@ export default function QuotationList({ quotations, customers, onView, onEdit, o
                 return 'outline';
         }
     };
+
+    const getSalesOrderStatusVariant = (status?: SalesOrder['status']): "fulfilled" | "secondary" | "destructive" | "outline" | "success" | "confirmed" | "draft" => {
+        if (!status) return 'outline';
+        switch (status) {
+            case 'Fulfilled':
+                return 'fulfilled';
+            case 'Confirmed':
+                return 'confirmed';
+            case 'Draft':
+                return 'draft';
+            case 'Cancelled':
+                return 'destructive';
+            case 'Invoiced':
+                 return 'destructive';
+            default:
+                return 'outline';
+        }
+    };
     
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -106,14 +125,16 @@ export default function QuotationList({ quotations, customers, onView, onEdit, o
                                 <TableHead>Quotation ID</TableHead>
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Date</TableHead>
-                                <TableHead>Expiry Date</TableHead>
                                 <TableHead>Amount</TableHead>
-                                <TableHead>Status</TableHead>
+                                <TableHead>Quotation Status</TableHead>
+                                <TableHead>Sales Order Status</TableHead>
                                 <TableHead className="w-[150px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {quotations.map((quotation) => (
+                            {quotations.map((quotation) => {
+                                const linkedSO = salesOrders.find(so => so.quotationId === quotation.id);
+                                return (
                                 <TableRow key={quotation.id}>
                                     <TableCell className="font-medium">{quotation.id}</TableCell>
                                     <TableCell>
@@ -123,10 +144,16 @@ export default function QuotationList({ quotations, customers, onView, onEdit, o
                                         </Button>
                                     </TableCell>
                                     <TableCell>{formatDate(quotation.qtnDate)}</TableCell>
-                                    <TableCell>{formatDate(quotation.expiryDate)}</TableCell>
                                     <TableCell>₱{quotation.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                     <TableCell>
                                         <Badge variant={getStatusVariant(quotation.status)}>{quotation.status}</Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        {linkedSO ? (
+                                            <Badge variant={getSalesOrderStatusVariant(linkedSO.status)}>{linkedSO.status}</Badge>
+                                        ) : (
+                                            <Badge variant="outline">N/A</Badge>
+                                        )}
                                     </TableCell>
                                     <TableCell className="flex items-center gap-1">
                                         <Tooltip>
@@ -155,7 +182,7 @@ export default function QuotationList({ quotations, customers, onView, onEdit, o
                                         </Tooltip>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )})}
                         </TableBody>
                     </Table>
                     </TooltipProvider>
