@@ -82,7 +82,7 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
           <TableHeader>
             <TableRow>
               <TableHead>Customer</TableHead>
-              <TableHead>Amount</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
               <TableHead>Quotation</TableHead>
               <TableHead>Sales Order</TableHead>
               <TableHead>Job Order</TableHead>
