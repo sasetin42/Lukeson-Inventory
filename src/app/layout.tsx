@@ -115,10 +115,10 @@ const navGroups = [
 
 function AppContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory']);
+  const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
   
   const handleAccordionChange = (value: string[]) => {
-      const alwaysOpen = ['Overview', 'Inventory'];
+      const alwaysOpen = ['Overview', 'Inventory', 'Sales'];
       let newOpenState = [...value];
 
       for (const item of alwaysOpen) {
