@@ -6,7 +6,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle, HelpCircle, Check, Clock, DollarSign, CheckCircle, AlertCircle } from "lucide-react";
 import QuotationList from "@/components/quotations/quotation-list";
-import { Quotation, Customer, SalesOrder } from '@/lib/types';
+import { Quotation, Customer, SalesOrder, JobOrder } from '@/lib/types';
 import QuotationFormModal from '@/components/quotations/quotation-form-modal';
 import QuotationDetailsModal from '@/components/quotations/quotation-details-modal';
 import { useToast } from '@/hooks/use-toast';
@@ -14,23 +14,32 @@ import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import CustomerViewModal from '@/components/customers/customer-view-modal';
+import SalesOrderViewModal from '@/components/sales-orders/sales-order-view-modal';
+import JobOrderViewModal from '@/components/job-orders/job-order-view-modal';
 
 export default function QuotationsPage() {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
+  const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [isSalesOrderModalOpen, setIsSalesOrderModalOpen] = useState(false);
+  const [isJobOrderModalOpen, setIsJobOrderModalOpen] = useState(false);
+
   const [editingQuotation, setEditingQuotation] = useState<Quotation | null>(null);
   const [viewingQuotation, setViewingQuotation] = useState<Quotation | null>(null);
   const [viewingCustomer, setViewingCustomer] = useState<Customer | null>(null);
+  const [viewingSalesOrder, setViewingSalesOrder] = useState<SalesOrder | null>(null);
+  const [viewingJobOrder, setViewingJobOrder] = useState<JobOrder | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     const quotationsRef = collection(db, 'quotations');
     const customersRef = collection(db, 'customers');
     const salesOrdersRef = collection(db, 'salesOrders');
+    const jobOrdersRef = collection(db, 'jobOrders');
 
     const unsubscribeQtns = onSnapshot(quotationsRef, (snapshot) => {
         const loadedQuotations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
@@ -56,11 +65,20 @@ export default function QuotationsPage() {
         toast({ title: "Error", description: "Failed to load sales orders.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
     });
 
+    const unsubscribeJobOrders = onSnapshot(jobOrdersRef, (snapshot) => {
+        const loadedJobOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
+        setJobOrders(loadedJobOrders);
+    }, (error) => {
+        console.error("Error fetching job orders:", error);
+        toast({ title: "Error", description: "Failed to load job orders.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
+    });
+
 
     return () => {
         unsubscribeQtns();
         unsubscribeCustomers();
         unsubscribeSalesOrders();
+        unsubscribeJobOrders();
     };
   }, [toast]);
 
@@ -94,6 +112,27 @@ export default function QuotationsPage() {
     setIsCustomerModalOpen(false);
     setViewingCustomer(null);
   }
+  
+  const handleOpenSalesOrderModal = (salesOrder: SalesOrder) => {
+      setViewingSalesOrder(salesOrder);
+      setIsSalesOrderModalOpen(true);
+  }
+
+  const handleCloseSalesOrderModal = () => {
+    setIsSalesOrderModalOpen(false);
+    setViewingSalesOrder(null);
+  }
+  
+  const handleOpenJobOrderModal = (jobOrder: JobOrder) => {
+      setViewingJobOrder(jobOrder);
+      setIsJobOrderModalOpen(true);
+  }
+
+  const handleCloseJobOrderModal = () => {
+    setIsJobOrderModalOpen(false);
+    setViewingJobOrder(null);
+  }
+
 
   const handleSaveQuotation = async (quotationData: Omit<Quotation, 'id'> & { id?: string }) => {
     try {
@@ -182,6 +221,7 @@ export default function QuotationsPage() {
         onDelete={handleDeleteQuotation}
         onApprove={handleApproveQuotation}
         onViewCustomer={handleOpenCustomerModal}
+        onViewSalesOrder={handleOpenSalesOrderModal}
       />
       {isFormModalOpen && (
         <QuotationFormModal
@@ -205,6 +245,32 @@ export default function QuotationsPage() {
             isOpen={isCustomerModalOpen}
             onClose={handleCloseCustomerModal}
             customer={viewingCustomer}
+          />
+      )}
+      {isSalesOrderModalOpen && (
+        <SalesOrderViewModal
+            isOpen={isSalesOrderModalOpen}
+            onClose={handleCloseSalesOrderModal}
+            salesOrder={viewingSalesOrder}
+            quotations={quotations}
+            jobOrders={jobOrders}
+            onEdit={(so) => {
+                handleCloseSalesOrderModal();
+                toast({title: "Info", description: "To edit a Sales Order, please go to the Sales Orders page."});
+            }}
+        />
+      )}
+       {isJobOrderModalOpen && viewingJobOrder && (
+          <JobOrderViewModal
+            isOpen={isJobOrderModalOpen}
+            onClose={handleCloseJobOrderModal}
+            jobOrder={viewingJobOrder}
+            salesOrder={salesOrders.find(so => so.id === viewingJobOrder.salesOrderId)}
+            quotation={quotations.find(q => q.id === salesOrders.find(so => so.id === viewingJobOrder.salesOrderId)?.quotationId)}
+            onEdit={() => {
+                handleCloseJobOrderModal();
+                toast({title: "Info", description: "To edit a Job Order, please go to the Job Orders page."});
+            }}
           />
       )}
     </div>

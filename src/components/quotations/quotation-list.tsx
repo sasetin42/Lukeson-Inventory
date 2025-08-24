@@ -31,9 +31,10 @@ interface QuotationListProps {
     onDelete: (quotationId: string) => void;
     onApprove: (quotation: Quotation) => void;
     onViewCustomer: (customer: Customer) => void;
+    onViewSalesOrder: (salesOrder: SalesOrder) => void;
 }
 
-export default function QuotationList({ quotations, customers, salesOrders, onView, onEdit, onDelete, onApprove, onViewCustomer }: QuotationListProps) {
+export default function QuotationList({ quotations, customers, salesOrders, onView, onEdit, onDelete, onApprove, onViewCustomer, onViewSalesOrder }: QuotationListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [quotationToDelete, setQuotationToDelete] = useState<Quotation | null>(null);
     const [isApproveAlertOpen, setIsApproveAlertOpen] = useState(false);
@@ -150,7 +151,9 @@ export default function QuotationList({ quotations, customers, salesOrders, onVi
                                     </TableCell>
                                     <TableCell>
                                         {linkedSO ? (
-                                            <Badge variant={getSalesOrderStatusVariant(linkedSO.status)}>{linkedSO.status}</Badge>
+                                            <Button variant="link" className="p-0 h-auto" onClick={() => onViewSalesOrder(linkedSO)}>
+                                                <Badge variant={getSalesOrderStatusVariant(linkedSO.status)} className="cursor-pointer">{linkedSO.status}</Badge>
+                                            </Button>
                                         ) : (
                                             <Badge variant="outline">N/A</Badge>
                                         )}
