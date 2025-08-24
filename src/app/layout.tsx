@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Home, Package, FileText, Users, LogOut, Settings, LifeBuoy, BarChart3, List, FilePlus, FileMinus, Goal, Building, ChevronDown, LayoutGrid, BarChart2, ShoppingCart, ShoppingBag, FileCode, Warehouse, Truck, Users2, File, FileCog, Shield, DatabaseBackup, Banknote, Briefcase, PlusCircle, AlertTriangle } from 'lucide-react';
+import { Home, Package, FileText, Users, LogOut, Settings, LifeBuoy, BarChart3, List, FilePlus, FileMinus, Goal, Building, ChevronDown, LayoutGrid, BarChart2, ShoppingCart, ShoppingBag, FileCode, Warehouse, Truck, Users2, File, FileCog, Shield, DatabaseBackup, Banknote, Briefcase, PlusCircle, AlertTriangle, User } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from '@/components/icons/logo';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, SidebarContent, SidebarSeparator } from '@/components/ui/sidebar';
@@ -213,6 +213,12 @@ function AppContent({ children }: { children: React.ReactNode }) {
               <DropdownMenuContent side="right" align="start" className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                   <Link href="/settings">
+                    <User className="mr-2 h-4 w-4 text-purple-500" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings">
                     <Settings className="mr-2 h-4 w-4 text-blue-500" />
