@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Upload, X } from 'lucide-react';
+import { Loader2, Upload, X, CreditCard } from 'lucide-react';
 import type { Invoice, PaymentMethod } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useToast } from '@/hooks/use-toast';
@@ -104,7 +104,7 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="payment-method">Payment Method</Label>
+                        <Label htmlFor="payment-method" className="flex items-center gap-2"><CreditCard className="h-4 w-4 text-blue-500" /> Payment Method</Label>
                         <Select onValueChange={(value) => setPaymentMethod(value as PaymentMethod)} value={paymentMethod}>
                             <SelectTrigger id="payment-method">
                                 <SelectValue placeholder="Select method" />
@@ -117,7 +117,7 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
                         </Select>
                     </div>
                     <div className="space-y-2">
-                         <Label htmlFor="dropzone-file">Transaction Proof</Label>
+                         <Label htmlFor="dropzone-file" className="flex items-center gap-2"><Upload className="h-4 w-4 text-green-500" /> Transaction Proof</Label>
                          {transactionProofPreview ? (
                              <div className="relative w-full h-48 rounded-lg overflow-hidden">
                                 <Image src={transactionProofPreview} alt="Transaction proof preview" layout="fill" objectFit="contain" data-ai-hint="receipt proof" />
