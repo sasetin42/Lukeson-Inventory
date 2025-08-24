@@ -199,11 +199,17 @@ export default function SalesOrderView({ salesOrder }: SalesOrderViewProps) {
                 </div>
             </div>
 
-             {showNotes && salesOrder.notes && (
-                <div className="mt-8">
-                    <h4 className="font-bold">Notes:</h4>
-                    <p className="text-sm text-muted-foreground">{salesOrder.notes}</p>
+            {showNotes && (
+              <div className="grid grid-cols-2 gap-4 mt-8">
+                <div>
+                  <h4 className="font-bold">Quotation Notes:</h4>
+                  <p className="text-sm text-muted-foreground">{salesOrder.notes || "No quotation notes."}</p>
                 </div>
+                <div>
+                  <h4 className="font-bold">Sales Order Notes:</h4>
+                  <p className="text-sm text-muted-foreground">{salesOrder.notes || "No sales order notes."}</p>
+                </div>
+              </div>
             )}
 
             <div className="flex justify-between mt-24 text-center text-xs">
