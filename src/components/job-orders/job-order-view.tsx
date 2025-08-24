@@ -23,7 +23,7 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
     return (
         <div className="py-4">
             <div className="flex flex-col items-center text-center mb-6">
-                <Image src="https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/7a63721a-e570-4aa7-92ca-455b85a30599.png?alt=media" alt="Lukeson Lighting Company Logo" width={80} height={80} className="mb-4" data-ai-hint="company logo" />
+                <Image src="https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/e903a953-ab33-4f9e-953e-5390916e6373.png?alt=media" alt="Lukeson Lighting Company Logo" width={80} height={80} className="mb-4" data-ai-hint="company logo" />
                 <h2 className="text-xl font-bold">LUKESON LIGHTING COMPANY</h2>
                 <p className="text-sm text-muted-foreground">20 Genoveva, Novaliches, Quezon City, Metro Manila</p>
                 <p className="text-sm text-muted-foreground">Phone: +63 912 378 5841</p>
