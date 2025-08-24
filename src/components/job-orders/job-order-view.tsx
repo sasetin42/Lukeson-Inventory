@@ -53,7 +53,7 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         fetchSettings();
     }, []);
 
-    const { companyName, address, phone, website, logo, preparedByName, preparedByLabel, receivedByName, receivedByLabel, verifiedByName, verifiedByLabel } = templateSettings;
+    const { companyName, address, phone, website, logo } = templateSettings;
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -73,19 +73,19 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 py-4">
                 <div className="space-y-1">
                     <h4 className="font-semibold flex items-center gap-2 text-sm"><User className="h-4 w-4 text-blue-500" /> Customer</h4>
-                    <p className="text-muted-foreground pl-6">{jobOrder.customerName}</p>
+                    <p className="text-muted-foreground text-sm pl-6">{jobOrder.customerName}</p>
                 </div>
                 <div className="space-y-1">
                     <h4 className="font-semibold flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-green-500" /> Job Order Date</h4>
-                    <p className="text-muted-foreground pl-6">{formatDate(jobOrder.jobOrderDate)}</p>
+                    <p className="text-muted-foreground text-sm pl-6">{formatDate(jobOrder.jobOrderDate)}</p>
                 </div>
                 <div className="space-y-1">
                     <h4 className="font-semibold flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-red-500" /> Expected Completion</h4>
-                    <p className="text-muted-foreground pl-6">{formatDate(jobOrder.expectedCompletionDate)}</p>
+                    <p className="text-muted-foreground text-sm pl-6">{formatDate(jobOrder.expectedCompletionDate)}</p>
                 </div>
                 <div className="space-y-1">
                     <h4 className="font-semibold flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-purple-500" /> SO Delivery Date</h4>
-                    <p className="text-muted-foreground pl-6">{salesOrder ? formatDate(salesOrder.deliveryDate) : 'N/A'}</p>
+                    <p className="text-muted-foreground text-sm pl-6">{salesOrder ? formatDate(salesOrder.deliveryDate) : 'N/A'}</p>
                 </div>
             </div>
             <Separator />
@@ -131,16 +131,16 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
 
             <div className="flex justify-between mt-24 text-center">
                 <div>
-                    <p className="font-bold">{preparedByName}</p>
-                    <p className="text-sm border-t border-black pt-1 mt-1">{preparedByLabel}</p>
+                    <p className="font-bold border-b border-black pb-1 mb-1">Quotations</p>
+                    <p className="text-sm">Verified by:</p>
                 </div>
-                    <div>
-                    <p className="font-bold">{receivedByName}</p>
-                    <p className="text-sm border-t border-black pt-1 mt-1">{receivedByLabel}</p>
+                 <div>
+                    <p className="font-bold border-b border-black pb-1 mb-1">Inspections</p>
+                    <p className="text-sm">Quality Check:</p>
                 </div>
-                    <div>
-                    <p className="font-bold">{verifiedByName}</p>
-                    <p className="text-sm border-t border-black pt-1 mt-1">{verifiedByLabel}</p>
+                 <div>
+                    <p className="font-bold border-b border-black pb-1 mb-1">Sales Invoice</p>
+                    <p className="text-sm">Admin Approval:</p>
                 </div>
             </div>
         </div>
