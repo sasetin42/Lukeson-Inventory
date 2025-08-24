@@ -25,6 +25,7 @@ interface InvoiceFormProps {
 export default function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFormProps) {
     const { toast } = useToast();
     const [customers, setCustomers] = useState<Customer[]>([]);
+    const [allInvoices, setAllInvoices] = useState<Invoice[]>([]);
     const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
     
     const [isSaving, setIsSaving] = useState(false);
@@ -43,11 +44,17 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFor
         const fetchData = async () => {
             try {
                 const customersRef = collection(db, 'customers');
+                const invoicesRef = collection(db, 'invoices');
+
                 const customersSnapshot = await getDocs(customersRef);
                 setCustomers(customersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer)));
+
+                const invoicesSnapshot = await getDocs(invoicesRef);
+                setAllInvoices(invoicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice)));
+
             } catch (error) {
-                console.error("Error fetching customers:", error);
-                toast({ title: "Error", description: "Failed to load customers.", variant: "destructive"});
+                console.error("Error fetching data:", error);
+                toast({ title: "Error", description: "Failed to load customers and invoices.", variant: "destructive"});
             }
         };
         fetchData();
@@ -87,6 +94,12 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFor
         setNotes('');
     }
 
+    const availableSalesOrders = salesOrders.filter(so => {
+        // Exclude if it's already linked to another invoice (and we are not editing that specific invoice)
+        const isAlreadyInvoiced = allInvoices.some(inv => inv.salesOrderId === so.id && inv.id !== (invoice?.id || ''));
+        return !isAlreadyInvoiced;
+    });
+
     useEffect(() => {
         const fetchSalesOrders = async () => {
             if (!customerId) {
@@ -95,7 +108,8 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFor
                 return;
             }
             try {
-                const soQuery = query(collection(db, 'salesOrders'), where("customerId", "==", customerId), where("status", "in", ["Confirmed", "Fulfilled"]));
+                // Only allow invoicing for Fulfilled Sales Orders
+                const soQuery = query(collection(db, 'salesOrders'), where("customerId", "==", customerId), where("status", "==", "Fulfilled"));
                 const soSnapshot = await getDocs(soQuery);
                 const loadedSOs = soSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
                 setSalesOrders(loadedSOs);
@@ -179,10 +193,10 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFor
                 </div>
                  <div className="space-y-2">
                     <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Link Sales Order</Label>
-                    <Select onValueChange={handleSalesOrderChange} value={salesOrderId} disabled={!customerId || salesOrders.length === 0}>
-                        <SelectTrigger><SelectValue placeholder="Select a sales order" /></SelectTrigger>
+                    <Select onValueChange={handleSalesOrderChange} value={salesOrderId} disabled={!customerId || availableSalesOrders.length === 0}>
+                        <SelectTrigger><SelectValue placeholder="Select an SO" /></SelectTrigger>
                         <SelectContent>
-                            {salesOrders.map(s => <SelectItem key={s.id} value={s.id}>{s.id}</SelectItem>)}
+                            {availableSalesOrders.map(s => <SelectItem key={s.id} value={s.id}>{s.id}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
