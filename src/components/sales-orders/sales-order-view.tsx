@@ -102,14 +102,14 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     };
 
-    const getStatusVariant = (status: SalesOrder['status']): "fulfilled" | "secondary" | "destructive" | "outline" | "success" | "confirmed" => {
+    const getStatusVariant = (status: SalesOrder['status']): "fulfilled" | "secondary" | "destructive" | "outline" | "success" | "confirmed" | "draft" => {
         switch (status) {
             case 'Fulfilled':
                 return 'fulfilled';
             case 'Confirmed':
                 return 'confirmed';
             case 'Draft':
-                return 'outline';
+                return 'draft';
             case 'Cancelled':
                 return 'destructive';
             case 'Invoiced':
@@ -152,12 +152,12 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
                         {quotation && (
                             <>
                                 <span className="text-xs font-semibold">Quotation:</span>
-                                <Badge variant={getQuotationStatusVariant(quotation.status)} className="text-white">{quotation.status}</Badge>
+                                <Badge variant={getQuotationStatusVariant(quotation.status)}>{quotation.status}</Badge>
                                 <span className="text-xs font-semibold">|</span>
                             </>
                         )}
                         <span className="text-xs font-semibold">Sales Order:</span>
-                        <Badge variant={getStatusVariant(salesOrder.status)} className="text-white">{salesOrder.status}</Badge>
+                        <Badge variant={getStatusVariant(salesOrder.status)}>{salesOrder.status}</Badge>
                     </div>
                 </div>
             </div>
