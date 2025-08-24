@@ -64,12 +64,12 @@ export default function QuotationList({ quotations, customers, onView, onEdit, o
         }
     };
 
-    const getStatusVariant = (status: Quotation['status']): "default" | "secondary" | "destructive" | "outline" | "success" | "draft" => {
+    const getStatusVariant = (status: Quotation['status']): "default" | "secondary" | "destructive" | "outline" | "success" | "draft" | "quotation" => {
         switch (status) {
             case 'Accepted':
                 return 'success';
             case 'Sent':
-                return 'secondary';
+                return 'quotation';
             case 'Draft':
                 return 'draft';
             case 'Expired':

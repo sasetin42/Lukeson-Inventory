@@ -22,6 +22,7 @@ const badgeVariants = cva(
         inProgress: "border-transparent bg-[#81B29A] text-[#FFFFFF]",
         fulfilled: "border-transparent bg-[#F2CC8F] text-black",
         completed: "border-transparent bg-[#81B29A] text-black",
+        quotation: "border-transparent bg-[#3D405B] text-[#FFFFFF]",
       },
     },
     defaultVariants: {
