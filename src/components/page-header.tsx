@@ -3,13 +3,13 @@
 
 import type { ReactNode } from 'react';
 import { Button } from './ui/button';
-import { Zap, AlertTriangle } from 'lucide-react';
+import { Zap, AlertTriangle, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { Product } from '@/lib/types';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { Product, SalesOrder } from '@/lib/types';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -26,6 +26,7 @@ function HeaderActions() {
     const [dateTime, setDateTime] = useState<Date | null>(null);
     const [mounted, setMounted] = useState(false);
     const [lowStockCount, setLowStockCount] = useState(0);
+    const [invoiceReadyCount, setInvoiceReadyCount] = useState(0);
     const isMobile = useIsMobile();
 
     useEffect(() => {
@@ -35,15 +36,21 @@ function HeaderActions() {
         }, 1000);
 
         const productsRef = collection(db, 'products');
-        const unsubscribe = onSnapshot(productsRef, (snapshot) => {
+        const unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
             const products = snapshot.docs.map(doc => doc.data() as Product);
             const lowStockItems = products.filter(p => p.stock > 0 && p.stock <= p.reOrderLevel);
             setLowStockCount(lowStockItems.length);
         });
 
+        const salesOrdersQuery = query(collection(db, 'salesOrders'), where('status', '==', 'Fulfilled'));
+        const unsubscribeSalesOrders = onSnapshot(salesOrdersQuery, (snapshot) => {
+            setInvoiceReadyCount(snapshot.size);
+        });
+
         return () => {
             clearInterval(timer);
-            unsubscribe();
+            unsubscribeProducts();
+            unsubscribeSalesOrders();
         };
     }, []);
 
@@ -83,6 +90,27 @@ function HeaderActions() {
 
     return (
         <div className="flex items-center gap-2 sm:gap-4">
+             <div className="text-right text-xs text-muted-foreground font-medium hidden lg:block p-2 rounded-md bg-muted/50">
+                {dateTime ? (
+                    <>
+                        <div>{format(dateTime, 'E, MMM d, yyyy')}</div>
+                        <div>{format(dateTime, 'h:mm:ss a')}</div>
+                    </>
+                ) : (
+                    'Loading...'
+                )}
+            </div>
+             <Button 
+                variant={invoiceReadyCount > 0 ? "default" : "outline"} 
+                size="sm" 
+                asChild 
+                className={cn(invoiceReadyCount > 0 && "animate-blink")}
+            >
+                <Link href="/invoices">
+                    <FileText className="h-4 w-4 mr-2" />
+                    For Invoicing ({invoiceReadyCount})
+                </Link>
+            </Button>
             <Button 
                 variant={lowStockCount > 0 ? "destructive" : "outline"} 
                 size="sm" 
@@ -94,9 +122,6 @@ function HeaderActions() {
                     Stock Alert ({lowStockCount})
                 </Link>
             </Button>
-            <div className="text-sm text-muted-foreground font-medium hidden lg:block">
-                {dateTime ? format(dateTime, 'E, MMM d, yyyy, h:mm:ss a') : 'Loading...'}
-            </div>
             <Button variant="outline" size="sm" onClick={handleOptimize}>
                 <Zap className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Optimize System</span>
