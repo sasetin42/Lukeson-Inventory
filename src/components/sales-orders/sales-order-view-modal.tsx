@@ -142,21 +142,25 @@ export default function SalesOrderViewModal({
             </Tooltip>
           </TooltipProvider>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleEditClick}>
+            <Button
+              variant="outline"
+              onClick={handleEditClick}
+              className="bg-[#2C2C2C] text-white hover:bg-[#2C2C2C]/90"
+            >
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
             </Button>
             <Button 
                 variant="outline" 
                 onClick={handlePrint}
-                className="bg-[#2C2C2C] text-[#FFFFFF] hover:bg-[#2C2C2C]/90"
+                className="bg-[#FF9D00] text-white hover:bg-[#FF9D00]/90"
             >
               <Printer className="mr-2 h-4 w-4" />
               Print
             </Button>
             <Button 
                 onClick={onClose}
-                className="bg-[#588B00] text-[#FFFFFF] hover:bg-[#588B00]/90"
+                className="bg-[#588B00] text-white hover:bg-[#588B00]/90"
             >
                 Close
             </Button>

@@ -269,8 +269,12 @@ export default function ProductDetailsModal({
         </div>
         <DialogFooter className="sm:justify-end">
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => { onEdit(product); onClose(); }}>
-              <Edit className="h-4 w-4 mr-2 text-blue-500" />
+            <Button
+              variant="outline"
+              onClick={() => { onEdit(product); onClose(); }}
+              className="bg-[#2C2C2C] text-white hover:bg-[#2C2C2C]/90"
+            >
+              <Edit className="h-4 w-4 mr-2" />
               Edit
             </Button>
             <Button variant="outline" onClick={() => setDeactivateAlertOpen(true)}>

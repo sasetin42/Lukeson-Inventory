@@ -127,17 +127,30 @@ export default function JobOrderViewModal({
         </div>
         <DialogFooter className="justify-between">
             <div>
-                 <Button variant="outline" onClick={handlePrint}>
+                 <Button
+                    variant="outline"
+                    onClick={handlePrint}
+                    className="bg-[#FF9D00] text-white hover:bg-[#FF9D00]/90"
+                 >
                     <Printer className="mr-2 h-4 w-4" />
                     Print
                 </Button>
             </div>
             <div className='flex gap-2'>
-                <Button variant="outline" onClick={handleEdit}>
+                <Button
+                    variant="outline"
+                    onClick={handleEdit}
+                    className="bg-[#2C2C2C] text-white hover:bg-[#2C2C2C]/90"
+                >
                     <Edit className="mr-2 h-4 w-4" />
                     Edit
                 </Button>
-                <Button onClick={onClose}>Close</Button>
+                <Button
+                    onClick={onClose}
+                    className="bg-[#588B00] text-white hover:bg-[#588B00]/90"
+                >
+                    Close
+                </Button>
             </div>
         </DialogFooter>
       </DialogContent>

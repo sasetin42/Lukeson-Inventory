@@ -91,11 +91,20 @@ export default function PurchaseOrderViewModal({
                 </Button>
             </div>
             <div className='flex gap-2'>
-                <Button variant="outline" onClick={handlePrint}>
+                <Button
+                    variant="outline"
+                    onClick={handlePrint}
+                    className="bg-[#FF9D00] text-white hover:bg-[#FF9D00]/90"
+                >
                     <Printer className="mr-2 h-4 w-4" />
                     Print
                 </Button>
-                <Button onClick={onClose}>Close</Button>
+                <Button
+                    onClick={onClose}
+                    className="bg-[#588B00] text-white hover:bg-[#588B00]/90"
+                >
+                    Close
+                </Button>
             </div>
         </DialogFooter>
       </DialogContent>
