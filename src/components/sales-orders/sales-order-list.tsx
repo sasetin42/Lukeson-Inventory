@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react';
-import { SalesOrder, Quotation } from '@/lib/types';
+import { SalesOrder, Quotation, JobOrder } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -25,12 +25,13 @@ import { useToast } from '@/hooks/use-toast';
 interface SalesOrderListProps {
     salesOrders: SalesOrder[];
     quotations: Quotation[];
+    jobOrders: JobOrder[];
     onEdit: (salesOrder: SalesOrder) => void;
     onDelete: (salesOrderId: string) => void;
     onView: (salesOrder: SalesOrder) => void;
 }
 
-export default function SalesOrderList({ salesOrders, quotations, onEdit, onDelete, onView }: SalesOrderListProps) {
+export default function SalesOrderList({ salesOrders, quotations, jobOrders, onEdit, onDelete, onView }: SalesOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [salesOrderToDelete, setSalesOrderToDelete] = useState<SalesOrder | null>(null);
     const { toast } = useToast();

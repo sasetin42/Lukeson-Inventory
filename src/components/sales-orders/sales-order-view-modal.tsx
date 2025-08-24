@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { SalesOrder } from '@/lib/types';
+import { SalesOrder, JobOrder } from '@/lib/types';
 import { Button } from '../ui/button';
 import SalesOrderView from './sales-order-view';
 import { Printer, PlusCircle } from 'lucide-react';
@@ -18,12 +18,14 @@ import { useRouter } from 'next/navigation';
 
 interface SalesOrderViewModalProps {
   salesOrder: SalesOrder | null;
+  jobOrders: JobOrder[];
   isOpen: boolean;
   onClose: () => void;
 }
 
 export default function SalesOrderViewModal({
   salesOrder,
+  jobOrders,
   isOpen,
   onClose,
 }: SalesOrderViewModalProps) {
@@ -78,6 +80,8 @@ export default function SalesOrderViewModal({
     const salesOrderData = encodeURIComponent(JSON.stringify(salesOrder));
     router.push(`/job-orders?fromSalesOrder=${salesOrderData}`);
   };
+  
+  const hasJobOrder = jobOrders.some(jo => jo.salesOrderId === salesOrder.id);
 
 
   return (
@@ -97,7 +101,7 @@ export default function SalesOrderViewModal({
         <DialogFooter className="justify-between">
             <Button 
               onClick={handleCreateJobOrder} 
-              disabled={salesOrder.status !== 'Confirmed'}
+              disabled={salesOrder.status !== 'Confirmed' || hasJobOrder}
               className="bg-[#F97316] text-white hover:bg-[#F97316]/90"
             >
               <PlusCircle className="mr-2 h-4 w-4" />

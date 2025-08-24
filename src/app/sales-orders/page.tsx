@@ -7,7 +7,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign, AlertCircle, Trash2 } from "lucide-react";
 import SalesOrderList from "@/components/sales-orders/sales-order-list";
-import { SalesOrder, Customer, Quotation } from '@/lib/types';
+import { SalesOrder, Customer, Quotation, JobOrder } from '@/lib/types';
 import SalesOrderFormModal from "@/components/sales-orders/sales-order-form-modal";
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
@@ -20,6 +20,7 @@ import SalesOrderViewModal from '@/components/sales-orders/sales-order-view-moda
 function SalesOrdersContent() {
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
   const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [editingSalesOrder, setEditingSalesOrder] = useState<SalesOrder | null>(null);
@@ -57,6 +58,8 @@ function SalesOrdersContent() {
     try {
       const salesOrdersRef = collection(db, 'salesOrders');
       const quotationsRef = collection(db, 'quotations');
+      const jobOrdersRef = collection(db, 'jobOrders');
+
       let q = query(salesOrdersRef);
 
       if (customerIdFilter) {
@@ -68,14 +71,19 @@ function SalesOrdersContent() {
         }
       }
       
-      const soSnapshot = await getDocs(q);
+      const [soSnapshot, qtnSnapshot, joSnapshot] = await Promise.all([
+        getDocs(q),
+        getDocs(quotationsRef),
+        getDocs(jobOrdersRef),
+      ]);
+
       const loadedSalesOrders = soSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
-      
-      const qtnSnapshot = await getDocs(quotationsRef);
       const loadedQuotations = qtnSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
+      const loadedJobOrders = joSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
 
       setSalesOrders(loadedSalesOrders);
       setQuotations(loadedQuotations);
+      setJobOrders(loadedJobOrders);
 
     } catch (error) {
       console.error("Error fetching sales orders: ", error);
@@ -189,6 +197,7 @@ function SalesOrdersContent() {
             <SalesOrderList
                 salesOrders={salesOrders}
                 quotations={quotations}
+                jobOrders={jobOrders}
                 onEdit={handleOpenModal}
                 onDelete={handleDeleteSalesOrder}
                 onView={handleOpenViewModal}
@@ -217,6 +226,7 @@ function SalesOrdersContent() {
           isOpen={isViewModalOpen}
           onClose={handleCloseViewModal}
           salesOrder={viewingSalesOrder}
+          jobOrders={jobOrders}
         />
       )}
     </div>
