@@ -121,21 +121,33 @@ function JobOrdersContent() {
               toast({ title: "Success", description: "Job Order added successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           }
 
-          // If job order is completed, update the sales order status to fulfilled
-          if (finalStatus === 'Completed' && jobOrderData.salesOrderId) {
+          if (jobOrderData.salesOrderId) {
             const soRef = doc(db, "salesOrders", jobOrderData.salesOrderId);
-            await updateDoc(soRef, {
-                status: 'Fulfilled',
-                modifiedAt: serverTimestamp()
-            });
-            toast({ title: "Sales Order Updated", description: `Sales Order ${jobOrderData.salesOrderId} has been marked as Fulfilled.`, variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
-          } else if (finalStatus === 'In Progress' && jobOrderData.salesOrderId) {
-            const soRef = doc(db, "salesOrders", jobOrderData.salesOrderId);
-            await updateDoc(soRef, {
-                status: 'Confirmed',
-                modifiedAt: serverTimestamp()
-            });
-            toast({ title: "Sales Order Updated", description: `Sales Order ${jobOrderData.salesOrderId} has been reverted to Confirmed.`, variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
+            let soUpdate: { status: string; modifiedAt: any; } | null = null;
+            let soToastMessage: string | null = null;
+
+            switch(finalStatus) {
+                case 'Completed':
+                    soUpdate = { status: 'Fulfilled', modifiedAt: serverTimestamp() };
+                    soToastMessage = `Sales Order ${jobOrderData.salesOrderId} has been marked as Fulfilled.`;
+                    break;
+                case 'In Progress':
+                    soUpdate = { status: 'Confirmed', modifiedAt: serverTimestamp() };
+                    soToastMessage = `Sales Order ${jobOrderData.salesOrderId} has been reverted to Confirmed.`;
+                    break;
+                case 'Draft':
+                case 'Scheduled':
+                case 'On Hold':
+                case 'Cancelled':
+                    soUpdate = { status: 'Draft', modifiedAt: serverTimestamp() };
+                    soToastMessage = `Sales Order ${jobOrderData.salesOrderId} has been reverted to Draft.`;
+                    break;
+            }
+            
+            if (soUpdate) {
+                await updateDoc(soRef, soUpdate);
+                toast({ title: "Sales Order Updated", description: soToastMessage!, variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
+            }
           }
 
           handleCloseFormModal();
