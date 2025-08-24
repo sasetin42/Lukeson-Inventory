@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2, Eye, AlertCircle, Search } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, AlertCircle, Search, PlusCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +28,7 @@ interface SalesOrderListProps {
     salesOrders: SalesOrder[];
     quotations: Quotation[];
     jobOrders: JobOrder[];
+    onCreate: () => void;
     onDelete: (salesOrderId: string) => void;
     onView: (salesOrder: SalesOrder) => void;
     onViewJobOrder: (jobOrder: JobOrder) => void;
@@ -42,6 +43,7 @@ export default function SalesOrderList({
     salesOrders, 
     quotations, 
     jobOrders, 
+    onCreate,
     onDelete, 
     onView, 
     onViewJobOrder, 
@@ -124,8 +126,16 @@ export default function SalesOrderList({
         <>
             <Card>
                 <CardHeader>
-                    <CardTitle>Sales Orders</CardTitle>
-                    <CardDescription>A list of all your sales orders. (e.g. SO-2025-001)</CardDescription>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle>Sales Orders</CardTitle>
+                            <CardDescription>A list of all your sales orders. (e.g. SO-2025-001)</CardDescription>
+                        </div>
+                        <Button onClick={onCreate}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Create Sales Order
+                        </Button>
+                    </div>
                     <div className="flex items-center gap-2 pt-4">
                         <div className="relative w-full">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

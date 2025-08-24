@@ -201,12 +201,6 @@ function SalesOrdersContent() {
         title={customerName ? `Sales Orders for ${customerName}` : 'Sales Orders'}
         description="Manage sales orders."
         icon={<ShoppingCart className="h-6 w-6 text-red-500" />}
-        actions={
-          <Button onClick={() => handleOpenModal(null)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Sales Order
-          </Button>
-        }
       />
       <Tabs defaultValue="sales-orders">
         <TabsList>
@@ -233,6 +227,7 @@ function SalesOrdersContent() {
                 salesOrders={filteredSalesOrders}
                 quotations={quotations}
                 jobOrders={jobOrders}
+                onCreate={() => handleOpenModal(null)}
                 onDelete={handleDeleteSalesOrder}
                 onView={handleOpenViewModal}
                 onViewJobOrder={handleOpenJoViewModal}
