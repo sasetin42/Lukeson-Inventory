@@ -6,13 +6,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Invoice } from "@/lib/types";
 import { format } from "date-fns";
 import { Button } from "../ui/button";
-import { PlusCircle } from "lucide-react";
+import { Eye, FileText, User } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 interface PaymentListProps {
     invoices: Invoice[];
+    onViewTransaction: (invoice: Invoice) => void;
+    onViewSalesInvoice: (invoice: Invoice) => void;
+    onViewCustomer: (invoice: Invoice) => void;
 }
 
-export default function PaymentList({ invoices }: PaymentListProps) {
+export default function PaymentList({ invoices, onViewTransaction, onViewSalesInvoice, onViewCustomer }: PaymentListProps) {
     
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -38,21 +42,52 @@ export default function PaymentList({ invoices }: PaymentListProps) {
                             <TableHead>Payment Date</TableHead>
                             <TableHead>Payment Method</TableHead>
                             <TableHead className="text-right">Amount Paid</TableHead>
+                            <TableHead className="text-center">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {invoices.map(invoice => (
-                            <TableRow key={invoice.id}>
-                                <TableCell className="font-medium">{invoice.id}</TableCell>
-                                <TableCell>{invoice.customerName}</TableCell>
-                                <TableCell>{formatDate((invoice as any).paidDate || invoice.dueDate)}</TableCell>
-                                <TableCell>{invoice.paymentMethod || 'N/A'}</TableCell>
-                                <TableCell className="text-right">₱{invoice.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
-                            </TableRow>
-                        ))}
+                        <TooltipProvider>
+                            {invoices.map(invoice => (
+                                <TableRow key={invoice.id}>
+                                    <TableCell className="font-medium">{invoice.id}</TableCell>
+                                    <TableCell>{invoice.customerName}</TableCell>
+                                    <TableCell>{formatDate((invoice as any).paidDate || invoice.dueDate)}</TableCell>
+                                    <TableCell>{invoice.paymentMethod || 'N/A'}</TableCell>
+                                    <TableCell className="text-right">₱{invoice.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
+                                    <TableCell className="text-center">
+                                       <div className="flex items-center justify-center gap-1">
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" onClick={() => onViewTransaction(invoice)}>
+                                                        <Eye className="h-4 w-4 text-blue-500" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>View Transaction Proof</TooltipContent>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" onClick={() => onViewSalesInvoice(invoice)}>
+                                                        <FileText className="h-4 w-4 text-green-500" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>View Sales Invoice</TooltipContent>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" onClick={() => onViewCustomer(invoice)}>
+                                                        <User className="h-4 w-4 text-purple-500" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>View Customer Details</TooltipContent>
+                                            </Tooltip>
+                                       </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TooltipProvider>
                          {invoices.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={5} className="text-center h-24">
+                                <TableCell colSpan={6} className="text-center h-24">
                                     No payments recorded yet.
                                 </TableCell>
                             </TableRow>
