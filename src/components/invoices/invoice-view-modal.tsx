@@ -12,7 +12,7 @@ import {
 import { Invoice } from '@/lib/types';
 import { Button } from '../ui/button';
 import InvoiceView from './invoice-view';
-import { Printer } from 'lucide-react';
+import { Printer, Edit } from 'lucide-react';
 import { useRef } from 'react';
 import { Badge } from '../ui/badge';
 
@@ -20,12 +20,14 @@ interface InvoiceViewModalProps {
   invoice: Invoice | null;
   isOpen: boolean;
   onClose: () => void;
+  onEdit: (invoice: Invoice) => void;
 }
 
 export default function InvoiceViewModal({
   invoice,
   isOpen,
   onClose,
+  onEdit,
 }: InvoiceViewModalProps) {
   const printableRef = useRef<HTMLDivElement>(null);
 
@@ -72,6 +74,12 @@ export default function InvoiceViewModal({
         }
     }
   };
+  
+  const handleEditClick = () => {
+    if(invoice) {
+        onEdit(invoice);
+    }
+  }
 
   const getStatusVariant = (status: string): "success" | "secondary" | "destructive" | "outline" | "posted" => {
     switch (status) {
@@ -104,6 +112,14 @@ export default function InvoiceViewModal({
         </div>
         <DialogFooter className="justify-end">
             <div className='flex gap-2'>
+                <Button
+                    variant="outline"
+                    onClick={handleEditClick}
+                    className="bg-[#2C2C2C] text-white hover:bg-[#151515] hover:text-white"
+                >
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit
+                </Button>
                 <Button
                     variant="outline"
                     onClick={handlePrint}

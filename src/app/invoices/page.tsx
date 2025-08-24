@@ -213,6 +213,10 @@ export default function InvoicesPage() {
             isOpen={!!viewingInvoice}
             onClose={() => setViewingInvoice(null)}
             invoice={viewingInvoice}
+            onEdit={(invoiceToEdit) => {
+              setViewingInvoice(null);
+              handleOpenModal(invoiceToEdit);
+            }}
           />
       )}
     </div>
