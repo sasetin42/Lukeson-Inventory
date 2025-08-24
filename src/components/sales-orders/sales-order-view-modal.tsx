@@ -96,9 +96,9 @@ export default function SalesOrderViewModal({
         </div>
         <DialogFooter className="justify-between">
             <Button 
-              variant="outline" 
               onClick={handleCreateJobOrder} 
               disabled={salesOrder.status !== 'Confirmed'}
+              className="bg-[#F97316] text-white hover:bg-[#F97316]/90"
             >
               <PlusCircle className="mr-2 h-4 w-4" />
               Create Job Order
