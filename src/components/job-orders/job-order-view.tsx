@@ -21,7 +21,7 @@ const TEMPLATE_DOC_ID = 'jobOrder';
 
 export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrderViewProps) {
     const [templateSettings, setTemplateSettings] = useState({
-        accentColor: '#0A3BAA',
+        accentColor: '#F97316',
         companyName: 'LUKESON LIGHTING COMPANY',
         address: '20 Genoveva, Novaliches, Quezon City, Metro Manila',
         phone: 'Phone: +63 912 378 5841',
@@ -31,11 +31,11 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         showNotes: true,
         showVat: true,
         preparedByLabel: 'Prepared by:',
-        preparedByName: 'YMP / MCB / MJTS',
+        preparedByName: 'Admin',
         receivedByLabel: 'Received by:',
-        receivedByName: 'JUAN DELA CRUZ',
+        receivedByName: '_________________________',
         verifiedByLabel: 'Verified by:',
-        verifiedByName: 'HIROYOSHI KANAZAWA - VP',
+        verifiedByName: '_________________________',
     });
     
     useEffect(() => {
@@ -95,9 +95,9 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Product</TableHead>
-                                <TableHead className="text-right">Qty</TableHead>
-                                <TableHead className="text-right">UOM</TableHead>
+                                <TableHead style={{ backgroundColor: '#578C00', color: '#FFFFFF' }}>Product</TableHead>
+                                <TableHead className="text-right" style={{ backgroundColor: '#578C00', color: '#FFFFFF' }}>Qty</TableHead>
+                                <TableHead className="text-right" style={{ backgroundColor: '#578C00', color: '#FFFFFF' }}>UOM</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
