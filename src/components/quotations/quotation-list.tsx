@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2, Eye, CheckCircle, User, Search } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, CheckCircle, User, Search, PlusCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +30,7 @@ interface QuotationListProps {
     salesOrders: SalesOrder[];
     onView: (quotation: Quotation) => void;
     onEdit: (quotation: Quotation) => void;
+    onCreate: () => void;
     onDelete: (quotationId: string) => void;
     onApprove: (quotation: Quotation) => void;
     onViewCustomer: (customer: Customer) => void;
@@ -46,6 +47,7 @@ export default function QuotationList({
     salesOrders, 
     onView, 
     onEdit, 
+    onCreate,
     onDelete, 
     onApprove, 
     onViewCustomer, 
@@ -135,8 +137,16 @@ export default function QuotationList({
         <>
             <Card>
                 <CardHeader>
-                    <CardTitle>Quotations</CardTitle>
-                    <CardDescription>A list of all your quotations.</CardDescription>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle>Quotations</CardTitle>
+                            <CardDescription>A list of all your quotations.</CardDescription>
+                        </div>
+                        <Button onClick={onCreate}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Create Quotation
+                        </Button>
+                    </div>
                     <div className="flex items-center gap-2 pt-4">
                         <div className="relative w-full">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

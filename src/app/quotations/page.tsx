@@ -206,12 +206,6 @@ export default function QuotationsPage() {
         title="Quotations"
         description="Create and manage customer quotations."
         icon={<FileText className="h-6 w-6 text-purple-500" />}
-        actions={
-          <Button onClick={() => handleOpenFormModal(null)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Quotation
-          </Button>
-        }
       />
        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {kpis.map((kpi, index) => (
@@ -232,6 +226,7 @@ export default function QuotationsPage() {
         salesOrders={salesOrders}
         onView={handleOpenDetailsModal}
         onEdit={handleOpenFormModal}
+        onCreate={() => handleOpenFormModal(null)}
         onDelete={handleDeleteQuotation}
         onApprove={handleApproveQuotation}
         onViewCustomer={handleOpenCustomerModal}
