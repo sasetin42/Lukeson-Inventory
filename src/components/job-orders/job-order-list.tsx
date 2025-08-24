@@ -80,7 +80,7 @@ export default function JobOrderList({ jobOrders, salesOrders, onEdit, onDelete,
                                 <TableHead>Customer</TableHead>
                                 <TableHead>Job Order Date</TableHead>
                                 <TableHead>Completion Date</TableHead>
-                                <TableHead>Sales Orders Delivery Date</TableHead>
+                                <TableHead>SO Delivery Date</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="w-[100px] text-center">Actions</TableHead>
                             </TableRow>
