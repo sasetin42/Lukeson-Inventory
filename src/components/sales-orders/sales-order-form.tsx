@@ -459,5 +459,3 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
         </div>
     );
 }
-
-    
