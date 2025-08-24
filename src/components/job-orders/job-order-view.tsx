@@ -49,8 +49,6 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
                                 <TableHead>Product</TableHead>
                                 <TableHead className="text-right">Qty</TableHead>
                                 <TableHead className="text-right">UOM</TableHead>
-                                <TableHead className="text-right">Unit Price</TableHead>
-                                <TableHead className="text-right">Tax</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -59,8 +57,6 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
                                     <TableCell>{line.description}</TableCell>
                                     <TableCell className="text-right">{line.quantity}</TableCell>
                                     <TableCell className="text-right">{line.uom}</TableCell>
-                                    <TableCell className="text-right">₱{line.unitPrice.toFixed(2)}</TableCell>
-                                    <TableCell className="text-right">{(line.taxRate * 100).toFixed(0)}%</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
