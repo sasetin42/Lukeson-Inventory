@@ -145,7 +145,7 @@ export default function SalesOrderViewModal({
             <Button
               variant="outline"
               onClick={handleEditClick}
-              className="bg-[#2C2C2C] text-white hover:bg-[#2C2C2C]/90"
+              className="bg-[#2C2C2C] text-white hover:bg-[#151515]"
             >
                 <Edit className="mr-2 h-4 w-4" />
                 Edit

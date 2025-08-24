@@ -272,7 +272,7 @@ export default function ProductDetailsModal({
             <Button
               variant="outline"
               onClick={() => { onEdit(product); onClose(); }}
-              className="bg-[#2C2C2C] text-white hover:bg-[#2C2C2C]/90"
+              className="bg-[#2C2C2C] text-white hover:bg-[#151515]"
             >
               <Edit className="h-4 w-4 mr-2" />
               Edit
