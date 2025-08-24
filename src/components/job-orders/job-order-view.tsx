@@ -114,6 +114,16 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
                         <span className="text-sm text-muted-foreground">{jobOrder.id}</span>
                         <Badge variant={getStatusVariant(jobOrder.status)} className="capitalize h-fit">{jobOrder.status}</Badge>
                     </div>
+                    <div className="mt-2 space-y-1">
+                        <div className="flex items-center justify-end gap-2">
+                            <h4 className="font-semibold text-xs">Quotation Status:</h4>
+                            {quotation ? <Badge variant={getQuotationStatusVariant(quotation.status)}>{quotation.status}</Badge> : <Badge variant="outline">N/A</Badge>}
+                        </div>
+                        <div className="flex items-center justify-end gap-2">
+                            <h4 className="font-semibold text-xs">Sales Order Status:</h4>
+                            {salesOrder ? <Badge variant={getSalesOrderStatusVariant(salesOrder.status)}>{salesOrder.status}</Badge> : <Badge variant="outline">N/A</Badge>}
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -148,14 +158,6 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
                 <div className="space-y-1">
                     <h4 className="font-semibold flex items-center gap-1"><Calendar className="h-3 w-3" /> SO Delivery Date</h4>
                     <p className="text-muted-foreground pl-4">{salesOrder ? formatDate(salesOrder.deliveryDate) : 'N/A'}</p>
-                </div>
-                <div className="space-y-1">
-                    <h4 className="font-semibold">Quotation Status</h4>
-                    {quotation ? <Badge variant={getQuotationStatusVariant(quotation.status)}>{quotation.status}</Badge> : <span className="text-muted-foreground">N/A</span>}
-                </div>
-                <div className="space-y-1">
-                    <h4 className="font-semibold">Sales Order Status</h4>
-                    {salesOrder ? <Badge variant={getSalesOrderStatusVariant(salesOrder.status)}>{salesOrder.status}</Badge> : <span className="text-muted-foreground">N/A</span>}
                 </div>
             </div>
             <Separator />
@@ -216,4 +218,3 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         </div>
     );
 }
-
