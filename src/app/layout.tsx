@@ -215,17 +215,17 @@ function AppContent({ children }: { children: React.ReactNode }) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <Link href="/settings">
-                    <Settings className="mr-2 h-4 w-4" />
+                    <Settings className="mr-2 h-4 w-4 text-blue-500" />
                     <span>Settings</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <LifeBuoy className="mr-2 h-4 w-4" />
+                  <LifeBuoy className="mr-2 h-4 w-4 text-yellow-500" />
                   <span>Support</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <LogOut className="mr-2 h-4 w-4 text-red-500" />
                   <span>Log out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
