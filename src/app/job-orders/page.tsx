@@ -15,7 +15,6 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import JobOrderTemplate from '@/components/job-orders/job-order-template';
 import JobOrderSettings from '@/components/job-orders/job-order-settings';
 
 function JobOrdersContent() {
@@ -164,7 +163,6 @@ function JobOrdersContent() {
        <Tabs defaultValue="job-orders">
         <TabsList>
           <TabsTrigger value="job-orders">Job Orders</TabsTrigger>
-          <TabsTrigger value="templates">Job Order Template</TabsTrigger>
           <TabsTrigger value="settings">Job Order Settings</TabsTrigger>
         </TabsList>
         <TabsContent value="job-orders" className="mt-4">
@@ -190,9 +188,6 @@ function JobOrdersContent() {
               onView={handleOpenViewModal}
             />
           </div>
-        </TabsContent>
-        <TabsContent value="templates" className="mt-4">
-            <JobOrderTemplate />
         </TabsContent>
         <TabsContent value="settings" className="mt-4">
             <JobOrderSettings />
