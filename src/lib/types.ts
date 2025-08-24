@@ -172,7 +172,7 @@ export type Invoice = {
     vatAmount?: number;
     paidDate?: Date | FieldValue | string;
     paymentMethod?: PaymentMethod;
-    transactionProofUrl?: string;
+    transactionProof?: string; // Changed from transactionProofUrl
 };
 
 

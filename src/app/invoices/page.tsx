@@ -112,14 +112,14 @@ export default function InvoicesPage() {
       setInvoiceToPay(null);
   }
   
-  const handleRecordPayment = async (invoiceId: string, paymentMethod?: PaymentMethod, transactionProofUrl?: string) => {
+  const handleRecordPayment = async (invoiceId: string, paymentMethod?: PaymentMethod, transactionProof?: string) => {
       try {
           const invoiceRef = doc(db, "invoices", invoiceId);
           const invoiceSnap = await getDoc(invoiceRef);
           if(!invoiceSnap.exists()) throw new Error("Invoice not found");
 
           const invoiceData = invoiceSnap.data() as Invoice;
-          const isPaid = !!(paymentMethod && transactionProofUrl);
+          const isPaid = !!(paymentMethod && transactionProof);
           const newStatus = isPaid ? 'Paid' : 'Posted';
           const newPaidAmount = isPaid ? invoiceData.amount : (invoiceData.paidAmount || 0);
           const newBalance = isPaid ? 0 : invoiceData.amount;
@@ -130,7 +130,7 @@ export default function InvoicesPage() {
               balance: newBalance,
               paidDate: isPaid ? serverTimestamp() : null,
               paymentMethod: paymentMethod || null,
-              transactionProofUrl: transactionProofUrl || null
+              transactionProof: transactionProof || null
           }, { merge: true });
           
           toast({ title: "Success", description: `Invoice has been marked as ${newStatus}.`, variant: "success" });

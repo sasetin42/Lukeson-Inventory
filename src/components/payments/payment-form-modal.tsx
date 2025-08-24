@@ -17,25 +17,32 @@ import { Loader2, Upload, X } from 'lucide-react';
 import type { Invoice, PaymentMethod } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { Progress } from '../ui/progress';
 import Image from 'next/image';
 
 interface PaymentFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (invoiceId: string, paymentMethod?: PaymentMethod, transactionProofUrl?: string) => Promise<void>;
+  onSave: (invoiceId: string, paymentMethod?: PaymentMethod, transactionProof?: string) => Promise<void>;
   invoice: Invoice;
 }
 
 const paymentMethods: PaymentMethod[] = ['Cash', 'Gcash', 'Maya', 'Credit Card', 'Bank Transfer'];
+
+const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
 
 export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: PaymentFormModalProps) {
     const { toast } = useToast();
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | undefined>();
     const [transactionFile, setTransactionFile] = useState<File | null>(null);
     const [isSaving, setIsSaving] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
     const [transactionProofPreview, setTransactionProofPreview] = useState<string | null>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,40 +69,15 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
         setTransactionFile(null);
         setTransactionProofPreview(null);
     };
-    
-    const uploadFile = async (): Promise<string | undefined> => {
-        if (!transactionFile) return undefined;
-        
-        return new Promise((resolve, reject) => {
-            const storage = getStorage();
-            const storageRef = ref(storage, `transaction_proofs/${invoice.id}/${transactionFile.name}`);
-            const uploadTask = uploadBytesResumable(storageRef, transactionFile);
-
-            uploadTask.on('state_changed',
-                (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    setUploadProgress(progress);
-                },
-                (error) => {
-                    console.error("Upload failed:", error);
-                    reject(error);
-                },
-                () => {
-                    getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                        resolve(downloadURL);
-                    });
-                }
-            );
-        });
-    }
 
     const handleSubmit = async () => {
         setIsSaving(true);
         try {
-            const fileUrl = await uploadFile();
-            await onSave(invoice.id, paymentMethod, fileUrl);
+            const dataUri = transactionFile ? await fileToDataUri(transactionFile) : undefined;
+            await onSave(invoice.id, paymentMethod, dataUri);
         } catch (error) {
             toast({ title: "Error", description: "Failed to upload transaction proof.", variant: "destructive" });
+        } finally {
             setIsSaving(false);
         }
     };
@@ -161,7 +143,7 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
                                 </label>
                             </div>
                          )}
-                         {isSaving && uploadProgress > 0 && <Progress value={uploadProgress} className="w-full h-2" />}
+                         {isSaving && <Progress value={100} className="w-full h-2 animate-pulse" />}
                     </div>
                 </div>
                 <DialogFooter className="sm:justify-between">
