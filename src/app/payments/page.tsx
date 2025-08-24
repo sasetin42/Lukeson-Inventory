@@ -15,6 +15,8 @@ import { differenceInDays } from 'date-fns';
 import TransactionViewModal from '@/components/payments/transaction-view-modal';
 import SalesOrderViewModal from '@/components/sales-orders/sales-order-view-modal';
 import CustomerViewModal from '@/components/customers/customer-view-modal';
+import InvoiceViewModal from '@/components/invoices/invoice-view-modal';
+import InvoiceFormModal from '@/components/invoices/invoice-form-modal';
 
 
 export default function PaymentsPage() {
@@ -24,6 +26,9 @@ export default function PaymentsPage() {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
   const [viewingTransaction, setViewingTransaction] = useState<Invoice | null>(null);
+  const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null);
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  const [isInvoiceFormModalOpen, setIsInvoiceFormModalOpen] = useState(false);
   const [viewingSalesOrder, setViewingSalesOrder] = useState<SalesOrder | null>(null);
   const [viewingCustomer, setViewingCustomer] = useState<Customer | null>(null);
   const [isSalesOrderModalOpen, setIsSalesOrderModalOpen] = useState(false);
@@ -90,15 +95,17 @@ export default function PaymentsPage() {
   ];
 
   const handleViewTransaction = (invoice: Invoice) => setViewingTransaction(invoice);
+
   const handleViewSalesInvoice = (invoice: Invoice) => {
-      const so = salesOrders.find(s => s.id === invoice.salesOrderId);
-      if(so) {
-        setViewingSalesOrder(so);
-        setIsSalesOrderModalOpen(true);
-      } else {
-        toast({ title: "Not Found", description: "Associated Sales Order not found.", variant: "destructive" });
-      }
+    setViewingInvoice(invoice);
+  };
+
+  const handleEditInvoice = (invoiceToEdit: Invoice) => {
+    setViewingInvoice(null);
+    setEditingInvoice(invoiceToEdit);
+    setIsInvoiceFormModalOpen(true);
   }
+
   const handleViewCustomer = (invoice: Invoice) => {
       const customer = customers.find(c => c.id === invoice.customerId);
        if(customer) {
@@ -145,15 +152,22 @@ export default function PaymentsPage() {
           />
       )}
 
-      {isSalesOrderModalOpen && viewingSalesOrder && (
-        <SalesOrderViewModal
-            isOpen={isSalesOrderModalOpen}
-            onClose={() => setIsSalesOrderModalOpen(false)}
-            salesOrder={viewingSalesOrder}
-            quotations={quotations}
-            jobOrders={jobOrders}
-            onEdit={() => {}}
+      {viewingInvoice && (
+        <InvoiceViewModal
+            isOpen={!!viewingInvoice}
+            onClose={() => setViewingInvoice(null)}
+            invoice={viewingInvoice}
+            onEdit={handleEditInvoice}
         />
+      )}
+
+      {isInvoiceFormModalOpen && (
+          <InvoiceFormModal 
+            isOpen={isInvoiceFormModalOpen}
+            onClose={() => setIsInvoiceFormModalOpen(false)}
+            onSave={() => {}}
+            invoice={editingInvoice}
+          />
       )}
       
       {isCustomerModalOpen && viewingCustomer && (
