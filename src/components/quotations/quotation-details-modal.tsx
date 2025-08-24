@@ -163,12 +163,12 @@ export default function QuotationDetailsModal({
                 )}
             </div>
             <div className="flex gap-2">
-                <Button variant="outline" onClick={handleEditClick}>
-                <Edit className="h-4 w-4 mr-2 text-blue-500" />
-                Edit Quotation
+                <Button variant="outline" onClick={handleEditClick} className="bg-[#2C2C2C] text-white hover:bg-[#151515] hover:text-white">
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Quotation
                 </Button>
-                <Button variant="default" onClick={onClose}>
-                Close
+                <Button onClick={onClose} className="bg-[#588B00] text-white hover:bg-[#588B00]/90">
+                    Close
                 </Button>
             </div>
         </DialogFooter>
