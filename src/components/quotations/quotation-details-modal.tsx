@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Quotation } from '@/lib/types';
+import { Quotation, SalesOrder } from '@/lib/types';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import {
@@ -25,10 +25,12 @@ import { Button } from '../ui/button';
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useRouter } from 'next/navigation';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 
 interface QuotationDetailsModalProps {
   quotation: Quotation | null;
+  salesOrders: SalesOrder[];
   isOpen: boolean;
   onClose: () => void;
   onEdit: (quotation: Quotation) => void;
@@ -36,6 +38,7 @@ interface QuotationDetailsModalProps {
 
 export default function QuotationDetailsModal({
   quotation,
+  salesOrders,
   isOpen,
   onClose,
   onEdit,
@@ -71,6 +74,17 @@ export default function QuotationDetailsModal({
     const quotationData = encodeURIComponent(JSON.stringify(quotation));
     router.push(`/sales-orders?fromQuotation=${quotationData}`);
   }
+
+  const hasSalesOrder = salesOrders.some(so => so.quotationId === quotation.id);
+  const isCreateSODisabled = quotation.status !== 'Accepted' || hasSalesOrder;
+
+  let tooltipMessage = '';
+  if (quotation.status !== 'Accepted') {
+    tooltipMessage = 'Sales Order can only be created from an "Accepted" quotation.';
+  } else if (hasSalesOrder) {
+    tooltipMessage = 'A Sales Order for this quotation already exists.';
+  }
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -155,12 +169,23 @@ export default function QuotationDetailsModal({
         </div>
         <DialogFooter className="sm:justify-between pt-4 border-t">
             <div>
-                {quotation.status === 'Accepted' && (
-                    <Button onClick={handleCreateSalesOrder}>
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                        Create Sales Order
-                    </Button>
-                )}
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div tabIndex={isCreateSODisabled ? 0 : -1}>
+                                <Button onClick={handleCreateSalesOrder} disabled={isCreateSODisabled} style={isCreateSODisabled ? { pointerEvents: 'none' } : {}}>
+                                    <ShoppingCart className="h-4 w-4 mr-2" />
+                                    Create Sales Order
+                                </Button>
+                            </div>
+                        </TooltipTrigger>
+                        {isCreateSODisabled && (
+                            <TooltipContent>
+                                <p>{tooltipMessage}</p>
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                </TooltipProvider>
             </div>
             <div className="flex gap-2">
                 <Button variant="outline" onClick={handleEditClick} className="bg-[#2C2C2C] text-white hover:bg-[#151515] hover:text-white">

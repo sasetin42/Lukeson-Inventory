@@ -6,7 +6,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle, HelpCircle, Check, Clock, DollarSign, CheckCircle, AlertCircle } from "lucide-react";
 import QuotationList from "@/components/quotations/quotation-list";
-import { Quotation, Customer } from '@/lib/types';
+import { Quotation, Customer, SalesOrder } from '@/lib/types';
 import QuotationFormModal from '@/components/quotations/quotation-form-modal';
 import QuotationDetailsModal from '@/components/quotations/quotation-details-modal';
 import { useToast } from '@/hooks/use-toast';
@@ -18,6 +18,7 @@ import CustomerViewModal from '@/components/customers/customer-view-modal';
 export default function QuotationsPage() {
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
@@ -29,6 +30,7 @@ export default function QuotationsPage() {
   useEffect(() => {
     const quotationsRef = collection(db, 'quotations');
     const customersRef = collection(db, 'customers');
+    const salesOrdersRef = collection(db, 'salesOrders');
 
     const unsubscribeQtns = onSnapshot(quotationsRef, (snapshot) => {
         const loadedQuotations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
@@ -45,10 +47,20 @@ export default function QuotationsPage() {
         console.error("Error fetching customers:", error);
         toast({ title: "Error", description: "Failed to load customers.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
     });
+      
+    const unsubscribeSalesOrders = onSnapshot(salesOrdersRef, (snapshot) => {
+        const loadedSalesOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
+        setSalesOrders(loadedSalesOrders);
+    }, (error) => {
+        console.error("Error fetching sales orders:", error);
+        toast({ title: "Error", description: "Failed to load sales orders.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
+    });
+
 
     return () => {
         unsubscribeQtns();
         unsubscribeCustomers();
+        unsubscribeSalesOrders();
     };
   }, [toast]);
 
@@ -184,6 +196,7 @@ export default function QuotationsPage() {
           onClose={handleCloseDetailsModal}
           onEdit={handleOpenFormModal}
           quotation={viewingQuotation}
+          salesOrders={salesOrders}
         />
       )}
       {isCustomerModalOpen && (
