@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useToast } from '@/hooks/use-toast';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { Progress } from '../ui/progress';
+import Image from 'next/image';
 
 interface PaymentFormModalProps {
   isOpen: boolean;
@@ -35,6 +36,7 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
     const [transactionFile, setTransactionFile] = useState<File | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [transactionProofPreview, setTransactionProofPreview] = useState<string | null>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -48,7 +50,17 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
                 return;
             }
             setTransactionFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setTransactionProofPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
+    };
+    
+    const removeImage = () => {
+        setTransactionFile(null);
+        setTransactionProofPreview(null);
     };
     
     const uploadFile = async (): Promise<string | undefined> => {
@@ -82,6 +94,7 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
         try {
             const fileUrl = await uploadFile();
             await onSave(invoice.id, paymentMethod, fileUrl);
+            onClose();
         } catch (error) {
             toast({ title: "Error", description: "Failed to upload transaction proof.", variant: "destructive" });
         } finally {
@@ -93,6 +106,7 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
         setIsSaving(true);
         try {
             await onSave(invoice.id, undefined, undefined);
+            onClose();
         } catch (error) {
             console.error("Error marking as posted:", error);
         } finally {
@@ -125,12 +139,18 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
                     </div>
                     <div className="space-y-2">
                          <Label htmlFor="dropzone-file">Transaction Proof</Label>
-                         {transactionFile ? (
-                             <div className="flex items-center justify-between p-2 border rounded-md">
-                                 <span className="text-sm truncate">{transactionFile.name}</span>
-                                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setTransactionFile(null)}>
-                                     <X className="h-4 w-4" />
-                                 </Button>
+                         {transactionProofPreview ? (
+                             <div className="relative w-full h-48 rounded-lg overflow-hidden">
+                                <Image src={transactionProofPreview} alt="Transaction proof preview" layout="fill" objectFit="contain" data-ai-hint="receipt proof" />
+                                <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    className="absolute top-2 right-2 h-7 w-7"
+                                    onClick={removeImage}
+                                    disabled={isSaving}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
                              </div>
                          ) : (
                             <div className="flex items-center justify-center w-full">
