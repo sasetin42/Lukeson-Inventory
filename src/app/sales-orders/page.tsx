@@ -16,6 +16,7 @@ import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import SalesOrderTemplate from '@/components/sales-orders/sales-order-template';
 import SalesOrderViewModal from '@/components/sales-orders/sales-order-view-modal';
+import JobOrderViewModal from '@/components/job-orders/job-order-view-modal';
 
 function SalesOrdersContent() {
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
@@ -23,8 +24,10 @@ function SalesOrdersContent() {
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isJoViewModalOpen, setIsJoViewModalOpen] = useState(false);
   const [editingSalesOrder, setEditingSalesOrder] = useState<SalesOrder | null>(null);
   const [viewingSalesOrder, setViewingSalesOrder] = useState<SalesOrder | null>(null);
+  const [viewingJobOrder, setViewingJobOrder] = useState<JobOrder | null>(null);
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const customerIdFilter = searchParams.get('customerId');
@@ -120,6 +123,16 @@ function SalesOrdersContent() {
     setViewingSalesOrder(null);
   }
 
+  const handleOpenJoViewModal = (jobOrder: JobOrder) => {
+      setViewingJobOrder(jobOrder);
+      setIsJoViewModalOpen(true);
+  }
+
+  const handleCloseJoViewModal = () => {
+    setIsJoViewModalOpen(false);
+    setViewingJobOrder(null);
+  }
+
   const handleSaveSalesOrder = async (salesOrderData: Omit<SalesOrder, 'id'> & { id?: string }) => {
       try {
           const { id, ...dataToSave } = salesOrderData;
@@ -198,9 +211,9 @@ function SalesOrdersContent() {
                 salesOrders={salesOrders}
                 quotations={quotations}
                 jobOrders={jobOrders}
-                onEdit={handleOpenModal}
                 onDelete={handleDeleteSalesOrder}
                 onView={handleOpenViewModal}
+                onViewJobOrder={handleOpenJoViewModal}
             />
           </div>
         </TabsContent>
@@ -228,6 +241,22 @@ function SalesOrdersContent() {
           salesOrder={viewingSalesOrder}
           jobOrders={jobOrders}
         />
+      )}
+
+      {isJoViewModalOpen && viewingJobOrder && (
+          <JobOrderViewModal
+            isOpen={isJoViewModalOpen}
+            onClose={handleCloseJoViewModal}
+            jobOrder={viewingJobOrder}
+            salesOrder={salesOrders.find(so => so.id === viewingJobOrder.salesOrderId)}
+            quotation={quotations.find(q => q.id === salesOrders.find(so => so.id === viewingJobOrder.salesOrderId)?.quotationId)}
+            onEdit={() => {
+                // This is a bit complex. For now, we just close the modal.
+                // A better solution might involve routing to the job order page with an edit state.
+                handleCloseJoViewModal();
+                toast({title: "Info", description: "To edit a Job Order, please go to the Job Orders page."});
+            }}
+          />
       )}
     </div>
   );

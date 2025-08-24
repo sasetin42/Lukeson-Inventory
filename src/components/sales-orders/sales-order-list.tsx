@@ -26,12 +26,12 @@ interface SalesOrderListProps {
     salesOrders: SalesOrder[];
     quotations: Quotation[];
     jobOrders: JobOrder[];
-    onEdit: (salesOrder: SalesOrder) => void;
     onDelete: (salesOrderId: string) => void;
     onView: (salesOrder: SalesOrder) => void;
+    onViewJobOrder: (jobOrder: JobOrder) => void;
 }
 
-export default function SalesOrderList({ salesOrders, quotations, jobOrders, onEdit, onDelete, onView }: SalesOrderListProps) {
+export default function SalesOrderList({ salesOrders, quotations, jobOrders, onDelete, onView, onViewJobOrder }: SalesOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [salesOrderToDelete, setSalesOrderToDelete] = useState<SalesOrder | null>(null);
     const { toast } = useToast();
@@ -153,7 +153,9 @@ export default function SalesOrderList({ salesOrders, quotations, jobOrders, onE
                                             </TableCell>
                                             <TableCell>
                                                 {jobOrder ? (
-                                                    <Badge variant={getJobOrderStatusVariant(jobOrder.status)}>{jobOrder.status}</Badge>
+                                                    <Button variant="link" className="p-0 h-auto" onClick={() => onViewJobOrder(jobOrder)}>
+                                                        <Badge variant={getJobOrderStatusVariant(jobOrder.status)} className="cursor-pointer">{jobOrder.status}</Badge>
+                                                    </Button>
                                                 ) : (
                                                     <Badge variant="outline">N/A</Badge>
                                                 )}
@@ -166,14 +168,6 @@ export default function SalesOrderList({ salesOrders, quotations, jobOrders, onE
                                                         </Button>
                                                     </TooltipTrigger>
                                                     <TooltipContent>View Sales Order</TooltipContent>
-                                                </Tooltip>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button variant="ghost" size="icon" onClick={() => onEdit(salesOrder)}>
-                                                            <Edit className="h-4 w-4 text-green-500" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>Edit Sales Order</TooltipContent>
                                                 </Tooltip>
                                                 <Tooltip>
                                                      <TooltipTrigger asChild>
