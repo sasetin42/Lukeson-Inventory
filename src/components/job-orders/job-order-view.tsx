@@ -1,101 +1,82 @@
 
 'use client';
 
-import { useMemo } from 'react';
 import { JobOrder } from '@/lib/types';
 import { format } from 'date-fns';
-import Image from 'next/image';
+import { Separator } from '../ui/separator';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { User, Calendar } from 'lucide-react';
 
 interface JobOrderViewProps {
   jobOrder: JobOrder;
 }
 
 export default function JobOrderView({ jobOrder }: JobOrderViewProps) {
-    const accentColor = '#0A3BAA';
-    const companyName = 'YAMASHITA MOLD PHILIPPINES CORPORATION';
-    const address = 'Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines';
-    const phone = 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463';
-    const website = 'www.yamashitamold.ph';
-
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     };
 
     return (
-        <div className="p-8 bg-white text-black">
-            <div className="flex justify-between items-start">
-                 <div className="flex items-center gap-4">
-                    <Image src="https://placehold.co/100x50.png" width={100} height={50} alt="Company Logo" data-ai-hint="logo"/>
-                    <div className="text-xs">
-                        <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
-                        <p>{address}</p>
-                        <p>{phone}</p>
-                        <p>{website}</p>
+        <div className="py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
+                <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-sm"><User className="h-4 w-4 text-blue-500" /> Customer</h4>
+                    <p className="text-muted-foreground pl-6">{jobOrder.customerName}</p>
+                </div>
+                <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-green-500" /> Job Order Date</h4>
+                    <p className="text-muted-foreground pl-6">{formatDate(jobOrder.jobOrderDate)}</p>
+                </div>
+                <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-red-500" /> Expected Completion</h4>
+                    <p className="text-muted-foreground pl-6">{formatDate(jobOrder.expectedCompletionDate)}</p>
+                </div>
+            </div>
+            <Separator />
+            <div className="space-y-2 py-2">
+                <h4 className="font-semibold">Line Items</h4>
+                <div className="border rounded-md">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Product</TableHead>
+                                <TableHead className="text-right">Qty</TableHead>
+                                <TableHead className="text-right">UOM</TableHead>
+                                <TableHead className="text-right">Unit Price</TableHead>
+                                <TableHead className="text-right">Tax</TableHead>
+                                <TableHead className="text-right">Total</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {jobOrder.lines.map((line, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{line.description}</TableCell>
+                                    <TableCell className="text-right">{line.quantity}</TableCell>
+                                    <TableCell className="text-right">{line.uom}</TableCell>
+                                    <TableCell className="text-right">₱{line.unitPrice.toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">{(line.taxRate * 100).toFixed(0)}%</TableCell>
+                                    <TableCell className="text-right">₱{line.total.toFixed(2)}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+            {jobOrder.notes && (
+                <>
+                    <Separator />
+                    <div className="space-y-2 py-2">
+                        <h4 className="font-semibold">Notes</h4>
+                        <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md">{jobOrder.notes}</p>
                     </div>
-                </div>
-                <div className="text-right">
-                    <h2 className="text-3xl font-bold" style={{ color: accentColor }}>JOB ORDER</h2>
-                    <p className="text-sm"><strong>Job Order ID:</strong> {jobOrder.id}</p>
-                    <p className="text-sm"><strong>Date:</strong> {formatDate(jobOrder.jobOrderDate)}</p>
-                    <p className="text-sm"><strong>Expected Completion:</strong> {formatDate(jobOrder.expectedCompletionDate)}</p>
-                </div>
-            </div>
-
-            <div className="mt-8">
-                <p className="font-bold">CLIENT:</p>
-                <p>{jobOrder.customerName}</p>
-            </div>
-            
-            <table className="w-full mt-4 border-collapse text-sm">
-                <thead>
-                    <tr>
-                        <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Description of Work</th>
-                        <th className="p-2 text-right text-white" style={{backgroundColor: accentColor}}>Qty</th>
-                        <th className="p-2 text-right text-white" style={{backgroundColor: accentColor}}>Unit Price</th>
-                        <th className="p-2 text-right text-white" style={{backgroundColor: accentColor}}>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {jobOrder.lines.map((line, index) => (
-                        <tr key={index} className="border-b">
-                            <td className="p-2">{line.description}</td>
-                            <td className="p-2 text-right">{line.quantity}</td>
-                            <td className="p-2 text-right">₱{line.unitPrice.toFixed(2)}</td>
-                            <td className="p-2 text-right">₱{line.total.toFixed(2)}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-            
-            <div className="flex justify-end mt-4">
-                <div className="w-1/2 text-sm">
-                    <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
-                        <span>Total:</span>
-                        <span>₱{jobOrder.totalAmount.toFixed(2)}</span>
-                    </div>
-                </div>
-            </div>
-
-             {jobOrder.notes && (
-                <div className="mt-8">
-                    <h4 className="font-bold">Notes:</h4>
-                    <p className="text-sm text-muted-foreground">{jobOrder.notes}</p>
-                </div>
+                </>
             )}
-
-            <div className="flex justify-between mt-24 text-center text-xs">
-                <div>
-                    <p className="font-bold">YMP / MCB / MJTS</p>
-                    <p className="border-t border-black pt-1 mt-1">Prepared by:</p>
-                </div>
-                 <div>
-                    <p className="font-bold">JUAN DELA CRUZ</p>
-                    <p className="border-t border-black pt-1 mt-1">Received by:</p>
-                </div>
-                 <div>
-                    <p className="font-bold">HIROYOSHI KANAZAWA - VP</p>
-                    <p className="border-t border-black pt-1 mt-1">Verified by:</p>
+            <Separator />
+            <div className="flex justify-end items-center gap-4 pt-4">
+                <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Total Amount</p>
+                    <h3 className="text-2xl font-bold">₱{jobOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
                 </div>
             </div>
         </div>
