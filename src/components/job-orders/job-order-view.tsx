@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { Separator } from '../ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { User, Calendar } from 'lucide-react';
+import Image from 'next/image';
 
 interface JobOrderViewProps {
   jobOrder: JobOrder;
@@ -21,6 +22,14 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
 
     return (
         <div className="py-4">
+            <div className="flex flex-col items-center text-center mb-6">
+                <Image src="https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/7a63721a-e570-4aa7-92ca-455b85a30599.png?alt=media" alt="Lukeson Lighting Company Logo" width={80} height={80} className="mb-4" data-ai-hint="company logo" />
+                <h2 className="text-xl font-bold">LUKESON LIGHTING COMPANY</h2>
+                <p className="text-sm text-muted-foreground">20 Genoveva, Novaliches, Quezon City, Metro Manila</p>
+                <p className="text-sm text-muted-foreground">Phone: +63 912 378 5841</p>
+                <p className="text-sm text-muted-foreground">https://lukesonlighting.com.ph/</p>
+            </div>
+            <Separator />
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 py-4">
                 <div className="space-y-1">
                     <h4 className="font-semibold flex items-center gap-2 text-sm"><User className="h-4 w-4 text-blue-500" /> Customer</h4>
