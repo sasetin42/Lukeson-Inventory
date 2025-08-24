@@ -73,12 +73,13 @@ export default function InvoiceViewModal({
     }
   };
 
-  const getStatusVariant = (status: string): "success" | "secondary" | "destructive" | "outline" => {
+  const getStatusVariant = (status: string): "success" | "secondary" | "destructive" | "outline" | "posted" => {
     switch (status) {
         case 'Paid':
             return 'success';
-        case 'Pending':
         case 'Posted':
+            return 'posted';
+        case 'Pending':
             return 'secondary';
         case 'Overdue':
             return 'destructive';
