@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { Badge } from '../ui/badge';
 
 interface JobOrderViewProps {
   jobOrder: JobOrder;
@@ -53,59 +54,111 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         fetchSettings();
     }, []);
 
-    const { companyName, address, phone, website, logo } = templateSettings;
+    const { companyName, address, phone, website, logo, preparedByName, preparedByLabel, receivedByName, receivedByLabel, verifiedByName, verifiedByLabel } = templateSettings;
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     };
+    
+    const getStatusVariant = (status: JobOrder['status']): "success" | "secondary" | "destructive" | "outline" | "inProgress" => {
+        switch (status) {
+            case 'Completed': return 'success';
+            case 'In Progress': return 'inProgress';
+            case 'Scheduled': return 'secondary';
+            case 'Draft': 
+            case 'On Hold': return 'outline';
+            case 'Cancelled': return 'destructive';
+            default: return 'outline';
+        }
+    };
+    
+    const getQuotationStatusVariant = (status?: Quotation['status']): "default" | "secondary" | "destructive" | "outline" | "success" => {
+        if (!status) return 'outline';
+        switch (status) {
+            case 'Accepted': return 'success';
+            case 'Sent': return 'secondary';
+            case 'Draft': return 'outline';
+            case 'Expired': return 'destructive';
+            default: return 'outline';
+        }
+    };
+
+    const getSalesOrderStatusVariant = (status?: SalesOrder['status']): "default" | "secondary" | "destructive" | "outline" | "success" | "confirmed" => {
+        if (!status) return 'outline';
+        switch (status) {
+            case 'Fulfilled': return 'success';
+            case 'Confirmed': return 'confirmed';
+            case 'Draft': return 'outline';
+            case 'Cancelled': return 'destructive';
+            case 'Invoiced': return 'destructive';
+            default: return 'outline';
+        }
+    };
 
     return (
-        <div className="py-4">
-            <div className="flex flex-col items-center text-center mb-6">
-                <Image src={logo} alt="Company Logo" width={80} height={80} className="mb-4" data-ai-hint="company logo" />
-                <h2 className="text-xl font-bold">{companyName}</h2>
-                <p className="text-sm text-muted-foreground">{address}</p>
-                <p className="text-sm text-muted-foreground">{phone}</p>
-                <p className="text-sm text-muted-foreground">{website}</p>
+        <div className="py-4 text-xs">
+            <div className="flex flex-col items-center text-center mb-4">
+                <Image src={logo} alt="Company Logo" width={60} height={60} className="mb-2" data-ai-hint="company logo" />
+                <h2 className="text-lg font-bold">{companyName}</h2>
+                <p className="text-xs text-muted-foreground">{address}</p>
+                <p className="text-xs text-muted-foreground">{phone}</p>
+                <p className="text-xs text-muted-foreground">{website}</p>
+            </div>
+            
+            <div className="text-center my-4">
+                 <h3 className="text-xl font-bold" style={{ color: templateSettings.accentColor }}>JOB ORDER</h3>
+                 <div className="flex items-center justify-center gap-2">
+                    <span className="text-sm text-muted-foreground">{jobOrder.id}</span>
+                    <Badge variant={getStatusVariant(jobOrder.status)} className="capitalize h-fit">{jobOrder.status}</Badge>
+                 </div>
+            </div>
+
+            <Separator />
+            <div className="grid grid-cols-4 gap-x-4 gap-y-2 py-3 text-xs">
+                <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-1"><User className="h-3 w-3" /> Customer</h4>
+                    <p className="text-muted-foreground pl-4">{jobOrder.customerName}</p>
+                </div>
+                <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-1"><Calendar className="h-3 w-3" /> Job Order Date</h4>
+                    <p className="text-muted-foreground pl-4">{formatDate(jobOrder.jobOrderDate)}</p>
+                </div>
+                <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-1"><Calendar className="h-3 w-3" /> Expected Completion</h4>
+                    <p className="text-muted-foreground pl-4">{formatDate(jobOrder.expectedCompletionDate)}</p>
+                </div>
+                <div className="space-y-1">
+                    <h4 className="font-semibold flex items-center gap-1"><Calendar className="h-3 w-3" /> SO Delivery Date</h4>
+                    <p className="text-muted-foreground pl-4">{salesOrder ? formatDate(salesOrder.deliveryDate) : 'N/A'}</p>
+                </div>
+                <div className="space-y-1">
+                    <h4 className="font-semibold">Quotation Status</h4>
+                    {quotation ? <Badge variant={getQuotationStatusVariant(quotation.status)}>{quotation.status}</Badge> : <span className="text-muted-foreground">N/A</span>}
+                </div>
+                <div className="space-y-1">
+                    <h4 className="font-semibold">Sales Order Status</h4>
+                    {salesOrder ? <Badge variant={getSalesOrderStatusVariant(salesOrder.status)}>{salesOrder.status}</Badge> : <span className="text-muted-foreground">N/A</span>}
+                </div>
             </div>
             <Separator />
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 py-4">
-                <div className="space-y-1">
-                    <h4 className="font-semibold flex items-center gap-2 text-sm"><User className="h-4 w-4 text-blue-500" /> Customer</h4>
-                    <p className="text-muted-foreground text-sm pl-6">{jobOrder.customerName}</p>
-                </div>
-                <div className="space-y-1">
-                    <h4 className="font-semibold flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-green-500" /> Job Order Date</h4>
-                    <p className="text-muted-foreground text-sm pl-6">{formatDate(jobOrder.jobOrderDate)}</p>
-                </div>
-                <div className="space-y-1">
-                    <h4 className="font-semibold flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-red-500" /> Expected Completion</h4>
-                    <p className="text-muted-foreground text-sm pl-6">{formatDate(jobOrder.expectedCompletionDate)}</p>
-                </div>
-                <div className="space-y-1">
-                    <h4 className="font-semibold flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-purple-500" /> SO Delivery Date</h4>
-                    <p className="text-muted-foreground text-sm pl-6">{salesOrder ? formatDate(salesOrder.deliveryDate) : 'N/A'}</p>
-                </div>
-            </div>
-            <Separator />
-            <div className="space-y-2 py-2">
-                <h4 className="font-semibold">Line Items</h4>
+            <div className="space-y-1 py-2">
+                <h4 className="font-semibold text-xs">Line Items</h4>
                 <div className="border rounded-md">
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead style={{ backgroundColor: '#578C00', color: '#FFFFFF' }}>Product</TableHead>
-                                <TableHead className="text-right" style={{ backgroundColor: '#578C00', color: '#FFFFFF' }}>Qty</TableHead>
-                                <TableHead className="text-right" style={{ backgroundColor: '#578C00', color: '#FFFFFF' }}>UOM</TableHead>
+                                <TableHead style={{ backgroundColor: '#578C00', color: '#FFFFFF' }} className="py-1 px-2 text-xs h-auto">Product</TableHead>
+                                <TableHead className="text-right py-1 px-2 text-xs h-auto" style={{ backgroundColor: '#578C00', color: '#FFFFFF' }}>Qty</TableHead>
+                                <TableHead className="text-right py-1 px-2 text-xs h-auto" style={{ backgroundColor: '#578C00', color: '#FFFFFF' }}>UOM</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {jobOrder.lines.map((line, index) => (
                                 <TableRow key={index}>
-                                    <TableCell>{line.description}</TableCell>
-                                    <TableCell className="text-right">{line.quantity}</TableCell>
-                                    <TableCell className="text-right">{line.uom}</TableCell>
+                                    <TableCell className="py-1 px-2">{line.description}</TableCell>
+                                    <TableCell className="text-right py-1 px-2">{line.quantity}</TableCell>
+                                    <TableCell className="text-right py-1 px-2">{line.uom}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -114,33 +167,33 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
             </div>
             
             <Separator />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-                 <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-4 py-3 text-xs">
+                 <div className="space-y-1">
                     <h4 className="font-semibold">Quotation Notes</h4>
-                    <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md min-h-[80px]">
+                    <p className="text-muted-foreground p-2 bg-muted/50 rounded-md min-h-[60px]">
                         {quotation?.notes || 'No quotation notes available.'}
                     </p>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                     <h4 className="font-semibold">Sales Order Notes</h4>
-                     <p className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-md min-h-[80px]">
+                     <p className="text-muted-foreground p-2 bg-muted/50 rounded-md min-h-[60px]">
                         {salesOrder?.notes || 'No sales order notes available.'}
                     </p>
                 </div>
             </div>
 
-            <div className="flex justify-between mt-24 text-center">
+            <div className="flex justify-between mt-16 text-center text-xs">
                 <div>
-                    <p className="font-bold border-b border-black pb-1 mb-1">Quotations</p>
-                    <p className="text-sm">Verified by:</p>
+                    <p className="font-bold">{preparedByName}</p>
+                    <p className="text-xs border-t border-black pt-1 mt-1">{preparedByLabel}</p>
                 </div>
                  <div>
-                    <p className="font-bold border-b border-black pb-1 mb-1">Inspections</p>
-                    <p className="text-sm">Quality Check:</p>
+                    <p className="font-bold">{receivedByName}</p>
+                    <p className="text-xs border-t border-black pt-1 mt-1">{receivedByLabel}</p>
                 </div>
                  <div>
-                    <p className="font-bold border-b border-black pb-1 mb-1">Sales Invoice</p>
-                    <p className="text-sm">Admin Approval:</p>
+                    <p className="font-bold">{verifiedByName}</p>
+                    <p className="text-xs border-t border-black pt-1 mt-1">{verifiedByLabel}</p>
                 </div>
             </div>
         </div>
