@@ -50,7 +50,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         fetchSettings();
     }, []);
 
-    const { accentColor, companyName, address, phone, website, logo, showNotes, showVat, preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName } = templateSettings;
+    const { accentColor, companyName, address, phone, website, logo, showDueDate, showNotes, showVat, preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName } = templateSettings;
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
