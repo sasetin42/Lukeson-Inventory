@@ -117,7 +117,7 @@ const navGroups = [
 ];
 
 function AppContent({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, logout } = useAuth();
+  const { isAuthenticated, isLoading, logout, user } = useAuth();
   const { toast } = useToast();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -150,9 +150,13 @@ function AppContent({ children }: { children: React.ReactNode }) {
       setOpenAccordion(newOpenState);
   }
   
-  const handleLogout = () => {
-    logout();
-    toast({ title: "Logged Out", description: "You have been successfully logged out.", variant: 'success' });
+  const handleLogout = async () => {
+    try {
+        await logout();
+        toast({ title: "Logged Out", description: "You have been successfully logged out.", variant: 'success' });
+    } catch (error) {
+        toast({ title: "Logout Failed", description: "An error occurred during logout.", variant: 'destructive' });
+    }
   };
   
   if (isLoading) {
@@ -227,11 +231,11 @@ function AppContent({ children }: { children: React.ReactNode }) {
                 <Button variant="ghost" className="justify-start w-full gap-2 p-2 h-auto">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={userProfile.avatar} alt={userProfile.name} data-ai-hint="user avatar" />
-                    <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="text-left">
                     <p className="text-sm font-medium text-foreground">{userProfile.name}</p>
-                    <p className="text-xs text-muted-foreground">admin@example.com</p>
+                    <p className="text-xs text-muted-foreground">{user?.email}</p>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
