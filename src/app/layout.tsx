@@ -30,45 +30,51 @@ const navGroups = [
   {
     title: 'CORE FEATURES',
     color: 'text-blue-500',
+    roles: ['Admin', 'Manager', 'Viewer'],
     items: [
       {
         title: 'Overview',
+        roles: ['Admin', 'Manager', 'Viewer'],
         links: [
-          { href: '/', icon: LayoutGrid, label: 'Dashboard', color: 'text-sky-500' },
-          { href: '/analytics', icon: BarChart2, label: 'Analytics', color: 'text-green-500' },
+          { href: '/', icon: LayoutGrid, label: 'Dashboard', color: 'text-sky-500', roles: ['Admin', 'Manager', 'Viewer'] },
+          { href: '/analytics', icon: BarChart2, label: 'Analytics', color: 'text-green-500', roles: ['Admin', 'Manager', 'Viewer'] },
         ],
       },
       {
         title: 'Inventory',
+        roles: ['Admin', 'Manager', 'Viewer'],
         links: [
-          { href: '/products', icon: Package, label: 'Products', color: 'text-blue-500' },
-          { href: '/warehouses', icon: Warehouse, label: 'Warehouses', color: 'text-green-500' },
-          { href: '/stock-alerts', icon: AlertTriangle, label: 'Stock Alerts', color: 'text-red-500' },
-          { href: '/inventory-settings', icon: Settings, label: 'Settings', color: 'text-yellow-500' },
+          { href: '/products', icon: Package, label: 'Products', color: 'text-blue-500', roles: ['Admin', 'Manager', 'Viewer'] },
+          { href: '/warehouses', icon: Warehouse, label: 'Warehouses', color: 'text-green-500', roles: ['Admin', 'Manager'] },
+          { href: '/stock-alerts', icon: AlertTriangle, label: 'Stock Alerts', color: 'text-red-500', roles: ['Admin', 'Manager'] },
+          { href: '/inventory-settings', icon: Settings, label: 'Settings', color: 'text-yellow-500', roles: ['Admin', 'Manager'] },
         ],
       },
       {
         title: 'Sales',
+        roles: ['Admin', 'Manager'],
         links: [
-            { href: '/quotations', icon: FileText, label: 'Quotations', color: 'text-purple-500' },
-            { href: '/sales-orders', icon: ShoppingCart, label: 'Sales Orders', color: 'text-red-500' },
-            { href: '/job-orders', icon: PlusCircle, label: 'Job Order', color: 'text-orange-500' },
-            { href: '/invoices', icon: FileCog, label: 'Sales Invoices', color: 'text-yellow-500' },
-            { href: '/payments', icon: Banknote, label: 'Payments', color: 'text-indigo-500' },
+            { href: '/quotations', icon: FileText, label: 'Quotations', color: 'text-purple-500', roles: ['Admin', 'Manager'] },
+            { href: '/sales-orders', icon: ShoppingCart, label: 'Sales Orders', color: 'text-red-500', roles: ['Admin', 'Manager'] },
+            { href: '/job-orders', icon: PlusCircle, label: 'Job Order', color: 'text-orange-500', roles: ['Admin', 'Manager'] },
+            { href: '/invoices', icon: FileCog, label: 'Sales Invoices', color: 'text-yellow-500', roles: ['Admin', 'Manager'] },
+            { href: '/payments', icon: Banknote, label: 'Payments', color: 'text-indigo-500', roles: ['Admin', 'Manager'] },
         ],
       },
       {
         title: 'Purchasing',
+        roles: ['Admin', 'Manager'],
         links: [
-            { href: '/purchase-orders', icon: ShoppingBag, label: 'Purchase Orders', color: 'text-blue-500' },
-            { href: '/goods-receipts', icon: File, label: 'Goods Receipts', color: 'text-purple-500' },
+            { href: '/purchase-orders', icon: ShoppingBag, label: 'Purchase Orders', color: 'text-blue-500', roles: ['Admin', 'Manager'] },
+            { href: '/goods-receipts', icon: File, label: 'Goods Receipts', color: 'text-purple-500', roles: ['Admin', 'Manager'] },
         ],
       },
       {
         title: 'Contacts',
+        roles: ['Admin', 'Manager'],
         links: [
-            { href: '/customer', icon: Users, label: 'Customers', color: 'text-purple-500' },
-            { href: '/suppliers', icon: Truck, label: 'Suppliers', color: 'text-green-500' },
+            { href: '/customer', icon: Users, label: 'Customers', color: 'text-purple-500', roles: ['Admin', 'Manager'] },
+            { href: '/suppliers', icon: Truck, label: 'Suppliers', color: 'text-green-500', roles: ['Admin', 'Manager'] },
         ],
       },
     ],
@@ -76,26 +82,29 @@ const navGroups = [
   {
     title: 'FINANCE',
     color: 'text-green-500',
+    roles: ['Admin', 'Manager'],
     items: [
       {
         title: 'Accounting',
+        roles: ['Admin', 'Manager'],
         links: [
-            { href: '/chart-of-accounts', icon: Briefcase, label: 'Chart of Accounts', color: 'text-sky-500' },
-            { href: '/journals', icon: FileCode, label: 'Journal Entries', color: 'text-red-500' },
+            { href: '/chart-of-accounts', icon: Briefcase, label: 'Chart of Accounts', color: 'text-sky-500', roles: ['Admin', 'Manager'] },
+            { href: '/journals', icon: FileCode, label: 'Journal Entries', color: 'text-red-500', roles: ['Admin', 'Manager'] },
         ],
       },
       {
         title: 'Reports',
+        roles: ['Admin', 'Manager', 'Viewer'],
         links: [
-            { href: '/reports/ar-aging', icon: BarChart3, label: 'AR/AP Aging', color: 'text-yellow-500' },
-            { href: '/reports/inventory-valuation', icon: BarChart3, label: 'Inventory Valuation', color: 'text-indigo-500' },
-            { href: '/reports/pnl', icon: BarChart3, label: 'Profit & Loss', color: 'text-pink-500' },
-            { href: '/reports/balance-sheet', icon: BarChart3, label: 'Balance Sheet', color: 'text-sky-500' },
-            { href: '/reports/sales-by-customer', icon: BarChart3, label: 'Sales by Customer', color: 'text-green-500' },
-            { href: '/reports/sales-by-item', icon: BarChart3, label: 'Sales by Item', color: 'text-blue-500' },
-            { href: '/reports/purchase-analysis', icon: BarChart3, label: 'Purchase Analysis', color: 'text-purple-500' },
-            { href: '/reports/audit-trail', icon: BarChart3, label: 'System Security', color: 'text-red-500' },
-            { href: '/reports/cash-flow-statement', icon: BarChart3, label: 'Cash Flow Statement', color: 'text-orange-500' },
+            { href: '/reports/ar-aging', icon: BarChart3, label: 'AR/AP Aging', color: 'text-yellow-500', roles: ['Admin', 'Manager'] },
+            { href: '/reports/inventory-valuation', icon: BarChart3, label: 'Inventory Valuation', color: 'text-indigo-500', roles: ['Admin', 'Manager', 'Viewer'] },
+            { href: '/reports/pnl', icon: BarChart3, label: 'Profit & Loss', color: 'text-pink-500', roles: ['Admin', 'Manager', 'Viewer'] },
+            { href: '/reports/balance-sheet', icon: BarChart3, label: 'Balance Sheet', color: 'text-sky-500', roles: ['Admin', 'Manager', 'Viewer'] },
+            { href: '/reports/sales-by-customer', icon: BarChart3, label: 'Sales by Customer', color: 'text-green-500', roles: ['Admin', 'Manager', 'Viewer'] },
+            { href: '/reports/sales-by-item', icon: BarChart3, label: 'Sales by Item', color: 'text-blue-500', roles: ['Admin', 'Manager', 'Viewer'] },
+            { href: '/reports/purchase-analysis', icon: BarChart3, label: 'Purchase Analysis', color: 'text-purple-500', roles: ['Admin', 'Manager'] },
+            { href: '/reports/audit-trail', icon: BarChart3, label: 'System Security', color: 'text-red-500', roles: ['Admin'] },
+            { href: '/reports/cash-flow-statement', icon: BarChart3, label: 'Cash Flow Statement', color: 'text-orange-500', roles: ['Admin', 'Manager'] },
         ],
       },
     ],
@@ -103,14 +112,16 @@ const navGroups = [
   {
     title: 'SETTINGS',
     color: 'text-red-500',
+    roles: ['Admin'],
     items: [
       {
         title: 'System Settings',
+        roles: ['Admin'],
         links: [
-            { href: '/settings', icon: Settings, label: 'General Settings', color: 'text-yellow-500' },
-            { href: '/users-management', icon: Users2, label: 'Users & Roles', color: 'text-indigo-500' },
-            { href: '/security', icon: Shield, label: 'System Security', color: 'text-pink-500' },
-            { href: '/system-backup', icon: DatabaseBackup, label: 'System Backup', color: 'text-sky-500' },
+            { href: '/settings', icon: Settings, label: 'General Settings', color: 'text-yellow-500', roles: ['Admin'] },
+            { href: '/users-management', icon: Users2, label: 'Users & Roles', color: 'text-indigo-500', roles: ['Admin'] },
+            { href: '/security', icon: Shield, label: 'System Security', color: 'text-pink-500', roles: ['Admin'] },
+            { href: '/system-backup', icon: DatabaseBackup, label: 'System Backup', color: 'text-sky-500', roles: ['Admin'] },
         ],
       },
     ],
@@ -118,7 +129,7 @@ const navGroups = [
 ];
 
 function AppContent({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, logout, user } = useAuth();
+  const { isAuthenticated, isLoading, logout, firebaseUser, userRole } = useAuth();
   const { toast } = useToast();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -194,11 +205,11 @@ function AppContent({ children }: { children: React.ReactNode }) {
                 value={openAccordion} 
                 onValueChange={handleAccordionChange}
               >
-                {navGroups.map((group, groupIndex) => (
+                {navGroups.filter(g => g.roles.includes(userRole!)).map((group, groupIndex) => (
                   <div key={group.title}>
                     {groupIndex > 0 && <SidebarSeparator className="my-2" />}
                     <h3 className={`text-sm font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
-                    {group.items.map((item) => (
+                    {group.items.filter(i => i.roles.includes(userRole!)).map((item) => (
                         <AccordionItem value={item.title} key={item.title}>
                           <AccordionTrigger>
                             <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
@@ -207,7 +218,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
                           </AccordionTrigger>
                           <AccordionContent>
                             <SidebarMenu className="ml-4 border-l border-gray-200 dark:border-gray-700 py-1">
-                              {item.links.map((link) => (
+                              {item.links.filter(l => l.roles.includes(userRole!)).map((link) => (
                                 <SidebarMenuItem key={link.label}>
                                   <SidebarMenuButton asChild>
                                     <Link href={link.href}>
@@ -233,11 +244,11 @@ function AppContent({ children }: { children: React.ReactNode }) {
                 <Button variant="ghost" className="justify-start w-full gap-2 p-2 h-auto">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={userProfile.avatar} alt={userProfile.name} data-ai-hint="user avatar" />
-                    <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>{firebaseUser?.email?.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="text-left">
                     <p className="text-sm font-medium text-foreground">{userProfile.name}</p>
-                    <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    <p className="text-xs text-muted-foreground">{firebaseUser?.email}</p>
                   </div>
                 </Button>
               </DropdownMenuTrigger>

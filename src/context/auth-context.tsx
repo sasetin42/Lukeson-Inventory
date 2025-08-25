@@ -3,35 +3,63 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User as FirebaseUser } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { User } from '@/lib/types';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: FirebaseUser | null;
+  user: User | null;
+  firebaseUser: FirebaseUser | null;
   login: (email: string, pass: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
+  userRole: User['role'] | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<FirebaseUser | null>(null);
+    const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+    const [user, setUser] = useState<User | null>(null);
+    const [userRole, setUserRole] = useState<User['role'] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const pathname = usePathname();
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
-            setIsLoading(false);
-            if (!currentUser && pathname !== '/login') {
-                router.push('/login');
+        const unsubscribe = onAuthStateChanged(auth, async (currentFirebaseUser) => {
+            setFirebaseUser(currentFirebaseUser);
+
+            if (currentFirebaseUser) {
+                try {
+                    const userDocRef = doc(db, 'users', currentFirebaseUser.uid);
+                    const userDocSnap = await getDoc(userDocRef);
+                    if (userDocSnap.exists()) {
+                        const userData = userDocSnap.data() as User;
+                        setUser({ ...userData, id: currentFirebaseUser.uid });
+                        setUserRole(userData.role);
+                    } else {
+                        // Handle case where user exists in Auth but not Firestore
+                        setUser(null);
+                        setUserRole(null);
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data from Firestore:", error);
+                    setUser(null);
+                    setUserRole(null);
+                }
+            } else {
+                setUser(null);
+                setUserRole(null);
+                 if (pathname !== '/login') {
+                    router.push('/login');
+                }
             }
+            setIsLoading(false);
         });
 
-        // Cleanup subscription on unmount
         return () => unsubscribe();
     }, [router, pathname]);
 
@@ -46,11 +74,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const value = { 
-        isAuthenticated: !isLoading && !!user, 
+        isAuthenticated: !isLoading && !!firebaseUser, 
         user,
+        firebaseUser,
         login, 
         logout, 
-        isLoading 
+        isLoading,
+        userRole,
     };
 
     return (

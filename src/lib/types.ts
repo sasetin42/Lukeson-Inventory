@@ -21,6 +21,7 @@ export type Company = {
 // User and Role Management
 export type User = {
     id: string;
+    firestoreId?: string;
     name: string;
     email: string;
     role: 'Admin' | 'Manager' | 'Viewer';
