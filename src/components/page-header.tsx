@@ -42,7 +42,11 @@ function HeaderActions() {
             setLowStockCount(lowStockItems.length);
         });
 
-        const salesOrdersQuery = query(collection(db, 'salesOrders'), where('status', '==', 'Fulfilled'));
+        const salesOrdersQuery = query(
+            collection(db, 'salesOrders'), 
+            where('status', '==', 'Fulfilled'),
+            where('invoicedStatus', '!=', 'Fully Invoiced')
+        );
         const unsubscribeSalesOrders = onSnapshot(salesOrdersQuery, (snapshot) => {
             setInvoiceReadyCount(snapshot.size);
         });
