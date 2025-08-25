@@ -151,9 +151,6 @@ function AppContent({ children }: { children: React.ReactNode }) {
   const handleLogout = async () => {
     localStorage.removeItem('user_profile');
     toast({ title: "Logged Out", description: "You have been successfully logged out.", variant: 'success' });
-    // In a real app, you'd likely redirect to a login page
-    // router.push('/login'); 
-    // For now, we can just reset the displayed user profile to default
     setUserProfile({ name: 'Admin User', avatar: 'https://placehold.co/40x40.png' });
   };
 
