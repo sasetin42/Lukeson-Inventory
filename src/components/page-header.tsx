@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import { Button } from './ui/button';
-import { Zap, AlertTriangle, FileText } from 'lucide-react';
+import { Zap, AlertTriangle, FileText, Loader2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
@@ -61,11 +61,22 @@ function HeaderActions() {
     }, []);
 
     const handleOptimize = () => {
-        toast({
-            title: "System Optimized",
-            description: "Cache has been cleared and data has been refreshed.",
-            variant: 'success'
+        const { id, update } = toast({
+            title: "Optimizing...",
+            description: "Please wait while we refresh the system data.",
+            variant: 'default',
+            icon: <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
         });
+
+        setTimeout(() => {
+            update({
+                id,
+                title: "System Optimized",
+                description: "Cache has been cleared and data has been refreshed.",
+                variant: 'success',
+                icon: <CheckCircle className="h-5 w-5" />
+            });
+        }, 1000);
     }
 
     if (!mounted) {
