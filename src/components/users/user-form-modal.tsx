@@ -75,7 +75,7 @@ export default function UserFormModal({
             status,
         };
 
-        if (password) {
+        if (password && !user) { // Only add password if it's a new user
             userData.password = password;
         }
 

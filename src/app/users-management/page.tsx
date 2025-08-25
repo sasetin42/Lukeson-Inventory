@@ -69,9 +69,15 @@ export default function UsersManagementPage() {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    await deleteDoc(doc(db, "users", userId));
-    toast({ title: "Success", description: "User deleted successfully.", variant: "success" });
-    fetchUsers(); // refetch
+    try {
+      // Note: In a real app, you would also delete the user from Firebase Auth.
+      // This requires backend logic for security reasons.
+      await deleteDoc(doc(db, "users", userId));
+      toast({ title: "Success", description: "User deleted successfully.", variant: "success" });
+      fetchUsers(); // refetch
+    } catch (error) {
+       toast({ title: "Error", description: "Failed to delete user.", variant: "destructive" });
+    }
   };
 
   const totalUsers = users.length;
