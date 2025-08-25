@@ -46,6 +46,7 @@ function HeaderActions() {
             collection(db, 'salesOrders'), 
             where('status', '==', 'Fulfilled')
         );
+
         const unsubscribeSalesOrders = onSnapshot(salesOrdersQuery, (snapshot) => {
             const salesOrders = snapshot.docs.map(doc => doc.data() as SalesOrder);
             const invoiceReadyOrders = salesOrders.filter(so => so.invoicedStatus !== 'Fully Invoiced');
@@ -85,7 +86,7 @@ function HeaderActions() {
                         ({lowStockCount})
                     </Link>
                 </Button>
-                 <Button variant="outline" size="sm" onClick={handleOptimize} className="text-xs">
+                 <Button size="sm" onClick={handleOptimize} className="text-xs bg-[#5F8400] text-[#FFFFFF] hover:bg-[#5F8400]/90">
                     <Zap className="h-3 w-3 mr-1" />
                     Optimize
                 </Button>
@@ -127,7 +128,7 @@ function HeaderActions() {
                     Stock Alert ({lowStockCount})
                 </Link>
             </Button>
-            <Button variant="outline" size="sm" onClick={handleOptimize}>
+            <Button size="sm" onClick={handleOptimize} className="bg-[#5F8400] text-[#FFFFFF] hover:bg-[#5F8400]/90">
                 <Zap className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Optimize System</span>
                 <span className="sm:hidden">Optimize</span>
