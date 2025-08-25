@@ -42,10 +42,7 @@ function HeaderActions() {
             setLowStockCount(lowStockItems.length);
         });
 
-        const salesOrdersQuery = query(
-            collection(db, 'salesOrders'), 
-            where('status', '==', 'Fulfilled')
-        );
+        const salesOrdersQuery = query(collection(db, 'salesOrders'), where('status', '==', 'Fulfilled'));
 
         const unsubscribeSalesOrders = onSnapshot(salesOrdersQuery, (snapshot) => {
             const salesOrders = snapshot.docs.map(doc => doc.data() as SalesOrder);
@@ -62,7 +59,7 @@ function HeaderActions() {
 
     const handleOptimize = () => {
         const { id, update } = toast({
-            title: "Optimizing...",
+            title: "System is optimizing...",
             description: "Please wait while we refresh the system data.",
             variant: 'default',
             icon: <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
@@ -121,7 +118,7 @@ function HeaderActions() {
                 variant={invoiceReadyCount > 0 ? "default" : "outline"} 
                 size="sm" 
                 asChild 
-                className={cn(invoiceReadyCount > 0 && "animate-blink")}
+                className={cn(invoiceReadyCount > 0 && "animate-blink", "bg-[#F99B01] text-white hover:bg-[#F99B01]/90")}
             >
                 <Link href="/invoices">
                     <FileText className="h-4 w-4 mr-2" />
