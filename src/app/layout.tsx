@@ -17,6 +17,7 @@ import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import UserProfileModal from '@/components/users/user-profile-modal';
 import { useToast } from '@/hooks/use-toast';
+import { AuthProvider, useAuth } from '@/context/auth-context';
 
 
 // export const metadata: Metadata = {
@@ -116,11 +117,12 @@ const navGroups = [
 ];
 
 function AppContent({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
+  const { isAuthenticated, isLoading, logout } = useAuth();
   const { toast } = useToast();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [userProfile, setUserProfile] = useState({ name: 'Admin User', avatar: 'https://placehold.co/40x40.png' });
+  const pathname = usePathname();
 
   useEffect(() => {
     const storedProfile = localStorage.getItem('user_profile');
@@ -148,11 +150,22 @@ function AppContent({ children }: { children: React.ReactNode }) {
       setOpenAccordion(newOpenState);
   }
   
-  const handleLogout = async () => {
-    localStorage.removeItem('user_profile');
+  const handleLogout = () => {
+    logout();
     toast({ title: "Logged Out", description: "You have been successfully logged out.", variant: 'success' });
-    setUserProfile({ name: 'Admin User', avatar: 'https://placehold.co/40x40.png' });
   };
+  
+  if (isLoading) {
+    return <div className="flex h-screen w-full items-center justify-center">Loading...</div>;
+  }
+  
+  if (!isAuthenticated && pathname !== '/login') {
+      return null;
+  }
+  
+  if (pathname === '/login') {
+      return <>{children}</>;
+  }
 
 
   return (
@@ -275,8 +288,10 @@ export default function RootLayout({
         <meta name="description" content="A comprehensive, all-in-one business management system tailored for businesses in the Philippines." />
       </head>
       <body className="font-body antialiased h-full bg-background transition-colors duration-300" suppressHydrationWarning={true}>
-        <AppContent>{children}</AppContent>
-        <Toaster />
+        <AuthProvider>
+            <AppContent>{children}</AppContent>
+            <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );
