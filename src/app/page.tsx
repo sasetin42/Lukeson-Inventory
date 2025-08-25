@@ -44,33 +44,40 @@ export default function DashboardPage() {
       onSnapshot(customersRef, (snapshot) => setCustomers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer))), (err) => { console.error(err); toast({ title: "Error", description: "Failed to load customers.", variant: "destructive" });}),
       onSnapshot(salesRef, (snapshot) => setSales(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder))), (err) => { console.error(err); toast({ title: "Error", description: "Failed to load sales.", variant: "destructive" });}),
       onSnapshot(quotationsRef, (quotationsSnapshot) => {
-          onSnapshot(jobOrdersRef, (jobOrdersSnapshot) => {
-              onSnapshot(invoicesRef, (invoicesSnapshot) => {
-                  onSnapshot(recentSalesQuery, (salesSnapshot) => {
-                      const loadedQuotations = quotationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
-                      setQuotations(loadedQuotations);
-                      const loadedJobOrders = jobOrdersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
-                      setJobOrders(loadedJobOrders);
-                      const loadedInvoices = invoicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
-                      const loadedSales = salesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
-
-                      const enrichedTransactions = loadedSales.map(sale => {
-                          const quotation = sale.quotationId ? loadedQuotations.find(q => q.id === sale.quotationId) : undefined;
-                          const jobOrder = loadedJobOrders.find(j => j.salesOrderId === sale.id);
-                          const invoice = loadedInvoices.find(i => i.salesOrderId === sale.id);
-                          return { salesOrder: sale, quotation, jobOrder, invoice };
-                      });
-                      setRecentTransactions(enrichedTransactions);
-                      setLoading(false);
-                  });
-              });
-          });
-      }, (err) => { console.error(err); toast({ title: "Error", description: "Failed to load dashboard data.", variant: "destructive" });})
+        setQuotations(quotationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation)))
+      }, (err) => { console.error(err); toast({ title: "Error", description: "Failed to load quotations.", variant: "destructive" });}),
+      onSnapshot(jobOrdersRef, (jobOrdersSnapshot) => {
+        setJobOrders(jobOrdersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder)))
+      }, (err) => { console.error(err); toast({ title: "Error", description: "Failed to load job orders.", variant: "destructive" });}),
+      onSnapshot(invoicesRef, (invoicesSnapshot) => {
+        setInvoices(invoicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice)))
+      }, (err) => { console.error(err); toast({ title: "Error", description: "Failed to load invoices.", variant: "destructive" });}),
+      onSnapshot(recentSalesQuery, (salesSnapshot) => {
+        const loadedSales = salesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
+        // We need all quotations, jobOrders, and invoices to link, so we fetch them above and use the state here.
+        // This onSnapshot is now just for getting the *most recent* sales.
+        setLoading(false);
+      }, (err) => { console.error(err); toast({ title: "Error", description: "Failed to load recent sales.", variant: "destructive" }); setLoading(false);})
     ];
 
     return () => unsubscribes.forEach(unsub => unsub());
 
   }, [toast]);
+
+  useEffect(() => {
+    // This effect runs when sales, quotations, jobOrders, or invoices change,
+    // and rebuilds the recentTransactions list.
+    const recentSales = sales.sort((a, b) => ((b.orderDate as any).toDate() || new Date(b.orderDate as string)).getTime() - ((a.orderDate as any).toDate() || new Date(a.orderDate as string)).getTime()).slice(0, 10);
+    
+    const enrichedTransactions = recentSales.map(sale => {
+        const quotation = sale.quotationId ? quotations.find(q => q.id === sale.quotationId) : undefined;
+        const jobOrder = jobOrders.find(j => j.salesOrderId === sale.id);
+        const invoice = invoices.find(i => i.salesOrderId === sale.id);
+        return { salesOrder: sale, quotation, jobOrder, invoice };
+    });
+    setRecentTransactions(enrichedTransactions);
+
+  }, [sales, quotations, jobOrders, invoices])
 
   // Transform sales orders to a flat list of sales for compatibility with existing components
   const flatSales: FlatSale[] = sales.flatMap(order => 

@@ -50,6 +50,7 @@ const getStatusVariant = (doc: any, type: 'quotation' | 'salesOrder' | 'jobOrder
         case 'invoice':
              switch (doc.status as string) {
                 case 'Paid': return 'success';
+                case 'Posted': return 'posted';
                 case 'Pending': return 'secondary';
                 case 'Overdue': return 'destructive';
                 default: return 'outline';
@@ -87,6 +88,7 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
               <TableHead>Sales Order</TableHead>
               <TableHead>Job Order</TableHead>
               <TableHead>Invoice</TableHead>
+              <TableHead>Payment Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -119,11 +121,23 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
                 </TableCell>
                 <TableCell>
                     <Badge variant={getStatusVariant(invoice, 'invoice')}>
+                        {invoice?.id ? 'Created' : 'N/A'}
+                    </Badge>
+                </TableCell>
+                 <TableCell>
+                    <Badge variant={getStatusVariant(invoice, 'invoice')}>
                         {invoice?.status || 'N/A'}
                     </Badge>
                 </TableCell>
               </TableRow>
             ))}
+             {transactions.length === 0 && (
+                <TableRow>
+                    <TableCell colSpan={7} className="h-24 text-center">
+                        No recent transactions.
+                    </TableCell>
+                </TableRow>
+            )}
           </TableBody>
         </Table>
       </CardContent>
