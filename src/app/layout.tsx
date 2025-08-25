@@ -16,6 +16,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import UserProfileModal from '@/components/users/user-profile-modal';
+import { useToast } from '@/hooks/use-toast';
 
 
 // export const metadata: Metadata = {
@@ -116,6 +117,7 @@ const navGroups = [
 
 function AppContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const { toast } = useToast();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [userProfile, setUserProfile] = useState({ name: 'Admin User', avatar: 'https://placehold.co/40x40.png' });
@@ -147,9 +149,12 @@ function AppContent({ children }: { children: React.ReactNode }) {
   }
   
   const handleLogout = async () => {
-    // Since we are not using Firebase Auth, this can be a placeholder or cleared from local storage
-    console.log("Logout clicked");
-    // router.push('/login'); // If you had a login page
+    localStorage.removeItem('user_profile');
+    toast({ title: "Logged Out", description: "You have been successfully logged out.", variant: 'success' });
+    // In a real app, you'd likely redirect to a login page
+    // router.push('/login'); 
+    // For now, we can just reset the displayed user profile to default
+    setUserProfile({ name: 'Admin User', avatar: 'https://placehold.co/40x40.png' });
   };
 
 
