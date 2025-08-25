@@ -80,67 +80,69 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-3xl">
+            <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>My Profile</DialogTitle>
                     <DialogDescription>Update your personal information and profile picture.</DialogDescription>
                 </DialogHeader>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
-                    <div className="flex flex-col items-center gap-4">
-                        <Avatar className="h-32 w-32">
-                            <AvatarImage src={avatar} alt={name} data-ai-hint="user avatar" />
-                            <AvatarFallback>{name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
-                            <Camera className="mr-2 h-4 w-4"/>
-                            Upload Picture
-                        </Button>
-                        <Input 
-                            type="file" 
-                            ref={fileInputRef}
-                            className="hidden"
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                        />
+                <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="flex flex-col items-center gap-4">
+                            <Avatar className="h-32 w-32">
+                                <AvatarImage src={avatar} alt={name} data-ai-hint="user avatar" />
+                                <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
+                                <Camera className="mr-2 h-4 w-4"/>
+                                Upload Picture
+                            </Button>
+                            <Input 
+                                type="file" 
+                                ref={fileInputRef}
+                                className="hidden"
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                            />
+                        </div>
+                        <div className="md:col-span-2 space-y-3">
+                            <div className="space-y-2">
+                                <Label htmlFor="name" className="flex items-center gap-2"><User className="h-4 w-4 text-blue-500" />Name</Label>
+                                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-4 w-4 text-red-500" />Email</Label>
+                                <Input id="email" type="email" value={email} disabled />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="flex items-center gap-2"><Shield className="h-4 w-4 text-green-500" />Role</Label>
+                                    <Badge variant="secondary">Admin</Badge>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="flex items-center gap-2"><Activity className="h-4 w-4 text-yellow-500" />Status</Label>
+                                    <Badge variant="success">Active</Badge>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className="md:col-span-2 space-y-4">
+                    <Separator />
+                    <div className="space-y-3">
+                        <h3 className="font-semibold">Password Settings</h3>
                         <div className="space-y-2">
-                            <Label htmlFor="name" className="flex items-center gap-2"><User className="h-4 w-4 text-blue-500" />Name</Label>
-                            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+                            <Label htmlFor="current-password" className="flex items-center gap-2"><Key className="h-4 w-4 text-gray-500" />Current Password</Label>
+                            <Input id="current-password" type="password" placeholder="Enter your current password" />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-4 w-4 text-red-500" />Email</Label>
-                            <Input id="email" type="email" value={email} disabled />
+                            <Label htmlFor="new-password" className="flex items-center gap-2"><Key className="h-4 w-4 text-gray-500" />New Password</Label>
+                            <Input id="new-password" type="password" placeholder="Enter a new password" />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                             <div className="space-y-2">
-                                <Label className="flex items-center gap-2"><Shield className="h-4 w-4 text-green-500" />Role</Label>
-                                <Badge variant="secondary" className="text-base">Admin</Badge>
-                             </div>
-                             <div className="space-y-2">
-                                <Label className="flex items-center gap-2"><Activity className="h-4 w-4 text-yellow-500" />Status</Label>
-                                <Badge variant="success" className="text-base">Active</Badge>
-                             </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="confirm-password" className="flex items-center gap-2"><Key className="h-4 w-4 text-gray-500" />Confirm New Password</Label>
+                            <Input id="confirm-password" type="password" placeholder="Confirm your new password" />
                         </div>
                     </div>
                 </div>
-                <Separator />
-                 <div className="space-y-4">
-                    <h3 className="font-semibold">Password Settings</h3>
-                    <div className="space-y-2">
-                        <Label htmlFor="current-password" className="flex items-center gap-2"><Key className="h-4 w-4 text-gray-500" />Current Password</Label>
-                        <Input id="current-password" type="password" placeholder="Enter your current password" />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="new-password" className="flex items-center gap-2"><Key className="h-4 w-4 text-gray-500" />New Password</Label>
-                        <Input id="new-password" type="password" placeholder="Enter a new password" />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="confirm-password" className="flex items-center gap-2"><Key className="h-4 w-4 text-gray-500" />Confirm New Password</Label>
-                        <Input id="confirm-password" type="password" placeholder="Confirm your new password" />
-                    </div>
-                </div>
-                <DialogFooter>
+                <DialogFooter className="pt-4">
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
                     <Button onClick={handleProfileUpdate} disabled={isSaving}>
                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
