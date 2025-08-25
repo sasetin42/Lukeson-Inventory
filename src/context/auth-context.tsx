@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const value = { 
-        isAuthenticated: !!user, 
+        isAuthenticated: !isLoading && !!user, 
         user,
         login, 
         logout, 
