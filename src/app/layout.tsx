@@ -18,6 +18,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import UserProfileModal from '@/components/users/user-profile-modal';
 import { useToast } from '@/hooks/use-toast';
 import { AuthProvider, useAuth } from '@/context/auth-context';
+import SupportModal from '@/components/support/support-modal';
 
 
 // export const metadata: Metadata = {
@@ -121,6 +122,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [userProfile, setUserProfile] = useState({ name: 'Admin User', avatar: 'https://placehold.co/40x40.png' });
   const pathname = usePathname();
 
@@ -252,7 +254,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
                     <span>Settings</span>
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsSupportModalOpen(true)}>
                   <LifeBuoy className="mr-2 h-4 w-4 text-yellow-500" />
                   <span>Support</span>
                 </DropdownMenuItem>
@@ -272,6 +274,10 @@ function AppContent({ children }: { children: React.ReactNode }) {
           isOpen={isProfileModalOpen} 
           onClose={() => setIsProfileModalOpen(false)} 
           onProfileUpdate={setUserProfile}
+        />
+        <SupportModal
+          isOpen={isSupportModalOpen}
+          onClose={() => setIsSupportModalOpen(false)}
         />
       </SidebarProvider>
   );
