@@ -44,11 +44,12 @@ function HeaderActions() {
 
         const salesOrdersQuery = query(
             collection(db, 'salesOrders'), 
-            where('status', '==', 'Fulfilled'),
-            where('invoicedStatus', '!=', 'Fully Invoiced')
+            where('status', '==', 'Fulfilled')
         );
         const unsubscribeSalesOrders = onSnapshot(salesOrdersQuery, (snapshot) => {
-            setInvoiceReadyCount(snapshot.size);
+            const salesOrders = snapshot.docs.map(doc => doc.data() as SalesOrder);
+            const invoiceReadyOrders = salesOrders.filter(so => so.invoicedStatus !== 'Fully Invoiced');
+            setInvoiceReadyCount(invoiceReadyOrders.length);
         });
 
         return () => {
