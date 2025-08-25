@@ -9,7 +9,7 @@ import InventoryOverview from "@/components/dashboard/inventory-overview";
 import RecentTransactions from "@/components/dashboard/recent-transactions";
 import QuickStats from "@/components/dashboard/quick-stats";
 import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
-import { Product, SalesOrder, ItemCategory, PurchaseOrder, Quotation, JobOrder, Invoice, RecentTransaction } from '@/lib/types';
+import { Product, SalesOrder, ItemCategory, PurchaseOrder, Quotation, JobOrder, Invoice, RecentTransaction, Customer } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc, addDoc, serverTimestamp, orderBy, query, limit } from 'firebase/firestore';
@@ -17,7 +17,11 @@ import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-
 
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [sales, setSales] = useState<SalesOrder[]>([]);
+  const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<RecentTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,18 +35,23 @@ export default function DashboardPage() {
     const quotationsRef = collection(db, 'quotations');
     const jobOrdersRef = collection(db, 'jobOrders');
     const invoicesRef = collection(db, 'invoices');
+    const customersRef = collection(db, 'customers');
     
     const recentSalesQuery = query(salesRef, orderBy("orderDate", "desc"), limit(10));
 
     const unsubscribes = [
       onSnapshot(productsRef, (snapshot) => setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product))), (err) => { console.error(err); toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });}),
+      onSnapshot(customersRef, (snapshot) => setCustomers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer))), (err) => { console.error(err); toast({ title: "Error", description: "Failed to load customers.", variant: "destructive" });}),
       onSnapshot(recentSalesQuery, (snapshot) => setSales(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder))), (err) => { console.error(err); toast({ title: "Error", description: "Failed to load sales.", variant: "destructive" });}),
       onSnapshot(quotationsRef, (quotationsSnapshot) => {
           onSnapshot(jobOrdersRef, (jobOrdersSnapshot) => {
               onSnapshot(invoicesRef, (invoicesSnapshot) => {
+                  setInvoices(invoicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice)));
                   onSnapshot(recentSalesQuery, (salesSnapshot) => {
                       const loadedQuotations = quotationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
+                      setQuotations(loadedQuotations);
                       const loadedJobOrders = jobOrdersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder));
+                      setJobOrders(loadedJobOrders);
                       const loadedInvoices = invoicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
                       const loadedSales = salesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
 
@@ -132,7 +141,11 @@ export default function DashboardPage() {
       <InventoryOverview products={products} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <QuickStats />
+        <QuickStats 
+          customers={customers}
+          salesOrders={sales}
+          invoices={invoices}
+        />
         <LowStockAlerts products={products} onCreatePO={handleCreatePO} />
       </div>
 

@@ -22,6 +22,16 @@ export default function InventoryOverview({ products }: InventoryOverviewProps) 
     lastMonth.setMonth(lastMonth.getMonth() - 1);
     return createdAtDate > lastMonth;
   }).length;
+  
+  const formatCurrency = (value: number) => {
+    if (value >= 1_000_000) {
+      return `₱${(value / 1_000_000).toFixed(2)}M`;
+    }
+    if (value >= 1_000) {
+      return `₱${(value / 1_000).toFixed(1)}K`;
+    }
+    return `₱${value.toFixed(2)}`;
+  };
 
   const cardData = [
     { 
@@ -35,7 +45,7 @@ export default function InventoryOverview({ products }: InventoryOverviewProps) 
     },
     { 
       title: 'Total Value (est.)', 
-      value: `₱${(totalValue / 1000000).toFixed(2)}M`, 
+      value: formatCurrency(totalValue), 
       icon: DollarSign, 
       trend: '+8% from last week',
       color: 'green' as const,

@@ -5,8 +5,15 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Zap } from "lucide-react";
 import Link from 'next/link';
+import { Customer, SalesOrder, Invoice } from '@/lib/types';
 
-export default function QuickStats() {
+interface QuickStatsProps {
+  customers: Customer[];
+  salesOrders: SalesOrder[];
+  invoices: Invoice[];
+}
+
+export default function QuickStats({ customers, salesOrders, invoices }: QuickStatsProps) {
   const [stats, setStats] = useState([
     { label: "New Customers", value: "0" },
     { label: "Pending Orders", value: "0" },
@@ -15,11 +22,27 @@ export default function QuickStats() {
   ]);
 
   useEffect(() => {
-      // This component's data was dependent on Firestore.
-      // With localStorage, this data is not available in the same way.
-      // For now, we will display 0 for all stats.
-      // A more complete solution would involve creating and managing this data in localStorage as well.
-  }, []);
+    const newCustomers = customers.filter(c => {
+      // Assuming createdAt is available and is a Firestore timestamp
+      const createdAt = (c as any).createdAt?.toDate ? (c as any).createdAt.toDate() : new Date(0);
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      return createdAt > thirtyDaysAgo;
+    }).length;
+
+    const pendingOrders = salesOrders.filter(so => so.status === 'Confirmed' || so.status === 'Draft').length;
+    
+    const openInvoices = invoices.filter(inv => inv.status !== 'Paid').length;
+    
+    const fulfilledOrders = salesOrders.filter(so => so.status === 'Fulfilled').length;
+
+    setStats([
+      { label: "New Customers", value: newCustomers.toString() },
+      { label: "Pending Orders", value: pendingOrders.toString() },
+      { label: "Open Invoices", value: openInvoices.toString() },
+      { label: "Fulfilled Orders", value: fulfilledOrders.toString() },
+    ]);
+  }, [customers, salesOrders, invoices]);
 
   const statLinks = {
     "New Customers": "/customer",
