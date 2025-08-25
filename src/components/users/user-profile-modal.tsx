@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Camera } from 'lucide-react';
+import { Loader2, Camera, User, Mail, Shield, Activity, Key } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
@@ -105,20 +105,20 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
                     </div>
                     <div className="md:col-span-2 space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="name" className="flex items-center gap-2"><User className="h-4 w-4 text-blue-500" />Name</Label>
                             <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
+                            <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-4 w-4 text-red-500" />Email</Label>
                             <Input id="email" type="email" value={email} disabled />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                              <div className="space-y-2">
-                                <Label>Role</Label>
+                                <Label className="flex items-center gap-2"><Shield className="h-4 w-4 text-green-500" />Role</Label>
                                 <Badge variant="secondary" className="text-base">Admin</Badge>
                              </div>
                              <div className="space-y-2">
-                                <Label>Status</Label>
+                                <Label className="flex items-center gap-2"><Activity className="h-4 w-4 text-yellow-500" />Status</Label>
                                 <Badge variant="success" className="text-base">Active</Badge>
                              </div>
                         </div>
@@ -128,15 +128,15 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
                  <div className="space-y-4">
                     <h3 className="font-semibold">Password Settings</h3>
                     <div className="space-y-2">
-                        <Label htmlFor="current-password">Current Password</Label>
+                        <Label htmlFor="current-password" className="flex items-center gap-2"><Key className="h-4 w-4 text-gray-500" />Current Password</Label>
                         <Input id="current-password" type="password" placeholder="Enter your current password" />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="new-password">New Password</Label>
+                        <Label htmlFor="new-password" className="flex items-center gap-2"><Key className="h-4 w-4 text-gray-500" />New Password</Label>
                         <Input id="new-password" type="password" placeholder="Enter a new password" />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="confirm-password">Confirm New Password</Label>
+                        <Label htmlFor="confirm-password" className="flex items-center gap-2"><Key className="h-4 w-4 text-gray-500" />Confirm New Password</Label>
                         <Input id="confirm-password" type="password" placeholder="Confirm your new password" />
                     </div>
                 </div>
