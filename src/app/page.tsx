@@ -9,7 +9,7 @@ import InventoryOverview from "@/components/dashboard/inventory-overview";
 import RecentTransactions from "@/components/dashboard/recent-transactions";
 import QuickStats from "@/components/dashboard/quick-stats";
 import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
-import { Product, SalesOrder, ItemCategory, PurchaseOrder, Quotation, JobOrder, Invoice, RecentTransaction, Customer } from '@/lib/types';
+import { Product, SalesOrder, ItemCategory, PurchaseOrder, Quotation, JobOrder, Invoice, RecentTransaction, Customer, FlatSale } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc, addDoc, serverTimestamp, orderBy, query, limit } from 'firebase/firestore';
@@ -42,11 +42,10 @@ export default function DashboardPage() {
     const unsubscribes = [
       onSnapshot(productsRef, (snapshot) => setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product))), (err) => { console.error(err); toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });}),
       onSnapshot(customersRef, (snapshot) => setCustomers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer))), (err) => { console.error(err); toast({ title: "Error", description: "Failed to load customers.", variant: "destructive" });}),
-      onSnapshot(recentSalesQuery, (snapshot) => setSales(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder))), (err) => { console.error(err); toast({ title: "Error", description: "Failed to load sales.", variant: "destructive" });}),
+      onSnapshot(salesRef, (snapshot) => setSales(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder))), (err) => { console.error(err); toast({ title: "Error", description: "Failed to load sales.", variant: "destructive" });}),
       onSnapshot(quotationsRef, (quotationsSnapshot) => {
           onSnapshot(jobOrdersRef, (jobOrdersSnapshot) => {
               onSnapshot(invoicesRef, (invoicesSnapshot) => {
-                  setInvoices(invoicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice)));
                   onSnapshot(recentSalesQuery, (salesSnapshot) => {
                       const loadedQuotations = quotationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
                       setQuotations(loadedQuotations);
@@ -74,7 +73,7 @@ export default function DashboardPage() {
   }, [toast]);
 
   // Transform sales orders to a flat list of sales for compatibility with existing components
-  const flatSales = sales.flatMap(order => 
+  const flatSales: FlatSale[] = sales.flatMap(order => 
     order.lines.map(line => ({
         id: `${order.id}-${line.id}`,
         productId: line.itemId,
