@@ -35,13 +35,13 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
                     <div className="space-y-2">
                         <div className="flex items-center gap-3">
                             <Mail className="h-4 w-4 text-muted-foreground" />
-                            <a href="mailto:support@example.com" className="text-primary hover:underline">
-                                support@example.com
+                            <a href="mailto:cesartrongcoso@gmail.com" className="text-primary hover:underline">
+                                cesartrongcoso@gmail.com
                             </a>
                         </div>
                         <div className="flex items-center gap-3">
                             <Phone className="h-4 w-4 text-muted-foreground" />
-                            <span>+1 (800) 555-0199</span>
+                            <span>+63 977 359 0258</span>
                         </div>
                     </div>
                     <p className="text-sm text-muted-foreground">Our support team is available Monday to Friday, 9 AM to 5 PM.</p>
