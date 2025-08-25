@@ -9,8 +9,9 @@ import { User } from '@/lib/types';
 import UserList from '@/components/users/user-list';
 import UserFormModal from '@/components/users/user-form-modal';
 import { useToast } from '@/hooks/use-toast';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import KpiCard from '@/components/kpi-card';
 
 export default function UsersManagementPage() {
@@ -50,14 +51,23 @@ export default function UsersManagementPage() {
   }
 
   const handleSaveUser = async (userData: Omit<User, 'id' | 'createdAt' | 'lastLoginAt'> & { id?: string, password?: string }) => {
-    const { id, password, ...dataToSave } = userData; // We don't save password to DB in this example
+    const { id, password, ...dataToSave } = userData;
     try {
         if (id) { // Editing existing user
             const userRef = doc(db, "users", id);
             await setDoc(userRef, { ...dataToSave, lastLoginAt: serverTimestamp() }, { merge: true });
             toast({ title: "Success", description: "User updated successfully.", variant: "success" });
         } else { // Adding new user
-            await addDoc(collection(db, "users"), { ...dataToSave, createdAt: serverTimestamp(), lastLoginAt: serverTimestamp() });
+            if (!password) {
+                toast({ title: "Error", description: "Password is required for new users.", variant: "destructive" });
+                return;
+            }
+            const userCredential = await createUserWithEmailAndPassword(auth, userData.email, password);
+            const firestoreId = userCredential.user.uid;
+            
+            const userRef = doc(db, "users", firestoreId);
+            await setDoc(userRef, { ...dataToSave, createdAt: serverTimestamp(), lastLoginAt: serverTimestamp() });
+            
             toast({ title: "Success", description: "User added successfully.", variant: "success" });
         }
         handleCloseModal();
@@ -71,7 +81,7 @@ export default function UsersManagementPage() {
   const handleDeleteUser = async (userId: string) => {
     try {
       // Note: In a real app, you would also delete the user from Firebase Auth.
-      // This requires backend logic for security reasons.
+      // This requires backend logic for security reasons. For now, we only delete from Firestore.
       await deleteDoc(doc(db, "users", userId));
       toast({ title: "Success", description: "User deleted successfully.", variant: "success" });
       fetchUsers(); // refetch
@@ -96,12 +106,6 @@ export default function UsersManagementPage() {
         title="Users & Roles" 
         description="Manage system users and their permissions." 
         icon={<Users2 className="h-6 w-6 text-indigo-500" />}
-        actions={
-            <Button onClick={() => handleOpenModal(null)}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Add User
-            </Button>
-        }
       />
       <div className="grid gap-6 md:grid-cols-3">
         {kpis.map((kpi, index) => (
@@ -119,7 +123,8 @@ export default function UsersManagementPage() {
       <UserList 
         users={users} 
         onEdit={handleOpenModal} 
-        onDelete={handleDeleteUser} 
+        onDelete={handleDeleteUser}
+        onAddUser={() => handleOpenModal(null)}
       />
       {isModalOpen && (
         <UserFormModal 

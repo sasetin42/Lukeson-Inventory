@@ -6,7 +6,7 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, PlusCircle } from "lucide-react";
 import { User } from "@/lib/types";
 import {
   DropdownMenu,
@@ -31,9 +31,10 @@ interface UserListProps {
     users: User[];
     onEdit: (user: User) => void;
     onDelete: (userId: string) => void;
+    onAddUser: () => void;
 }
 
-export default function UserList({ users, onEdit, onDelete }: UserListProps) {
+export default function UserList({ users, onEdit, onDelete, onAddUser }: UserListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
@@ -64,8 +65,16 @@ export default function UserList({ users, onEdit, onDelete }: UserListProps) {
         <>
             <Card>
                 <CardHeader>
-                    <CardTitle>User Accounts</CardTitle>
-                    <CardDescription>A list of all users in the system.</CardDescription>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle>User Accounts</CardTitle>
+                            <CardDescription>A list of all users in the system.</CardDescription>
+                        </div>
+                        <Button onClick={onAddUser}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add User
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <Table>
