@@ -26,7 +26,7 @@ const badgeVariants = cva(
         posted: "border-transparent bg-[#302F6B] text-[#FFFFFF]",
         admin: "border-transparent bg-[#5F8400] text-white",
         sent: "border-transparent bg-[#673DE6] text-white",
-        received: "border-transparent bg-[#DD2C00] text-white",
+        received: "border-transparent bg-[#5F8400] text-white",
       },
     },
     defaultVariants: {
