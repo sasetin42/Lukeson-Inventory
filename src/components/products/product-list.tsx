@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download, Power, LayoutGrid, Package, Layers, PowerOff, Lamp, Square } from "lucide-react";
+import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download, Power, LayoutGrid, Package, Layers, PowerOff, Lamp, Square, History } from "lucide-react";
 import { Product, ItemCategory } from "@/lib/types";
 import {
   DropdownMenu,
@@ -41,6 +41,7 @@ interface ProductListProps {
     onEdit: (product: Product | null) => void;
     onDelete: (product: Product) => void;
     onAddCategory: () => void;
+    onViewStockHistory: (product: Product) => void;
 }
 
 const categoryIcons: { [key: string]: React.ReactElement } = {
@@ -50,7 +51,7 @@ const categoryIcons: { [key: string]: React.ReactElement } = {
     'ALUMINIUM PROFILE': <Square className="h-4 w-4 text-gray-500" />,
 };
 
-export default function ProductList({ products, onEdit, onDelete, onAddCategory }: ProductListProps) {
+export default function ProductList({ products, onEdit, onDelete, onAddCategory, onViewStockHistory }: ProductListProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
@@ -269,6 +270,10 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                                     <DropdownMenuItem onClick={() => setSelectedProduct(product)}>
                                         <Eye className="mr-2 h-4 w-4 text-blue-500" />
                                         View Details
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => onViewStockHistory(product)}>
+                                        <History className="mr-2 h-4 w-4 text-purple-500" />
+                                        Stock History
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteAlert(product)} disabled={!canWrite}>

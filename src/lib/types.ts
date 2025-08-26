@@ -335,6 +335,14 @@ export type Product = {
     expiryDateTracking: boolean;
 };
 
+export type StockHistory = {
+    date: Date;
+    type: 'Sale' | 'Purchase' | 'Adjustment';
+    quantityChange: number;
+    newStock: number;
+    reference: string; // SO-ID, PO-ID, etc.
+}
+
 // Flat Sales type for analytics
 export type FlatSale = {
     id: string;

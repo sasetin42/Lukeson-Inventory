@@ -8,22 +8,27 @@ import { Package, PlusCircle, Upload, Download, DollarSign, AlertTriangle, XCirc
 import KpiCard from "@/components/kpi-card";
 import ActionCard from "@/components/action-card";
 import ProductList from "@/components/products/product-list";
-import { Product, ItemCategory } from '@/lib/types';
+import { Product, ItemCategory, SalesOrder, PurchaseOrder } from '@/lib/types';
 import ProductFormModal from '@/components/products/product-form-modal';
 import CategoryFormModal from '@/components/category/category-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { useAuth } from '@/context/auth-context';
+import StockHistoryModal from '@/components/products/stock-history-modal';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
+    const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
+    const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([]);
     const [categories, setCategories] = useState<ItemCategory[]>([]);
     const [loading, setLoading] = useState(true);
     const [isProductModalOpen, setIsProductModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [editingCategory, setEditingCategory] = useState<ItemCategory | null>(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+    const [isStockHistoryModalOpen, setIsStockHistoryModalOpen] = useState(false);
+    const [viewingStockHistoryFor, setViewingStockHistoryFor] = useState<Product | null>(null);
     const { toast } = useToast();
     const { hasWriteAccess } = useAuth();
     const canWrite = hasWriteAccess('Products');
@@ -32,6 +37,8 @@ export default function ProductsPage() {
         setLoading(true);
         const productsRef = collection(db, 'products');
         const categoriesRef = collection(db, 'categories');
+        const salesOrdersRef = collection(db, 'salesOrders');
+        const purchaseOrdersRef = collection(db, 'purchaseOrders');
 
         const unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
             const loadedProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
@@ -50,10 +57,20 @@ export default function ProductsPage() {
             console.error("Error fetching categories:", error);
             toast({ title: "Error", description: "Failed to load category data.", variant: "destructive" });
         });
+        
+        const unsubscribeSales = onSnapshot(salesOrdersRef, (snapshot) => {
+            setSalesOrders(snapshot.docs.map(doc => doc.data() as SalesOrder));
+        });
+
+        const unsubscribePurchases = onSnapshot(purchaseOrdersRef, (snapshot) => {
+            setPurchaseOrders(snapshot.docs.map(doc => doc.data() as PurchaseOrder));
+        });
 
         return () => {
             unsubscribeProducts();
             unsubscribeCategories();
+            unsubscribeSales();
+            unsubscribePurchases();
         };
     }, [toast]);
     
@@ -87,6 +104,11 @@ export default function ProductsPage() {
     const handleCloseProductModal = () => {
         setIsProductModalOpen(false);
         setEditingProduct(null);
+    }
+    
+    const handleOpenStockHistoryModal = (product: Product) => {
+        setViewingStockHistoryFor(product);
+        setIsStockHistoryModalOpen(true);
     }
 
     const handleDeleteProduct = async (productToDelete: Product) => {
@@ -196,6 +218,7 @@ export default function ProductsPage() {
         onEdit={handleOpenProductModal} 
         onDelete={handleDeleteProduct}
         onAddCategory={() => setIsCategoryModalOpen(true)}
+        onViewStockHistory={handleOpenStockHistoryModal}
       />
 
       {isProductModalOpen && (
@@ -218,6 +241,15 @@ export default function ProductsPage() {
         />
       )}
       
+      {isStockHistoryModalOpen && viewingStockHistoryFor && (
+        <StockHistoryModal
+            isOpen={isStockHistoryModalOpen}
+            onClose={() => setIsStockHistoryModalOpen(false)}
+            product={viewingStockHistoryFor}
+            salesOrders={salesOrders}
+            purchaseOrders={purchaseOrders}
+        />
+      )}
     </div>
   );
 }
