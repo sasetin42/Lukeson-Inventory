@@ -160,7 +160,8 @@ function AppContent({ children }: { children: React.ReactNode }) {
 
   const hasAccess = (module: string) => {
     if (!rolePermissions) return false;
-    return rolePermissions[module] && rolePermissions[module] !== 'No Access';
+    const permission = rolePermissions[module];
+    return permission === 'Full Access' || permission === 'Read-only';
   }
 
   return (
