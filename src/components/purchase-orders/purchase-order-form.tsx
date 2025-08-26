@@ -138,6 +138,8 @@ export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }
                 supplierId,
                 supplierName: supplier?.name || 'N/A',
                 supplierEmail: supplier?.contact.email || '',
+                supplierAddress: supplier?.address,
+                supplierContact: supplier?.contact.name,
                 orderDate,
                 expectedDeliveryDate: expectedDeliveryDate || null,
                 status,

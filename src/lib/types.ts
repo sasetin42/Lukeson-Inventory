@@ -1,6 +1,5 @@
 
 
-
 import type { LucideIcon } from "lucide-react";
 import { FieldValue } from "firebase/firestore";
 
@@ -196,6 +195,8 @@ export type PurchaseOrder = {
     supplierId: string;
     supplierName: string;
     supplierEmail: string;
+    supplierContact?: string;
+    supplierAddress?: string;
     orderDate: Date | FieldValue | string;
     expectedDeliveryDate: Date | FieldValue | string | null;
     status: 'Draft' | 'Sent' | 'Confirmed' | 'Partially Received' | 'Received' | 'Billed' | 'Cancelled';

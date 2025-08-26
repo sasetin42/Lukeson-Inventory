@@ -76,11 +76,15 @@ export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewPr
                 </div>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-8 text-sm">
                 <p className="font-bold">SUPPLIER:</p>
-                <Button variant="link" className="p-0 h-auto text-black text-sm" onClick={() => { /* Logic to view supplier */ }}>
+                 <Button variant="link" className="p-0 h-auto text-black text-sm" onClick={() => { /* Logic to view supplier */ }}>
                     {purchaseOrder.supplierName}
                 </Button>
+                <div className="text-xs text-muted-foreground">
+                    <p>{purchaseOrder.supplierAddress}</p>
+                    <p>{purchaseOrder.supplierContact} | {purchaseOrder.supplierEmail}</p>
+                </div>
             </div>
             
             <table className="w-full mt-4 border-collapse text-sm">
