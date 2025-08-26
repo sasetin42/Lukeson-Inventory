@@ -19,58 +19,33 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { useAuth } from '@/context/auth-context';
-import { storage, db } from '@/lib/firebase';
-import { ref, uploadString, getDownloadURL } from 'firebase/storage';
-import { doc, updateDoc } from 'firebase/firestore';
 
 interface UserProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onProfileUpdate: (profile: { name: string, avatar: string }) => void;
 }
 
-export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: UserProfileModalProps) {
+export default function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
     const { toast } = useToast();
-    const { user, firebaseUser } = useAuth();
+    const { user, profile, updateUserProfile } = useAuth();
     const [name, setName] = useState('');
-    const [avatar, setAvatar] = useState('https://placehold.co/128x128.png');
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (isOpen && user) {
-            setName(user.name || '');
-            setAvatar((user as any).avatar || 'https://placehold.co/128x128.png');
+            setName(profile.name || '');
+            setAvatarPreview(profile.avatar);
+            setAvatarFile(null); // Reset file on open
         }
-    }, [isOpen, user]);
+    }, [isOpen, user, profile]);
 
     const handleProfileUpdate = async () => {
-        if (!firebaseUser) {
-            toast({ title: 'Error', description: 'You must be logged in to update your profile.', variant: 'destructive' });
-            return;
-        }
-
         setIsSaving(true);
         try {
-            let avatarUrl = (user as any)?.avatar; // Start with the current avatar URL
-
-            // Check if the avatar state holds a new file (data URI)
-            if (avatar.startsWith('data:image')) {
-                const storageRef = ref(storage, `avatars/${firebaseUser.uid}`);
-                await uploadString(storageRef, avatar, 'data_url');
-                avatarUrl = await getDownloadURL(storageRef);
-            }
-
-            const userDocRef = doc(db, 'users', firebaseUser.uid);
-            await updateDoc(userDocRef, {
-                name: name,
-                avatar: avatarUrl, // Save the permanent URL
-            });
-            
-            const updatedProfile = { name, avatar: avatarUrl };
-            localStorage.setItem('user_profile', JSON.stringify(updatedProfile));
-            onProfileUpdate(updatedProfile); // Update parent state
-
+            await updateUserProfile(name, avatarFile);
             toast({ title: 'Success', description: 'Your profile has been updated.', variant: 'success' });
             onClose();
         } catch (error: any) {
@@ -83,9 +58,10 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setAvatarFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
-                setAvatar(reader.result as string); // Temporarily set avatar to data URL for preview
+                setAvatarPreview(reader.result as string);
             };
             reader.readAsDataURL(file);
         }
@@ -103,7 +79,7 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="flex flex-col items-center gap-4">
                             <Avatar className="h-32 w-32">
-                                <AvatarImage src={avatar} alt={name} data-ai-hint="user avatar" />
+                                <AvatarImage src={avatarPreview || undefined} alt={name} data-ai-hint="user avatar" />
                                 <AvatarFallback>{name?.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <Button variant="outline" onClick={() => fileInputRef.current?.click()}>

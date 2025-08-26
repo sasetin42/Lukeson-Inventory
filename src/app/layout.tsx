@@ -129,26 +129,13 @@ export const navGroups = [
 ];
 
 function AppContent({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, logout, firebaseUser, userRole, user } = useAuth();
+  const { isAuthenticated, isLoading, logout, firebaseUser, userRole, user, profile, updateUserProfile } = useAuth();
   const { toast } = useToast();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
-  const [userProfile, setUserProfile] = useState({ name: 'Admin User', avatar: 'https://placehold.co/40x40.png' });
   const pathname = usePathname();
 
-  useEffect(() => {
-    // This effect ensures the profile in the UI is always up-to-date with the auth context or local storage.
-    if (user) {
-        setUserProfile({ name: user.name, avatar: (user as any).avatar || 'https://placehold.co/40x40.png' });
-    } else {
-        const storedProfile = localStorage.getItem('user_profile');
-        if (storedProfile) {
-            setUserProfile(JSON.parse(storedProfile));
-        }
-    }
-  }, [user]);
-  
   const handleAccordionChange = (value: string[]) => {
       const alwaysOpen = ['Overview', 'Inventory', 'Sales'];
       let newOpenState = [...value];
@@ -248,11 +235,11 @@ function AppContent({ children }: { children: React.ReactNode }) {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="justify-start w-full gap-2 p-2 h-auto">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={userProfile.avatar} alt={userProfile.name} data-ai-hint="user avatar" />
+                    <AvatarImage src={profile.avatar} alt={profile.name} data-ai-hint="user avatar" />
                     <AvatarFallback>{firebaseUser?.email?.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="text-left">
-                    <p className="text-sm font-medium text-foreground">{userProfile.name}</p>
+                    <p className="text-sm font-medium text-foreground">{profile.name}</p>
                     <p className="text-xs text-muted-foreground">{firebaseUser?.email}</p>
                   </div>
                 </Button>
@@ -289,7 +276,6 @@ function AppContent({ children }: { children: React.ReactNode }) {
         <UserProfileModal 
           isOpen={isProfileModalOpen} 
           onClose={() => setIsProfileModalOpen(false)} 
-          onProfileUpdate={setUserProfile}
         />
         <SupportModal
           isOpen={isSupportModalOpen}

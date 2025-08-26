@@ -3,19 +3,27 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { auth, db } from '@/lib/firebase';
+import { auth, db, storage } from '@/lib/firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User as FirebaseUser } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { User } from '@/lib/types';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
+
+interface UserProfile {
+    name: string;
+    avatar: string;
+}
 
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
   firebaseUser: FirebaseUser | null;
+  profile: UserProfile;
   login: (email: string, pass: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
   userRole: User['role'] | null;
+  updateUserProfile: (name: string, avatarFile: File | null) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,47 +32,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
     const [user, setUser] = useState<User | null>(null);
     const [userRole, setUserRole] = useState<User['role'] | null>(null);
+    const [profile, setProfile] = useState<UserProfile>({ name: 'User', avatar: 'https://placehold.co/128x128.png'});
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const pathname = usePathname();
 
+    const fetchUserData = async (fbUser: FirebaseUser) => {
+        try {
+            const userDocRef = doc(db, 'users', fbUser.uid);
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+                const userData = { ...userDocSnap.data(), id: fbUser.uid } as User;
+                setUser(userData);
+                setUserRole(userData.role);
+                setProfile({ name: userData.name, avatar: (userData as any).avatar || 'https://placehold.co/128x128.png' });
+            } else {
+                console.log(`Creating Firestore document for new user ${fbUser.uid}`);
+                const newUser: Omit<User, 'id'> = {
+                    name: fbUser.displayName || 'New User',
+                    email: fbUser.email || '',
+                    role: 'Viewer',
+                    status: 'active',
+                    createdAt: serverTimestamp(),
+                    lastLoginAt: serverTimestamp(),
+                };
+                await setDoc(userDocRef, newUser);
+                const fullUser = { ...newUser, id: fbUser.uid } as User;
+                setUser(fullUser);
+                setUserRole(fullUser.role);
+                setProfile({ name: fullUser.name, avatar: (fullUser as any).avatar || 'https://placehold.co/128x128.png' });
+            }
+        } catch (error) {
+            console.error("Error fetching or creating user data from Firestore:", error);
+            setUser(null);
+            setUserRole(null);
+            setProfile({ name: 'Error', avatar: 'https://placehold.co/128x128.png' });
+        }
+    };
+
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentFirebaseUser) => {
             setIsLoading(true);
-            setFirebaseUser(currentFirebaseUser);
-
             if (currentFirebaseUser) {
-                try {
-                    const userDocRef = doc(db, 'users', currentFirebaseUser.uid);
-                    const userDocSnap = await getDoc(userDocRef);
-                    if (userDocSnap.exists()) {
-                        const userData = userDocSnap.data() as User;
-                        setUser({ ...userData, id: currentFirebaseUser.uid });
-                        setUserRole(userData.role);
-                    } else {
-                        // This might be a first-time login for an auth user created elsewhere.
-                        // Create a default user document.
-                        console.log(`Creating Firestore document for new user ${currentFirebaseUser.uid}`);
-                        const newUser: Omit<User, 'id'> = {
-                            name: currentFirebaseUser.displayName || 'New User',
-                            email: currentFirebaseUser.email || '',
-                            role: 'Viewer', // Default role
-                            status: 'active',
-                            createdAt: serverTimestamp(),
-                            lastLoginAt: serverTimestamp(),
-                        };
-                        await setDoc(userDocRef, newUser);
-                        setUser({ ...newUser, id: currentFirebaseUser.uid } as User);
-                        setUserRole(newUser.role);
-                    }
-                } catch (error) {
-                    console.error("Error fetching or creating user data from Firestore:", error);
-                    setUser(null);
-                    setUserRole(null);
-                }
+                setFirebaseUser(currentFirebaseUser);
+                await fetchUserData(currentFirebaseUser);
             } else {
+                setFirebaseUser(null);
                 setUser(null);
                 setUserRole(null);
+                setProfile({ name: 'User', avatar: 'https://placehold.co/128x128.png' });
             }
             setIsLoading(false);
         });
@@ -92,21 +109,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Update last login timestamp
         const userDocRef = doc(db, 'users', userCredential.user.uid);
         await setDoc(userDocRef, { lastLoginAt: serverTimestamp() }, { merge: true });
+        await fetchUserData(userCredential.user);
     };
 
     const logout = async () => {
         await signOut(auth);
-        localStorage.removeItem('user_profile');
+    };
+    
+    const updateUserProfile = async (name: string, avatarFile: File | null): Promise<void> => {
+        if (!firebaseUser) throw new Error("No user is logged in.");
+
+        const userDocRef = doc(db, "users", firebaseUser.uid);
+        let newAvatarUrl = profile.avatar; // Keep current avatar by default
+
+        if (avatarFile) {
+            const storageRef = ref(storage, `avatars/${firebaseUser.uid}`);
+            const dataUrl = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(avatarFile);
+            });
+            await uploadString(storageRef, dataUrl, 'data_url');
+            newAvatarUrl = await getDownloadURL(storageRef);
+        }
+
+        await updateDoc(userDocRef, {
+            name: name,
+            avatar: newAvatarUrl,
+        });
+
+        // Update the state locally to reflect changes immediately
+        setProfile({ name, avatar: newAvatarUrl });
+        if(user) {
+            setUser({ ...user, name: name, avatar: newAvatarUrl } as User);
+        }
     };
 
     const value = { 
         isAuthenticated: !isLoading && !!firebaseUser, 
         user,
         firebaseUser,
+        profile,
         login, 
         logout, 
         isLoading,
         userRole,
+        updateUserProfile,
     };
 
     return (
