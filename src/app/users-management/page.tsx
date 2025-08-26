@@ -220,6 +220,7 @@ export default function UsersManagementPage() {
         <TabsContent value="roles" className="mt-4">
           <RolesPermissions 
             roles={roles}
+            users={users}
             onAddRole={() => handleOpenRoleModal(null)}
             onEditRole={handleOpenRoleModal}
             onDeleteRole={handleDeleteRole}

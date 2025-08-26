@@ -5,25 +5,22 @@ import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { CheckCircle2, XCircle, Eye, Shield, PlusCircle, Edit, Trash2, Users } from 'lucide-react';
 import { Button } from "../ui/button";
-import { Role } from "@/lib/types";
+import { Role, User } from "@/lib/types";
 import { cn } from '@/lib/utils';
 
 interface RolesPermissionsProps {
     roles: Role[];
+    users: User[];
     onAddRole: () => void;
     onEditRole: (role: Role) => void;
     onDeleteRole: (roleId: string) => void;
     onViewRole: (role: Role) => void;
 }
 
-export default function RolesPermissions({ roles, onAddRole, onEditRole, onDeleteRole, onViewRole }: RolesPermissionsProps) {
+export default function RolesPermissions({ roles, users, onAddRole, onEditRole, onDeleteRole, onViewRole }: RolesPermissionsProps) {
   
   const countUsersInRole = (roleName: string) => {
-    // This is a placeholder. In a real app, you'd fetch user counts.
-    if (roleName === 'Admin') return 1;
-    if (roleName === 'Manager') return 3;
-    if (roleName === 'Viewer') return 5;
-    return 0;
+    return users.filter(user => user.role === roleName).length;
   }
 
   return (
