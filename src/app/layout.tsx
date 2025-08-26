@@ -189,7 +189,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
                   <Logo className="size-9 text-primary" />
               )}
               <div className="flex flex-col">
-                <h1 className="text-xl font-bold tracking-tight text-foreground">{companyProfile.name}</h1>
+                <h1 className="text-company-name font-bold tracking-tight text-foreground">{companyProfile.name}</h1>
                 <p className="text-sm text-muted-foreground">Workspace</p>
               </div>
             </div>

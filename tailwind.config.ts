@@ -9,6 +9,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontSize: {
+        'company-name': ['25px', '30px'],
+      },
       fontFamily: {
         body: ['Maven Pro', 'sans-serif'],
         headline: ['Maven Pro', 'sans-serif'],
