@@ -49,30 +49,35 @@ export default function RolesPermissions({ roles, onAddRole, onEditRole, onDelet
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {roles.map(role => {
                 const isAdmin = role.name === 'Admin';
+                const isInventory = role.name === 'Inventory';
                 const userCount = countUsersInRole(role.name);
                 return (
                     <Card 
                         key={role.id} 
                         className={cn(
                             "flex flex-col hover:shadow-lg transition-shadow cursor-pointer",
-                            isAdmin && "text-white"
+                            (isAdmin || isInventory) && "text-white"
                         )}
-                        style={isAdmin ? { backgroundColor: '#5F8400' } : {}}
+                        style={
+                            isAdmin ? { backgroundColor: '#5F8400' } :
+                            isInventory ? { backgroundColor: '#673DE6' } :
+                            {}
+                        }
                         onClick={() => onViewRole(role)}
                     >
                         <CardHeader>
                             <CardTitle className="flex items-center justify-between">
                                 <span>{role.name}</span>
                                 <div className="flex items-center gap-2">
-                                     <Button variant="ghost" size="icon" className={cn("h-7 w-7", isAdmin && "hover:bg-white/20")} onClick={(e) => { e.stopPropagation(); onEditRole(role); }}>
+                                     <Button variant="ghost" size="icon" className={cn("h-7 w-7", (isAdmin || isInventory) && "hover:bg-white/20")} onClick={(e) => { e.stopPropagation(); onEditRole(role); }}>
                                         <Edit className="h-4 w-4" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" className={cn("h-7 w-7", isAdmin && "hover:bg-white/20")} onClick={(e) => { e.stopPropagation(); onDeleteRole(role.id); }}>
+                                    <Button variant="ghost" size="icon" className={cn("h-7 w-7", (isAdmin || isInventory) && "hover:bg-white/20")} onClick={(e) => { e.stopPropagation(); onDeleteRole(role.id); }}>
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </div>
                             </CardTitle>
-                            <CardDescription className={cn(isAdmin && "text-white/80")}>
+                            <CardDescription className={cn((isAdmin || isInventory) && "text-white/80")}>
                                 {isAdmin ? "Admins managing communications, maintaining records, and ensuring efficient workflow." : `A short description about the ${role.name} role.`}
                             </CardDescription>
                         </CardHeader>
