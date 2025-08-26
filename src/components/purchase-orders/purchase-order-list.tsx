@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { useState } from 'react';
@@ -64,10 +65,6 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, on
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     }
 
-    const handleViewPo = (po: PurchaseOrder) => {
-        onView(po);
-    }
-
     return (
         <>
             <Card>
@@ -103,7 +100,7 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, on
                                     <TableCell className="flex items-center justify-center gap-2">
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button variant="ghost" size="icon" onClick={() => handleViewPo(purchaseOrder)}>
+                                                <Button variant="ghost" size="icon" onClick={() => onView(purchaseOrder)}>
                                                     <Eye className="h-4 w-4 text-blue-500" />
                                                 </Button>
                                             </TooltipTrigger>

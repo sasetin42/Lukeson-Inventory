@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -48,6 +49,7 @@ export default function PurchaseOrdersPage() {
   const handleOpenModal = (purchaseOrder: PurchaseOrder | null) => {
     setEditingPurchaseOrder(purchaseOrder);
     setIsModalOpen(true);
+    setViewingPurchaseOrder(null);
   };
   
   const handleCloseModal = () => {
@@ -166,6 +168,7 @@ export default function PurchaseOrdersPage() {
           isOpen={!!viewingPurchaseOrder}
           onClose={handleCloseViewModal}
           purchaseOrder={viewingPurchaseOrder}
+          onEdit={handleOpenModal}
         />
       )}
     </div>
