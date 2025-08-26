@@ -20,6 +20,8 @@ interface PurchaseOrderFormProps {
   onCancel: () => void;
 }
 
+const poStatuses: PurchaseOrder['status'][] = ['Draft', 'Sent', 'Confirmed', 'Received', 'Cancelled'];
+
 export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }: PurchaseOrderFormProps) {
     const { toast } = useToast();
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -157,7 +159,7 @@ export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }
 
     return (
         <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><Hash className="h-4 w-4" /> PO ID</Label>
                     <Input value={purchaseOrderId} disabled />
@@ -178,6 +180,15 @@ export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }
                  <div className="space-y-2">
                     <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Expected Delivery</Label>
                     <DatePicker date={expectedDeliveryDate} setDate={setExpectedDeliveryDate} />
+                </div>
+                 <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Status</Label>
+                    <Select onValueChange={(value) => setStatus(value as PurchaseOrder['status'])} value={status}>
+                        <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
+                        <SelectContent>
+                            {poStatuses.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
             
