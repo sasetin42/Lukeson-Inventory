@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, User as UserIcon, Mail, Shield, Activity, Key } from 'lucide-react';
-import type { User } from '@/lib/types';
+import type { User, Role } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/auth-context';
@@ -24,9 +24,9 @@ interface UserFormModalProps {
   onClose: () => void;
   onSave: (user: Omit<User, 'id' | 'createdAt' | 'lastLoginAt'> & { id?: string, password?: string }) => Promise<void>;
   user: User | null;
+  roles: Role[];
 }
 
-const roles: User['role'][] = ['Admin', 'Manager', 'Viewer'];
 const statuses: User['status'][] = ['active', 'inactive'];
 const SUPER_ADMIN_UID = "7AP0JBOpAJQMpGX7ofDyATVxfk93";
 
@@ -35,6 +35,7 @@ export default function UserFormModal({
     onClose, 
     onSave,
     user,
+    roles,
 }: UserFormModalProps) {
     const { toast } = useToast();
     const { user: currentUser } = useAuth();
@@ -128,7 +129,7 @@ export default function UserFormModal({
                                     <SelectValue placeholder="Select a role" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {roles.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                                    {roles.map(r => <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>

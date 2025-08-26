@@ -234,6 +234,7 @@ export default function UsersManagementPage() {
             onClose={handleCloseUserModal}
             onSave={handleSaveUser}
             user={editingUser}
+            roles={roles}
         />
       )}
       {isRoleModalOpen && (
