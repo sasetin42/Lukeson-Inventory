@@ -40,13 +40,7 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
     useEffect(() => {
         if (isOpen && user) {
             setName(user.name || '');
-            const storedProfile = localStorage.getItem('user_profile');
-            if (storedProfile) {
-                const profile = JSON.parse(storedProfile);
-                setAvatar(profile.avatar || user.avatar || 'https://placehold.co/128x128.png');
-            } else if(user.avatar){
-                 setAvatar(user.avatar);
-            }
+            setAvatar((user as any).avatar || 'https://placehold.co/128x128.png');
         }
     }, [isOpen, user]);
 
@@ -58,11 +52,11 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
 
         setIsSaving(true);
         try {
-            let avatarUrl = avatar;
-            // Check if the avatar is a new file upload (data URI)
+            let avatarUrl = (user as any)?.avatar; // Start with the current avatar URL
+
+            // Check if the avatar state holds a new file (data URI)
             if (avatar.startsWith('data:image')) {
                 const storageRef = ref(storage, `avatars/${firebaseUser.uid}`);
-                // 'data_url' is the format string for data URIs
                 await uploadString(storageRef, avatar, 'data_url');
                 avatarUrl = await getDownloadURL(storageRef);
             }
@@ -70,12 +64,12 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
             const userDocRef = doc(db, 'users', firebaseUser.uid);
             await updateDoc(userDocRef, {
                 name: name,
-                avatar: avatarUrl,
+                avatar: avatarUrl, // Save the permanent URL
             });
             
             const updatedProfile = { name, avatar: avatarUrl };
             localStorage.setItem('user_profile', JSON.stringify(updatedProfile));
-            onProfileUpdate(updatedProfile);
+            onProfileUpdate(updatedProfile); // Update parent state
 
             toast({ title: 'Success', description: 'Your profile has been updated.', variant: 'success' });
             onClose();
@@ -91,7 +85,7 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
-                setAvatar(reader.result as string);
+                setAvatar(reader.result as string); // Temporarily set avatar to data URL for preview
             };
             reader.readAsDataURL(file);
         }

@@ -138,12 +138,14 @@ function AppContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    // This effect ensures the profile in the UI is always up-to-date with the auth context or local storage.
     if (user) {
         setUserProfile({ name: user.name, avatar: (user as any).avatar || 'https://placehold.co/40x40.png' });
-    }
-    const storedProfile = localStorage.getItem('user_profile');
-    if (storedProfile) {
-        setUserProfile(JSON.parse(storedProfile));
+    } else {
+        const storedProfile = localStorage.getItem('user_profile');
+        if (storedProfile) {
+            setUserProfile(JSON.parse(storedProfile));
+        }
     }
   }, [user]);
   
