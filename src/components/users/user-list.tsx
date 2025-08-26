@@ -103,8 +103,7 @@ export default function UserList({ users, onEdit, onDelete, onAddUser, onView }:
                             {users.map((user) => {
                                 const isSuperAdmin = user.id === SUPER_ADMIN_UID;
                                 const canModify = !isSuperAdmin || (isSuperAdmin && currentUser?.id === SUPER_ADMIN_UID);
-                                const displayName = isSuperAdmin ? "Super Admin" : user.role;
-
+                                
                                 return (
                                 <TableRow key={user.id}>
                                     <TableCell>
@@ -120,7 +119,7 @@ export default function UserList({ users, onEdit, onDelete, onAddUser, onView }:
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={getRoleVariant(user.role)}>{displayName}</Badge>
+                                        <Badge variant={getRoleVariant(user.role)}>{user.role}</Badge>
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant={getStatusVariant(user.status)}>{user.status}</Badge>
