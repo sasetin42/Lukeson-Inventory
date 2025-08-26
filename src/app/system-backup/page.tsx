@@ -114,7 +114,8 @@ export default function SystemBackupPage() {
         setBackupToDelete(null);
     };
 
-    const lastSuccessfulBackup = backups.find(b => b.status === 'Successful');
+    const sortedBackups = [...backups].sort((a, b) => b.date.getTime() - a.date.getTime());
+    const lastSuccessfulBackup = sortedBackups.find(b => b.status === 'Successful');
 
     const handleToggleAllData = (checked: boolean) => {
         if (checked) {
@@ -190,7 +191,7 @@ export default function SystemBackupPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {backups.map(backup => (
+                            {sortedBackups.map(backup => (
                                 <TableRow key={backup.id}>
                                     <TableCell className="font-medium">{format(backup.date, 'Pp')}</TableCell>
                                     <TableCell>
