@@ -14,11 +14,17 @@ interface UserProfile {
     avatar: string;
 }
 
+interface CompanyProfile {
+    name: string;
+    logo: string;
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
   firebaseUser: FirebaseUser | null;
   profile: UserProfile;
+  companyProfile: CompanyProfile;
   login: (email: string, pass: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
@@ -33,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [userRole, setUserRole] = useState<User['role'] | null>(null);
     const [profile, setProfile] = useState<UserProfile>({ name: 'User', avatar: 'https://placehold.co/128x128.png'});
+    const [companyProfile, setCompanyProfile] = useState<CompanyProfile>({ name: 'IMIS Pro', logo: '' });
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const pathname = usePathname();
@@ -40,7 +47,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const fetchUserData = async (fbUser: FirebaseUser) => {
         try {
             const userDocRef = doc(db, 'users', fbUser.uid);
-            const userDocSnap = await getDoc(userDocRef);
+            const companyDocRef = doc(db, 'settings', 'companyProfile');
+
+            const [userDocSnap, companyDocSnap] = await Promise.all([
+                getDoc(userDocRef),
+                getDoc(companyDocRef)
+            ]);
+
             if (userDocSnap.exists()) {
                 const userData = { ...userDocSnap.data(), id: fbUser.uid } as User & { avatar?: string };
                 setUser(userData);
@@ -63,6 +76,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setUserRole(fullUser.role);
                 setProfile({ name: fullUser.name, avatar: fullUser.avatar || 'https://placehold.co/128x128.png' });
             }
+            
+            if (companyDocSnap.exists()) {
+                const companyData = companyDocSnap.data();
+                setCompanyProfile({ name: companyData.name || 'IMIS Pro', logo: companyData.logo || '' });
+            }
+
         } catch (error) {
             console.error("Error fetching or creating user data from Firestore:", error);
             setUser(null);
@@ -83,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setUser(null);
                 setUserRole(null);
                 setProfile({ name: 'User', avatar: 'https://placehold.co/128x128.png' });
+                setCompanyProfile({ name: 'IMIS Pro', logo: '' });
             }
             setIsLoading(false);
         });
@@ -143,6 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         firebaseUser,
         profile,
+        companyProfile,
         login, 
         logout, 
         isLoading,

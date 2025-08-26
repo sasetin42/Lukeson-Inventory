@@ -19,6 +19,7 @@ import UserProfileModal from '@/components/users/user-profile-modal';
 import { useToast } from '@/hooks/use-toast';
 import { AuthProvider, useAuth } from '@/context/auth-context';
 import SupportModal from '@/components/support/support-modal';
+import Image from 'next/image';
 
 
 // export const metadata: Metadata = {
@@ -129,7 +130,7 @@ export const navGroups = [
 ];
 
 function AppContent({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, logout, firebaseUser, userRole, profile } = useAuth();
+  const { isAuthenticated, isLoading, logout, firebaseUser, userRole, profile, companyProfile } = useAuth();
   const { toast } = useToast();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -182,9 +183,13 @@ function AppContent({ children }: { children: React.ReactNode }) {
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-3">
-              <Logo className="size-9 text-primary" />
+              {companyProfile.logo ? (
+                  <Image src={companyProfile.logo} alt={companyProfile.name} width={36} height={36} className="rounded-md" data-ai-hint="logo" />
+              ) : (
+                  <Logo className="size-9 text-primary" />
+              )}
               <div className="flex flex-col">
-                <h1 className="text-xl font-bold tracking-tight text-foreground">IMIS Pro</h1>
+                <h1 className="text-xl font-bold tracking-tight text-foreground">{companyProfile.name}</h1>
                 <p className="text-sm text-muted-foreground">Workspace</p>
               </div>
             </div>
