@@ -190,7 +190,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
               )}
               <div className="flex flex-col">
                 <h1 className="text-company-name font-bold tracking-tight text-foreground">{companyProfile.name}</h1>
-                <p className="text-sm text-muted-foreground">Workspace</p>
+                <p className="text-sm text-muted-foreground">Inventory System</p>
               </div>
             </div>
           </SidebarHeader>
