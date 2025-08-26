@@ -12,7 +12,7 @@ import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-
 import PurchaseOrderViewModal from '@/components/purchase-orders/purchase-order-view-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PurchaseOrderTemplate from '@/components/purchase-orders/purchase-order-template';
@@ -25,27 +25,25 @@ export default function PurchaseOrdersPage() {
   const [viewingPurchaseOrder, setViewingPurchaseOrder] = useState<PurchaseOrder | null>(null);
   const { toast } = useToast();
 
-  const fetchPurchaseOrders = async () => {
-    try {
-      const poRef = collection(db, 'purchaseOrders');
-      const q = query(poRef, orderBy('__name__'));
-      const snapshot = await getDocs(q);
-      const loadedPOs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PurchaseOrder));
-      setPurchaseOrders(loadedPOs);
-    } catch (error) {
-      console.error("Error fetching purchase orders: ", error);
-      toast({
-        title: "Error",
-        description: "Failed to load purchase orders. Please check your connection and permissions.",
-        variant: "destructive",
-        icon: <AlertCircle className="h-5 w-5" />
-      });
-    }
-  };
-
   useEffect(() => {
-    fetchPurchaseOrders();
-  }, []);
+    const poRef = collection(db, 'purchaseOrders');
+    const q = query(poRef, orderBy('__name__'));
+    
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const loadedPOs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PurchaseOrder));
+        setPurchaseOrders(loadedPOs);
+    }, (error) => {
+        console.error("Error fetching purchase orders: ", error);
+        toast({
+            title: "Error",
+            description: "Failed to load purchase orders. Please check your connection and permissions.",
+            variant: "destructive",
+            icon: <AlertCircle className="h-5 w-5" />
+        });
+    });
+
+    return () => unsubscribe();
+  }, [toast]);
 
   const handleOpenModal = (purchaseOrder: PurchaseOrder | null) => {
     setEditingPurchaseOrder(purchaseOrder);
@@ -81,7 +79,6 @@ export default function PurchaseOrdersPage() {
               toast({ title: "Success", description: "Purchase Order added successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           }
           handleCloseModal();
-          fetchPurchaseOrders();
       } catch (error) {
           console.error("Error saving purchase order: ", error);
           toast({ title: "Error", description: "Failed to save purchase order.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
@@ -92,7 +89,6 @@ export default function PurchaseOrdersPage() {
   const handleDeletePurchaseOrder = async (purchaseOrderId: string) => {
     await deleteDoc(doc(db, "purchaseOrders", purchaseOrderId));
     toast({ title: "Success", description: "Purchase Order deleted successfully.", variant: "destructive" });
-    fetchPurchaseOrders();
   };
 
   const totalReceived = purchaseOrders.filter(po => po.status === 'Received').length;
