@@ -19,10 +19,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { useAuth } from '@/context/auth-context';
-import { storage } from '@/lib/firebase';
+import { storage, db } from '@/lib/firebase';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -43,7 +42,10 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
             setName(user.name || '');
             const storedProfile = localStorage.getItem('user_profile');
             if (storedProfile) {
-                setAvatar(JSON.parse(storedProfile).avatar || 'https://placehold.co/128x128.png');
+                const profile = JSON.parse(storedProfile);
+                setAvatar(profile.avatar || user.avatar || 'https://placehold.co/128x128.png');
+            } else if(user.avatar){
+                 setAvatar(user.avatar);
             }
         }
     }, [isOpen, user]);
@@ -57,8 +59,10 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
         setIsSaving(true);
         try {
             let avatarUrl = avatar;
+            // Check if the avatar is a new file upload (data URI)
             if (avatar.startsWith('data:image')) {
                 const storageRef = ref(storage, `avatars/${firebaseUser.uid}`);
+                // 'data_url' is the format string for data URIs
                 await uploadString(storageRef, avatar, 'data_url');
                 avatarUrl = await getDownloadURL(storageRef);
             }
@@ -66,8 +70,7 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
             const userDocRef = doc(db, 'users', firebaseUser.uid);
             await updateDoc(userDocRef, {
                 name: name,
-                // Assuming avatar is stored on the user profile in some way, though it's not in the type.
-                // Let's stick to what's in local storage for the UI update for now.
+                avatar: avatarUrl,
             });
             
             const updatedProfile = { name, avatar: avatarUrl };
@@ -107,7 +110,7 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
                         <div className="flex flex-col items-center gap-4">
                             <Avatar className="h-32 w-32">
                                 <AvatarImage src={avatar} alt={name} data-ai-hint="user avatar" />
-                                <AvatarFallback>{name.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>{name?.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
                                 <Camera className="mr-2 h-4 w-4"/>

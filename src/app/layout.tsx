@@ -129,7 +129,7 @@ export const navGroups = [
 ];
 
 function AppContent({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, logout, firebaseUser, userRole } = useAuth();
+  const { isAuthenticated, isLoading, logout, firebaseUser, userRole, user } = useAuth();
   const { toast } = useToast();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -138,11 +138,14 @@ function AppContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    if (user) {
+        setUserProfile({ name: user.name, avatar: (user as any).avatar || 'https://placehold.co/40x40.png' });
+    }
     const storedProfile = localStorage.getItem('user_profile');
     if (storedProfile) {
         setUserProfile(JSON.parse(storedProfile));
     }
-  }, []);
+  }, [user]);
   
   const handleAccordionChange = (value: string[]) => {
       const alwaysOpen = ['Overview', 'Inventory', 'Sales'];
