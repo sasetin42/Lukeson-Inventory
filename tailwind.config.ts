@@ -10,7 +10,7 @@ export default {
   theme: {
     extend: {
       fontSize: {
-        'company-name': ['25px', '30px'],
+        'company-name': ['20px', '25px'],
       },
       fontFamily: {
         body: ['Maven Pro', 'sans-serif'],
