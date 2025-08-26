@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Shield } from 'lucide-react';
 import { Role, PermissionLevel } from '@/lib/types';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
@@ -70,6 +70,18 @@ export default function RoleFormModal({
         }));
     }
 
+    const handleGroupPermissionChange = (groupTitle: string, level: PermissionLevel) => {
+        const newPermissions = { ...permissions };
+        const group = navGroups.flatMap(g => g.items).find(i => i.title === groupTitle);
+        if (group) {
+            group.links.forEach((link: any) => {
+                newPermissions[link.label] = level;
+            });
+        }
+        setPermissions(newPermissions);
+    };
+
+
     const handleSubmit = async () => {
         if (!name) {
             toast({ title: "Validation Error", description: "Role name is required.", variant: "destructive" });
@@ -110,13 +122,24 @@ export default function RoleFormModal({
                     
                     <h3 className="font-semibold mt-4">Permissions</h3>
                     <ScrollArea className="h-72 pr-4 border rounded-md">
-                        <Accordion type="multiple" className="w-full p-2">
+                        <Accordion type="multiple" className="w-full p-2" defaultValue={navGroups.map(g => g.items.map((i:any) => i.title)).flat()}>
                         {navGroups.map(group => (
                             group.items.map((item: any) => (
                                 <AccordionItem value={item.title} key={item.title}>
                                     <AccordionTrigger>
                                         <div className="flex items-center justify-between w-full pr-2">
                                             <span className="font-semibold text-sm">{item.title}</span>
+                                            <RadioGroup 
+                                                className="flex gap-x-4" 
+                                                onValueChange={(value: PermissionLevel) => handleGroupPermissionChange(item.title, value)}
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                {permissionLevels.map(level => (
+                                                    <div key={level} className="flex items-center space-x-2">
+                                                        <Label htmlFor={`perm-group-${item.title}-${level}`} className="text-xs">{level}</Label>
+                                                    </div>
+                                                ))}
+                                            </RadioGroup>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent>
@@ -124,19 +147,18 @@ export default function RoleFormModal({
                                             {item.links.map((link: any) => (
                                                  <div key={link.label} className="flex items-center justify-between">
                                                     <Label htmlFor={`perm-${link.label}`}>{link.label}</Label>
-                                                    <Select
+                                                    <RadioGroup 
                                                         value={permissions[link.label] || 'No Access'}
                                                         onValueChange={(value: PermissionLevel) => handlePermissionChange(link.label, value)}
+                                                        className="flex gap-x-4"
                                                     >
-                                                        <SelectTrigger id={`perm-${link.label}`} className="w-[180px]">
-                                                            <SelectValue placeholder="Set permission" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {permissionLevels.map(level => (
-                                                                <SelectItem key={level} value={level}>{level}</SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
+                                                        {permissionLevels.map(level => (
+                                                            <div key={level} className="flex items-center space-x-2">
+                                                                <RadioGroupItem value={level} id={`perm-${link.label}-${level}`} />
+                                                                <Label htmlFor={`perm-${link.label}-${level}`} className="text-xs font-normal">{level}</Label>
+                                                            </div>
+                                                        ))}
+                                                    </RadioGroup>
                                                 </div>
                                             ))}
                                         </div>
