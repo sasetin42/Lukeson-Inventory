@@ -5,8 +5,8 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useRouter, usePathname } from 'next/navigation';
 import { auth, db, storage } from '@/lib/firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User as FirebaseUser } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { User } from '@/lib/types';
+import { doc, getDoc, setDoc, serverTimestamp, updateDoc, collection, query, where } from 'firebase/firestore';
+import { User, Role, PermissionLevel } from '@/lib/types';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface UserProfile {
@@ -29,6 +29,7 @@ interface AuthContextType {
   logout: () => void;
   isLoading: boolean;
   userRole: User['role'] | null;
+  rolePermissions: { [key: string]: PermissionLevel } | null;
   updateUserProfile: (name: string, avatarFile: File | null) => Promise<void>;
 }
 
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
     const [user, setUser] = useState<User | null>(null);
     const [userRole, setUserRole] = useState<User['role'] | null>(null);
+    const [rolePermissions, setRolePermissions] = useState<{ [key: string]: PermissionLevel } | null>(null);
     const [profile, setProfile] = useState<UserProfile>({ name: 'User', avatar: 'https://placehold.co/128x128.png'});
     const [companyProfile, setCompanyProfile] = useState<CompanyProfile>({ name: 'IMIS Pro', logo: '' });
     const [isLoading, setIsLoading] = useState(true);
@@ -53,9 +55,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 getDoc(userDocRef),
                 getDoc(companyDocRef)
             ]);
-
+            
+            let userData: User | null = null;
             if (userDocSnap.exists()) {
-                const userData = { ...userDocSnap.data(), id: fbUser.uid } as User & { avatar?: string };
+                userData = { ...userDocSnap.data(), id: fbUser.uid } as User;
                 setUser(userData);
                 setUserRole(userData.role);
                 setProfile({ name: userData.name, avatar: userData.avatar || 'https://placehold.co/128x128.png' });
@@ -71,10 +74,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     avatar: 'https://placehold.co/128x128.png',
                 };
                 await setDoc(userDocRef, newUser);
-                const fullUser = { ...newUser, id: fbUser.uid } as User & {avatar?: string};
-                setUser(fullUser as User);
-                setUserRole(fullUser.role);
-                setProfile({ name: fullUser.name, avatar: fullUser.avatar || 'https://placehold.co/128x128.png' });
+                userData = { ...newUser, id: fbUser.uid } as User;
+                setUser(userData);
+                setUserRole(userData.role);
+                setProfile({ name: userData.name, avatar: userData.avatar || 'https://placehold.co/128x128.png' });
             }
             
             if (companyDocSnap.exists()) {
@@ -82,10 +85,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setCompanyProfile({ name: companyData.name || 'IMIS Pro', logo: companyData.logo || '' });
             }
 
+            if (userData?.role) {
+                const rolesRef = collection(db, 'roles');
+                const q = query(rolesRef, where("name", "==", userData.role));
+                const roleQuerySnapshot = await getDocs(q);
+
+                if (!roleQuerySnapshot.empty) {
+                    const roleDoc = roleQuerySnapshot.docs[0];
+                    const roleData = roleDoc.data() as Role;
+                    setRolePermissions(roleData.permissions);
+                } else {
+                    setRolePermissions(null);
+                }
+            }
+
+
         } catch (error) {
             console.error("Error fetching or creating user data from Firestore:", error);
             setUser(null);
             setUserRole(null);
+            setRolePermissions(null);
             setProfile({ name: 'Error', avatar: 'https://placehold.co/128x128.png' });
         }
     };
@@ -101,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setFirebaseUser(null);
                 setUser(null);
                 setUserRole(null);
+                setRolePermissions(null);
                 setProfile({ name: 'User', avatar: 'https://placehold.co/128x128.png' });
                 setCompanyProfile({ name: 'IMIS Pro', logo: '' });
             }
@@ -168,6 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout, 
         isLoading,
         userRole,
+        rolePermissions,
         updateUserProfile,
     };
 
