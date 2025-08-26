@@ -12,7 +12,7 @@ import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-
 import PurchaseOrderViewModal from '@/components/purchase-orders/purchase-order-view-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PurchaseOrderTemplate from '@/components/purchase-orders/purchase-order-template';
@@ -28,7 +28,8 @@ export default function PurchaseOrdersPage() {
   const fetchPurchaseOrders = async () => {
     try {
       const poRef = collection(db, 'purchaseOrders');
-      const snapshot = await getDocs(poRef);
+      const q = query(poRef, orderBy('__name__'));
+      const snapshot = await getDocs(q);
       const loadedPOs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PurchaseOrder));
       setPurchaseOrders(loadedPOs);
     } catch (error) {
