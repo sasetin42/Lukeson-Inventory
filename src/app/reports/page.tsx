@@ -25,6 +25,8 @@ import InventoryValueByCategoryChart from '@/components/analytics/inventory-valu
 import InventoryTurnoverByCategoryChart from '@/components/analytics/inventory-turnover-by-category-chart';
 import StockMovementTrendChart from '@/components/analytics/stock-movement-trend-chart';
 import InventoryOptimizationRecommendations from '@/components/analytics/inventory-optimization-recommendations';
+import SupplierPerformanceList from '@/components/analytics/supplier-performance-list';
+import SupplierOnTimeChart from '@/components/analytics/supplier-on-time-chart';
 
 
 export default function ReportsPage() {
@@ -184,8 +186,14 @@ export default function ReportsPage() {
         </TabsContent>
         <TabsContent value="purchase" className="mt-4">
             <Card>
-                <CardHeader><CardTitle>Purchase Analysis</CardTitle></CardHeader>
-                <CardContent><p>Purchase analysis reports will go here.</p></CardContent>
+                <CardHeader>
+                    <CardTitle>Purchase Analysis</CardTitle>
+                    <CardDescription>Evaluate supplier performance and purchasing trends.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-6">
+                    <SupplierPerformanceList suppliers={suppliers} dateRange={365} />
+                    <SupplierOnTimeChart suppliers={suppliers} dateRange={365} />
+                </CardContent>
             </Card>
         </TabsContent>
       </Tabs>
