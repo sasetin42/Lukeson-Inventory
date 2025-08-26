@@ -27,7 +27,7 @@ interface UserProfileModalProps {
 
 export default function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
     const { toast } = useToast();
-    const { user, profile, updateUserProfile } = useAuth();
+    const { user, profile, updateUserProfile, firebaseUser } = useAuth();
     const [name, setName] = useState('');
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -44,6 +44,11 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
 
     const handleProfileUpdate = async () => {
         setIsSaving(true);
+        if (!firebaseUser) {
+            toast({ title: 'Error', description: 'You are not logged in.', variant: 'destructive' });
+            setIsSaving(false);
+            return;
+        }
         try {
             await updateUserProfile(name, avatarFile);
             toast({ title: 'Success', description: 'Your profile has been updated.', variant: 'success' });
@@ -101,7 +106,7 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-4 w-4 text-red-500" />Email</Label>
-                                <Input id="email" type="email" value={user?.email || ''} disabled />
+                                <Input id="email" type="email" value={firebaseUser?.email || ''} disabled />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">

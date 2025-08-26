@@ -42,25 +42,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const userDocRef = doc(db, 'users', fbUser.uid);
             const userDocSnap = await getDoc(userDocRef);
             if (userDocSnap.exists()) {
-                const userData = { ...userDocSnap.data(), id: fbUser.uid } as User;
+                const userData = { ...userDocSnap.data(), id: fbUser.uid } as User & { avatar?: string };
                 setUser(userData);
                 setUserRole(userData.role);
-                setProfile({ name: userData.name, avatar: (userData as any).avatar || 'https://placehold.co/128x128.png' });
+                setProfile({ name: userData.name, avatar: userData.avatar || 'https://placehold.co/128x128.png' });
             } else {
                 console.log(`Creating Firestore document for new user ${fbUser.uid}`);
-                const newUser: Omit<User, 'id'> = {
+                const newUser: Omit<User, 'id'> & {avatar?: string} = {
                     name: fbUser.displayName || 'New User',
                     email: fbUser.email || '',
                     role: 'Viewer',
                     status: 'active',
                     createdAt: serverTimestamp(),
                     lastLoginAt: serverTimestamp(),
+                    avatar: 'https://placehold.co/128x128.png',
                 };
                 await setDoc(userDocRef, newUser);
-                const fullUser = { ...newUser, id: fbUser.uid } as User;
-                setUser(fullUser);
+                const fullUser = { ...newUser, id: fbUser.uid } as User & {avatar?: string};
+                setUser(fullUser as User);
                 setUserRole(fullUser.role);
-                setProfile({ name: fullUser.name, avatar: (fullUser as any).avatar || 'https://placehold.co/128x128.png' });
+                setProfile({ name: fullUser.name, avatar: fullUser.avatar || 'https://placehold.co/128x128.png' });
             }
         } catch (error) {
             console.error("Error fetching or creating user data from Firestore:", error);
@@ -90,17 +91,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     useEffect(() => {
-        if (!isLoading) {
-            const isAuthPage = pathname === '/login';
-            if (firebaseUser) {
-                if (isAuthPage) {
-                    router.push('/');
-                }
-            } else {
-                if (!isAuthPage) {
-                    router.push('/login');
-                }
-            }
+        if (isLoading) return;
+        
+        const isAuthPage = pathname === '/login';
+
+        if (!firebaseUser && !isAuthPage) {
+            router.push('/login');
+        } else if (firebaseUser && isAuthPage) {
+            router.push('/');
         }
     }, [isLoading, firebaseUser, pathname, router]);
 

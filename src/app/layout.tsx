@@ -129,7 +129,7 @@ export const navGroups = [
 ];
 
 function AppContent({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, logout, firebaseUser, userRole, user, profile, updateUserProfile } = useAuth();
+  const { isAuthenticated, isLoading, logout, firebaseUser, userRole, profile } = useAuth();
   const { toast } = useToast();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
