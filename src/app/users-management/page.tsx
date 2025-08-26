@@ -14,6 +14,7 @@ import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import KpiCard from '@/components/kpi-card';
 import RolesPermissions from '@/components/users/roles-permissions';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -121,13 +122,24 @@ export default function UsersManagementPage() {
           />
         ))}
       </div>
-      <UserList 
-        users={users} 
-        onEdit={handleOpenModal} 
-        onDelete={handleDeleteUser}
-        onAddUser={() => handleOpenModal(null)}
-      />
-      <RolesPermissions />
+      <Tabs defaultValue="users">
+        <TabsList>
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="roles">Roles & Permissions</TabsTrigger>
+        </TabsList>
+        <TabsContent value="users" className="mt-4">
+          <UserList 
+            users={users} 
+            onEdit={handleOpenModal} 
+            onDelete={handleDeleteUser}
+            onAddUser={() => handleOpenModal(null)}
+          />
+        </TabsContent>
+        <TabsContent value="roles" className="mt-4">
+          <RolesPermissions />
+        </TabsContent>
+      </Tabs>
+      
       {isModalOpen && (
         <UserFormModal 
             isOpen={isModalOpen}
