@@ -98,7 +98,6 @@ export const navGroups = [
         roles: ['Admin', 'Manager', 'Viewer'],
         links: [
             { href: '/reports', icon: BarChart3, label: 'System Reports', color: 'text-orange-500', roles: ['Admin', 'Manager', 'Viewer'] },
-            { href: '/reports/purchase-analysis', icon: BarChart3, label: 'Purchase Analysis', color: 'text-purple-500', roles: ['Admin', 'Manager'] },
         ],
       },
     ],
