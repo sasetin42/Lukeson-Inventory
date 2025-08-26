@@ -1,8 +1,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle2, XCircle, Eye, Shield } from 'lucide-react';
+import { CheckCircle2, XCircle, Eye, Shield, PlusCircle } from 'lucide-react';
 import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 
 const permissionsData = [
   { module: 'Dashboard', admin: 'Full Access', manager: 'Full Access', viewer: 'Read-only' },
@@ -44,13 +45,21 @@ export default function RolesPermissions() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-purple-500" />
-            Roles & Permissions Matrix
-        </CardTitle>
-        <CardDescription>
-          An overview of what each user role can access and do in the system.
-        </CardDescription>
+        <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+                <Shield className="h-6 w-6 text-purple-500" />
+                <div>
+                    <CardTitle>Roles & Permissions Matrix</CardTitle>
+                    <CardDescription>
+                    An overview of what each user role can access and do in the system.
+                    </CardDescription>
+                </div>
+            </div>
+            <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Role
+            </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
