@@ -5,51 +5,64 @@ import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Users2, Shield, Activity } from "lucide-react";
-import { User } from '@/lib/types';
+import { User, Role, PermissionLevel } from '@/lib/types';
 import UserList from '@/components/users/user-list';
 import UserFormModal from '@/components/users/user-form-modal';
+import RoleFormModal from '@/components/users/role-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db, auth } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import KpiCard from '@/components/kpi-card';
 import RolesPermissions from '@/components/users/roles-permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { permissionsData } from '@/components/users/roles-permissions';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingRole, setEditingRole] = useState<Role | null>(null);
   const { toast } = useToast();
 
-  const fetchUsers = async () => {
-    try {
-      const usersRef = collection(db, 'users');
-      const snapshot = await getDocs(usersRef);
-      const loadedUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
-      setUsers(loadedUsers);
-    } catch (error) {
-      console.error("Error fetching users: ", error);
-      toast({
-        title: "Error",
-        description: "Failed to load users. Please check your connection and permissions.",
-        variant: "destructive"
-      });
-    }
-  };
-
   useEffect(() => {
-    fetchUsers();
+    const usersRef = collection(db, 'users');
+    const rolesRef = collection(db, 'roles');
+    
+    const unsubscribeUsers = onSnapshot(usersRef, (snapshot) => {
+        setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User)));
+    });
+    
+    const unsubscribeRoles = onSnapshot(rolesRef, (snapshot) => {
+        setRoles(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Role)));
+    });
+
+    return () => {
+        unsubscribeUsers();
+        unsubscribeRoles();
+    };
   }, []);
 
-  const handleOpenModal = (user: User | null) => {
+  const handleOpenUserModal = (user: User | null) => {
     setEditingUser(user);
-    setIsModalOpen(true);
+    setIsUserModalOpen(true);
   };
   
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseUserModal = () => {
+    setIsUserModalOpen(false);
     setEditingUser(null);
+  }
+  
+  const handleOpenRoleModal = (role: Role | null) => {
+      setEditingRole(role);
+      setIsRoleModalOpen(true);
+  }
+
+  const handleCloseRoleModal = () => {
+    setIsRoleModalOpen(false);
+    setEditingRole(null);
   }
 
   const handleSaveUser = async (userData: Omit<User, 'id' | 'createdAt' | 'lastLoginAt'> & { id?: string, password?: string }) => {
@@ -72,8 +85,7 @@ export default function UsersManagementPage() {
             
             toast({ title: "Success", description: "User added successfully.", variant: "success" });
         }
-        handleCloseModal();
-        fetchUsers(); // refetch
+        handleCloseUserModal();
     } catch (error: any) {
         console.error("Error saving user: ", error);
         toast({ title: "Error", description: `Failed to save user: ${error.message}`, variant: "destructive" });
@@ -82,15 +94,34 @@ export default function UsersManagementPage() {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      // Note: In a real app, you would also delete the user from Firebase Auth.
-      // This requires backend logic for security reasons. For now, we only delete from Firestore.
       await deleteDoc(doc(db, "users", userId));
       toast({ title: "Success", description: "User deleted successfully.", variant: "success" });
-      fetchUsers(); // refetch
     } catch (error) {
        toast({ title: "Error", description: "Failed to delete user.", variant: "destructive" });
     }
   };
+
+  const handleSaveRole = async (roleData: Omit<Role, 'id'> & {id?: string}) => {
+    const { id, ...dataToSave } = roleData;
+    try {
+      const roleRef = doc(db, 'roles', id || dataToSave.name.toLowerCase().replace(/\s/g, '-'));
+      await setDoc(roleRef, dataToSave, { merge: true });
+      toast({ title: "Success", description: "Role saved successfully.", variant: "success" });
+      handleCloseRoleModal();
+    } catch (error) {
+      console.error("Error saving role:", error);
+      toast({ title: "Error", description: "Failed to save role.", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteRole = async (roleId: string) => {
+    try {
+      await deleteDoc(doc(db, 'roles', roleId));
+      toast({ title: "Success", description: "Role deleted successfully.", variant: "success" });
+    } catch(error) {
+       toast({ title: "Error", description: "Failed to delete role.", variant: "destructive" });
+    }
+  }
 
   const totalUsers = users.length;
   const activeUsers = users.filter(u => u.status === 'active').length;
@@ -130,23 +161,37 @@ export default function UsersManagementPage() {
         <TabsContent value="users" className="mt-4">
           <UserList 
             users={users} 
-            onEdit={handleOpenModal} 
+            onEdit={handleOpenUserModal} 
             onDelete={handleDeleteUser}
-            onAddUser={() => handleOpenModal(null)}
+            onAddUser={() => handleOpenUserModal(null)}
           />
         </TabsContent>
         <TabsContent value="roles" className="mt-4">
-          <RolesPermissions />
+          <RolesPermissions 
+            roles={roles}
+            onAddRole={() => handleOpenRoleModal(null)}
+            onEditRole={handleOpenRoleModal}
+            onDeleteRole={handleDeleteRole}
+          />
         </TabsContent>
       </Tabs>
       
-      {isModalOpen && (
+      {isUserModalOpen && (
         <UserFormModal 
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
+            isOpen={isUserModalOpen}
+            onClose={handleCloseUserModal}
             onSave={handleSaveUser}
             user={editingUser}
         />
+      )}
+      {isRoleModalOpen && (
+          <RoleFormModal
+            isOpen={isRoleModalOpen}
+            onClose={handleCloseRoleModal}
+            onSave={handleSaveRole}
+            role={editingRole}
+            modules={permissionsData.map(p => p.module)}
+          />
       )}
     </div>
   );

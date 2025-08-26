@@ -19,6 +19,16 @@ export type Company = {
 };
 
 // User and Role Management
+export type PermissionLevel = 'Full Access' | 'Read-only' | 'No Access';
+
+export type Role = {
+    id: string;
+    name: string;
+    permissions: {
+        [module: string]: PermissionLevel;
+    };
+};
+
 export type User = {
     id: string;
     firestoreId?: string;

@@ -1,11 +1,14 @@
 
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle2, XCircle, Eye, Shield, PlusCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, Eye, Shield, PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { Role } from "@/lib/types";
 
-const permissionsData = [
+export const permissionsData = [
   { module: 'Dashboard', admin: 'Full Access', manager: 'Full Access', viewer: 'Read-only' },
   { module: 'Analytics', admin: 'Full Access', manager: 'Full Access', viewer: 'Read-only' },
   { module: 'Products', admin: 'Full Access', manager: 'Full Access', viewer: 'Read-only' },
@@ -41,7 +44,14 @@ const PermissionIcon = ({ permission }: { permission: string }) => {
     return null;
 };
 
-export default function RolesPermissions() {
+interface RolesPermissionsProps {
+    roles: Role[];
+    onAddRole: () => void;
+    onEditRole: (role: Role) => void;
+    onDeleteRole: (roleId: string) => void;
+}
+
+export default function RolesPermissions({ roles, onAddRole, onEditRole, onDeleteRole }: RolesPermissionsProps) {
   return (
     <Card>
       <CardHeader>
@@ -55,7 +65,7 @@ export default function RolesPermissions() {
                     </CardDescription>
                 </div>
             </div>
-            <Button>
+            <Button onClick={onAddRole}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Role
             </Button>
@@ -67,30 +77,26 @@ export default function RolesPermissions() {
             <TableHeader>
                 <TableRow>
                 <TableHead className="w-1/4">Module</TableHead>
-                <TableHead className="text-center w-1/4">
-                    <Badge variant="destructive">Admin</Badge>
-                </TableHead>
-                <TableHead className="text-center w-1/4">
-                    <Badge variant="secondary">Manager</Badge>
-                </TableHead>
-                <TableHead className="text-center w-1/4">
-                    <Badge variant="outline">Viewer</Badge>
-                </TableHead>
+                {roles.map(role => (
+                    <TableHead key={role.id} className="text-center w-1/4">
+                        <div className="flex items-center justify-center gap-2">
+                            <Badge variant="secondary">{role.name}</Badge>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onEditRole(role)}><Edit className="h-3 w-3" /></Button>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onDeleteRole(role.id)}><Trash2 className="h-3 w-3 text-red-500" /></Button>
+                        </div>
+                    </TableHead>
+                ))}
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {permissionsData.map((row) => (
-                <TableRow key={row.module}>
-                    <TableCell className="font-medium">{row.module}</TableCell>
-                    <TableCell className="text-center">
-                        <PermissionIcon permission={row.admin} />
-                    </TableCell>
-                    <TableCell className="text-center">
-                        <PermissionIcon permission={row.manager} />
-                    </TableCell>
-                    <TableCell className="text-center">
-                        <PermissionIcon permission={row.viewer} />
-                    </TableCell>
+                {permissionsData.map((data) => (
+                <TableRow key={data.module}>
+                    <TableCell className="font-medium">{data.module}</TableCell>
+                    {roles.map(role => (
+                       <TableCell key={`${role.id}-${data.module}`} className="text-center">
+                           <PermissionIcon permission={role.permissions[data.module] || 'No Access'} />
+                       </TableCell> 
+                    ))}
                 </TableRow>
                 ))}
             </TableBody>
