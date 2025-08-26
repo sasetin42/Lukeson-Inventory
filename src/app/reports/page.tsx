@@ -15,7 +15,10 @@ import RevenueByCategoryChart from '@/components/reports/revenue-by-category-cha
 import SalesStatusChart from '@/components/reports/sales-status-chart';
 import PurchaseStatusChart from '@/components/reports/purchase-status-chart';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import ProfitLossStatement from '@/components/reports/profit-loss-statement';
+import BalanceSheet from '@/components/reports/balance-sheet';
+import CashflowStatement from '@/components/reports/cashflow-statement';
 
 
 export default function ReportsPage() {
@@ -101,8 +104,28 @@ export default function ReportsPage() {
         </TabsContent>
         <TabsContent value="pnl" className="mt-4">
             <Card>
-                <CardHeader><CardTitle>Financial Statements</CardTitle></CardHeader>
-                <CardContent><p>Profit & Loss, Balance Sheet, and Cashflow Statements will go here.</p></CardContent>
+                <CardHeader>
+                    <CardTitle>Financial Statements</CardTitle>
+                    <CardDescription>A summary of your company's financial health.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                   <Tabs defaultValue="profit-loss">
+                        <TabsList>
+                            <TabsTrigger value="profit-loss">Profit & Loss</TabsTrigger>
+                            <TabsTrigger value="balance-sheet">Balance Sheet</TabsTrigger>
+                            <TabsTrigger value="cash-flow">Cashflow Statement</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="profit-loss" className="mt-4">
+                            <ProfitLossStatement sales={sales} products={products} purchases={purchases} />
+                        </TabsContent>
+                        <TabsContent value="balance-sheet" className="mt-4">
+                            <BalanceSheet products={products} sales={sales} />
+                        </TabsContent>
+                         <TabsContent value="cash-flow" className="mt-4">
+                            <CashflowStatement sales={sales} purchases={purchases} />
+                        </TabsContent>
+                   </Tabs>
+                </CardContent>
             </Card>
         </TabsContent>
         <TabsContent value="sales" className="mt-4">
