@@ -74,6 +74,7 @@ export default function RoleFormModal({
         const newPermissions = { ...permissions };
         const group = navGroups.flatMap(g => g.items).find(i => i.title === groupTitle);
         if (group) {
+            newPermissions[group.title] = level;
             group.links.forEach((link: any) => {
                 newPermissions[link.label] = level;
             });
@@ -129,13 +130,15 @@ export default function RoleFormModal({
                                         <div className="flex items-center justify-between w-full pr-2">
                                             <span className="font-semibold text-sm">{item.title}</span>
                                             <RadioGroup 
+                                                value={permissions[item.title] || 'No Access'}
                                                 className="flex gap-x-4" 
                                                 onValueChange={(value: PermissionLevel) => handleGroupPermissionChange(item.title, value)}
                                                 onClick={(e) => e.stopPropagation()}
                                             >
                                                 {permissionLevels.map(level => (
                                                     <div key={level} className="flex items-center space-x-2">
-                                                        <Label htmlFor={`perm-group-${item.title}-${level}`} className="text-xs">{level}</Label>
+                                                        <RadioGroupItem value={level} id={`perm-group-${item.title}-${level}`} />
+                                                        <Label htmlFor={`perm-group-${item.title}-${level}`} className="text-xs font-normal">{level}</Label>
                                                     </div>
                                                 ))}
                                             </RadioGroup>
