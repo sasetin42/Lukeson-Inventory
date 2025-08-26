@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
+import { useAuth } from '@/context/auth-context';
 
 interface UserListProps {
     users: User[];
@@ -34,9 +35,12 @@ interface UserListProps {
     onAddUser: () => void;
 }
 
+const SUPER_ADMIN_UID = "7AP0JBOpAJQMpGX7ofDyATVxfk93";
+
 export default function UserList({ users, onEdit, onDelete, onAddUser }: UserListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
+    const { user: currentUser } = useAuth();
 
     const openDeleteAlert = (user: User) => {
         setUserToDelete(user);
@@ -88,7 +92,11 @@ export default function UserList({ users, onEdit, onDelete, onAddUser }: UserLis
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {users.map((user) => (
+                            {users.map((user) => {
+                                const isSuperAdmin = user.id === SUPER_ADMIN_UID;
+                                const canModify = !isSuperAdmin || (isSuperAdmin && currentUser?.id === SUPER_ADMIN_UID);
+
+                                return (
                                 <TableRow key={user.id}>
                                     <TableCell>
                                         <div className="flex items-center gap-3">
@@ -117,11 +125,11 @@ export default function UserList({ users, onEdit, onDelete, onAddUser }: UserLis
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => onEdit(user)}>
+                                                <DropdownMenuItem onClick={() => onEdit(user)} disabled={!canModify}>
                                                     <Edit className="mr-2 h-4 w-4" />
                                                     Edit
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-destructive" onClick={() => openDeleteAlert(user)}>
+                                                <DropdownMenuItem className="text-destructive" onClick={() => openDeleteAlert(user)} disabled={isSuperAdmin}>
                                                     <Trash2 className="mr-2 h-4 w-4" />
                                                     Delete
                                                 </DropdownMenuItem>
@@ -129,7 +137,7 @@ export default function UserList({ users, onEdit, onDelete, onAddUser }: UserLis
                                         </DropdownMenu>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )})}
                         </TableBody>
                     </Table>
                 </CardContent>
