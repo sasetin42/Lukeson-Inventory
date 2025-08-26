@@ -17,13 +17,16 @@ import KpiCard from '@/components/kpi-card';
 import RolesPermissions from '@/components/users/roles-permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { navGroups } from '@/app/layout';
+import UserDetailsModal from '@/components/users/user-details-modal';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [viewingUser, setViewingUser] = useState<User | null>(null);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const { toast } = useToast();
 
@@ -48,6 +51,7 @@ export default function UsersManagementPage() {
   const handleOpenUserModal = (user: User | null) => {
     setEditingUser(user);
     setIsUserModalOpen(true);
+    setIsDetailsModalOpen(false);
   };
   
   const handleCloseUserModal = () => {
@@ -65,6 +69,16 @@ export default function UsersManagementPage() {
     setEditingRole(null);
   }
 
+  const handleOpenDetailsModal = (user: User) => {
+    setViewingUser(user);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleCloseDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setViewingUser(null);
+  };
+
   const handleSaveUser = async (userData: Omit<User, 'id' | 'createdAt' | 'lastLoginAt'> & { id?: string, password?: string }) => {
     const { id, password, ...dataToSave } = userData;
     try {
@@ -75,6 +89,7 @@ export default function UsersManagementPage() {
                 name: dataToSave.name,
                 role: dataToSave.role,
                 status: dataToSave.status,
+                modifiedAt: serverTimestamp(),
             });
             toast({ title: "Success", description: "User updated successfully.", variant: "success" });
         } else { // Adding new user
@@ -91,7 +106,8 @@ export default function UsersManagementPage() {
             const userRef = doc(db, "users", firestoreId);
             await setDoc(userRef, { 
                 ...dataToSave, 
-                createdAt: serverTimestamp(), 
+                createdAt: serverTimestamp(),
+                modifiedAt: serverTimestamp(),
                 lastLoginAt: null,
             });
             
@@ -185,6 +201,7 @@ export default function UsersManagementPage() {
             onEdit={handleOpenUserModal} 
             onDelete={handleDeleteUser}
             onAddUser={() => handleOpenUserModal(null)}
+            onView={handleOpenDetailsModal}
           />
         </TabsContent>
         <TabsContent value="roles" className="mt-4">
@@ -213,6 +230,14 @@ export default function UsersManagementPage() {
             role={editingRole}
             navGroups={navGroups}
           />
+      )}
+      {viewingUser && (
+        <UserDetailsModal
+            isOpen={isDetailsModalOpen}
+            onClose={handleCloseDetailsModal}
+            user={viewingUser}
+            onEdit={handleOpenUserModal}
+        />
       )}
     </div>
   );

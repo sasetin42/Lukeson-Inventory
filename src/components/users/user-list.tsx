@@ -6,7 +6,7 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Edit, Trash2, PlusCircle } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, PlusCircle, Eye } from "lucide-react";
 import { User } from "@/lib/types";
 import {
   DropdownMenu,
@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { useAuth } from '@/context/auth-context';
 
 interface UserListProps {
@@ -33,11 +33,12 @@ interface UserListProps {
     onEdit: (user: User) => void;
     onDelete: (userId: string) => void;
     onAddUser: () => void;
+    onView: (user: User) => void;
 }
 
 const SUPER_ADMIN_UID = "7AP0JBOpAJQMpGX7ofDyATVxfk93";
 
-export default function UserList({ users, onEdit, onDelete, onAddUser }: UserListProps) {
+export default function UserList({ users, onEdit, onDelete, onAddUser, onView }: UserListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
     const { user: currentUser } = useAuth();
@@ -59,11 +60,11 @@ export default function UserList({ users, onEdit, onDelete, onAddUser }: UserLis
         return status === 'active' ? 'default' : 'secondary';
     };
 
-    const formatLastLogin = (lastLoginAt: any) => {
-      if (!lastLoginAt) return 'Never';
-      const date = lastLoginAt.toDate ? lastLoginAt.toDate() : new Date(lastLoginAt);
-      return `${formatDistanceToNow(date)} ago`;
-    }
+    const formatDate = (date: any) => {
+        if (!date) return 'N/A';
+        const d = date.toDate ? date.toDate() : new Date(date);
+        return format(d, 'PP');
+    };
 
     return (
         <>
@@ -87,8 +88,9 @@ export default function UserList({ users, onEdit, onDelete, onAddUser }: UserLis
                                 <TableHead>Name</TableHead>
                                 <TableHead>Role</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead>Last Login</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
+                                <TableHead>Date Created</TableHead>
+                                <TableHead>Date Modified</TableHead>
+                                <TableHead className="w-[50px] text-center">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -101,7 +103,7 @@ export default function UserList({ users, onEdit, onDelete, onAddUser }: UserLis
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <Avatar className="h-9 w-9">
-                                                <AvatarImage src={`https://placehold.co/40x40.png`} alt={user.name} data-ai-hint="person avatar" />
+                                                <AvatarImage src={(user as any).avatar} alt={user.name} data-ai-hint="person avatar" />
                                                 <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div>
@@ -115,9 +117,12 @@ export default function UserList({ users, onEdit, onDelete, onAddUser }: UserLis
                                         <Badge variant={getStatusVariant(user.status)}>{user.status}</Badge>
                                     </TableCell>
                                     <TableCell>
-                                        {formatLastLogin(user.lastLoginAt)}
+                                        {formatDate(user.createdAt)}
                                     </TableCell>
                                     <TableCell>
+                                        {formatDate(user.modifiedAt)}
+                                    </TableCell>
+                                    <TableCell className="text-center">
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" size="icon">
@@ -125,11 +130,11 @@ export default function UserList({ users, onEdit, onDelete, onAddUser }: UserLis
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => onEdit(user)} disabled={!canModify}>
-                                                    <Edit className="mr-2 h-4 w-4" />
-                                                    Edit
+                                                <DropdownMenuItem onClick={() => onView(user)}>
+                                                    <Eye className="mr-2 h-4 w-4 text-blue-500" />
+                                                    View Details
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem className="text-destructive" onClick={() => openDeleteAlert(user)} disabled={isSuperAdmin}>
+                                                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteAlert(user)} disabled={isSuperAdmin}>
                                                     <Trash2 className="mr-2 h-4 w-4" />
                                                     Delete
                                                 </DropdownMenuItem>

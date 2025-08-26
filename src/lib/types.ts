@@ -38,6 +38,7 @@ export type User = {
     status: 'active' | 'inactive';
     lastLoginAt?: Date | FieldValue | string;
     createdAt: Date | FieldValue | string;
+    modifiedAt?: Date | FieldValue | string;
 };
 
 // Contacts
