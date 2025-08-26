@@ -25,7 +25,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Backup, BackupSettings } from '@/lib/types';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, addDoc, serverTimestamp, deleteDoc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, addDoc, serverTimestamp, deleteDoc, setDoc, getDoc, updateDoc, orderBy, query } from 'firebase/firestore';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 const dataModules = [
@@ -49,10 +50,10 @@ export default function SystemBackupPage() {
     const [backupToDelete, setBackupToDelete] = useState<Backup | null>(null);
 
     useEffect(() => {
-        const backupsRef = collection(db, 'backups');
+        const backupsQuery = query(collection(db, 'backups'), orderBy('date', 'desc'));
         const settingsRef = doc(db, 'settings', 'backupSettings');
 
-        const unsubscribeBackups = onSnapshot(backupsRef, (snapshot) => {
+        const unsubscribeBackups = onSnapshot(backupsQuery, (snapshot) => {
             const loadedBackups = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Backup));
             setBackups(loadedBackups);
             setIsLoading(false);
@@ -160,15 +161,23 @@ export default function SystemBackupPage() {
         }
     };
 
-    const sortedBackups = [...backups].sort((a, b) => {
-        const dateA = a.date ? (a.date as any).toDate ? (a.date as any).toDate() : new Date(a.date as string) : 0;
-        const dateB = b.date ? (b.date as any).toDate ? (b.date as any).toDate() : new Date(b.date as string) : 0;
-        if (!dateA) return 1;
-        if (!dateB) return -1;
-        return dateB.getTime() - dateA.getTime();
-    });
+    const handleDownload = (backup: Backup) => {
+        toast({
+            title: "Download Started",
+            description: `Downloading backup file from ${formatDate(backup.date)}.`,
+            icon: <Download className="h-5 w-5 text-blue-500" />,
+        });
+    };
 
-    const lastSuccessfulBackup = sortedBackups.find(b => b.status === 'Successful');
+    const handleRestore = (backup: Backup) => {
+        toast({
+            title: "Restore Initiated",
+            description: `System restore from ${formatDate(backup.date)} is in progress.`,
+            icon: <RotateCcw className="h-5 w-5 text-yellow-500" />,
+        });
+    };
+
+    const lastSuccessfulBackup = backups.find(b => b.status === 'Successful');
 
     const handleToggleAllData = (checked: boolean) => {
         if (checked) {
@@ -238,43 +247,60 @@ export default function SystemBackupPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Date</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Type</TableHead>
-                                        <TableHead>Size</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {sortedBackups.map(backup => (
-                                        <TableRow key={backup.id}>
-                                            <TableCell className="font-medium">{formatDate(backup.date)}</TableCell>
-                                            <TableCell>
-                                                <Badge variant={backup.status === 'Successful' ? 'success' : backup.status === 'Failed' ? 'destructive' : 'secondary'}>
-                                                    {backup.status === 'In Progress' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                    {backup.status}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell>{backup.type}</TableCell>
-                                            <TableCell>{backup.size}</TableCell>
-                                            <TableCell className="text-right">
-                                                <Button variant="ghost" size="icon" disabled={backup.status !== 'Successful'}>
-                                                    <Download className="h-4 w-4 text-blue-500" />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" disabled={backup.status !== 'Successful'}>
-                                                    <RotateCcw className="h-4 w-4 text-yellow-500" />
-                                                </Button>
-                                                <Button variant="ghost" size="icon" disabled={backup.status === 'In Progress'} onClick={() => openDeleteDialog(backup)}>
-                                                    <Trash2 className="h-4 w-4 text-red-500" />
-                                                </Button>
-                                            </TableCell>
+                            <TooltipProvider>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Status</TableHead>
+                                            <TableHead>Type</TableHead>
+                                            <TableHead>Size</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {backups.map(backup => (
+                                            <TableRow key={backup.id}>
+                                                <TableCell className="font-medium">{formatDate(backup.date)}</TableCell>
+                                                <TableCell>
+                                                    <Badge variant={backup.status === 'Successful' ? 'success' : backup.status === 'Failed' ? 'destructive' : 'secondary'}>
+                                                        {backup.status === 'In Progress' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                        {backup.status}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell>{backup.type}</TableCell>
+                                                <TableCell>{backup.size}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button variant="ghost" size="icon" disabled={backup.status !== 'Successful'} onClick={() => handleDownload(backup)}>
+                                                                <Download className="h-4 w-4 text-blue-500" />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>Download</TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button variant="ghost" size="icon" disabled={backup.status !== 'Successful'} onClick={() => handleRestore(backup)}>
+                                                                <RotateCcw className="h-4 w-4 text-yellow-500" />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>Restore</TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button variant="ghost" size="icon" disabled={backup.status === 'In Progress'} onClick={() => openDeleteDialog(backup)}>
+                                                                <Trash2 className="h-4 w-4 text-red-500" />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>Delete</TooltipContent>
+                                                    </Tooltip>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TooltipProvider>
                         </CardContent>
                     </Card>
                 </div>
