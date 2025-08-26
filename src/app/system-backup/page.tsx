@@ -13,6 +13,17 @@ import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from '@/components/ui/label';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
 
 type Backup = {
   id: string;
@@ -43,6 +54,9 @@ export default function SystemBackupPage() {
     const [isBackingUp, setIsBackingUp] = useState(false);
     const [backupFrequency, setBackupFrequency] = useState('daily');
     const [includedData, setIncludedData] = useState<string[]>(dataModules.map(m => m.id));
+    const [isSavingSettings, setIsSavingSettings] = useState(false);
+    const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+    const [backupToDelete, setBackupToDelete] = useState<Backup | null>(null);
 
     const handleBackupNow = () => {
         setIsBackingUp(true);
@@ -78,6 +92,28 @@ export default function SystemBackupPage() {
         }, 3000);
     };
     
+    const handleSaveSettings = () => {
+        setIsSavingSettings(true);
+        toast({ title: 'Saving...', description: 'Applying your backup preferences.', icon: <Loader2 className="h-5 w-5 animate-spin" /> });
+        setTimeout(() => {
+            setIsSavingSettings(false);
+            toast({ title: 'Settings Saved', description: 'Your backup preferences have been updated.', variant: 'success', icon: <CheckCircle className="h-5 w-5" /> });
+        }, 1500);
+    }
+    
+    const openDeleteDialog = (backup: Backup) => {
+        setBackupToDelete(backup);
+        setIsDeleteAlertOpen(true);
+    };
+
+    const handleDeleteBackup = () => {
+        if (!backupToDelete) return;
+        setBackups(prev => prev.filter(b => b.id !== backupToDelete.id));
+        toast({ title: 'Backup Deleted', description: `Backup from ${format(backupToDelete.date, 'PPp')} has been deleted.`, variant: 'destructive' });
+        setIsDeleteAlertOpen(false);
+        setBackupToDelete(null);
+    };
+
     const lastSuccessfulBackup = backups.find(b => b.status === 'Successful');
 
     const handleToggleAllData = (checked: boolean) => {
@@ -167,12 +203,12 @@ export default function SystemBackupPage() {
                                     <TableCell>{backup.size}</TableCell>
                                     <TableCell className="text-right">
                                         <Button variant="ghost" size="icon" disabled={backup.status !== 'Successful'}>
-                                            <Download className="h-4 w-4" />
+                                            <Download className="h-4 w-4 text-blue-500" />
                                         </Button>
                                         <Button variant="ghost" size="icon" disabled={backup.status !== 'Successful'}>
-                                            <RotateCcw className="h-4 w-4" />
+                                            <RotateCcw className="h-4 w-4 text-yellow-500" />
                                         </Button>
-                                         <Button variant="ghost" size="icon" disabled={backup.status === 'In Progress'}>
+                                         <Button variant="ghost" size="icon" disabled={backup.status === 'In Progress'} onClick={() => openDeleteDialog(backup)}>
                                             <Trash2 className="h-4 w-4 text-red-500" />
                                         </Button>
                                     </TableCell>
@@ -242,11 +278,29 @@ export default function SystemBackupPage() {
                     </div>
                 </CardContent>
                 <CardFooter>
-                    <Button className="w-full">Save Settings</Button>
+                    <Button className="w-full" onClick={handleSaveSettings} disabled={isSavingSettings}>
+                         {isSavingSettings && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Save Settings
+                    </Button>
                 </CardFooter>
             </Card>
         </div>
       </div>
+       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              backup file.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteBackup}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
