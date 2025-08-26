@@ -128,23 +128,21 @@ export default function SettingsPage() {
                 icon={<Settings className="h-6 w-6 text-yellow-500" />}
             />
             <Tabs defaultValue="company">
-                <TabsList>
-                    <TabsTrigger value="company"><Building2 className="mr-2 h-4 w-4" />Company Profile</TabsTrigger>
-                    <TabsTrigger value="login"><LogIn className="mr-2 h-4 w-4" />Login Screen</TabsTrigger>
-                </TabsList>
+                <div className="flex justify-between items-center mb-4">
+                    <TabsList>
+                        <TabsTrigger value="company"><Building2 className="mr-2 h-4 w-4" />Company Profile</TabsTrigger>
+                        <TabsTrigger value="login"><LogIn className="mr-2 h-4 w-4" />Login Screen</TabsTrigger>
+                    </TabsList>
+                    <Button onClick={handleSave} disabled={isSaving}>
+                        {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        {isSaving ? 'Saving...' : 'Save All Settings'}
+                    </Button>
+                </div>
                 <TabsContent value="company" className="mt-4">
                     <Card>
                         <CardHeader>
-                            <div className="flex justify-between items-center">
-                                <div>
-                                    <CardTitle>Company Details</CardTitle>
-                                    <CardDescription>This information will appear on your invoices, purchase orders, and other documents.</CardDescription>
-                                </div>
-                                <Button onClick={handleSave} disabled={isSaving}>
-                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                    {isSaving ? 'Saving...' : 'Save All Settings'}
-                                </Button>
-                            </div>
+                            <CardTitle>Company Details</CardTitle>
+                            <CardDescription>This information will appear on your invoices, purchase orders, and other documents.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                              <div className="flex items-start gap-6">
