@@ -8,6 +8,7 @@ import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
+import { Badge } from '../ui/badge';
 
 interface PurchaseOrderViewProps {
   purchaseOrder: PurchaseOrder;
@@ -56,6 +57,16 @@ export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewPr
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     };
 
+    const getStatusVariant = (status: PurchaseOrder['status']) => {
+        switch (status) {
+            case 'Received': return 'received';
+            case 'Sent': return 'sent';
+            case 'Draft': return 'draft';
+            case 'Cancelled': return 'destructive';
+            default: return 'outline';
+        }
+    };
+
     return (
         <div className="p-8 bg-white text-black">
             <div className="flex justify-between items-center">
@@ -73,6 +84,9 @@ export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewPr
                     <p className="text-sm"><strong>PO ID:</strong> {purchaseOrder.id}</p>
                     <p className="text-sm"><strong>Date:</strong> {formatDate(purchaseOrder.orderDate)}</p>
                     {showDueDate && <p className="text-sm"><strong>Expected Delivery:</strong> {formatDate(purchaseOrder.expectedDeliveryDate)}</p>}
+                    <div className="mt-2">
+                        <Badge variant={getStatusVariant(purchaseOrder.status)}>{purchaseOrder.status}</Badge>
+                    </div>
                 </div>
             </div>
 
