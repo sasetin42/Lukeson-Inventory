@@ -13,6 +13,7 @@ import { db, auth } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import KpiCard from '@/components/kpi-card';
+import RolesPermissions from '@/components/users/roles-permissions';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -126,6 +127,7 @@ export default function UsersManagementPage() {
         onDelete={handleDeleteUser}
         onAddUser={() => handleOpenModal(null)}
       />
+      <RolesPermissions />
       {isModalOpen && (
         <UserFormModal 
             isOpen={isModalOpen}
