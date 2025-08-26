@@ -27,6 +27,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { format } from 'date-fns';
 import { useAuth } from '@/context/auth-context';
+import { CrownIcon } from '../icons/crown-icon';
 
 interface UserListProps {
     users: User[];
@@ -119,7 +120,10 @@ export default function UserList({ users, onEdit, onDelete, onAddUser, onView }:
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={getRoleVariant(user.role)}>{user.role}</Badge>
+                                        <Badge variant={getRoleVariant(user.role)}>
+                                            {user.role === 'Admin' && <CrownIcon className="mr-1 h-3 w-3" />}
+                                            {user.role}
+                                        </Badge>
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant={getStatusVariant(user.status)}>{user.status}</Badge>
