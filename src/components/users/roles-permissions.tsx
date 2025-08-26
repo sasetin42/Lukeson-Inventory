@@ -1,6 +1,7 @@
 
 'use client';
 
+import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CheckCircle2, XCircle, Eye, Shield, PlusCircle, Edit, Trash2 } from 'lucide-react';
@@ -79,7 +80,7 @@ export default function RolesPermissions({ roles, onAddRole, onEditRole, onDelet
                             <TableCell colSpan={roles.length + 1} className="font-bold text-primary">{group.title}</TableCell>
                         </TableRow>
                         {group.items.map((item) => (
-                            item.links.map(link => (
+                            item.links.map((link: any) => (
                                 <TableRow key={link.label}>
                                     <TableCell className="font-medium pl-8">{link.label}</TableCell>
                                     {roles.map(role => (
@@ -104,4 +105,3 @@ export default function RolesPermissions({ roles, onAddRole, onEditRole, onDelet
 export const permissionsDataBackup = [
   { module: 'Dashboard', admin: 'Full Access', manager: 'Full Access', viewer: 'Read-only' },
 ];
-
