@@ -5,7 +5,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useRouter, usePathname } from 'next/navigation';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User as FirebaseUser } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { User } from '@/lib/types';
 
 interface AuthContextType {
@@ -42,12 +42,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         setUser({ ...userData, id: currentFirebaseUser.uid });
                         setUserRole(userData.role);
                     } else {
-                        console.warn(`No Firestore document found for user ${currentFirebaseUser.uid}`);
-                        setUser(null);
-                        setUserRole(null);
+                        // This might be a first-time login for an auth user created elsewhere.
+                        // Create a default user document.
+                        console.log(`Creating Firestore document for new user ${currentFirebaseUser.uid}`);
+                        const newUser: Omit<User, 'id'> = {
+                            name: currentFirebaseUser.displayName || 'New User',
+                            email: currentFirebaseUser.email || '',
+                            role: 'Viewer', // Default role
+                            status: 'active',
+                            createdAt: serverTimestamp(),
+                            lastLoginAt: serverTimestamp(),
+                        };
+                        await setDoc(userDocRef, newUser);
+                        setUser({ ...newUser, id: currentFirebaseUser.uid } as User);
+                        setUserRole(newUser.role);
                     }
                 } catch (error) {
-                    console.error("Error fetching user data from Firestore:", error);
+                    console.error("Error fetching or creating user data from Firestore:", error);
                     setUser(null);
                     setUserRole(null);
                 }
@@ -62,7 +73,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     useEffect(() => {
-        // This effect handles redirection after loading state changes.
         if (!isLoading) {
             if (firebaseUser && pathname === '/login') {
                 router.push('/');
@@ -73,13 +83,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [isLoading, firebaseUser, pathname, router]);
 
     const login = async (email: string, pass: string): Promise<void> => {
-        await signInWithEmailAndPassword(auth, email, pass);
+        const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+        // Update last login timestamp
+        const userDocRef = doc(db, 'users', userCredential.user.uid);
+        await setDoc(userDocRef, { lastLoginAt: serverTimestamp() }, { merge: true });
     };
 
     const logout = async () => {
         await signOut(auth);
         localStorage.removeItem('user_profile');
-        // The onAuthStateChanged listener will handle the redirect to /login
     };
 
     const value = { 

@@ -12,7 +12,7 @@ import RoleFormModal from '@/components/users/role-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db, auth } from '@/lib/firebase';
 import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot, updateDoc } from 'firebase/firestore';
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import KpiCard from '@/components/kpi-card';
 import RolesPermissions from '@/components/users/roles-permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -32,11 +32,11 @@ export default function UsersManagementPage() {
     const rolesRef = collection(db, 'roles');
     
     const unsubscribeUsers = onSnapshot(usersRef, (snapshot) => {
-        setUsers(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User)));
+        setUsers(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as User)));
     });
     
     const unsubscribeRoles = onSnapshot(rolesRef, (snapshot) => {
-        setRoles(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Role)));
+        setRoles(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Role)));
     });
 
     return () => {
@@ -92,7 +92,7 @@ export default function UsersManagementPage() {
             await setDoc(userRef, { 
                 ...dataToSave, 
                 createdAt: serverTimestamp(), 
-                lastLoginAt: serverTimestamp() 
+                lastLoginAt: null,
             });
             
             toast({ title: "Success", description: "User added successfully.", variant: "success" });
@@ -130,6 +130,12 @@ export default function UsersManagementPage() {
   };
 
   const handleDeleteRole = async (roleId: string) => {
+    // Before deleting a role, check if any user is assigned to it.
+    const isRoleInUse = users.some(user => user.role === roles.find(r => r.id === roleId)?.name);
+    if(isRoleInUse){
+        toast({ title: "Cannot Delete Role", description: "This role is currently assigned to one or more users.", variant: "destructive" });
+        return;
+    }
     try {
       await deleteDoc(doc(db, 'roles', roleId));
       toast({ title: "Success", description: "Role deleted successfully.", variant: "success" });
