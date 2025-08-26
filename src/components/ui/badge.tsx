@@ -18,7 +18,7 @@ const badgeVariants = cva(
         outline: "text-foreground",
         success: "border-transparent bg-[#0974C6] text-white",
         draft: "border-transparent bg-[#2C2C2C] text-white",
-        confirmed: "border-transparent bg-[#673DE6] text-white",
+        confirmed: "border-transparent bg-[#5F8400] text-white",
         inProgress: "border-transparent bg-[#F7593B] text-[#FFFFFF]",
         fulfilled: "border-transparent bg-[#F2CC8F] text-black",
         completed: "border-transparent bg-[#165C75] text-[#FFFFFF]",
