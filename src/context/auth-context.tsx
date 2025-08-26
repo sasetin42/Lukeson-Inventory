@@ -30,6 +30,7 @@ interface AuthContextType {
   isLoading: boolean;
   userRole: User['role'] | null;
   rolePermissions: { [key: string]: PermissionLevel } | null;
+  hasWriteAccess: (module: string) => boolean;
   updateUserProfile: (name: string, avatarFile: File | null) => Promise<void>;
 }
 
@@ -177,6 +178,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser({ ...user, name, avatar: newAvatarUrl });
         }
     };
+    
+    const hasWriteAccess = (module: string): boolean => {
+        if (!rolePermissions) return false;
+        return rolePermissions[module] === 'Full Access';
+    };
 
     const value = { 
         isAuthenticated: !isLoading && !!firebaseUser, 
@@ -189,6 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         userRole,
         rolePermissions,
+        hasWriteAccess,
         updateUserProfile,
     };
 

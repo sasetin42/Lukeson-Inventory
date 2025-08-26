@@ -34,6 +34,7 @@ import { format } from 'date-fns';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { Progress } from '../ui/progress';
+import { useAuth } from '@/context/auth-context';
 
 interface ProductListProps {
     products: Product[];
@@ -58,6 +59,8 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
     const [categoryFilter, setCategoryFilter] = useState('all');
     const { toast } = useToast();
     const [mounted, setMounted] = useState(false);
+    const { hasWriteAccess } = useAuth();
+    const canWrite = hasWriteAccess('Products');
 
     useEffect(() => {
         setMounted(true);
@@ -183,11 +186,11 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                         <CardDescription>Your current inventory of products.</CardDescription>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
-                        <Button variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-50 hover:text-purple-700" onClick={onAddCategory}>
+                        <Button variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-50 hover:text-purple-700" onClick={onAddCategory} disabled={!canWrite}>
                             <LayoutGrid className="mr-2 h-4 w-4" />
                             Add Category
                         </Button>
-                        <Button onClick={() => onEdit(null)}>
+                        <Button onClick={() => onEdit(null)} disabled={!canWrite}>
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Add Product
                         </Button>
@@ -268,7 +271,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                                         View Details
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteAlert(product)}>
+                                    <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDeleteAlert(product)} disabled={!canWrite}>
                                         <Trash2 className="mr-2 h-4 w-4 text-red-500" />
                                         Delete
                                     </DropdownMenuItem>

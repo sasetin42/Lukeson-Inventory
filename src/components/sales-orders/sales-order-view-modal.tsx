@@ -16,6 +16,7 @@ import { Printer, PlusCircle, Edit } from 'lucide-react';
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useAuth } from '@/context/auth-context';
 
 interface SalesOrderViewModalProps {
   salesOrder: SalesOrder | null;
@@ -36,6 +37,9 @@ export default function SalesOrderViewModal({
 }: SalesOrderViewModalProps) {
   const printableRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const { hasWriteAccess } = useAuth();
+  const canWriteSales = hasWriteAccess('Sales Orders');
+  const canWriteJobs = hasWriteAccess('Job Order');
 
   if (!salesOrder) return null;
 
@@ -92,13 +96,15 @@ export default function SalesOrderViewModal({
   };
   
   const hasJobOrder = jobOrders.some(jo => jo.salesOrderId === salesOrder.id);
-  const isButtonDisabled = salesOrder.status !== 'Confirmed' || hasJobOrder;
+  const isButtonDisabled = salesOrder.status !== 'Confirmed' || hasJobOrder || !canWriteJobs;
   
   let tooltipMessage = '';
   if (salesOrder.status !== 'Confirmed') {
     tooltipMessage = 'Job Order can only be created from a "Confirmed" Sales Order.';
   } else if (hasJobOrder) {
     tooltipMessage = 'A Job Order for this Sales Order already exists.';
+  } else if (!canWriteJobs) {
+    tooltipMessage = "You don't have permission to create Job Orders.";
   }
 
   const quotation = quotations.find(q => q.id === salesOrder?.quotationId);
@@ -146,6 +152,7 @@ export default function SalesOrderViewModal({
               variant="outline"
               onClick={handleEditClick}
               className="bg-[#2C2C2C] text-white hover:bg-[#151515] hover:text-white"
+               disabled={!canWriteSales}
             >
                 <Edit className="mr-2 h-4 w-4" />
                 Edit

@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { navGroups } from '@/app/layout';
 import UserDetailsModal from '@/components/users/user-details-modal';
 import RoleDetailsModal from '@/components/users/role-details-modal';
+import { useAuth } from '@/context/auth-context';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -32,6 +33,8 @@ export default function UsersManagementPage() {
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [viewingRole, setViewingRole] = useState<Role | null>(null);
   const { toast } = useToast();
+  const { hasWriteAccess } = useAuth();
+  const canWrite = hasWriteAccess('Users & Roles');
 
   useEffect(() => {
     const usersRef = collection(db, 'users');

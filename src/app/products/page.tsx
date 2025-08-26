@@ -14,6 +14,7 @@ import CategoryFormModal from '@/components/category/category-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { useAuth } from '@/context/auth-context';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -24,6 +25,8 @@ export default function ProductsPage() {
     const [editingCategory, setEditingCategory] = useState<ItemCategory | null>(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const { toast } = useToast();
+    const { hasWriteAccess } = useAuth();
+    const canWrite = hasWriteAccess('Products');
     
     useEffect(() => {
         setLoading(true);

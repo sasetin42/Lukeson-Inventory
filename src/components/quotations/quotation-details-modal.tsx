@@ -26,6 +26,7 @@ import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useAuth } from '@/context/auth-context';
 
 
 interface QuotationDetailsModalProps {
@@ -44,6 +45,8 @@ export default function QuotationDetailsModal({
   onEdit,
 }: QuotationDetailsModalProps) {
   const router = useRouter();
+  const { hasWriteAccess } = useAuth();
+  const canWrite = hasWriteAccess('Quotations');
 
   if (!quotation) return null;
 
@@ -173,7 +176,7 @@ export default function QuotationDetailsModal({
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <div tabIndex={isCreateSODisabled ? 0 : -1}>
-                                <Button onClick={handleCreateSalesOrder} disabled={isCreateSODisabled} style={isCreateSODisabled ? { pointerEvents: 'none' } : {}}>
+                                <Button onClick={handleCreateSalesOrder} disabled={isCreateSODisabled || !canWrite} style={isCreateSODisabled || !canWrite ? { pointerEvents: 'none' } : {}}>
                                     <ShoppingCart className="h-4 w-4 mr-2" />
                                     Create Sales Order
                                 </Button>
@@ -188,7 +191,7 @@ export default function QuotationDetailsModal({
                 </TooltipProvider>
             </div>
             <div className="flex gap-2">
-                <Button variant="outline" onClick={handleEditClick} className="bg-[#2C2C2C] text-white hover:bg-[#151515] hover:text-white">
+                <Button variant="outline" onClick={handleEditClick} className="bg-[#2C2C2C] text-white hover:bg-[#151515] hover:text-white" disabled={!canWrite}>
                     <Edit className="h-4 w-4 mr-2" />
                     Edit Quotation
                 </Button>

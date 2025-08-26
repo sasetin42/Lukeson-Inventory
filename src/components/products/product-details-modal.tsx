@@ -55,6 +55,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import ProductImage from './product-image';
 import { format } from 'date-fns';
+import { useAuth } from '@/context/auth-context';
 
 interface ProductDetailsModalProps {
   product: Product | null;
@@ -75,6 +76,8 @@ export default function ProductDetailsModal({
 }: ProductDetailsModalProps) {
   const { toast } = useToast();
   const [isDeactivateAlertOpen, setDeactivateAlertOpen] = useState(false);
+  const { hasWriteAccess } = useAuth();
+  const canWrite = hasWriteAccess('Products');
 
   if (!product) return null;
 
@@ -273,15 +276,16 @@ export default function ProductDetailsModal({
               variant="outline"
               onClick={() => { onEdit(product); onClose(); }}
               className="bg-[#2C2C2C] text-white hover:bg-[#151515] hover:text-white"
+               disabled={!canWrite}
             >
               <Edit className="h-4 w-4 mr-2" />
               Edit
             </Button>
-            <Button variant="outline" onClick={() => setDeactivateAlertOpen(true)}>
+            <Button variant="outline" onClick={() => setDeactivateAlertOpen(true)} disabled={!canWrite}>
               <Power className={`h-4 w-4 mr-2 ${isActive ? 'text-orange-500' : 'text-green-500'}`} />
               {isActive ? 'Deactivate' : 'Activate'}
             </Button>
-            <Button variant="destructive" onClick={handleDeleteClick}>
+            <Button variant="destructive" onClick={handleDeleteClick} disabled={!canWrite}>
               <Trash2 className="h-4 w-4 mr-2" />
               Delete
             </Button>

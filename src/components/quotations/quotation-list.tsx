@@ -23,6 +23,7 @@ import Link from 'next/link';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useAuth } from '@/context/auth-context';
 
 interface QuotationListProps {
     quotations: Quotation[];
@@ -61,6 +62,8 @@ export default function QuotationList({
     const [quotationToDelete, setQuotationToDelete] = useState<Quotation | null>(null);
     const [isApproveAlertOpen, setIsApproveAlertOpen] = useState(false);
     const [quotationToApprove, setQuotationToApprove] = useState<Quotation | null>(null);
+    const { hasWriteAccess } = useAuth();
+    const canWrite = hasWriteAccess('Quotations');
 
     const openDeleteAlert = (quotation: Quotation) => {
         setQuotationToDelete(quotation);
@@ -142,7 +145,7 @@ export default function QuotationList({
                             <CardTitle>Quotations</CardTitle>
                             <CardDescription>A list of all your quotations.</CardDescription>
                         </div>
-                        <Button onClick={onCreate}>
+                        <Button onClick={onCreate} disabled={!canWrite}>
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Create Quotation
                         </Button>
@@ -222,7 +225,7 @@ export default function QuotationList({
                                         </Tooltip>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button variant="ghost" size="icon" onClick={() => openApproveAlert(quotation)} disabled={quotation.status === 'Accepted'}>
+                                                <Button variant="ghost" size="icon" onClick={() => openApproveAlert(quotation)} disabled={quotation.status === 'Accepted' || !canWrite}>
                                                     <CheckCircle className="h-4 w-4 text-green-500" />
                                                 </Button>
                                             </TooltipTrigger>
@@ -230,7 +233,7 @@ export default function QuotationList({
                                         </Tooltip>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => openDeleteAlert(quotation)}>
+                                                <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => openDeleteAlert(quotation)} disabled={!canWrite}>
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
                                             </TooltipTrigger>

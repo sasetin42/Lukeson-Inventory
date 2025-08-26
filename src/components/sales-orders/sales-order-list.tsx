@@ -23,6 +23,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useAuth } from '@/context/auth-context';
 
 interface SalesOrderListProps {
     salesOrders: SalesOrder[];
@@ -56,6 +57,8 @@ export default function SalesOrderList({
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [salesOrderToDelete, setSalesOrderToDelete] = useState<SalesOrder | null>(null);
     const { toast } = useToast();
+    const { hasWriteAccess } = useAuth();
+    const canWrite = hasWriteAccess('Sales Orders');
 
     const openDeleteAlert = (salesOrder: SalesOrder) => {
         setSalesOrderToDelete(salesOrder);
@@ -131,7 +134,7 @@ export default function SalesOrderList({
                             <CardTitle>Sales Orders</CardTitle>
                             <CardDescription>A list of all your sales orders. (e.g. SO-2025-001)</CardDescription>
                         </div>
-                        <Button onClick={onCreate}>
+                        <Button onClick={onCreate} disabled={!canWrite}>
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Create Sales Order
                         </Button>
@@ -228,7 +231,7 @@ export default function SalesOrderList({
                                                 </Tooltip>
                                                 <Tooltip>
                                                      <TooltipTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => openDeleteAlert(salesOrder)}>
+                                                        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => openDeleteAlert(salesOrder)} disabled={!canWrite}>
                                                             <Trash2 className="h-4 w-4" />
                                                         </Button>
                                                     </TooltipTrigger>
