@@ -108,7 +108,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory 
                                   (product.sku && product.sku.toLowerCase().includes(searchQuery.toLowerCase()));
             const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
             return matchesSearch && matchesCategory;
-        });
+        }).sort((a, b) => (a.productCode || '').localeCompare(b.productCode || ''));
     }, [products, searchQuery, categoryFilter]);
 
     const getStockStatus = (stock: number, reOrderLevel: number) => {
