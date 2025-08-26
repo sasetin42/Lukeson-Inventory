@@ -50,11 +50,10 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, on
     
     const getStatusVariant = (status: PurchaseOrder['status']) => {
         switch (status) {
-            case 'Received': return 'default';
-            case 'Sent':
-            case 'Confirmed':
-                return 'secondary';
-            case 'Draft': return 'outline';
+            case 'Received': return 'received';
+            case 'Sent': return 'sent';
+            case 'Confirmed': return 'confirmed';
+            case 'Draft': return 'draft';
             case 'Cancelled': return 'destructive';
             default: return 'outline';
         }
