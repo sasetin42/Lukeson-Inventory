@@ -162,7 +162,15 @@ function AppContent({ children }: { children: React.ReactNode }) {
     if (!rolePermissions) return false;
     const permission = rolePermissions[module];
     return permission === 'Full Access' || permission === 'Read-only';
-  }
+  };
+
+  const filteredNavGroups = navGroups.map(group => ({
+      ...group,
+      items: group.items.map(item => ({
+          ...item,
+          links: item.links.filter(link => hasAccess(link.label))
+      })).filter(item => item.links.length > 0)
+  })).filter(group => group.items.length > 0);
 
   return (
       <SidebarProvider>
@@ -188,11 +196,11 @@ function AppContent({ children }: { children: React.ReactNode }) {
                 value={openAccordion} 
                 onValueChange={handleAccordionChange}
               >
-                {navGroups.filter(group => group.items.some(item => item.links.some(link => hasAccess(link.label)))).map((group, groupIndex) => (
+                {filteredNavGroups.map((group, groupIndex) => (
                   <div key={group.title}>
                     {groupIndex > 0 && <SidebarSeparator className="my-2" />}
                     <h3 className={`text-sm font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
-                    {group.items.filter(item => item.links.some(link => hasAccess(link.label))).map((item) => (
+                    {group.items.map((item) => (
                         <AccordionItem value={item.title} key={item.title}>
                           <AccordionTrigger>
                             <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
@@ -201,7 +209,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
                           </AccordionTrigger>
                           <AccordionContent>
                             <SidebarMenu className="ml-4 border-l border-gray-200 dark:border-gray-700 py-1">
-                              {item.links.filter(link => hasAccess(link.label)).map((link) => (
+                              {item.links.map((link) => (
                                 <SidebarMenuItem key={link.label}>
                                   <SidebarMenuButton asChild>
                                     <Link href={link.href}>

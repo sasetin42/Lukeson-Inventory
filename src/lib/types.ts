@@ -1,5 +1,6 @@
 
 
+
 import type { LucideIcon } from "lucide-react";
 import { FieldValue } from "firebase/firestore";
 
@@ -362,5 +363,36 @@ export type Backup = {
 export type BackupSettings = {
     frequency: string;
     includedData: string[];
+    modifiedAt?: Date | FieldValue | string;
+};
+
+// Accounting
+export type AccountType = 'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Expense';
+export type AccountSubType = 'Current Asset' | 'Fixed Asset' | 'Inventory' | 'Bank' | 'Current Liability' | 'Long-term Liability' | 'Owner\'s Equity' | 'Retained Earnings' | 'Sales' | 'Other Income' | 'Cost of Goods Sold' | 'Operating Expense';
+
+export type Account = {
+    id: string;
+    name: string;
+    code: string;
+    type: AccountType;
+    subType: AccountSubType;
+    balance: number;
+    createdAt?: Date | FieldValue | string;
+    modifiedAt?: Date | FieldValue | string;
+};
+
+export type JournalEntryLine = {
+    accountId: string;
+    debit: number;
+    credit: number;
+    description?: string;
+};
+
+export type JournalEntry = {
+    id: string;
+    date: Date | FieldValue | string;
+    description: string;
+    lines: JournalEntryLine[];
+    createdAt?: Date | FieldValue | string;
     modifiedAt?: Date | FieldValue | string;
 };
