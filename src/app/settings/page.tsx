@@ -126,12 +126,6 @@ export default function SettingsPage() {
                 title="General Settings"
                 description="Manage system-wide settings including company profile and appearance."
                 icon={<Settings className="h-6 w-6 text-yellow-500" />}
-                actions={
-                     <Button onClick={handleSave} disabled={isSaving}>
-                        {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                        {isSaving ? 'Saving...' : 'Save All Settings'}
-                    </Button>
-                }
             />
             <Tabs defaultValue="company">
                 <TabsList>
@@ -141,8 +135,16 @@ export default function SettingsPage() {
                 <TabsContent value="company" className="mt-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Company Details</CardTitle>
-                            <CardDescription>This information will appear on your invoices, purchase orders, and other documents.</CardDescription>
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <CardTitle>Company Details</CardTitle>
+                                    <CardDescription>This information will appear on your invoices, purchase orders, and other documents.</CardDescription>
+                                </div>
+                                <Button onClick={handleSave} disabled={isSaving}>
+                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                    {isSaving ? 'Saving...' : 'Save All Settings'}
+                                </Button>
+                            </div>
                         </CardHeader>
                         <CardContent className="space-y-6">
                              <div className="flex items-start gap-6">
