@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { useAuth } from '@/context/auth-context';
+import Image from 'next/image';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -93,24 +94,28 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
                     <DialogDescription>Update your personal information.</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
-                    <div className="flex items-center gap-4">
-                        <Avatar className="h-20 w-20">
-                            <AvatarImage src={avatarPreview || undefined} alt={name} data-ai-hint="user avatar" />
-                            <AvatarFallback className="text-3xl">{name?.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="grid w-full max-w-sm items-center gap-1.5">
-                            <Label htmlFor="picture">Profile Picture</Label>
-                            <div className="flex items-center gap-2">
-                                <Input id="picture" type="file" ref={fileInputRef} onChange={handleAvatarChange} accept="image/png, image/jpeg" className="flex-1" />
-                                {avatarFile && (
-                                    <Button variant="ghost" size="icon" onClick={removeImage}>
-                                        <X className="h-4 w-4 text-muted-foreground" />
-                                    </Button>
-                                )}
-                            </div>
-                            <p className="text-xs text-muted-foreground">PNG or JPG. Max size 2MB.</p>
+                     <div className="flex items-center gap-6">
+                        <div className="space-y-2">
+                             <Label>Profile Picture</Label>
+                            <Avatar className="h-24 w-24">
+                                <AvatarImage src={avatarPreview || undefined} alt={name} data-ai-hint="user avatar" />
+                                <AvatarFallback className="text-3xl">{name?.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                        </div>
+                        <div className="flex-1">
+                            <div className="flex items-center justify-center w-full">
+                                <label htmlFor="dropzone-file-avatar" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <Upload className="w-8 h-8 mb-4 text-primary" />
+                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                        <p className="text-xs text-muted-foreground">PNG or JPG (MAX. 2MB)</p>
+                                    </div>
+                                    <Input id="dropzone-file-avatar" type="file" className="hidden" onChange={handleAvatarChange} accept="image/*"/>
+                                </label>
+                            </div> 
                         </div>
                     </div>
+
 
                     <div className="space-y-2">
                         <Label htmlFor="name" className="flex items-center gap-2"><User className="h-4 w-4 text-blue-500" />Name</Label>
