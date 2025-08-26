@@ -18,16 +18,19 @@ import RolesPermissions from '@/components/users/roles-permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { navGroups } from '@/app/layout';
 import UserDetailsModal from '@/components/users/user-details-modal';
+import RoleDetailsModal from '@/components/users/role-details-modal';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isUserDetailsModalOpen, setIsUserDetailsModalOpen] = useState(false);
+  const [isRoleDetailsModalOpen, setIsRoleDetailsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [viewingUser, setViewingUser] = useState<User | null>(null);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
+  const [viewingRole, setViewingRole] = useState<Role | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -51,7 +54,7 @@ export default function UsersManagementPage() {
   const handleOpenUserModal = (user: User | null) => {
     setEditingUser(user);
     setIsUserModalOpen(true);
-    setIsDetailsModalOpen(false);
+    setIsUserDetailsModalOpen(false);
   };
   
   const handleCloseUserModal = () => {
@@ -69,15 +72,25 @@ export default function UsersManagementPage() {
     setEditingRole(null);
   }
 
-  const handleOpenDetailsModal = (user: User) => {
+  const handleOpenUserDetailsModal = (user: User) => {
     setViewingUser(user);
-    setIsDetailsModalOpen(true);
+    setIsUserDetailsModalOpen(true);
   };
 
-  const handleCloseDetailsModal = () => {
-    setIsDetailsModalOpen(false);
+  const handleCloseUserDetailsModal = () => {
+    setIsUserDetailsModalOpen(false);
     setViewingUser(null);
   };
+
+  const handleOpenRoleDetailsModal = (role: Role) => {
+    setViewingRole(role);
+    setIsRoleDetailsModalOpen(true);
+  }
+
+  const handleCloseRoleDetailsModal = () => {
+    setIsRoleDetailsModalOpen(false);
+    setViewingRole(null);
+  }
 
   const handleSaveUser = async (userData: Omit<User, 'id' | 'createdAt' | 'lastLoginAt'> & { id?: string, password?: string }) => {
     const { id, password, ...dataToSave } = userData;
@@ -201,7 +214,7 @@ export default function UsersManagementPage() {
             onEdit={handleOpenUserModal} 
             onDelete={handleDeleteUser}
             onAddUser={() => handleOpenUserModal(null)}
-            onView={handleOpenDetailsModal}
+            onView={handleOpenUserDetailsModal}
           />
         </TabsContent>
         <TabsContent value="roles" className="mt-4">
@@ -210,6 +223,7 @@ export default function UsersManagementPage() {
             onAddRole={() => handleOpenRoleModal(null)}
             onEditRole={handleOpenRoleModal}
             onDeleteRole={handleDeleteRole}
+            onViewRole={handleOpenRoleDetailsModal}
           />
         </TabsContent>
       </Tabs>
@@ -233,10 +247,17 @@ export default function UsersManagementPage() {
       )}
       {viewingUser && (
         <UserDetailsModal
-            isOpen={isDetailsModalOpen}
-            onClose={handleCloseDetailsModal}
+            isOpen={isUserDetailsModalOpen}
+            onClose={handleCloseUserDetailsModal}
             user={viewingUser}
             onEdit={handleOpenUserModal}
+        />
+      )}
+      {viewingRole && (
+        <RoleDetailsModal
+          isOpen={isRoleDetailsModalOpen}
+          onClose={handleCloseRoleDetailsModal}
+          role={viewingRole}
         />
       )}
     </div>

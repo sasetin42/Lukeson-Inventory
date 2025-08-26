@@ -2,41 +2,30 @@
 'use client';
 
 import * as React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle2, XCircle, Eye, Shield, PlusCircle, Edit, Trash2 } from 'lucide-react';
-import { Badge } from "../ui/badge";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { CheckCircle2, XCircle, Eye, Shield, PlusCircle, Edit, Trash2, Users } from 'lucide-react';
 import { Button } from "../ui/button";
 import { Role } from "@/lib/types";
-import { navGroups } from "@/app/layout";
-
-export const permissionsData = navGroups.flatMap(group => 
-    group.items.flatMap(item => 
-        item.links.map(link => ({ module: link.label }))
-    )
-);
-
-const PermissionIcon = ({ permission }: { permission?: string }) => {
-    if (permission === 'Full Access') {
-        return <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto" />;
-    }
-    if (permission === 'Read-only') {
-        return <Eye className="h-5 w-5 text-blue-500 mx-auto" />;
-    }
-    if (permission === 'No Access' || !permission) {
-        return <XCircle className="h-5 w-5 text-red-500 mx-auto" />;
-    }
-    return null;
-};
+import { cn } from '@/lib/utils';
 
 interface RolesPermissionsProps {
     roles: Role[];
     onAddRole: () => void;
     onEditRole: (role: Role) => void;
     onDeleteRole: (roleId: string) => void;
+    onViewRole: (role: Role) => void;
 }
 
-export default function RolesPermissions({ roles, onAddRole, onEditRole, onDeleteRole }: RolesPermissionsProps) {
+export default function RolesPermissions({ roles, onAddRole, onEditRole, onDeleteRole, onViewRole }: RolesPermissionsProps) {
+  
+  const countUsersInRole = (roleName: string) => {
+    // This is a placeholder. In a real app, you'd fetch user counts.
+    if (roleName === 'Admin') return 1;
+    if (roleName === 'Manager') return 3;
+    if (roleName === 'Viewer') return 5;
+    return 0;
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -44,9 +33,9 @@ export default function RolesPermissions({ roles, onAddRole, onEditRole, onDelet
             <div className="flex items-center gap-2">
                 <Shield className="h-6 w-6 text-purple-500" />
                 <div>
-                    <CardTitle>Roles & Permissions Matrix</CardTitle>
+                    <CardTitle>Roles & Permissions</CardTitle>
                     <CardDescription>
-                    An overview of what each user role can access and do in the system.
+                    Manage what each user role can access and do in the system.
                     </CardDescription>
                 </div>
             </div>
@@ -57,44 +46,45 @@ export default function RolesPermissions({ roles, onAddRole, onEditRole, onDelet
         </div>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto">
-            <Table>
-            <TableHeader>
-                <TableRow>
-                <TableHead className="w-1/4">Module</TableHead>
-                {roles.map(role => (
-                    <TableHead key={role.id} className="text-center w-1/4">
-                        <div className="flex items-center justify-center gap-2">
-                            <Badge variant="secondary">{role.name}</Badge>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onEditRole(role)}><Edit className="h-3 w-3" /></Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onDeleteRole(role.id)}><Trash2 className="h-3 w-3 text-red-500" /></Button>
-                        </div>
-                    </TableHead>
-                ))}
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {navGroups.map((group) => (
-                    <React.Fragment key={group.title}>
-                        <TableRow className="bg-muted/50">
-                            <TableCell colSpan={roles.length + 1} className="font-bold text-primary">{group.title}</TableCell>
-                        </TableRow>
-                        {group.items.map((item) => (
-                            item.links.map((link: any) => (
-                                <TableRow key={link.label}>
-                                    <TableCell className="font-medium pl-8">{link.label}</TableCell>
-                                    {roles.map(role => (
-                                    <TableCell key={`${role.id}-${link.label}`} className="text-center">
-                                        <PermissionIcon permission={role.permissions[link.label]} />
-                                    </TableCell> 
-                                    ))}
-                                </TableRow>
-                            ))
-                        ))}
-                    </React.Fragment>
-                ))}
-            </TableBody>
-            </Table>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {roles.map(role => {
+                const isAdmin = role.name === 'Admin';
+                const userCount = countUsersInRole(role.name);
+                return (
+                    <Card 
+                        key={role.id} 
+                        className={cn(
+                            "flex flex-col hover:shadow-lg transition-shadow cursor-pointer",
+                            isAdmin && "text-white"
+                        )}
+                        style={isAdmin ? { backgroundColor: '#5F8400' } : {}}
+                        onClick={() => onViewRole(role)}
+                    >
+                        <CardHeader>
+                            <CardTitle className="flex items-center justify-between">
+                                <span>{role.name}</span>
+                                <div className="flex items-center gap-2">
+                                     <Button variant="ghost" size="icon" className={cn("h-7 w-7", isAdmin && "hover:bg-white/20")} onClick={(e) => { e.stopPropagation(); onEditRole(role); }}>
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className={cn("h-7 w-7", isAdmin && "hover:bg-white/20")} onClick={(e) => { e.stopPropagation(); onDeleteRole(role.id); }}>
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </CardTitle>
+                            <CardDescription className={cn(isAdmin && "text-white/80")}>
+                                A short description about the {role.name} role.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardFooter className="mt-auto">
+                            <div className="flex items-center gap-2 text-sm">
+                                <Users className="h-4 w-4" />
+                                <span>{userCount} {userCount === 1 ? 'user' : 'users'} in this role</span>
+                            </div>
+                        </CardFooter>
+                    </Card>
+                )
+            })}
         </div>
       </CardContent>
     </Card>
