@@ -187,7 +187,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
                 value={openAccordion} 
                 onValueChange={handleAccordionChange}
               >
-                {navGroups.map((group, groupIndex) => (
+                {navGroups.filter(group => group.items.some(item => item.links.some(link => hasAccess(link.label)))).map((group, groupIndex) => (
                   <div key={group.title}>
                     {groupIndex > 0 && <SidebarSeparator className="my-2" />}
                     <h3 className={`text-sm font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
