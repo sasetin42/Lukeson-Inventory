@@ -6,12 +6,12 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign, ShoppingBag, AlertCircle } from "lucide-react";
 import PurchaseOrderList from "@/components/purchase-orders/purchase-order-list";
-import { PurchaseOrder } from '@/lib/types';
+import { PurchaseOrder, Product } from '@/lib/types';
 import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-form-modal';
 import PurchaseOrderViewModal from '@/components/purchase-orders/purchase-order-view-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, query, orderBy, onSnapshot, updateDoc } from 'firebase/firestore';
+import { collection, getDoc, doc, setDoc, deleteDoc, addDoc, serverTimestamp, query, orderBy, onSnapshot, updateDoc, runTransaction } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PurchaseOrderTemplate from '@/components/purchase-orders/purchase-order-template';
@@ -87,19 +87,47 @@ export default function PurchaseOrdersPage() {
   const handleStatusUpdate = async (purchaseOrderId: string, newStatus: PurchaseOrder['status']) => {
     const poRef = doc(db, 'purchaseOrders', purchaseOrderId);
     try {
-      await updateDoc(poRef, { status: newStatus, modifiedAt: serverTimestamp() });
-      toast({
-        title: "Status Updated",
-        description: `Purchase order ${purchaseOrderId} has been updated to "${newStatus}".`,
-        variant: "success"
-      });
+        if (newStatus === 'Received') {
+            await runTransaction(db, async (transaction) => {
+                const poDoc = await transaction.get(poRef);
+                if (!poDoc.exists()) {
+                    throw "Purchase Order not found!";
+                }
+
+                const purchaseOrder = poDoc.data() as PurchaseOrder;
+
+                for (const line of purchaseOrder.lines) {
+                    const productRef = doc(db, 'products', line.itemId);
+                    const productDoc = await transaction.get(productRef);
+                    if (productDoc.exists()) {
+                        const product = productDoc.data() as Product;
+                        const newStock = product.stock + line.quantity;
+                        transaction.update(productRef, { stock: newStock });
+                    }
+                }
+
+                transaction.update(poRef, { status: newStatus, modifiedAt: serverTimestamp() });
+            });
+            toast({
+                title: "Status Updated & Stock Increased",
+                description: `PO ${purchaseOrderId} marked as "Received" and product stock levels have been updated.`,
+                variant: "success"
+            });
+        } else {
+            await updateDoc(poRef, { status: newStatus, modifiedAt: serverTimestamp() });
+            toast({
+                title: "Status Updated",
+                description: `Purchase order ${purchaseOrderId} has been updated to "${newStatus}".`,
+                variant: "success"
+            });
+        }
     } catch (error) {
-      console.error("Error updating PO status:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update purchase order status.",
-        variant: "destructive"
-      });
+        console.error("Error updating PO status:", error);
+        toast({
+            title: "Error",
+            description: "Failed to update purchase order status.",
+            variant: "destructive"
+        });
     }
   };
 
