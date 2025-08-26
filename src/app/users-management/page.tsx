@@ -11,7 +11,7 @@ import UserFormModal from '@/components/users/user-form-modal';
 import RoleFormModal from '@/components/users/role-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db, auth } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, onSnapshot, updateDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import KpiCard from '@/components/kpi-card';
 import RolesPermissions from '@/components/users/roles-permissions';
@@ -70,18 +70,30 @@ export default function UsersManagementPage() {
     try {
         if (id) { // Editing existing user
             const userRef = doc(db, "users", id);
-            await setDoc(userRef, { ...dataToSave, lastLoginAt: serverTimestamp() }, { merge: true });
+            // We only update fields that can be changed in the modal
+            await updateDoc(userRef, {
+                name: dataToSave.name,
+                role: dataToSave.role,
+                status: dataToSave.status,
+            });
             toast({ title: "Success", description: "User updated successfully.", variant: "success" });
         } else { // Adding new user
             if (!password) {
                 toast({ title: "Error", description: "Password is required for new users.", variant: "destructive" });
                 return;
             }
+            // Note: This only creates the user in Firebase Auth.
+            // A corresponding Firestore document needs to be created, ideally with a Cloud Function trigger.
+            // For this client-side solution, we'll create it directly.
             const userCredential = await createUserWithEmailAndPassword(auth, userData.email, password);
             const firestoreId = userCredential.user.uid;
             
             const userRef = doc(db, "users", firestoreId);
-            await setDoc(userRef, { ...dataToSave, createdAt: serverTimestamp(), lastLoginAt: serverTimestamp() });
+            await setDoc(userRef, { 
+                ...dataToSave, 
+                createdAt: serverTimestamp(), 
+                lastLoginAt: serverTimestamp() 
+            });
             
             toast({ title: "Success", description: "User added successfully.", variant: "success" });
         }
@@ -94,10 +106,12 @@ export default function UsersManagementPage() {
 
   const handleDeleteUser = async (userId: string) => {
     try {
+      // Note: This deletes the Firestore document, but not the Firebase Auth user.
+      // Deleting the Auth user requires admin privileges and is best handled server-side.
       await deleteDoc(doc(db, "users", userId));
-      toast({ title: "Success", description: "User deleted successfully.", variant: "success" });
+      toast({ title: "Success", description: "User record deleted successfully.", variant: "success" });
     } catch (error) {
-       toast({ title: "Error", description: "Failed to delete user.", variant: "destructive" });
+       toast({ title: "Error", description: "Failed to delete user record.", variant: "destructive" });
     }
   };
 

@@ -30,6 +30,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentFirebaseUser) => {
+            setIsLoading(true);
             setFirebaseUser(currentFirebaseUser);
 
             if (currentFirebaseUser) {
@@ -40,15 +41,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         const userData = userDocSnap.data() as User;
                         setUser({ ...userData, id: currentFirebaseUser.uid });
                         setUserRole(userData.role);
+                         if (pathname === '/login') {
+                            router.push('/');
+                        }
                     } else {
                         // Handle case where user exists in Auth but not Firestore
+                        console.warn(`No Firestore document found for user ${currentFirebaseUser.uid}`);
                         setUser(null);
                         setUserRole(null);
+                        if (pathname !== '/login') {
+                            router.push('/login');
+                        }
                     }
                 } catch (error) {
                     console.error("Error fetching user data from Firestore:", error);
                     setUser(null);
                     setUserRole(null);
+                    if (pathname !== '/login') {
+                        router.push('/login');
+                    }
                 }
             } else {
                 setUser(null);
