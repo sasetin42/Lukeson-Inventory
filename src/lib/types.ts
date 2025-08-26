@@ -39,6 +39,7 @@ export type User = {
     lastLoginAt?: Date | FieldValue | string;
     createdAt: Date | FieldValue | string;
     modifiedAt?: Date | FieldValue | string;
+    avatar?: string;
 };
 
 // Contacts

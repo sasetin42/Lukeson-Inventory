@@ -7,7 +7,7 @@ import { auth, db, storage } from '@/lib/firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { User } from '@/lib/types';
-import { ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { ref, uploadString, getDownloadURL, uploadBytes } from 'firebase/storage';
 
 interface UserProfile {
     name: string;
@@ -118,16 +118,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!firebaseUser) throw new Error("No user is logged in.");
 
         const userDocRef = doc(db, "users", firebaseUser.uid);
-        
-        // Only updating the name now
-        await updateDoc(userDocRef, {
-            name: name,
-        });
+        const dataToUpdate: { name: string, avatar?: string } = { name };
+        let newAvatarUrl = profile.avatar;
+
+        if (avatarFile) {
+            const storageRef = ref(storage, `avatars/${firebaseUser.uid}/${avatarFile.name}`);
+            await uploadBytes(storageRef, avatarFile);
+            newAvatarUrl = await getDownloadURL(storageRef);
+            dataToUpdate.avatar = newAvatarUrl;
+        }
+
+        await updateDoc(userDocRef, dataToUpdate);
 
         // Update the state locally to reflect changes immediately
-        setProfile({ ...profile, name });
+        const newProfile = { name, avatar: newAvatarUrl };
+        setProfile(newProfile);
         if(user) {
-            setUser({ ...user, name: name });
+            setUser({ ...user, name, avatar: newAvatarUrl });
         }
     };
 

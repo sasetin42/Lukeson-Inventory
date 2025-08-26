@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, User, Mail, Shield, Activity, Key } from 'lucide-react';
+import { Loader2, User, Mail, Shield, Activity, Upload, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
@@ -29,13 +29,43 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
     const { toast } = useToast();
     const { user, profile, updateUserProfile, firebaseUser } = useAuth();
     const [name, setName] = useState('');
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (isOpen && profile) {
             setName(profile.name || '');
+            setAvatarPreview(profile.avatar || null);
+            setAvatarFile(null); // Reset file on open
         }
     }, [isOpen, profile]);
+
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                toast({ title: "File too large", description: "Please upload an image smaller than 2MB.", variant: "destructive" });
+                return;
+            }
+            setAvatarFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAvatarPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    
+    const removeImage = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setAvatarFile(null);
+        setAvatarPreview(profile.avatar);
+        if(fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    }
 
     const handleProfileUpdate = async () => {
         setIsSaving(true);
@@ -45,7 +75,7 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
             return;
         }
         try {
-            await updateUserProfile(name, null);
+            await updateUserProfile(name, avatarFile);
             toast({ title: 'Success', description: 'Your profile has been updated.', variant: 'success' });
             onClose();
         } catch (error: any) {
@@ -63,6 +93,25 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
                     <DialogDescription>Update your personal information.</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
+                    <div className="flex items-center gap-4">
+                        <Avatar className="h-20 w-20">
+                            <AvatarImage src={avatarPreview || undefined} alt={name} data-ai-hint="user avatar" />
+                            <AvatarFallback className="text-3xl">{name?.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="grid w-full max-w-sm items-center gap-1.5">
+                            <Label htmlFor="picture">Profile Picture</Label>
+                            <div className="flex items-center gap-2">
+                                <Input id="picture" type="file" ref={fileInputRef} onChange={handleAvatarChange} accept="image/png, image/jpeg" className="flex-1" />
+                                {avatarFile && (
+                                    <Button variant="ghost" size="icon" onClick={removeImage}>
+                                        <X className="h-4 w-4 text-muted-foreground" />
+                                    </Button>
+                                )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">PNG or JPG. Max size 2MB.</p>
+                        </div>
+                    </div>
+
                     <div className="space-y-2">
                         <Label htmlFor="name" className="flex items-center gap-2"><User className="h-4 w-4 text-blue-500" />Name</Label>
                         <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
