@@ -58,18 +58,18 @@ export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewPr
 
     return (
         <div className="p-8 bg-white text-black">
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-center">
                  <div className="flex items-center gap-4">
                     <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo" />
                     <div className="text-xs">
-                        <p className="font-bold" style={{ color: accentColor, fontSize: '20px', lineHeight: '25px' }}>{companyName}</p>
+                        <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
                         <p>{address}</p>
                         <p>{phone}</p>
                         <p>{website}</p>
                     </div>
                 </div>
                 <div className="text-right">
-                    <h2 className="font-bold" style={{ color: accentColor, fontSize: '20px', lineHeight: '25px' }}>PURCHASE ORDER</h2>
+                    <h2 className="font-bold text-lg" style={{ color: accentColor }}>PURCHASE ORDER</h2>
                     <p className="text-sm"><strong>PO ID:</strong> {purchaseOrder.id}</p>
                     <p className="text-sm"><strong>Date:</strong> {formatDate(purchaseOrder.orderDate)}</p>
                     {showDueDate && <p className="text-sm"><strong>Expected Delivery:</strong> {formatDate(purchaseOrder.expectedDeliveryDate)}</p>}
