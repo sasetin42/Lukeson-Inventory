@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, File, Send, CheckCircle, XCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -75,6 +75,13 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, on
         return format(date.toDate ? date.toDate() : new Date(date), 'PP');
     }
 
+    const statusIcons = {
+        Draft: <File className="h-4 w-4 mr-2" style={{ color: '#2C2C2C' }} />,
+        Sent: <Send className="h-4 w-4 mr-2" style={{ color: '#673DE6' }} />,
+        Received: <CheckCircle className="h-4 w-4 mr-2" style={{ color: '#5F8400' }} />,
+        Cancelled: <XCircle className="h-4 w-4 mr-2" style={{ color: '#EF4444' }} />,
+    };
+
     return (
         <>
             <Card>
@@ -120,6 +127,7 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, on
                                                 >
                                                     {poStatuses.map((status) => (
                                                         <DropdownMenuRadioItem key={status} value={status}>
+                                                            {statusIcons[status as keyof typeof statusIcons]}
                                                             {status}
                                                         </DropdownMenuRadioItem>
                                                     ))}
