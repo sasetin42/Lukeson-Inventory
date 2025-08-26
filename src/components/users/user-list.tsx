@@ -59,6 +59,12 @@ export default function UserList({ users, onEdit, onDelete, onAddUser, onView }:
     const getStatusVariant = (status: string) => {
         return status === 'active' ? 'default' : 'secondary';
     };
+    
+    const getRoleVariant = (role: string): "admin" | "secondary" | "outline" => {
+        if (role === 'Admin') return 'admin';
+        if (role === 'Manager') return 'secondary';
+        return 'outline';
+    };
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -97,6 +103,7 @@ export default function UserList({ users, onEdit, onDelete, onAddUser, onView }:
                             {users.map((user) => {
                                 const isSuperAdmin = user.id === SUPER_ADMIN_UID;
                                 const canModify = !isSuperAdmin || (isSuperAdmin && currentUser?.id === SUPER_ADMIN_UID);
+                                const displayName = isSuperAdmin ? "Super Admin" : user.role;
 
                                 return (
                                 <TableRow key={user.id}>
@@ -112,7 +119,9 @@ export default function UserList({ users, onEdit, onDelete, onAddUser, onView }:
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell>{user.role}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={getRoleVariant(user.role)}>{displayName}</Badge>
+                                    </TableCell>
                                     <TableCell>
                                         <Badge variant={getStatusVariant(user.status)}>{user.status}</Badge>
                                     </TableCell>
