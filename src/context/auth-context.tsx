@@ -118,29 +118,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!firebaseUser) throw new Error("No user is logged in.");
 
         const userDocRef = doc(db, "users", firebaseUser.uid);
-        let newAvatarUrl = profile.avatar; // Keep current avatar by default
-
-        if (avatarFile) {
-            const storageRef = ref(storage, `avatars/${firebaseUser.uid}`);
-            const dataUrl = await new Promise<string>((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.onerror = reject;
-                reader.readAsDataURL(avatarFile);
-            });
-            await uploadString(storageRef, dataUrl, 'data_url');
-            newAvatarUrl = await getDownloadURL(storageRef);
-        }
-
+        
+        // Only updating the name now
         await updateDoc(userDocRef, {
             name: name,
-            avatar: newAvatarUrl,
         });
 
         // Update the state locally to reflect changes immediately
-        setProfile({ name, avatar: newAvatarUrl });
+        setProfile({ ...profile, name });
         if(user) {
-            setUser({ ...user, name: name, avatar: newAvatarUrl } as User);
+            setUser({ ...user, name: name });
         }
     };
 
