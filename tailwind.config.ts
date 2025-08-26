@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -10,7 +11,7 @@ export default {
   theme: {
     extend: {
       fontSize: {
-        'company-name': ['20px', '25px'],
+        'company-name': ['18px', '20px'],
       },
       fontFamily: {
         body: ['Maven Pro', 'sans-serif'],
