@@ -184,9 +184,9 @@ function AppContent({ children }: { children: React.ReactNode }) {
           <SidebarHeader>
             <div className="flex items-center gap-3">
               {companyProfile.logo ? (
-                  <Image src={companyProfile.logo} alt={companyProfile.name} width={48} height={48} className="rounded-md" data-ai-hint="logo" />
+                  <Image src={companyProfile.logo} alt={companyProfile.name} width={56} height={56} className="rounded-md" data-ai-hint="logo" />
               ) : (
-                  <Logo className="size-12 text-primary" />
+                  <Logo className="size-14 text-primary" />
               )}
               <div className="flex flex-col">
                 <h1 className="text-company-name font-bold tracking-tight text-foreground">{companyProfile.name}</h1>
