@@ -19,6 +19,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import ProfitLossStatement from '@/components/reports/profit-loss-statement';
 import BalanceSheet from '@/components/reports/balance-sheet';
 import CashflowStatement from '@/components/reports/cashflow-statement';
+import SalesByCustomerChart from '@/components/analytics/sales-by-customer-chart';
+import ProductPerformanceDetails from '@/components/analytics/product-performance-details';
 
 
 export default function ReportsPage() {
@@ -130,8 +132,24 @@ export default function ReportsPage() {
         </TabsContent>
         <TabsContent value="sales" className="mt-4">
             <Card>
-                <CardHeader><CardTitle>Sales Reports</CardTitle></CardHeader>
-                <CardContent><p>Sales by Customer and Sales by Item reports will go here.</p></CardContent>
+                <CardHeader>
+                  <CardTitle>Sales Reports</CardTitle>
+                  <CardDescription>Detailed analysis of your sales performance.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                   <Tabs defaultValue="by-customer">
+                        <TabsList>
+                            <TabsTrigger value="by-customer">Sales by Customer</TabsTrigger>
+                            <TabsTrigger value="by-item">Sales by Item</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="by-customer" className="mt-4">
+                            <SalesByCustomerChart sales={sales} dateRange={365} />
+                        </TabsContent>
+                        <TabsContent value="by-item" className="mt-4">
+                           <ProductPerformanceDetails products={products} sales={sales} dateRange={365} />
+                        </TabsContent>
+                   </Tabs>
+                </CardContent>
             </Card>
         </TabsContent>
         <TabsContent value="inventory" className="mt-4">
