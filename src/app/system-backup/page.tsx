@@ -150,7 +150,7 @@ export default function SystemBackupPage() {
         if (!backupToDelete) return;
         try {
             await deleteDoc(doc(db, 'backups', backupToDelete.id));
-            toast({ title: 'Backup Deleted', description: `Backup from ${format((backupToDelete.date as any).toDate(), 'PPp')} has been deleted.`, variant: 'destructive' });
+            toast({ title: 'Backup Deleted', description: `Backup from ${formatDate(backupToDelete.date)} has been deleted.`, variant: 'destructive' });
         } catch (error) {
             console.error("Error deleting backup:", error);
             toast({ title: "Error", description: "Failed to delete backup.", variant: "destructive" });
@@ -180,7 +180,7 @@ export default function SystemBackupPage() {
     
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
-        return format(date.toDate ? date.toDate() : new Date(date), 'PP');
+        return format(date.toDate ? date.toDate() : new Date(date), 'PPp');
     };
 
     return (
