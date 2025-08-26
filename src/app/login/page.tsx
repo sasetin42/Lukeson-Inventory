@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,8 @@ import { useRouter } from 'next/navigation';
 import { Logo } from '@/components/icons/logo';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -19,6 +21,28 @@ export default function LoginPage() {
     const { login } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
+
+    const [title, setTitle] = useState('IMIS Pro');
+    const [description, setDescription] = useState('Enter your credentials to access your workspace');
+    const [background, setBackground] = useState('');
+
+    useEffect(() => {
+        const fetchLoginSettings = async () => {
+            try {
+                const docRef = doc(db, 'settings', 'loginScreen');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    setTitle(data.title || 'IMIS Pro');
+                    setDescription(data.description || 'Enter your credentials to access your workspace');
+                    setBackground(data.background || '');
+                }
+            } catch (error) {
+                console.error("Error fetching login screen settings:", error);
+            }
+        };
+        fetchLoginSettings();
+    }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,14 +65,21 @@ export default function LoginPage() {
             setIsLoading(false);
         }
     };
+    
+    const backgroundStyle: React.CSSProperties = background ? {
+        backgroundImage: `url(${background})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+    } : {};
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-background">
-            <Card className="w-full max-w-sm">
+        <div className="flex items-center justify-center min-h-screen bg-background" style={backgroundStyle}>
+             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+            <Card className="w-full max-w-sm z-10">
                 <CardHeader className="text-center">
                     <Logo className="mx-auto h-12 w-12 text-primary" />
-                    <CardTitle className="mt-4">IMIS Pro</CardTitle>
-                    <CardDescription>Enter your credentials to access your workspace</CardDescription>
+                    <CardTitle className="mt-4">{title}</CardTitle>
+                    <CardDescription>{description}</CardDescription>
                 </CardHeader>
                 <form onSubmit={handleLogin}>
                     <CardContent className="space-y-4">
