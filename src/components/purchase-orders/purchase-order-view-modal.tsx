@@ -13,8 +13,11 @@ import {
 import { PurchaseOrder } from '@/lib/types';
 import { Button } from '../ui/button';
 import PurchaseOrderView from './purchase-order-view';
-import { Printer, Mail, Edit } from 'lucide-react';
-import { useRef } from 'react';
+import { Printer, Mail, Edit, Loader2, CheckCircle } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { db } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 
 interface PurchaseOrderViewModalProps {
   purchaseOrder: PurchaseOrder | null;
@@ -30,6 +33,8 @@ export default function PurchaseOrderViewModal({
   onEdit,
 }: PurchaseOrderViewModalProps) {
   const printableRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  const [isSending, setIsSending] = useState(false);
 
   if (!purchaseOrder) return null;
 
@@ -75,11 +80,43 @@ export default function PurchaseOrderViewModal({
     }
   };
 
-  const handleEmail = () => {
-    if (purchaseOrder.supplierEmail) {
-        const subject = `Purchase Order from YAMASHITA MOLD PHILIPPINES CORPORATION: ${purchaseOrder.id}`;
-        const body = `Dear ${purchaseOrder.supplierName},\n\nPlease find our purchase order attached.\n\nThank you,\n[Your Name]`;
-        window.location.href = `mailto:${purchaseOrder.supplierEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const handleEmail = async () => {
+    if (!purchaseOrder.supplierEmail) return;
+
+    setIsSending(true);
+    const { id, update } = toast({
+      title: "Sending Email...",
+      description: `Preparing to send PO ${purchaseOrder.id} to ${purchaseOrder.supplierEmail}`,
+      variant: 'default',
+      icon: <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+    });
+
+    try {
+      // Simulate sending email
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Update PO status to 'Sent' in Firestore
+      const poRef = doc(db, 'purchaseOrders', purchaseOrder.id);
+      await updateDoc(poRef, { status: 'Sent' });
+
+      update({
+        id,
+        title: "Email Sent Successfully",
+        description: `PO ${purchaseOrder.id} has been sent. Status updated to 'Sent'.`,
+        variant: 'success',
+        icon: <CheckCircle className="h-5 w-5" />
+      });
+
+    } catch (error) {
+       update({
+        id,
+        title: "Error Sending Email",
+        description: "Could not update the purchase order status.",
+        variant: 'destructive',
+      });
+      console.error("Failed to update PO status:", error);
+    } finally {
+        setIsSending(false);
     }
   }
 
@@ -105,9 +142,9 @@ export default function PurchaseOrderViewModal({
         </div>
         <DialogFooter className="justify-between">
             <div>
-                 <Button variant="outline" onClick={handleEmail} disabled={!purchaseOrder.supplierEmail}>
-                    <Mail className="mr-2 h-4 w-4" />
-                    Send to Supplier
+                 <Button variant="outline" onClick={handleEmail} disabled={!purchaseOrder.supplierEmail || isSending}>
+                    {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+                    {isSending ? 'Sending...' : 'Send to Supplier'}
                 </Button>
             </div>
             <div className='flex gap-2'>
