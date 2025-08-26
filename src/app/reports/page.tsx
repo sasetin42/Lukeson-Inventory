@@ -21,6 +21,10 @@ import BalanceSheet from '@/components/reports/balance-sheet';
 import CashflowStatement from '@/components/reports/cashflow-statement';
 import SalesByCustomerChart from '@/components/analytics/sales-by-customer-chart';
 import ProductPerformanceDetails from '@/components/analytics/product-performance-details';
+import InventoryValueByCategoryChart from '@/components/analytics/inventory-value-by-category-chart';
+import InventoryTurnoverByCategoryChart from '@/components/analytics/inventory-turnover-by-category-chart';
+import StockMovementTrendChart from '@/components/analytics/stock-movement-trend-chart';
+import InventoryOptimizationRecommendations from '@/components/analytics/inventory-optimization-recommendations';
 
 
 export default function ReportsPage() {
@@ -154,8 +158,28 @@ export default function ReportsPage() {
         </TabsContent>
         <TabsContent value="inventory" className="mt-4">
             <Card>
-                <CardHeader><CardTitle>Inventory Reports</CardTitle></CardHeader>
-                <CardContent><p>AR/AP Aging and Inventory Valuation reports will go here.</p></CardContent>
+                <CardHeader>
+                    <CardTitle>Inventory Reports</CardTitle>
+                    <CardDescription>Analyze your inventory from multiple perspectives.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Tabs defaultValue="valuation">
+                        <TabsList>
+                            <TabsTrigger value="valuation">Valuation & Turnover</TabsTrigger>
+                            <TabsTrigger value="movement">Movement & Optimization</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="valuation" className="mt-4 grid gap-6">
+                           <div className="grid md:grid-cols-2 gap-6">
+                                <InventoryValueByCategoryChart products={products} />
+                                <InventoryTurnoverByCategoryChart products={products} sales={sales} dateRange={365} />
+                           </div>
+                        </TabsContent>
+                         <TabsContent value="movement" className="mt-4 grid gap-6">
+                            <StockMovementTrendChart dateRange={30} />
+                            <InventoryOptimizationRecommendations />
+                        </TabsContent>
+                    </Tabs>
+                </CardContent>
             </Card>
         </TabsContent>
         <TabsContent value="purchase" className="mt-4">
