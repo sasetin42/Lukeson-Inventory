@@ -97,7 +97,6 @@ export default function RoleFormModal({
 
         try {
             await onSave(roleData);
-            onClose();
         } catch (error) {
             console.error("Failed to save role", error);
         } finally {

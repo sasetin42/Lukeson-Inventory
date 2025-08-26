@@ -104,7 +104,8 @@ export default function UsersManagementPage() {
   const handleSaveRole = async (roleData: Omit<Role, 'id'> & {id?: string}) => {
     const { id, ...dataToSave } = roleData;
     try {
-      const roleRef = doc(db, 'roles', id || dataToSave.name.toLowerCase().replace(/\s/g, '-'));
+      const docId = id || dataToSave.name.toLowerCase().replace(/\s+/g, '-');
+      const roleRef = doc(db, 'roles', docId);
       await setDoc(roleRef, dataToSave, { merge: true });
       toast({ title: "Success", description: "Role saved successfully.", variant: "success" });
       handleCloseRoleModal();
