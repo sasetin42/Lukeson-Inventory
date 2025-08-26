@@ -41,38 +41,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                         const userData = userDocSnap.data() as User;
                         setUser({ ...userData, id: currentFirebaseUser.uid });
                         setUserRole(userData.role);
-                         if (pathname === '/login') {
-                            router.push('/');
-                        }
                     } else {
-                        // Handle case where user exists in Auth but not Firestore
                         console.warn(`No Firestore document found for user ${currentFirebaseUser.uid}`);
                         setUser(null);
                         setUserRole(null);
-                        if (pathname !== '/login') {
-                            router.push('/login');
-                        }
                     }
                 } catch (error) {
                     console.error("Error fetching user data from Firestore:", error);
                     setUser(null);
                     setUserRole(null);
-                    if (pathname !== '/login') {
-                        router.push('/login');
-                    }
                 }
             } else {
                 setUser(null);
                 setUserRole(null);
-                 if (pathname !== '/login') {
-                    router.push('/login');
-                }
             }
             setIsLoading(false);
         });
 
         return () => unsubscribe();
-    }, [router, pathname]);
+    }, []);
+
+    useEffect(() => {
+        // This effect handles redirection after loading state changes.
+        if (!isLoading) {
+            if (firebaseUser && pathname === '/login') {
+                router.push('/');
+            } else if (!firebaseUser && pathname !== '/login') {
+                router.push('/login');
+            }
+        }
+    }, [isLoading, firebaseUser, pathname, router]);
 
     const login = async (email: string, pass: string): Promise<void> => {
         await signInWithEmailAndPassword(auth, email, pass);
@@ -81,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = async () => {
         await signOut(auth);
         localStorage.removeItem('user_profile');
-        router.push('/login');
+        // The onAuthStateChanged listener will handle the redirect to /login
     };
 
     const value = { 
