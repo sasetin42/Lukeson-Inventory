@@ -76,7 +76,7 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, on
                     <Table className="min-w-[800px]">
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Order ID</TableHead>
+                                <TableHead>Purchase Order ID</TableHead>
                                 <TableHead>Supplier</TableHead>
                                 <TableHead>Order Date</TableHead>
                                 <TableHead>Expected Delivery</TableHead>
