@@ -7,6 +7,16 @@ import { CheckCircle2, XCircle, Eye, Shield, PlusCircle, Edit, Trash2, Users } f
 import { Button } from "../ui/button";
 import { Role, User } from "@/lib/types";
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface RolesPermissionsProps {
     roles: Role[];
@@ -18,12 +28,28 @@ interface RolesPermissionsProps {
 }
 
 export default function RolesPermissions({ roles, users, onAddRole, onEditRole, onDeleteRole, onViewRole }: RolesPermissionsProps) {
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = React.useState(false);
+  const [roleToDelete, setRoleToDelete] = React.useState<Role | null>(null);
+
+  const openDeleteDialog = (role: Role) => {
+    setRoleToDelete(role);
+    setIsDeleteAlertOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (roleToDelete) {
+      onDeleteRole(roleToDelete.id);
+      setIsDeleteAlertOpen(false);
+      setRoleToDelete(null);
+    }
+  };
   
   const countUsersInRole = (roleName: string) => {
     return users.filter(user => user.role === roleName).length;
   }
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
@@ -60,21 +86,20 @@ export default function RolesPermissions({ roles, users, onAddRole, onEditRole, 
                             isInventory ? { backgroundColor: '#673DE6' } :
                             {}
                         }
-                        onClick={() => onViewRole(role)}
                     >
-                        <CardHeader>
+                        <CardHeader className="flex-1">
                             <CardTitle className="flex items-center justify-between">
-                                <span>{role.name}</span>
+                                <span onClick={() => onViewRole(role)} className="flex-1">{role.name}</span>
                                 <div className="flex items-center gap-2">
                                      <Button variant="ghost" size="icon" className={cn("h-7 w-7", (isAdmin || isInventory) && "hover:bg-white/20")} onClick={(e) => { e.stopPropagation(); onEditRole(role); }}>
                                         <Edit className="h-4 w-4" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" className={cn("h-7 w-7", (isAdmin || isInventory) && "hover:bg-white/20")} onClick={(e) => { e.stopPropagation(); onDeleteRole(role.id); }}>
+                                    <Button variant="ghost" size="icon" className={cn("h-7 w-7", (isAdmin || isInventory) && "hover:bg-white/20")} onClick={(e) => { e.stopPropagation(); openDeleteDialog(role); }}>
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </div>
                             </CardTitle>
-                            <CardDescription className={cn((isAdmin || isInventory) && "text-white/80")}>
+                            <CardDescription className={cn("pt-2", (isAdmin || isInventory) && "text-white/80")}>
                                 {isAdmin ? "Admins managing communications, maintaining records, and ensuring efficient workflow." : `A short description about the ${role.name} role.`}
                             </CardDescription>
                         </CardHeader>
@@ -90,10 +115,20 @@ export default function RolesPermissions({ roles, users, onAddRole, onEditRole, 
         </div>
       </CardContent>
     </Card>
+     <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+        <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+            This action cannot be undone. This will permanently delete the role.
+            </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>Delete</AlertDialogAction>
+        </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }
-
-// Dummy export to keep other files working
-export const permissionsDataBackup = [
-  { module: 'Dashboard', admin: 'Full Access', manager: 'Full Access', viewer: 'Read-only' },
-];
