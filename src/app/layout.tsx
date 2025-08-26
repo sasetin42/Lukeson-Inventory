@@ -13,7 +13,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, Sidebar
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/components/app-layout';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import UserProfileModal from '@/components/users/user-profile-modal';
 import { useToast } from '@/hooks/use-toast';
@@ -26,7 +26,7 @@ import SupportModal from '@/components/support/support-modal';
 //   description: 'A comprehensive, all-in-one business management system tailored for businesses in the Philippines.',
 // };
 
-const navGroups = [
+export const navGroups = [
   {
     title: 'CORE FEATURES',
     color: 'text-blue-500',
@@ -205,11 +205,11 @@ function AppContent({ children }: { children: React.ReactNode }) {
                 value={openAccordion} 
                 onValueChange={handleAccordionChange}
               >
-                {navGroups.filter(g => g.roles.includes(userRole!)).map((group, groupIndex) => (
+                {navGroups.filter(g => g.roles.includes(userRole || '')).map((group, groupIndex) => (
                   <div key={group.title}>
                     {groupIndex > 0 && <SidebarSeparator className="my-2" />}
                     <h3 className={`text-sm font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
-                    {group.items.filter(i => i.roles.includes(userRole!)).map((item) => (
+                    {group.items.filter(i => i.roles.includes(userRole || '')).map((item) => (
                         <AccordionItem value={item.title} key={item.title}>
                           <AccordionTrigger>
                             <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
@@ -218,7 +218,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
                           </AccordionTrigger>
                           <AccordionContent>
                             <SidebarMenu className="ml-4 border-l border-gray-200 dark:border-gray-700 py-1">
-                              {item.links.filter(l => l.roles.includes(userRole!)).map((link) => (
+                              {item.links.filter(l => l.roles.includes(userRole || '')).map((link) => (
                                 <SidebarMenuItem key={link.label}>
                                   <SidebarMenuButton asChild>
                                     <Link href={link.href}>

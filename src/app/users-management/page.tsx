@@ -16,7 +16,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import KpiCard from '@/components/kpi-card';
 import RolesPermissions from '@/components/users/roles-permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { permissionsData } from '@/components/users/roles-permissions';
+import { navGroups } from '@/app/layout';
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -190,7 +190,7 @@ export default function UsersManagementPage() {
             onClose={handleCloseRoleModal}
             onSave={handleSaveRole}
             role={editingRole}
-            modules={permissionsData.map(p => p.module)}
+            navGroups={navGroups}
           />
       )}
     </div>

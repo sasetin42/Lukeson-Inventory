@@ -18,13 +18,14 @@ import { Role, PermissionLevel } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 
 interface RoleFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (role: Omit<Role, 'id'> & {id?: string}) => Promise<void>;
   role: Role | null;
-  modules: string[];
+  navGroups: any[];
 }
 
 const permissionLevels: PermissionLevel[] = ['Full Access', 'Read-only', 'No Access'];
@@ -34,7 +35,7 @@ export default function RoleFormModal({
     onClose, 
     onSave,
     role,
-    modules,
+    navGroups,
 }: RoleFormModalProps) {
     const { toast } = useToast();
     const [name, setName] = useState('');
@@ -47,16 +48,20 @@ export default function RoleFormModal({
                 setName(role.name);
                 setPermissions(role.permissions || {});
             } else {
-                // Set default permissions for a new role
-                const defaultPermissions = modules.reduce((acc, module) => {
-                    acc[module] = 'No Access';
-                    return acc;
-                }, {} as {[key: string]: PermissionLevel});
+                const defaultPermissions: {[key: string]: PermissionLevel} = {};
+                navGroups.forEach(group => {
+                    group.items.forEach((item: any) => {
+                        defaultPermissions[item.title] = 'No Access';
+                        item.links.forEach((link: any) => {
+                            defaultPermissions[link.label] = 'No Access';
+                        });
+                    });
+                });
                 setPermissions(defaultPermissions);
                 setName('');
             }
         }
-    }, [isOpen, role, modules]);
+    }, [isOpen, role, navGroups]);
     
     const handlePermissionChange = (module: string, level: PermissionLevel) => {
         setPermissions(prev => ({
@@ -105,26 +110,41 @@ export default function RoleFormModal({
                     
                     <h3 className="font-semibold mt-4">Permissions</h3>
                     <ScrollArea className="h-72 pr-4 border rounded-md">
-                        <div className="p-4 space-y-3">
-                        {modules.map(module => (
-                            <div key={module} className="flex items-center justify-between">
-                                <Label htmlFor={`perm-${module}`}>{module}</Label>
-                                <Select
-                                    value={permissions[module] || 'No Access'}
-                                    onValueChange={(value: PermissionLevel) => handlePermissionChange(module, value)}
-                                >
-                                    <SelectTrigger id={`perm-${module}`} className="w-[180px]">
-                                        <SelectValue placeholder="Set permission" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {permissionLevels.map(level => (
-                                            <SelectItem key={level} value={level}>{level}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                        <Accordion type="multiple" className="w-full p-2">
+                        {navGroups.map(group => (
+                            group.items.map((item: any) => (
+                                <AccordionItem value={item.title} key={item.title}>
+                                    <AccordionTrigger>
+                                        <div className="flex items-center justify-between w-full pr-2">
+                                            <span className="font-semibold text-sm">{item.title}</span>
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        <div className="pl-4 space-y-3 pt-2">
+                                            {item.links.map((link: any) => (
+                                                 <div key={link.label} className="flex items-center justify-between">
+                                                    <Label htmlFor={`perm-${link.label}`}>{link.label}</Label>
+                                                    <Select
+                                                        value={permissions[link.label] || 'No Access'}
+                                                        onValueChange={(value: PermissionLevel) => handlePermissionChange(link.label, value)}
+                                                    >
+                                                        <SelectTrigger id={`perm-${link.label}`} className="w-[180px]">
+                                                            <SelectValue placeholder="Set permission" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {permissionLevels.map(level => (
+                                                                <SelectItem key={level} value={level}>{level}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))
                         ))}
-                        </div>
+                        </Accordion>
                     </ScrollArea>
 
                 </div>

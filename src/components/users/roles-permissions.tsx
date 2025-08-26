@@ -7,38 +7,22 @@ import { CheckCircle2, XCircle, Eye, Shield, PlusCircle, Edit, Trash2 } from 'lu
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Role } from "@/lib/types";
+import { navGroups } from "@/app/layout";
 
-export const permissionsData = [
-  { module: 'Dashboard', admin: 'Full Access', manager: 'Full Access', viewer: 'Read-only' },
-  { module: 'Analytics', admin: 'Full Access', manager: 'Full Access', viewer: 'Read-only' },
-  { module: 'Products', admin: 'Full Access', manager: 'Full Access', viewer: 'Read-only' },
-  { module: 'Warehouses', admin: 'Full Access', manager: 'Full Access', viewer: 'No Access' },
-  { module: 'Stock Alerts', admin: 'Full Access', manager: 'Full Access', viewer: 'Read-only' },
-  { module: 'Inventory Settings', admin: 'Full Access', manager: 'Full Access', viewer: 'No Access' },
-  { module: 'Quotations', admin: 'Full Access', manager: 'Full Access', viewer: 'No Access' },
-  { module: 'Sales Orders', admin: 'Full Access', manager: 'Full Access', viewer: 'No Access' },
-  { module: 'Job Order', admin: 'Full Access', manager: 'Full Access', viewer: 'No Access' },
-  { module: 'Sales Invoices', admin: 'Full Access', manager: 'Full Access', viewer: 'No Access' },
-  { module: 'Payments', admin: 'Full Access', manager: 'Full Access', viewer: 'No Access' },
-  { module: 'Purchase Orders', admin: 'Full Access', manager: 'Full Access', viewer: 'No Access' },
-  { module: 'Goods Receipts', admin: 'Full Access', manager: 'Full Access', viewer: 'No Access' },
-  { module: 'Customers', admin: 'Full Access', manager: 'Full Access', viewer: 'No Access' },
-  { module: 'Suppliers', admin: 'Full Access', manager: 'Full Access', viewer: 'No Access' },
-  { module: 'Finance Reports', admin: 'Full Access', manager: 'Full Access', viewer: 'Read-only' },
-  { module: 'System Settings', admin: 'Full Access', manager: 'No Access', viewer: 'No Access' },
-  { module: 'Users & Roles', admin: 'Full Access', manager: 'No Access', viewer: 'No Access' },
-  { module: 'System Security', admin: 'Full Access', manager: 'No Access', viewer: 'No Access' },
-  { module: 'System Backup', admin: 'Full Access', manager: 'No Access', viewer: 'No Access' },
-];
+export const permissionsData = navGroups.flatMap(group => 
+    group.items.flatMap(item => 
+        item.links.map(link => ({ module: link.label }))
+    )
+);
 
-const PermissionIcon = ({ permission }: { permission: string }) => {
+const PermissionIcon = ({ permission }: { permission?: string }) => {
     if (permission === 'Full Access') {
         return <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto" />;
     }
     if (permission === 'Read-only') {
         return <Eye className="h-5 w-5 text-blue-500 mx-auto" />;
     }
-    if (permission === 'No Access') {
+    if (permission === 'No Access' || !permission) {
         return <XCircle className="h-5 w-5 text-red-500 mx-auto" />;
     }
     return null;
@@ -89,15 +73,24 @@ export default function RolesPermissions({ roles, onAddRole, onEditRole, onDelet
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {permissionsData.map((data) => (
-                <TableRow key={data.module}>
-                    <TableCell className="font-medium">{data.module}</TableCell>
-                    {roles.map(role => (
-                       <TableCell key={`${role.id}-${data.module}`} className="text-center">
-                           <PermissionIcon permission={role.permissions[data.module] || 'No Access'} />
-                       </TableCell> 
-                    ))}
-                </TableRow>
+                {navGroups.map((group) => (
+                    <React.Fragment key={group.title}>
+                        <TableRow className="bg-muted/50">
+                            <TableCell colSpan={roles.length + 1} className="font-bold text-primary">{group.title}</TableCell>
+                        </TableRow>
+                        {group.items.map((item) => (
+                            item.links.map(link => (
+                                <TableRow key={link.label}>
+                                    <TableCell className="font-medium pl-8">{link.label}</TableCell>
+                                    {roles.map(role => (
+                                    <TableCell key={`${role.id}-${link.label}`} className="text-center">
+                                        <PermissionIcon permission={role.permissions[link.label]} />
+                                    </TableCell> 
+                                    ))}
+                                </TableRow>
+                            ))
+                        ))}
+                    </React.Fragment>
                 ))}
             </TableBody>
             </Table>
@@ -106,3 +99,9 @@ export default function RolesPermissions({ roles, onAddRole, onEditRole, onDelet
     </Card>
   );
 }
+
+// Dummy export to keep other files working
+export const permissionsDataBackup = [
+  { module: 'Dashboard', admin: 'Full Access', manager: 'Full Access', viewer: 'Read-only' },
+];
+
