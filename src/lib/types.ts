@@ -199,7 +199,7 @@ export type PurchaseOrder = {
     supplierAddress?: string;
     orderDate: Date | FieldValue | string;
     expectedDeliveryDate: Date | FieldValue | string | null;
-    status: 'Draft' | 'Sent' | 'Confirmed' | 'Received' | 'Cancelled';
+    status: 'Draft' | 'Sent' | 'Received' | 'Cancelled';
     totalAmount: number;
     lines: DocumentLine[];
     createdAt?: Date | FieldValue | string;

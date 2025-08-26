@@ -110,7 +110,7 @@ export default function PurchaseOrdersPage() {
   };
 
   const totalReceived = purchaseOrders.filter(po => po.status === 'Received').length;
-  const totalPending = purchaseOrders.filter(po => po.status === 'Sent' || po.status === 'Confirmed').length;
+  const totalPending = purchaseOrders.filter(po => po.status === 'Sent').length;
   const totalCancelled = purchaseOrders.filter(po => po.status === 'Cancelled').length;
   const totalValue = purchaseOrders.reduce((sum, po) => sum + po.totalAmount, 0);
 

@@ -20,7 +20,7 @@ interface PurchaseOrderFormProps {
   onCancel: () => void;
 }
 
-const poStatuses: PurchaseOrder['status'][] = ['Draft', 'Sent', 'Confirmed', 'Received', 'Cancelled'];
+const poStatuses: PurchaseOrder['status'][] = ['Draft', 'Sent', 'Received', 'Cancelled'];
 
 export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }: PurchaseOrderFormProps) {
     const { toast } = useToast();

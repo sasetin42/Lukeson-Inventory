@@ -32,7 +32,7 @@ import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
-const poStatuses: PurchaseOrder['status'][] = ['Draft', 'Sent', 'Confirmed', 'Received', 'Cancelled'];
+const poStatuses: PurchaseOrder['status'][] = ['Draft', 'Sent', 'Received', 'Cancelled'];
 
 interface PurchaseOrderListProps {
     purchaseOrders: PurchaseOrder[];
@@ -64,7 +64,6 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, on
         switch (status) {
             case 'Received': return 'received';
             case 'Sent': return 'sent';
-            case 'Confirmed': return 'confirmed';
             case 'Draft': return 'draft';
             case 'Cancelled': return 'destructive';
             default: return 'outline';
