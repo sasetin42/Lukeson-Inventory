@@ -12,7 +12,7 @@ import LowStockAlerts from "@/components/dashboard/low-stock-alerts";
 import { Product, SalesOrder, ItemCategory, PurchaseOrder, Quotation, JobOrder, Invoice, RecentTransaction, Customer, FlatSale } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, setDoc, addDoc, serverTimestamp, orderBy, query, limit } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, addDoc, serverTimestamp, orderBy, query, limit, getDocs } from 'firebase/firestore';
 import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-form-modal';
 
 export default function DashboardPage() {
@@ -105,7 +105,16 @@ export default function DashboardPage() {
   const handleSavePurchaseOrder = async (purchaseOrderData: Omit<PurchaseOrder, 'id'> & { id?: string }) => {
       try {
           const { id, ...dataToSave } = purchaseOrderData;
-          const poRef = doc(db, "purchaseOrders", id as string);
+          let docId = id;
+          if (!docId) {
+            const poRef = collection(db, 'purchaseOrders');
+            const snapshot = await getDocs(poRef);
+            const poCount = snapshot.size;
+            const year = new Date().getFullYear();
+            docId = `PO-${year}-${(poCount + 1).toString().padStart(4, '0')}`;
+          }
+
+          const poRef = doc(db, "purchaseOrders", docId);
           await setDoc(poRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
           toast({ title: "Success", description: "Purchase Order added successfully.", variant: "success" });
           handleCloseModal();
