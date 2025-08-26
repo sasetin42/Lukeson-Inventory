@@ -160,7 +160,14 @@ export default function SystemBackupPage() {
         }
     };
 
-    const sortedBackups = [...backups].sort((a, b) => (b.date as any).toDate().getTime() - (a.date as any).toDate().getTime());
+    const sortedBackups = [...backups].sort((a, b) => {
+        const dateA = a.date ? (a.date as any).toDate ? (a.date as any).toDate() : new Date(a.date as string) : 0;
+        const dateB = b.date ? (b.date as any).toDate ? (b.date as any).toDate() : new Date(b.date as string) : 0;
+        if (!dateA) return 1;
+        if (!dateB) return -1;
+        return dateB.getTime() - dateA.getTime();
+    });
+
     const lastSuccessfulBackup = sortedBackups.find(b => b.status === 'Successful');
 
     const handleToggleAllData = (checked: boolean) => {
