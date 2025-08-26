@@ -200,6 +200,26 @@ function JobOrdersContent() {
     await deleteDoc(doc(db, "jobOrders", jobOrderId));
     toast({ title: "Success", description: "Job Order deleted successfully.", variant: "destructive" });
   };
+  
+  const handleStatusUpdate = async (jobOrderId: string, newStatus: JobOrder['status']) => {
+    const joRef = doc(db, 'jobOrders', jobOrderId);
+    try {
+        await updateDoc(joRef, { status: newStatus, modifiedAt: serverTimestamp() });
+        toast({
+            title: "Status Updated",
+            description: `Job order ${jobOrderId} has been updated to "${newStatus}".`,
+            variant: "success"
+        });
+    } catch (error) {
+        console.error("Error updating JO status:", error);
+        toast({
+            title: "Error",
+            description: "Failed to update job order status.",
+            variant: "destructive"
+        });
+    }
+  };
+
 
   const totalValue = jobOrders.reduce((sum, jo) => sum + jo.totalAmount, 0);
   const totalCompleted = jobOrders.filter(jo => jo.status === 'Completed').length;
@@ -252,6 +272,7 @@ function JobOrdersContent() {
               onDelete={handleDeleteJobOrder}
               onView={handleOpenViewModal}
               onViewCustomer={handleOpenCustomerModal}
+              onStatusChange={handleStatusUpdate}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               statusFilter={statusFilter}

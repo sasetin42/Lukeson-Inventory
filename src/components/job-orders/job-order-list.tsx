@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2, Eye, User, Search, PlusCircle } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, User, Search, PlusCircle, Clock, CheckCircle, XCircle, File } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +18,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Input } from '../ui/input';
@@ -32,11 +41,14 @@ interface JobOrderListProps {
     onDelete: (jobOrderId: string) => void;
     onView: (jobOrder: JobOrder) => void;
     onViewCustomer: (customer: Customer) => void;
+    onStatusChange: (jobOrderId: string, newStatus: JobOrder['status']) => void;
     searchQuery: string;
     setSearchQuery: (query: string) => void;
     statusFilter: string;
     setStatusFilter: (status: string) => void;
 }
+
+const jobOrderStatuses: JobOrder['status'][] = ['Draft', 'Scheduled', 'In Progress', 'On Hold', 'Completed', 'Cancelled'];
 
 export default function JobOrderList({ 
     jobOrders, 
@@ -47,6 +59,7 @@ export default function JobOrderList({
     onDelete, 
     onView, 
     onViewCustomer,
+    onStatusChange,
     searchQuery,
     setSearchQuery,
     statusFilter,
@@ -94,6 +107,15 @@ export default function JobOrderList({
             onViewCustomer(customer);
         }
     }
+    
+    const statusIcons = {
+        'Draft': <File className="h-4 w-4 mr-2" />,
+        'Scheduled': <Clock className="h-4 w-4 mr-2 text-gray-500" />,
+        'In Progress': <Clock className="h-4 w-4 mr-2 text-blue-500" />,
+        'On Hold': <Clock className="h-4 w-4 mr-2 text-yellow-500" />,
+        'Completed': <CheckCircle className="h-4 w-4 mr-2 text-green-500" />,
+        'Cancelled': <XCircle className="h-4 w-4 mr-2 text-red-500" />,
+    };
 
     return (
         <>
@@ -165,7 +187,28 @@ export default function JobOrderList({
                                         <TableCell>{formatDate(jobOrder.expectedCompletionDate)}</TableCell>
                                         <TableCell>{salesOrder ? formatDate(salesOrder.deliveryDate) : 'N/A'}</TableCell>
                                         <TableCell>
-                                            <Badge variant={getStatusVariant(jobOrder.status)}>{jobOrder.status}</Badge>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" className="p-0 h-auto">
+                                                        <Badge variant={getStatusVariant(jobOrder.status)} className="cursor-pointer">{jobOrder.status}</Badge>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent>
+                                                    <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuRadioGroup 
+                                                        value={jobOrder.status}
+                                                        onValueChange={(newStatus) => onStatusChange(jobOrder.id, newStatus as JobOrder['status'])}
+                                                    >
+                                                        {jobOrderStatuses.map((status) => (
+                                                            <DropdownMenuRadioItem key={status} value={status}>
+                                                                {statusIcons[status as keyof typeof statusIcons]}
+                                                                {status}
+                                                            </DropdownMenuRadioItem>
+                                                        ))}
+                                                    </DropdownMenuRadioGroup>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </TableCell>
                                         <TableCell className="flex items-center justify-center gap-1">
                                              <Tooltip>
