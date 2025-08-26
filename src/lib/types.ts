@@ -350,3 +350,17 @@ export type RecentTransaction = {
     jobOrder?: JobOrder;
     invoice?: Invoice;
 };
+
+export type Backup = {
+  id: string;
+  date: Date | FieldValue | string;
+  status: 'Successful' | 'Failed' | 'In Progress';
+  type: 'Manual' | 'Automatic';
+  size: string;
+};
+
+export type BackupSettings = {
+    frequency: string;
+    includedData: string[];
+    modifiedAt?: Date | FieldValue | string;
+};
