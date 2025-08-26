@@ -73,7 +73,7 @@ export default function RolesPermissions({ roles, onAddRole, onEditRole, onDelet
                                 </div>
                             </CardTitle>
                             <CardDescription className={cn(isAdmin && "text-white/80")}>
-                                {isAdmin ? "Create a short description for Admin Role" : `A short description about the ${role.name} role.`}
+                                {isAdmin ? "Admins managing communications, maintaining records, and ensuring efficient workflow." : `A short description about the ${role.name} role.`}
                             </CardDescription>
                         </CardHeader>
                         <CardFooter className="mt-auto">
