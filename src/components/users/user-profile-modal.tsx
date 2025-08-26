@@ -18,6 +18,11 @@ import { Loader2, Camera, User, Mail, Shield, Activity, Key } from 'lucide-react
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
+import { useAuth } from '@/context/auth-context';
+import { storage } from '@/lib/firebase';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -27,34 +32,46 @@ interface UserProfileModalProps {
 
 export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: UserProfileModalProps) {
     const { toast } = useToast();
+    const { user, firebaseUser } = useAuth();
     const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
     const [avatar, setAvatar] = useState('https://placehold.co/128x128.png');
     const [isSaving, setIsSaving] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && user) {
+            setName(user.name || '');
             const storedProfile = localStorage.getItem('user_profile');
             if (storedProfile) {
-                const profile = JSON.parse(storedProfile);
-                setName(profile.name || 'Admin User');
-                setAvatar(profile.avatar || 'https://placehold.co/128x128.png');
-            } else {
-                setName('Admin User');
-                setAvatar('https://placehold.co/128x128.png');
+                setAvatar(JSON.parse(storedProfile).avatar || 'https://placehold.co/128x128.png');
             }
-            setEmail('admin@example.com'); // This is static
         }
-    }, [isOpen]);
+    }, [isOpen, user]);
 
     const handleProfileUpdate = async () => {
+        if (!firebaseUser) {
+            toast({ title: 'Error', description: 'You must be logged in to update your profile.', variant: 'destructive' });
+            return;
+        }
+
         setIsSaving(true);
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            const updatedProfile = { name, avatar };
-            localStorage.setItem('user_profile', JSON.stringify(updatedProfile));
+            let avatarUrl = avatar;
+            if (avatar.startsWith('data:image')) {
+                const storageRef = ref(storage, `avatars/${firebaseUser.uid}`);
+                await uploadString(storageRef, avatar, 'data_url');
+                avatarUrl = await getDownloadURL(storageRef);
+            }
+
+            const userDocRef = doc(db, 'users', firebaseUser.uid);
+            await updateDoc(userDocRef, {
+                name: name,
+                // Assuming avatar is stored on the user profile in some way, though it's not in the type.
+                // Let's stick to what's in local storage for the UI update for now.
+            });
             
+            const updatedProfile = { name, avatar: avatarUrl };
+            localStorage.setItem('user_profile', JSON.stringify(updatedProfile));
             onProfileUpdate(updatedProfile);
 
             toast({ title: 'Success', description: 'Your profile has been updated.', variant: 'success' });
@@ -111,16 +128,16 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="email" className="flex items-center gap-2"><Mail className="h-4 w-4 text-red-500" />Email</Label>
-                                <Input id="email" type="email" value={email} disabled />
+                                <Input id="email" type="email" value={user?.email || ''} disabled />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label className="flex items-center gap-2"><Shield className="h-4 w-4 text-green-500" />Role</Label>
-                                    <Badge variant="secondary">Admin</Badge>
+                                    <Badge variant="secondary">{user?.role}</Badge>
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="flex items-center gap-2"><Activity className="h-4 w-4 text-yellow-500" />Status</Label>
-                                    <Badge variant="success">Active</Badge>
+                                    <Badge variant="success">{user?.status}</Badge>
                                 </div>
                             </div>
                         </div>
@@ -128,17 +145,14 @@ export default function UserProfileModal({ isOpen, onClose, onProfileUpdate }: U
                     <Separator />
                     <div className="space-y-3">
                         <h3 className="font-semibold">Password Settings</h3>
+                        <p className="text-sm text-muted-foreground">Password changes must be done via the "Forgot Password" link on the login page for security reasons.</p>
                         <div className="space-y-2">
-                            <Label htmlFor="current-password" className="flex items-center gap-2"><Key className="h-4 w-4 text-gray-500" />Current Password</Label>
-                            <Input id="current-password" type="password" placeholder="Enter your current password" />
+                            <Label htmlFor="current-password" className="flex items-center gap-2 text-muted-foreground"><Key className="h-4 w-4" />Current Password</Label>
+                            <Input id="current-password" type="password" placeholder="Enter your current password" disabled />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="new-password" className="flex items-center gap-2"><Key className="h-4 w-4 text-gray-500" />New Password</Label>
-                            <Input id="new-password" type="password" placeholder="Enter a new password" />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="confirm-password" className="flex items-center gap-2"><Key className="h-4 w-4 text-gray-500" />Confirm New Password</Label>
-                            <Input id="confirm-password" type="password" placeholder="Confirm your new password" />
+                            <Label htmlFor="new-password" className="flex items-center gap-2 text-muted-foreground"><Key className="h-4 w-4" />New Password</Label>
+                            <Input id="new-password" type="password" placeholder="Enter a new password" disabled />
                         </div>
                     </div>
                 </div>

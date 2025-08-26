@@ -74,10 +74,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         if (!isLoading) {
-            if (firebaseUser && pathname === '/login') {
-                router.push('/');
-            } else if (!firebaseUser && pathname !== '/login') {
-                router.push('/login');
+            const isAuthPage = pathname === '/login';
+            if (firebaseUser) {
+                if (isAuthPage) {
+                    router.push('/');
+                }
+            } else {
+                if (!isAuthPage) {
+                    router.push('/login');
+                }
             }
         }
     }, [isLoading, firebaseUser, pathname, router]);
