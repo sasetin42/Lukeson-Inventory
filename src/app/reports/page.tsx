@@ -77,11 +77,12 @@ export default function ReportsPage() {
       />
       
       <Tabs defaultValue="overview">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="pnl">Financial Statements</TabsTrigger>
             <TabsTrigger value="sales">Sales Reports</TabsTrigger>
             <TabsTrigger value="inventory">Inventory Reports</TabsTrigger>
+            <TabsTrigger value="purchase">Purchase Analysis</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="mt-4">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
@@ -114,6 +115,12 @@ export default function ReportsPage() {
             <Card>
                 <CardHeader><CardTitle>Inventory Reports</CardTitle></CardHeader>
                 <CardContent><p>AR/AP Aging and Inventory Valuation reports will go here.</p></CardContent>
+            </Card>
+        </TabsContent>
+        <TabsContent value="purchase" className="mt-4">
+            <Card>
+                <CardHeader><CardTitle>Purchase Analysis</CardTitle></CardHeader>
+                <CardContent><p>Purchase analysis reports will go here.</p></CardContent>
             </Card>
         </TabsContent>
       </Tabs>
