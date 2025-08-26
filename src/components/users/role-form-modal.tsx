@@ -19,6 +19,7 @@ import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import { Separator } from '../ui/separator';
 
 interface RoleFormModalProps {
   isOpen: boolean;
@@ -126,26 +127,25 @@ export default function RoleFormModal({
                         {navGroups.map(group => (
                             group.items.map((item: any) => (
                                 <AccordionItem value={item.title} key={item.title}>
-                                    <AccordionTrigger>
-                                        <div className="flex items-center justify-between w-full pr-2">
+                                    <div className="flex items-center justify-between w-full pr-2">
+                                        <AccordionTrigger className="w-auto p-2">
                                             <span className="font-semibold text-sm">{item.title}</span>
-                                            <RadioGroup 
-                                                value={permissions[item.title] || 'No Access'}
-                                                className="flex gap-x-4" 
-                                                onValueChange={(value: PermissionLevel) => handleGroupPermissionChange(item.title, value)}
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                {permissionLevels.map(level => (
-                                                    <div key={level} className="flex items-center space-x-2">
-                                                        <RadioGroupItem value={level} id={`perm-group-${item.title}-${level}`} />
-                                                        <Label htmlFor={`perm-group-${item.title}-${level}`} className="text-xs font-normal">{level}</Label>
-                                                    </div>
-                                                ))}
-                                            </RadioGroup>
-                                        </div>
-                                    </AccordionTrigger>
+                                        </AccordionTrigger>
+                                        <RadioGroup 
+                                            value={permissions[item.title] || 'No Access'}
+                                            className="flex gap-x-4" 
+                                            onValueChange={(value: PermissionLevel) => handleGroupPermissionChange(item.title, value)}
+                                        >
+                                            {permissionLevels.map(level => (
+                                                <div key={level} className="flex items-center space-x-2">
+                                                    <RadioGroupItem value={level} id={`perm-group-${item.title}-${level}`} />
+                                                    <Label htmlFor={`perm-group-${item.title}-${level}`} className="text-xs font-normal">{level}</Label>
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
+                                    </div>
                                     <AccordionContent>
-                                        <div className="pl-4 space-y-3 pt-2">
+                                        <div className="pl-6 pr-2 space-y-3 pt-2">
                                             {item.links.map((link: any) => (
                                                  <div key={link.label} className="flex items-center justify-between">
                                                     <Label htmlFor={`perm-${link.label}`}>{link.label}</Label>
