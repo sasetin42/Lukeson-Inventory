@@ -1,5 +1,4 @@
 
-
 'use client'
 
 import { useState } from 'react';
@@ -9,6 +8,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,14 +32,17 @@ import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
+const poStatuses: PurchaseOrder['status'][] = ['Draft', 'Sent', 'Confirmed', 'Received', 'Cancelled'];
+
 interface PurchaseOrderListProps {
     purchaseOrders: PurchaseOrder[];
     onEdit: (purchaseOrder: PurchaseOrder) => void;
     onDelete: (purchaseOrderId: string) => void;
     onView: (purchaseOrder: PurchaseOrder) => void;
+    onStatusChange: (purchaseOrderId: string, newStatus: PurchaseOrder['status']) => void;
 }
 
-export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, onView }: PurchaseOrderListProps) {
+export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, onView, onStatusChange }: PurchaseOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [purchaseOrderToDelete, setPurchaseOrderToDelete] = useState<PurchaseOrder | null>(null);
     const { toast } = useToast();
@@ -94,7 +106,27 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, on
                                     <TableCell>{formatDate(purchaseOrder.expectedDeliveryDate)}</TableCell>
                                     <TableCell>₱{purchaseOrder.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                     <TableCell>
-                                        <Badge variant={getStatusVariant(purchaseOrder.status)}>{purchaseOrder.status}</Badge>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" className="p-0 h-auto">
+                                                    <Badge variant={getStatusVariant(purchaseOrder.status)} className="cursor-pointer">{purchaseOrder.status}</Badge>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent>
+                                                <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuRadioGroup 
+                                                    value={purchaseOrder.status}
+                                                    onValueChange={(newStatus) => onStatusChange(purchaseOrder.id, newStatus as PurchaseOrder['status'])}
+                                                >
+                                                    {poStatuses.map((status) => (
+                                                        <DropdownMenuRadioItem key={status} value={status}>
+                                                            {status}
+                                                        </DropdownMenuRadioItem>
+                                                    ))}
+                                                </DropdownMenuRadioGroup>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </TableCell>
                                     <TableCell className="flex items-center justify-center gap-2">
                                         <Tooltip>

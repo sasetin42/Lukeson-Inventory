@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -12,7 +11,7 @@ import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-
 import PurchaseOrderViewModal from '@/components/purchase-orders/purchase-order-view-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, deleteDoc, addDoc, serverTimestamp, query, orderBy, onSnapshot, updateDoc } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PurchaseOrderTemplate from '@/components/purchase-orders/purchase-order-template';
@@ -85,6 +84,25 @@ export default function PurchaseOrdersPage() {
       }
   };
 
+  const handleStatusUpdate = async (purchaseOrderId: string, newStatus: PurchaseOrder['status']) => {
+    const poRef = doc(db, 'purchaseOrders', purchaseOrderId);
+    try {
+      await updateDoc(poRef, { status: newStatus, modifiedAt: serverTimestamp() });
+      toast({
+        title: "Status Updated",
+        description: `Purchase order ${purchaseOrderId} has been updated to "${newStatus}".`,
+        variant: "success"
+      });
+    } catch (error) {
+      console.error("Error updating PO status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update purchase order status.",
+        variant: "destructive"
+      });
+    }
+  };
+
 
   const handleDeletePurchaseOrder = async (purchaseOrderId: string) => {
     await deleteDoc(doc(db, "purchaseOrders", purchaseOrderId));
@@ -142,6 +160,7 @@ export default function PurchaseOrdersPage() {
               onEdit={handleOpenModal}
               onDelete={handleDeletePurchaseOrder}
               onView={handleOpenViewModal}
+              onStatusChange={handleStatusUpdate}
             />
           </div>
         </TabsContent>
