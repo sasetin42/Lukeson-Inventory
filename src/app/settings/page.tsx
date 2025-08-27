@@ -140,6 +140,7 @@ export default function SettingsPage() {
                     <TabsList>
                         <TabsTrigger value="company"><Building2 className="mr-2 h-4 w-4" />Company Profile</TabsTrigger>
                         <TabsTrigger value="login"><LogIn className="mr-2 h-4 w-4" />Login Screen</TabsTrigger>
+                        <TabsTrigger value="loading"><Palette className="mr-2 h-4 w-4" />Loading Screen</TabsTrigger>
                     </TabsList>
                     <Button onClick={handleSave} disabled={isSaving}>
                         {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
@@ -219,6 +220,19 @@ export default function SettingsPage() {
                                         </label>
                                     </div> 
                                 </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+                 <TabsContent value="loading" className="mt-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Loading Screen</CardTitle>
+                            <CardDescription>Customize the initial loading screen of the application.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center justify-center h-48 border-2 border-dashed rounded-lg">
+                                <p className="text-muted-foreground">Loading screen settings coming soon!</p>
                             </div>
                         </CardContent>
                     </Card>
