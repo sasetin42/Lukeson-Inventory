@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2, Eye, File, Send, CheckCircle, XCircle } from "lucide-react";
+import { MoreHorizontal, Edit, Trash2, Eye, File, Send, CheckCircle, XCircle, PlusCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,13 +36,14 @@ const poStatuses: PurchaseOrder['status'][] = ['Draft', 'Sent', 'Received', 'Can
 
 interface PurchaseOrderListProps {
     purchaseOrders: PurchaseOrder[];
+    onCreate: () => void;
     onEdit: (purchaseOrder: PurchaseOrder) => void;
     onDelete: (purchaseOrderId: string) => void;
     onView: (purchaseOrder: PurchaseOrder) => void;
     onStatusChange: (purchaseOrderId: string, newStatus: PurchaseOrder['status']) => void;
 }
 
-export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, onView, onStatusChange }: PurchaseOrderListProps) {
+export default function PurchaseOrderList({ purchaseOrders, onCreate, onEdit, onDelete, onView, onStatusChange }: PurchaseOrderListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [purchaseOrderToDelete, setPurchaseOrderToDelete] = useState<PurchaseOrder | null>(null);
     const { toast } = useToast();
@@ -86,8 +87,16 @@ export default function PurchaseOrderList({ purchaseOrders, onEdit, onDelete, on
         <>
             <Card>
                 <CardHeader>
-                    <CardTitle>Purchase Orders</CardTitle>
-                    <CardDescription>A list of all your purchase orders.</CardDescription>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <CardTitle>Purchase Orders</CardTitle>
+                            <CardDescription>A list of all your purchase orders.</CardDescription>
+                        </div>
+                        <Button onClick={onCreate}>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Create Purchase Order
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent className="overflow-x-auto">
                     <Table className="min-w-[800px]">

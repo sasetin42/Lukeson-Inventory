@@ -155,12 +155,6 @@ export default function PurchaseOrdersPage() {
         title="Purchase Orders"
         description="Manage purchase orders for your suppliers."
         icon={<ShoppingBag className="h-6 w-6 text-blue-500" />}
-        actions={
-          <Button onClick={() => handleOpenModal(null)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Create Purchase Order
-          </Button>
-        }
       />
       <Tabs defaultValue="purchase-orders">
         <TabsList>
@@ -185,6 +179,7 @@ export default function PurchaseOrdersPage() {
           <div className="mt-4">
             <PurchaseOrderList
               purchaseOrders={purchaseOrders}
+              onCreate={() => handleOpenModal(null)}
               onEdit={handleOpenModal}
               onDelete={handleDeletePurchaseOrder}
               onView={handleOpenViewModal}
