@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -27,6 +28,8 @@ export default function LoginPage() {
     const [description, setDescription] = useState('Enter your credentials to access your workspace');
     const [background, setBackground] = useState('');
     const [logo, setLogo] = useState('');
+    const [footerText, setFooterText] = useState('');
+    const [footerLink, setFooterLink] = useState('');
 
     useEffect(() => {
         const fetchLoginSettings = async () => {
@@ -39,6 +42,8 @@ export default function LoginPage() {
                     setDescription(data.description || 'Enter your credentials to access your workspace');
                     setBackground(data.background || '');
                     setLogo(data.logo || '');
+                    setFooterText(data.footerText || '');
+                    setFooterLink(data.footerLink || '');
                 }
             } catch (error) {
                 console.error("Error fetching login screen settings:", error);
@@ -122,6 +127,13 @@ export default function LoginPage() {
                         </Button>
                     </CardFooter>
                 </form>
+                 {footerText && footerLink && (
+                    <div className="text-center p-4 pt-0 text-sm">
+                        <Link href={footerLink} className="text-muted-foreground hover:text-primary transition-colors">
+                            {footerText}
+                        </Link>
+                    </div>
+                )}
             </Card>
         </div>
     );

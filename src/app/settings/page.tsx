@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings, Building2, Palette, LogIn, Save, Loader2, Upload } from "lucide-react";
+import { Settings, Building2, Palette, LogIn, Save, Loader2, Upload, Link } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { db } from '@/lib/firebase';
@@ -40,6 +40,8 @@ export default function SettingsPage() {
     const [loginBgFile, setLoginBgFile] = useState<File | null>(null);
     const [loginLogo, setLoginLogo] = useState('');
     const [loginLogoFile, setLoginLogoFile] = useState<File | null>(null);
+    const [loginFooterText, setLoginFooterText] = useState('');
+    const [loginFooterLink, setLoginFooterLink] = useState('');
     
     // Loading Screen State
     const [loadingText, setLoadingText] = useState('Loading...');
@@ -86,6 +88,8 @@ export default function SettingsPage() {
                     setLoginDescription(data.description || 'Enter your credentials to access your workspace');
                     setLoginBg(data.background || '');
                     setLoginLogo(data.logo || '');
+                    setLoginFooterText(data.footerText || '');
+                    setLoginFooterLink(data.footerLink || '');
                 }
                 
                 if (loadingSnap.exists()) {
@@ -118,7 +122,12 @@ export default function SettingsPage() {
             await setDoc(doc(db, 'settings', COMPANY_SETTINGS_DOC_ID), companySettings, { merge: true });
 
             // Login Screen
-            const loginSettings: any = { title: loginTitle, description: loginDescription };
+            const loginSettings: any = { 
+                title: loginTitle, 
+                description: loginDescription,
+                footerText: loginFooterText,
+                footerLink: loginFooterLink,
+            };
             if (loginBgFile) {
                 loginSettings.background = await fileToDataUri(loginBgFile);
             } else {
@@ -248,6 +257,19 @@ export default function SettingsPage() {
                                             <Input id="dropzone-file-bg" type="file" className="hidden" onChange={(e) => setLoginBgFile(e.target.files?.[0] || null)} accept="image/*"/>
                                         </label>
                                     </div> 
+                                </div>
+                            </div>
+                             <div className="space-y-4 pt-4 border-t">
+                                <Label className="text-base font-semibold">Footer Link</Label>
+                                <div className="grid grid-cols-2 gap-4">
+                                     <div className="space-y-2">
+                                        <Label htmlFor="login-footer-text">Footer Text</Label>
+                                        <Input id="login-footer-text" value={loginFooterText} onChange={(e) => setLoginFooterText(e.target.value)} placeholder="e.g. Need help?"/>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="login-footer-link">Footer Link URL</Label>
+                                        <Input id="login-footer-link" value={loginFooterLink} onChange={(e) => setLoginFooterLink(e.target.value)} placeholder="e.g. https://example.com/support"/>
+                                    </div>
                                 </div>
                             </div>
                         </CardContent>
