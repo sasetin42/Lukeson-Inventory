@@ -279,6 +279,9 @@ function AppContent({ children }: { children: React.ReactNode }) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <div className="text-center text-xs text-muted-foreground mt-2 px-2">
+                Develop by: SaSe App Solutions
+            </div>
           </SidebarFooter>
         </Sidebar>
         <AppLayout>
