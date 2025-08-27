@@ -24,6 +24,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useState } from 'react';
+import { getInvoiceStatusVariant } from '../badge-variants';
 
 interface InvoiceListProps {
     invoices: Invoice[];
@@ -35,21 +36,6 @@ interface InvoiceListProps {
 export default function InvoiceList({ invoices, onView, onMarkAsPaid, onDelete }: InvoiceListProps) {
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
-
-    const getStatusVariant = (status: string): "success" | "secondary" | "destructive" | "outline" | "posted" => {
-        switch (status) {
-            case 'Paid':
-                return 'success';
-            case 'Posted':
-                return 'posted';
-            case 'Pending':
-                return 'secondary';
-            case 'Overdue':
-                return 'destructive';
-            default:
-                return 'outline';
-        }
-    };
 
     const formatDate = (date: any): string => {
         if (!date) return 'N/A';
@@ -90,7 +76,7 @@ export default function InvoiceList({ invoices, onView, onMarkAsPaid, onDelete }
                         <TableCell>{formatDate(invoice.dueDate)}</TableCell>
                         <TableCell>₱{invoice.amount.toFixed(2)}</TableCell>
                         <TableCell>
-                            <Badge variant={getStatusVariant(invoice.status)}>{invoice.status}</Badge>
+                            <Badge variant={getInvoiceStatusVariant(invoice.status)}>{invoice.status}</Badge>
                         </TableCell>
                         <TableCell>
                             <DropdownMenu>

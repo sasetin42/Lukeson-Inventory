@@ -15,6 +15,7 @@ import InvoiceView from './invoice-view';
 import { Printer, Edit } from 'lucide-react';
 import { useRef } from 'react';
 import { Badge } from '../ui/badge';
+import { getInvoiceStatusVariant } from '../badge-variants';
 
 interface InvoiceViewModalProps {
   invoice: Invoice | null;
@@ -81,28 +82,13 @@ export default function InvoiceViewModal({
     }
   }
 
-  const getStatusVariant = (status: string): "success" | "secondary" | "destructive" | "outline" | "posted" => {
-    switch (status) {
-        case 'Paid':
-            return 'success';
-        case 'Posted':
-            return 'posted';
-        case 'Pending':
-            return 'secondary';
-        case 'Overdue':
-            return 'destructive';
-        default:
-            return 'outline';
-    }
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
             <div className="flex items-center justify-between">
                 <DialogTitle>Invoice Details: <span className="font-semibold text-primary">{invoice.id}</span></DialogTitle>
-                <Badge variant={getStatusVariant(invoice.status)}>{invoice.status}</Badge>
+                <Badge variant={getInvoiceStatusVariant(invoice.status)}>{invoice.status}</Badge>
             </div>
         </DialogHeader>
         <div className="max-h-[70vh] overflow-y-auto p-1">

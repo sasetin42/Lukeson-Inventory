@@ -9,55 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { Activity, ChevronRight } from 'lucide-react';
 import { Button } from '../ui/button';
 import Link from 'next/link';
+import { getInvoiceStatusVariant, getJobOrderStatusVariant, getQuotationStatusVariant, getSalesOrderStatusVariant } from '../badge-variants';
 
 interface RecentTransactionsProps {
     transactions: RecentTransaction[];
-}
-
-const getStatusVariant = (doc: any, type: 'quotation' | 'salesOrder' | 'jobOrder' | 'invoice') => {
-    if (!doc) return 'outline';
-    
-    switch (type) {
-        case 'quotation':
-            switch (doc.status as string) {
-                case 'Accepted': return 'success';
-                case 'Sent': return 'secondary';
-                case 'Draft': return 'outline';
-                case 'Expired': return 'destructive';
-                default: return 'outline';
-            }
-        case 'salesOrder':
-            switch (doc.status as string) {
-                case 'Fulfilled': return 'default';
-                case 'Confirmed': return 'confirmed';
-                case 'Draft': return 'outline';
-                case 'Cancelled': return 'destructive';
-                case 'Invoiced': return 'destructive';
-                default: return 'outline';
-            }
-        case 'jobOrder':
-             switch (doc.status as string) {
-                case 'Completed': return 'success';
-                case 'In Progress':
-                case 'Scheduled':
-                    return 'secondary';
-                case 'Draft': 
-                case 'On Hold': 
-                    return 'outline';
-                case 'Cancelled': return 'destructive';
-                default: return 'outline';
-            }
-        case 'invoice':
-             switch (doc.status as string) {
-                case 'Paid': return 'success';
-                case 'Posted': return 'posted';
-                case 'Pending': return 'secondary';
-                case 'Overdue': return 'destructive';
-                default: return 'outline';
-            }
-        default:
-            return 'outline';
-    }
 }
 
 export default function RecentTransactions({ transactions }: RecentTransactionsProps) {
@@ -105,27 +60,27 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
                 </TableCell>
                 <TableCell className="text-right">₱{salesOrder.totalAmount.toFixed(2)}</TableCell>
                 <TableCell>
-                    <Badge variant={getStatusVariant(quotation, 'quotation')}>
+                    <Badge variant={getQuotationStatusVariant(quotation?.status)}>
                         {quotation?.status || 'N/A'}
                     </Badge>
                 </TableCell>
                 <TableCell>
-                    <Badge variant={getStatusVariant(salesOrder, 'salesOrder')}>
+                    <Badge variant={getSalesOrderStatusVariant(salesOrder.status)}>
                         {salesOrder.status}
                     </Badge>
                 </TableCell>
                 <TableCell>
-                    <Badge variant={getStatusVariant(jobOrder, 'jobOrder')}>
+                    <Badge variant={getJobOrderStatusVariant(jobOrder?.status || 'Draft')}>
                         {jobOrder?.status || 'N/A'}
                     </Badge>
                 </TableCell>
                 <TableCell>
-                    <Badge variant={getStatusVariant(invoice, 'invoice')}>
+                    <Badge variant={invoice?.id ? 'success' : 'outline'}>
                         {invoice?.id ? 'Created' : 'N/A'}
                     </Badge>
                 </TableCell>
                  <TableCell>
-                    <Badge variant={getStatusVariant(invoice, 'invoice')}>
+                    <Badge variant={getInvoiceStatusVariant(invoice?.status || 'Draft')}>
                         {invoice?.status || 'N/A'}
                     </Badge>
                 </TableCell>

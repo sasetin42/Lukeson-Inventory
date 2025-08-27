@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState } from 'react';
@@ -24,6 +23,7 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/comp
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useAuth } from '@/context/auth-context';
+import { getQuotationStatusVariant, getSalesOrderStatusVariant } from '../badge-variants';
 
 interface QuotationListProps {
     quotations: Quotation[];
@@ -88,39 +88,6 @@ export default function QuotationList({
             onApprove(quotationToApprove);
             setIsApproveAlertOpen(false);
             setQuotationToApprove(null);
-        }
-    };
-
-    const getStatusVariant = (status: Quotation['status']): "default" | "secondary" | "destructive" | "outline" | "success" | "draft" | "quotation" => {
-        switch (status) {
-            case 'Accepted':
-                return 'success';
-            case 'Sent':
-                return 'quotation';
-            case 'Draft':
-                return 'draft';
-            case 'Expired':
-                return 'destructive';
-            default:
-                return 'outline';
-        }
-    };
-
-    const getSalesOrderStatusVariant = (status?: SalesOrder['status']): "fulfilled" | "secondary" | "destructive" | "outline" | "success" | "confirmed" | "draft" => {
-        if (!status) return 'outline';
-        switch (status) {
-            case 'Fulfilled':
-                return 'fulfilled';
-            case 'Confirmed':
-                return 'confirmed';
-            case 'Draft':
-                return 'draft';
-            case 'Cancelled':
-                return 'destructive';
-            case 'Invoiced':
-                 return 'destructive';
-            default:
-                return 'outline';
         }
     };
     
@@ -203,7 +170,7 @@ export default function QuotationList({
                                     <TableCell>{formatDate(quotation.qtnDate)}</TableCell>
                                     <TableCell>₱{quotation.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                                     <TableCell>
-                                        <Badge variant={getStatusVariant(quotation.status)}>{quotation.status}</Badge>
+                                        <Badge variant={getQuotationStatusVariant(quotation.status)}>{quotation.status}</Badge>
                                     </TableCell>
                                     <TableCell>
                                         {linkedSO ? (
