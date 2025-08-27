@@ -42,6 +42,7 @@ export default function PaymentList({ invoices, onViewTransaction, onViewSalesIn
                             <TableHead>Payment Date</TableHead>
                             <TableHead>Payment Method</TableHead>
                             <TableHead className="text-right">Amount Paid</TableHead>
+                            <TableHead>Transaction Proof</TableHead>
                             <TableHead className="text-center">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -54,16 +55,18 @@ export default function PaymentList({ invoices, onViewTransaction, onViewSalesIn
                                     <TableCell>{formatDate((invoice as any).paidDate || invoice.dueDate)}</TableCell>
                                     <TableCell>{invoice.paymentMethod || 'N/A'}</TableCell>
                                     <TableCell className="text-right">₱{invoice.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
+                                    <TableCell>
+                                        {invoice.transactionProof ? (
+                                            <Button variant="outline" size="sm" onClick={() => onViewTransaction(invoice)}>
+                                                <Eye className="mr-2 h-4 w-4" />
+                                                View
+                                            </Button>
+                                        ) : (
+                                            <span className="text-muted-foreground">N/A</span>
+                                        )}
+                                    </TableCell>
                                     <TableCell className="text-center">
                                        <div className="flex items-center justify-center gap-1">
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button variant="ghost" size="icon" onClick={() => onViewTransaction(invoice)}>
-                                                        <Eye className="h-4 w-4 text-blue-500" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>View Transaction Proof</TooltipContent>
-                                            </Tooltip>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <Button variant="ghost" size="icon" onClick={() => onViewSalesInvoice(invoice)}>
@@ -87,7 +90,7 @@ export default function PaymentList({ invoices, onViewTransaction, onViewSalesIn
                         </TooltipProvider>
                          {invoices.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={6} className="text-center h-24">
+                                <TableCell colSpan={7} className="text-center h-24">
                                     No payments recorded yet.
                                 </TableCell>
                             </TableRow>
