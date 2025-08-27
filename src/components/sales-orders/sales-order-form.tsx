@@ -42,7 +42,6 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
     const [deliveryDate, setDeliveryDate] = useState<Date | undefined>();
     const [status, setStatus] = useState<SalesOrder['status'] | 'Confirmed'>('Draft');
     const [lines, setLines] = useState<DocumentLine[]>([]);
-    const [isStatusDisabled, setIsStatusDisabled] = useState(true);
     const [notes, setNotes] = useState('');
     const [quotationNotes, setQuotationNotes] = useState('');
     const [discountType, setDiscountType] = useState<'Fixed' | 'Percent'>('Fixed');
@@ -95,11 +94,9 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
                 setSalesOrderId(salesOrder.id);
                 onIdGenerated(salesOrder.id);
                 setStatus(salesOrder.status || 'Draft');
-                setIsStatusDisabled(hasJobOrder); // Disable if job order exists
             } else { 
                 generateSalesOrderId();
                 setStatus('Confirmed');
-                setIsStatusDisabled(false);
             }
             setCustomerId(salesOrder.customerId || '');
             setOrderDate(salesOrder.orderDate ? (salesOrder.orderDate instanceof Date ? salesOrder.orderDate : (salesOrder.orderDate as any).toDate()) : new Date());
@@ -124,7 +121,6 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
             setCustomerId('');
             setOrderDate(new Date());
             setDeliveryDate(undefined);
-            setIsStatusDisabled(true);
             setNotes('');
             setQuotationNotes('');
             setDiscountType('Fixed');
@@ -140,7 +136,6 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
         if (approvedQuotation) {
             setLines(approvedQuotation.lines);
             setStatus('Confirmed');
-            setIsStatusDisabled(false);
             setNotes(approvedQuotation.notes || '');
             setQuotationNotes(approvedQuotation.notes || '');
             setQuotationId(approvedQuotation.id);
@@ -152,7 +147,6 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
         } else {
             setLines([]);
             setStatus('Draft');
-            setIsStatusDisabled(true);
             setNotes('');
             setQuotationNotes('');
             setQuotationId(undefined);
@@ -323,7 +317,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
                 </div>
                  <div className="space-y-2">
                     <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Status <span className="text-red-500">*</span></Label>
-                    <Select value={status} onValueChange={(value) => setStatus(value as SalesOrder['status'])} disabled={isStatusDisabled}>
+                    <Select value={status} onValueChange={(value) => setStatus(value as SalesOrder['status'])} disabled>
                         <SelectTrigger><SelectValue/></SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Draft">Draft</SelectItem>
