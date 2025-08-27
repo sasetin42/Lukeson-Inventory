@@ -29,14 +29,16 @@ export default function SettingsPage() {
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [website, setWebsite] = useState('');
-    const [logo, setLogo] = useState('');
-    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [companyLogo, setCompanyLogo] = useState('');
+    const [companyLogoFile, setCompanyLogoFile] = useState<File | null>(null);
 
     // Login Screen State
     const [loginTitle, setLoginTitle] = useState('IMIS Pro');
     const [loginDescription, setLoginDescription] = useState('Enter your credentials to access your workspace');
     const [loginBg, setLoginBg] = useState('');
     const [loginBgFile, setLoginBgFile] = useState<File | null>(null);
+    const [loginLogo, setLoginLogo] = useState('');
+    const [loginLogoFile, setLoginLogoFile] = useState<File | null>(null);
 
     const fileToDataUri = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -60,7 +62,7 @@ export default function SettingsPage() {
                     setPhone(data.phone || '');
                     setEmail(data.email || '');
                     setWebsite(data.website || '');
-                    setLogo(data.logo || '');
+                    setCompanyLogo(data.logo || '');
                 }
 
                 const loginRef = doc(db, 'settings', LOGIN_SETTINGS_DOC_ID);
@@ -70,6 +72,7 @@ export default function SettingsPage() {
                     setLoginTitle(data.title || 'IMIS Pro');
                     setLoginDescription(data.description || 'Enter your credentials to access your workspace');
                     setLoginBg(data.background || '');
+                    setLoginLogo(data.logo || '');
                 }
 
             } catch (error) {
@@ -87,10 +90,10 @@ export default function SettingsPage() {
         try {
             // Company Profile
             const companySettings: any = { name: companyName, address, phone, email, website };
-            if (logoFile) {
-                companySettings.logo = await fileToDataUri(logoFile);
+            if (companyLogoFile) {
+                companySettings.logo = await fileToDataUri(companyLogoFile);
             } else {
-                companySettings.logo = logo;
+                companySettings.logo = companyLogo;
             }
             await setDoc(doc(db, 'settings', COMPANY_SETTINGS_DOC_ID), companySettings, { merge: true });
 
@@ -100,6 +103,11 @@ export default function SettingsPage() {
                 loginSettings.background = await fileToDataUri(loginBgFile);
             } else {
                 loginSettings.background = loginBg;
+            }
+             if (loginLogoFile) {
+                loginSettings.logo = await fileToDataUri(loginLogoFile);
+            } else {
+                loginSettings.logo = loginLogo;
             }
             await setDoc(doc(db, 'settings', LOGIN_SETTINGS_DOC_ID), loginSettings, { merge: true });
 
@@ -152,8 +160,8 @@ export default function SettingsPage() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Company Logo</Label>
-                                    {logo && <Image src={logo} alt="Company Logo" width={100} height={50} className="border p-2 rounded-md" data-ai-hint="logo"/>}
-                                    <Input type="file" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} accept="image/*" />
+                                    {companyLogo && <Image src={companyLogo} alt="Company Logo" width={100} height={50} className="border p-2 rounded-md" data-ai-hint="logo"/>}
+                                    <Input type="file" onChange={(e) => setCompanyLogoFile(e.target.files?.[0] || null)} accept="image/*" />
                                 </div>
                             </div>
                             <div className="space-y-2">
@@ -192,18 +200,25 @@ export default function SettingsPage() {
                                 <Label htmlFor="login-description">Form Description</Label>
                                 <Textarea id="login-description" value={loginDescription} onChange={(e) => setLoginDescription(e.target.value)} />
                             </div>
-                             <div className="space-y-2">
-                                <Label>Background Image</Label>
-                                {loginBg && <Image src={loginBg} alt="Login Background" width={200} height={120} className="border p-2 rounded-md object-cover" data-ai-hint="background"/>}
-                                <div className="flex items-center justify-center w-full">
-                                    <label htmlFor="dropzone-file-bg" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
-                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <Upload className="w-8 h-8 mb-4 text-primary" />
-                                            <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                        </div>
-                                        <Input id="dropzone-file-bg" type="file" className="hidden" onChange={(e) => setLoginBgFile(e.target.files?.[0] || null)} accept="image/*"/>
-                                    </label>
-                                </div> 
+                            <div className="grid grid-cols-2 gap-6">
+                                 <div className="space-y-2">
+                                    <Label>Login Form Logo</Label>
+                                    {loginLogo && <Image src={loginLogo} alt="Login Logo" width={80} height={80} className="border p-2 rounded-md object-contain" data-ai-hint="logo"/>}
+                                    <Input type="file" onChange={(e) => setLoginLogoFile(e.target.files?.[0] || null)} accept="image/*" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Background Image</Label>
+                                    {loginBg && <Image src={loginBg} alt="Login Background" width={200} height={120} className="border p-2 rounded-md object-cover" data-ai-hint="background"/>}
+                                    <div className="flex items-center justify-center w-full">
+                                        <label htmlFor="dropzone-file-bg" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <Upload className="w-8 h-8 mb-4 text-primary" />
+                                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                            </div>
+                                            <Input id="dropzone-file-bg" type="file" className="hidden" onChange={(e) => setLoginBgFile(e.target.files?.[0] || null)} accept="image/*"/>
+                                        </label>
+                                    </div> 
+                                </div>
                             </div>
                         </CardContent>
                     </Card>

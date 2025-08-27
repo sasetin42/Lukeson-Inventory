@@ -13,6 +13,7 @@ import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import Image from 'next/image';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
@@ -25,6 +26,7 @@ export default function LoginPage() {
     const [title, setTitle] = useState('IMIS Pro');
     const [description, setDescription] = useState('Enter your credentials to access your workspace');
     const [background, setBackground] = useState('');
+    const [logo, setLogo] = useState('');
 
     useEffect(() => {
         const fetchLoginSettings = async () => {
@@ -36,6 +38,7 @@ export default function LoginPage() {
                     setTitle(data.title || 'IMIS Pro');
                     setDescription(data.description || 'Enter your credentials to access your workspace');
                     setBackground(data.background || '');
+                    setLogo(data.logo || '');
                 }
             } catch (error) {
                 console.error("Error fetching login screen settings:", error);
@@ -77,7 +80,11 @@ export default function LoginPage() {
              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
             <Card className="w-full max-w-sm z-10">
                 <CardHeader className="text-center">
-                    <Logo className="mx-auto h-12 w-12 text-primary" />
+                    {logo ? (
+                        <Image src={logo} alt="Company Logo" width={60} height={60} className="mx-auto" data-ai-hint="logo"/>
+                    ) : (
+                        <Logo className="mx-auto h-12 w-12 text-primary" />
+                    )}
                     <CardTitle className="mt-4">{title}</CardTitle>
                     <CardDescription>{description}</CardDescription>
                 </CardHeader>
