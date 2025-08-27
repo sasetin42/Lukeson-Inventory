@@ -17,6 +17,7 @@ import Image from 'next/image';
 
 const COMPANY_SETTINGS_DOC_ID = 'companyProfile';
 const LOGIN_SETTINGS_DOC_ID = 'loginScreen';
+const LOADING_SETTINGS_DOC_ID = 'loadingScreen';
 
 export default function SettingsPage() {
     const { toast } = useToast();
@@ -39,6 +40,12 @@ export default function SettingsPage() {
     const [loginBgFile, setLoginBgFile] = useState<File | null>(null);
     const [loginLogo, setLoginLogo] = useState('');
     const [loginLogoFile, setLoginLogoFile] = useState<File | null>(null);
+    
+    // Loading Screen State
+    const [loadingText, setLoadingText] = useState('Loading...');
+    const [loadingBgColor, setLoadingBgColor] = useState('#FFFFFF');
+    const [loadingLogo, setLoadingLogo] = useState('');
+    const [loadingLogoFile, setLoadingLogoFile] = useState<File | null>(null);
 
     const fileToDataUri = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -54,7 +61,15 @@ export default function SettingsPage() {
             setIsLoading(true);
             try {
                 const companyRef = doc(db, 'settings', COMPANY_SETTINGS_DOC_ID);
-                const companySnap = await getDoc(companyRef);
+                const loginRef = doc(db, 'settings', LOGIN_SETTINGS_DOC_ID);
+                const loadingRef = doc(db, 'settings', LOADING_SETTINGS_DOC_ID);
+
+                const [companySnap, loginSnap, loadingSnap] = await Promise.all([
+                    getDoc(companyRef),
+                    getDoc(loginRef),
+                    getDoc(loadingRef),
+                ]);
+
                 if (companySnap.exists()) {
                     const data = companySnap.data();
                     setCompanyName(data.name || '');
@@ -65,14 +80,19 @@ export default function SettingsPage() {
                     setCompanyLogo(data.logo || '');
                 }
 
-                const loginRef = doc(db, 'settings', LOGIN_SETTINGS_DOC_ID);
-                const loginSnap = await getDoc(loginRef);
                 if (loginSnap.exists()) {
                     const data = loginSnap.data();
                     setLoginTitle(data.title || 'IMIS Pro');
                     setLoginDescription(data.description || 'Enter your credentials to access your workspace');
                     setLoginBg(data.background || '');
                     setLoginLogo(data.logo || '');
+                }
+                
+                if (loadingSnap.exists()) {
+                    const data = loadingSnap.data();
+                    setLoadingText(data.text || 'Loading...');
+                    setLoadingBgColor(data.backgroundColor || '#FFFFFF');
+                    setLoadingLogo(data.logo || '');
                 }
 
             } catch (error) {
@@ -110,6 +130,15 @@ export default function SettingsPage() {
                 loginSettings.logo = loginLogo;
             }
             await setDoc(doc(db, 'settings', LOGIN_SETTINGS_DOC_ID), loginSettings, { merge: true });
+            
+            // Loading Screen
+            const loadingSettings: any = { text: loadingText, backgroundColor: loadingBgColor };
+            if (loadingLogoFile) {
+                loadingSettings.logo = await fileToDataUri(loadingLogoFile);
+            } else {
+                loadingSettings.logo = loadingLogo;
+            }
+            await setDoc(doc(db, 'settings', LOADING_SETTINGS_DOC_ID), loadingSettings, { merge: true });
 
             toast({ title: "Success", description: "Settings saved successfully.", variant: "success" });
         } catch (error) {
@@ -230,9 +259,35 @@ export default function SettingsPage() {
                             <CardTitle>Loading Screen</CardTitle>
                             <CardDescription>Customize the initial loading screen of the application.</CardDescription>
                         </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center justify-center h-48 border-2 border-dashed rounded-lg">
-                                <p className="text-muted-foreground">Loading screen settings coming soon!</p>
+                        <CardContent className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="loading-text">Loading Text</Label>
+                                    <Input id="loading-text" value={loadingText} onChange={(e) => setLoadingText(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="loading-bg-color">Background Color</Label>
+                                    <div className="flex items-center gap-2">
+                                        <Input
+                                            id="loading-bg-color"
+                                            type="color"
+                                            value={loadingBgColor}
+                                            onChange={(e) => setLoadingBgColor(e.target.value)}
+                                            className="p-1 h-10 w-14"
+                                        />
+                                        <Input
+                                            value={loadingBgColor}
+                                            onChange={(e) => setLoadingBgColor(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                             <div className="space-y-2">
+                                <Label>Loading Logo</Label>
+                                <div className="flex items-center gap-4">
+                                    {loadingLogo && <Image src={loadingLogo} alt="Loading Logo" width={80} height={80} className="border p-2 rounded-md object-contain" data-ai-hint="logo"/>}
+                                    <Input type="file" onChange={(e) => setLoadingLogoFile(e.target.files?.[0] || null)} accept="image/*" />
+                                </div>
                             </div>
                         </CardContent>
                     </Card>

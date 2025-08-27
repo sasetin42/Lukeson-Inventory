@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Home, Package, FileText, Users, LogOut, Settings, LifeBuoy, BarChart3, List, FilePlus, FileMinus, Goal, Building, ChevronDown, LayoutGrid, BarChart2, ShoppingCart, ShoppingBag, FileCode, Warehouse, Truck, Users2, File, FileCog, Shield, DatabaseBackup, Banknote, Briefcase, PlusCircle, AlertTriangle, User } from 'lucide-react';
+import { Home, Package, FileText, Users, LogOut, Settings, LifeBuoy, BarChart3, List, FilePlus, FileMinus, Goal, Building, ChevronDown, LayoutGrid, BarChart2, ShoppingCart, ShoppingBag, FileCode, Warehouse, Truck, Users2, File, FileCog, Shield, DatabaseBackup, Banknote, Briefcase, PlusCircle, AlertTriangle, User, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Logo } from '@/components/icons/logo';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, SidebarContent, SidebarSeparator } from '@/components/ui/sidebar';
@@ -111,7 +111,7 @@ export const navGroups = [
 ];
 
 function AppContent({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, logout, firebaseUser, userRole, rolePermissions, profile, companyProfile } = useAuth();
+  const { isAuthenticated, isLoading, logout, firebaseUser, userRole, rolePermissions, profile, companyProfile, loadingScreenSettings } = useAuth();
   const { toast } = useToast();
   const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -147,7 +147,19 @@ function AppContent({ children }: { children: React.ReactNode }) {
   };
   
   if (isLoading) {
-    return <div className="flex h-screen w-full items-center justify-center">Loading...</div>;
+    const { logo, text, backgroundColor } = loadingScreenSettings;
+    return (
+        <div 
+            className="flex h-screen w-full flex-col items-center justify-center gap-4 transition-colors duration-500" 
+            style={{ backgroundColor: backgroundColor || 'hsl(var(--background))' }}
+        >
+            {logo && <Image src={logo} alt="Loading Logo" width={120} height={120} className="animate-pulse" data-ai-hint="logo"/>}
+            <div className="flex items-center gap-2">
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <p className="text-lg font-semibold">{text || 'Loading...'}</p>
+            </div>
+        </div>
+    );
   }
   
   if (!isAuthenticated && pathname !== '/login') {

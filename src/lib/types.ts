@@ -375,6 +375,12 @@ export type BackupSettings = {
     modifiedAt?: Date | FieldValue | string;
 };
 
+export type LoadingScreenSettings = {
+    logo: string;
+    text: string;
+    backgroundColor: string;
+};
+
 // Accounting
 export type AccountType = 'Asset' | 'Liability' | 'Equity' | 'Revenue' | 'Expense';
 export type AccountSubType = 'Current Asset' | 'Fixed Asset' | 'Inventory' | 'Bank' | 'Current Liability' | 'Long-term Liability' | 'Owner\'s Equity' | 'Retained Earnings' | 'Sales' | 'Other Income' | 'Cost of Goods Sold' | 'Operating Expense';

@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { auth, db, storage } from '@/lib/firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { User, Role, PermissionLevel } from '@/lib/types';
+import { User, Role, PermissionLevel, LoadingScreenSettings } from '@/lib/types';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 interface UserProfile {
@@ -25,6 +25,7 @@ interface AuthContextType {
   firebaseUser: FirebaseUser | null;
   profile: UserProfile;
   companyProfile: CompanyProfile;
+  loadingScreenSettings: Partial<LoadingScreenSettings>;
   login: (email: string, pass: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
@@ -43,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [rolePermissions, setRolePermissions] = useState<{ [key: string]: PermissionLevel } | null>(null);
     const [profile, setProfile] = useState<UserProfile>({ name: 'User', avatar: 'https://placehold.co/128x128.png'});
     const [companyProfile, setCompanyProfile] = useState<CompanyProfile>({ name: 'IMIS Pro', logo: '' });
+    const [loadingScreenSettings, setLoadingScreenSettings] = useState<Partial<LoadingScreenSettings>>({});
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const pathname = usePathname();
@@ -51,10 +53,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             const userDocRef = doc(db, 'users', fbUser.uid);
             const companyDocRef = doc(db, 'settings', 'companyProfile');
+            const loadingScreenDocRef = doc(db, 'settings', 'loadingScreen');
 
-            const [userDocSnap, companyDocSnap] = await Promise.all([
+
+            const [userDocSnap, companyDocSnap, loadingScreenSnap] = await Promise.all([
                 getDoc(userDocRef),
-                getDoc(companyDocRef)
+                getDoc(companyDocRef),
+                getDoc(loadingScreenDocRef),
             ]);
             
             let userData: User | null = null;
@@ -84,6 +89,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (companyDocSnap.exists()) {
                 const companyData = companyDocSnap.data();
                 setCompanyProfile({ name: companyData.name || 'IMIS Pro', logo: companyData.logo || '' });
+            }
+
+            if (loadingScreenSnap.exists()) {
+                setLoadingScreenSettings(loadingScreenSnap.data());
             }
 
             if (userData?.role) {
@@ -124,6 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setRolePermissions(null);
                 setProfile({ name: 'User', avatar: 'https://placehold.co/128x128.png' });
                 setCompanyProfile({ name: 'IMIS Pro', logo: '' });
+                setLoadingScreenSettings({});
             }
             setIsLoading(false);
         });
@@ -190,6 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         firebaseUser,
         profile,
         companyProfile,
+        loadingScreenSettings,
         login, 
         logout, 
         isLoading,
