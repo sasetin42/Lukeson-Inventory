@@ -279,8 +279,16 @@ function AppContent({ children }: { children: React.ReactNode }) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <div className="text-center text-xs text-muted-foreground mt-2 px-2">
+            <div className="px-2 mt-2">
+              <Button
+                className="w-full text-xs"
+                style={{
+                  background: 'linear-gradient(to right, #42BBFF, #6C47B5)',
+                  color: '#FFFFFF'
+                }}
+              >
                 Develop by: SaSe App Solutions
+              </Button>
             </div>
           </SidebarFooter>
         </Sidebar>
