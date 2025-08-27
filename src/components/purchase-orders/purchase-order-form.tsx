@@ -182,7 +182,7 @@ export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }
                     <DatePicker date={expectedDeliveryDate} setDate={setExpectedDeliveryDate} />
                 </div>
                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Status</Label>
+                    <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Status <span className="text-red-500">*</span></Label>
                     <Select onValueChange={(value) => setStatus(value as PurchaseOrder['status'])} value={status}>
                         <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
                         <SelectContent>
