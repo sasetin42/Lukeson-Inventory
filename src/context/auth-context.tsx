@@ -18,6 +18,7 @@ interface CompanyProfile {
     name: string;
     logo: string;
     siteIcon?: string;
+    siteTitle?: string;
 }
 
 interface AuthContextType {
@@ -44,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [userRole, setUserRole] = useState<User['role'] | null>(null);
     const [rolePermissions, setRolePermissions] = useState<{ [key: string]: PermissionLevel } | null>(null);
     const [profile, setProfile] = useState<UserProfile>({ name: 'User', avatar: 'https://placehold.co/128x128.png'});
-    const [companyProfile, setCompanyProfile] = useState<CompanyProfile>({ name: 'IMIS Pro', logo: '', siteIcon: '' });
+    const [companyProfile, setCompanyProfile] = useState<CompanyProfile>({ name: 'IMIS Pro', logo: '', siteIcon: '', siteTitle: 'IMIS Pro' });
     const [loadingScreenSettings, setLoadingScreenSettings] = useState<Partial<LoadingScreenSettings>>({});
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
@@ -89,7 +90,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             
             if (companyDocSnap.exists()) {
                 const companyData = companyDocSnap.data();
-                setCompanyProfile({ name: companyData.name || 'IMIS Pro', logo: companyData.logo || '', siteIcon: companyData.siteIcon || '' });
+                setCompanyProfile({ 
+                    name: companyData.name || 'IMIS Pro', 
+                    logo: companyData.logo || '', 
+                    siteIcon: companyData.siteIcon || '',
+                    siteTitle: companyData.siteTitle || 'IMIS Pro - All-in-One Business Management'
+                });
             }
 
             if (loadingScreenSnap.exists()) {
@@ -133,7 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setUserRole(null);
                 setRolePermissions(null);
                 setProfile({ name: 'User', avatar: 'https://placehold.co/128x128.png' });
-                setCompanyProfile({ name: 'IMIS Pro', logo: '', siteIcon: '' });
+                setCompanyProfile({ name: 'IMIS Pro', logo: '', siteIcon: '', siteTitle: 'IMIS Pro' });
                 setLoadingScreenSettings({});
             }
             setIsLoading(false);

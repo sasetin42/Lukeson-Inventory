@@ -379,6 +379,7 @@ export type LoadingScreenSettings = {
     logo: string;
     text: string;
     backgroundColor: string;
+    siteTitle: string;
 };
 
 // Accounting

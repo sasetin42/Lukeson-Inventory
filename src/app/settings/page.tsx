@@ -26,6 +26,7 @@ export default function SettingsPage() {
 
     // Company Profile State
     const [companyName, setCompanyName] = useState('');
+    const [siteTitle, setSiteTitle] = useState('');
     const [address, setAddress] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
@@ -77,6 +78,7 @@ export default function SettingsPage() {
                 if (companySnap.exists()) {
                     const data = companySnap.data();
                     setCompanyName(data.name || '');
+                    setSiteTitle(data.siteTitle || 'IMIS Pro');
                     setAddress(data.address || '');
                     setPhone(data.phone || '');
                     setEmail(data.email || '');
@@ -116,7 +118,7 @@ export default function SettingsPage() {
         setIsSaving(true);
         try {
             // Company Profile
-            const companySettings: any = { name: companyName, address, phone, email, website };
+            const companySettings: any = { name: companyName, siteTitle, address, phone, email, website };
             if (companyLogoFile) {
                 companySettings.logo = await fileToDataUri(companyLogoFile);
             } else {
@@ -157,7 +159,7 @@ export default function SettingsPage() {
             }
             await setDoc(doc(db, 'settings', LOADING_SETTINGS_DOC_ID), loadingSettings, { merge: true });
 
-            toast({ title: "Success", description: "Settings saved successfully.", variant: "success" });
+            toast({ title: "Success", description: "Settings saved successfully. Changes may require a page refresh to take effect.", variant: "success" });
         } catch (error) {
             console.error("Error saving settings:", error);
             toast({ title: "Error", description: "Failed to save settings.", variant: "destructive" });
@@ -205,14 +207,18 @@ export default function SettingsPage() {
                                     <Label htmlFor="company-name">Company Name</Label>
                                     <Input id="company-name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Company Logo</Label>
-                                    {companyLogo && <Image src={companyLogo} alt="Company Logo" width={100} height={50} className="border p-2 rounded-md" data-ai-hint="logo"/>}
-                                    <Input type="file" onChange={(e) => setCompanyLogoFile(e.target.files?.[0] || null)} accept="image/*" />
+                                <div className="space-y-2 flex-1">
+                                    <Label htmlFor="site-title">Site Title</Label>
+                                    <Input id="site-title" value={siteTitle} onChange={(e) => setSiteTitle(e.target.value)} />
                                 </div>
                             </div>
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                  <div className="space-y-2">
+                                    <Label>Company Logo</Label>
+                                    {companyLogo && <Image src={companyLogo} alt="Company Logo" width={100} height={50} className="border p-2 rounded-md" data-ai-hint="logo"/>}
+                                    <Input type="file" onChange={(e) => setCompanyLogoFile(e.target.files?.[0] || null)} accept="image/*" />
+                                </div>
+                                <div className="space-y-2">
                                     <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4" /> Site Icon (Favicon)</Label>
                                     <div className="flex items-center gap-4">
                                         {siteIcon && <Image src={siteIcon} alt="Site Icon" width={32} height={32} className="border p-1 rounded-md" data-ai-hint="favicon"/>}

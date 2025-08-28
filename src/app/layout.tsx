@@ -307,7 +307,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
   );
 }
 
-function DynamicFavicon() {
+function DynamicFaviconAndTitle() {
     const { companyProfile } = useAuth();
     
     useEffect(() => {
@@ -320,7 +320,13 @@ function DynamicFavicon() {
             }
             link.href = companyProfile.siteIcon;
         }
-    }, [companyProfile.siteIcon]);
+
+        if(companyProfile.siteTitle) {
+            document.title = companyProfile.siteTitle;
+        } else {
+            document.title = 'IMIS Pro - All-in-One Business Management';
+        }
+    }, [companyProfile.siteIcon, companyProfile.siteTitle]);
 
     return null;
 }
@@ -341,7 +347,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased h-full bg-background transition-colors duration-300" suppressHydrationWarning={true}>
         <AuthProvider>
-            <DynamicFavicon />
+            <DynamicFaviconAndTitle />
             <AppContent>{children}</AppContent>
             <Toaster />
         </AuthProvider>
