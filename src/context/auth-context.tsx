@@ -17,6 +17,7 @@ interface UserProfile {
 interface CompanyProfile {
     name: string;
     logo: string;
+    siteIcon?: string;
 }
 
 interface AuthContextType {
@@ -43,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [userRole, setUserRole] = useState<User['role'] | null>(null);
     const [rolePermissions, setRolePermissions] = useState<{ [key: string]: PermissionLevel } | null>(null);
     const [profile, setProfile] = useState<UserProfile>({ name: 'User', avatar: 'https://placehold.co/128x128.png'});
-    const [companyProfile, setCompanyProfile] = useState<CompanyProfile>({ name: 'IMIS Pro', logo: '' });
+    const [companyProfile, setCompanyProfile] = useState<CompanyProfile>({ name: 'IMIS Pro', logo: '', siteIcon: '' });
     const [loadingScreenSettings, setLoadingScreenSettings] = useState<Partial<LoadingScreenSettings>>({});
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
@@ -88,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             
             if (companyDocSnap.exists()) {
                 const companyData = companyDocSnap.data();
-                setCompanyProfile({ name: companyData.name || 'IMIS Pro', logo: companyData.logo || '' });
+                setCompanyProfile({ name: companyData.name || 'IMIS Pro', logo: companyData.logo || '', siteIcon: companyData.siteIcon || '' });
             }
 
             if (loadingScreenSnap.exists()) {
@@ -132,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setUserRole(null);
                 setRolePermissions(null);
                 setProfile({ name: 'User', avatar: 'https://placehold.co/128x128.png' });
-                setCompanyProfile({ name: 'IMIS Pro', logo: '' });
+                setCompanyProfile({ name: 'IMIS Pro', logo: '', siteIcon: '' });
                 setLoadingScreenSettings({});
             }
             setIsLoading(false);

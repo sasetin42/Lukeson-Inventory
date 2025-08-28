@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings, Building2, Palette, LogIn, Save, Loader2, Upload, Link } from "lucide-react";
+import { Settings, Building2, Palette, LogIn, Save, Loader2, Upload, Link, Image as ImageIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { db } from '@/lib/firebase';
@@ -32,6 +32,8 @@ export default function SettingsPage() {
     const [website, setWebsite] = useState('');
     const [companyLogo, setCompanyLogo] = useState('');
     const [companyLogoFile, setCompanyLogoFile] = useState<File | null>(null);
+    const [siteIcon, setSiteIcon] = useState('');
+    const [siteIconFile, setSiteIconFile] = useState<File | null>(null);
 
     // Login Screen State
     const [loginTitle, setLoginTitle] = useState('IMIS Pro');
@@ -80,6 +82,7 @@ export default function SettingsPage() {
                     setEmail(data.email || '');
                     setWebsite(data.website || '');
                     setCompanyLogo(data.logo || '');
+                    setSiteIcon(data.siteIcon || '');
                 }
 
                 if (loginSnap.exists()) {
@@ -118,6 +121,11 @@ export default function SettingsPage() {
                 companySettings.logo = await fileToDataUri(companyLogoFile);
             } else {
                 companySettings.logo = companyLogo;
+            }
+            if (siteIconFile) {
+                companySettings.siteIcon = await fileToDataUri(siteIconFile);
+            } else {
+                companySettings.siteIcon = siteIcon;
             }
             await setDoc(doc(db, 'settings', COMPANY_SETTINGS_DOC_ID), companySettings, { merge: true });
 
@@ -192,7 +200,7 @@ export default function SettingsPage() {
                             <CardDescription>This information will appear on your invoices, purchase orders, and other documents.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                             <div className="flex items-start gap-6">
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2 flex-1">
                                     <Label htmlFor="company-name">Company Name</Label>
                                     <Input id="company-name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
@@ -203,6 +211,16 @@ export default function SettingsPage() {
                                     <Input type="file" onChange={(e) => setCompanyLogoFile(e.target.files?.[0] || null)} accept="image/*" />
                                 </div>
                             </div>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                 <div className="space-y-2">
+                                    <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4" /> Site Icon (Favicon)</Label>
+                                    <div className="flex items-center gap-4">
+                                        {siteIcon && <Image src={siteIcon} alt="Site Icon" width={32} height={32} className="border p-1 rounded-md" data-ai-hint="favicon"/>}
+                                        <Input type="file" onChange={(e) => setSiteIconFile(e.target.files?.[0] || null)} accept="image/png, image/x-icon, image/svg+xml" />
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">Upload a .png, .ico, or .svg file. Recommended size: 32x32 pixels.</p>
+                                </div>
+                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="address">Address</Label>
                                 <Textarea id="address" value={address} onChange={(e) => setAddress(e.target.value)} />

@@ -307,6 +307,24 @@ function AppContent({ children }: { children: React.ReactNode }) {
   );
 }
 
+function DynamicFavicon() {
+    const { companyProfile } = useAuth();
+    
+    useEffect(() => {
+        if (companyProfile.siteIcon) {
+            let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+            if (!link) {
+                link = document.createElement('link');
+                link.rel = 'icon';
+                document.getElementsByTagName('head')[0].appendChild(link);
+            }
+            link.href = companyProfile.siteIcon;
+        }
+    }, [companyProfile.siteIcon]);
+
+    return null;
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -323,6 +341,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased h-full bg-background transition-colors duration-300" suppressHydrationWarning={true}>
         <AuthProvider>
+            <DynamicFavicon />
             <AppContent>{children}</AppContent>
             <Toaster />
         </AuthProvider>
