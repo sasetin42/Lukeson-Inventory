@@ -134,12 +134,6 @@ export default function PaymentsPage() {
         title="Payments Received"
         description="Track and manage all customer payments."
         icon={<Banknote className="h-6 w-6 text-indigo-500" />}
-        actions={
-            <Button variant="outline" onClick={handleClearHistory}>
-                <History className="mr-2 h-4 w-4" />
-                Clearing History
-            </Button>
-        }
       />
       <div className="grid gap-6 md:grid-cols-3">
         {kpis.map((kpi, index) => (
@@ -159,6 +153,7 @@ export default function PaymentsPage() {
         onViewTransaction={handleViewTransaction}
         onViewSalesInvoice={handleViewSalesInvoice}
         onViewCustomer={handleViewCustomer}
+        onClearHistory={handleClearHistory}
       />
       
       {viewingTransaction && (

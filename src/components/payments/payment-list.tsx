@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Invoice } from "@/lib/types";
 import { format } from "date-fns";
 import { Button } from "../ui/button";
-import { Eye, FileText, User, List } from "lucide-react";
+import { Eye, FileText, User, List, History } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 interface PaymentListProps {
@@ -14,9 +14,10 @@ interface PaymentListProps {
     onViewTransaction: (invoice: Invoice) => void;
     onViewSalesInvoice: (invoice: Invoice) => void;
     onViewCustomer: (invoice: Invoice) => void;
+    onClearHistory: () => void;
 }
 
-export default function PaymentList({ invoices, onViewTransaction, onViewSalesInvoice, onViewCustomer }: PaymentListProps) {
+export default function PaymentList({ invoices, onViewTransaction, onViewSalesInvoice, onViewCustomer, onClearHistory }: PaymentListProps) {
     
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -31,10 +32,16 @@ export default function PaymentList({ invoices, onViewTransaction, onViewSalesIn
                         <CardTitle>Payment History</CardTitle>
                         <CardDescription>A list of all successfully paid invoices.</CardDescription>
                     </div>
-                    <Button variant="outline">
-                        <List className="mr-2 h-4 w-4" />
-                        Recent Transactions
-                    </Button>
+                    <div className="flex items-center gap-2">
+                         <Button variant="outline">
+                            <List className="mr-2 h-4 w-4" />
+                            Recent Transactions
+                        </Button>
+                        <Button variant="outline" onClick={onClearHistory}>
+                            <History className="mr-2 h-4 w-4" />
+                            Clearing History
+                        </Button>
+                    </div>
                 </div>
             </CardHeader>
             <CardContent>
