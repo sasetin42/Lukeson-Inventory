@@ -135,16 +135,10 @@ export default function PaymentsPage() {
         description="Track and manage all customer payments."
         icon={<Banknote className="h-6 w-6 text-indigo-500" />}
         actions={
-            <div className="flex gap-2">
-                <Button variant="outline" onClick={handleClearHistory}>
-                    <History className="mr-2 h-4 w-4" />
-                    Clearing History
-                </Button>
-                <Button variant="outline">
-                    <List className="mr-2 h-4 w-4" />
-                    Recent Transactions
-                </Button>
-            </div>
+            <Button variant="outline" onClick={handleClearHistory}>
+                <History className="mr-2 h-4 w-4" />
+                Clearing History
+            </Button>
         }
       />
       <div className="grid gap-6 md:grid-cols-3">
@@ -203,4 +197,3 @@ export default function PaymentsPage() {
     </div>
   );
 }
-
