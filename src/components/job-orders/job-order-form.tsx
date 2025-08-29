@@ -190,7 +190,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
             const customer = customers.find(c => c.id === customerId);
             
             const jobOrderData = {
-                id: jobOrder?.id,
+                id: jobOrderId,
                 customerId,
                 customerName: customer?.name || 'N/A',
                 salesOrderId,
