@@ -97,7 +97,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                 <div className="w-1/2">
                     <p className="font-bold">BILL TO:</p>
                     <p>{invoice.customerName}</p>
-                    {invoice.customerTin && <p><strong>VAT REG. TIN: {invoice.customerTin}</strong></p>}
+                    {invoice.customerTin && <p><strong>TIN: {invoice.customerTin}</strong></p>}
                     {invoice.customerEmail && <p>Email: {invoice.customerEmail}</p>}
                     {invoice.customerPhone && <p>Phone: {invoice.customerPhone}</p>}
                 </div>
