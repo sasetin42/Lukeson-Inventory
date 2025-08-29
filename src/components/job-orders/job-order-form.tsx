@@ -181,9 +181,6 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
         try {
             const customer = customers.find(c => c.id === customerId);
             
-            // If new, set to In Progress, otherwise keep existing status
-            const finalStatus = !jobOrder?.id ? 'In Progress' : status;
-
             const jobOrderData = {
                 id: jobOrder?.id || jobOrderId,
                 customerId,
@@ -191,7 +188,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
                 salesOrderId,
                 jobOrderDate,
                 expectedCompletionDate: expectedCompletionDate || null,
-                status: finalStatus,
+                status: status,
                 lines,
                 notes,
                 totalAmount: calculateTotalAmount(),
