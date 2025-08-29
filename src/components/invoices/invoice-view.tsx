@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Invoice, SalesOrder } from '@/lib/types';
@@ -77,7 +76,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                     <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo" />
                     <div className="text-xs">
                         <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
-                        {tin && <p><strong>TIN:</strong> {tin}</p>}
+                        {tin && <p><strong>TIN: {tin}</strong></p>}
                         <p>{address}</p>
                         <p>{phone}</p>
                         <p>{website}</p>
@@ -97,7 +96,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                 <div className="w-1/2">
                     <p className="font-bold">BILL TO:</p>
                     <p>{invoice.customerName}</p>
-                    {invoice.customerTin && <p><strong>TIN:</strong> {invoice.customerTin}</p>}
+                    {invoice.customerTin && <p><strong>TIN: {invoice.customerTin}</strong></p>}
                     {invoice.customerEmail && <p>Email: {invoice.customerEmail}</p>}
                     {invoice.customerPhone && <p>Phone: {invoice.customerPhone}</p>}
                 </div>
@@ -128,7 +127,15 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                 </tbody>
             </table>
             
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-between mt-4">
+                <div className="w-1/2">
+                    {showNotes && (
+                        <div>
+                            <h4 className="font-bold">Notes:</h4>
+                            <p className="text-sm text-muted-foreground">{invoice.notes || 'No notes for this invoice.'}</p>
+                        </div>
+                    )}
+                </div>
                 <div className="w-1/2 text-sm space-y-1">
                     {showVat && (
                         <>
@@ -148,13 +155,6 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                     </div>
                 </div>
             </div>
-
-            {showNotes && (
-                 <div className="mt-8">
-                    <h4 className="font-bold">Notes:</h4>
-                    <p className="text-sm text-muted-foreground">{invoice.notes || 'No notes for this invoice.'}</p>
-                </div>
-            )}
 
             <div className="flex justify-between mt-24 text-center text-xs">
                 <div>
