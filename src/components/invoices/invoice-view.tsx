@@ -80,9 +80,12 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                 </div>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-8 text-sm">
                 <p className="font-bold">BILL TO:</p>
                 <p>{invoice.customerName}</p>
+                {invoice.customerTin && <p>TIN: {invoice.customerTin}</p>}
+                {invoice.customerEmail && <p>Email: {invoice.customerEmail}</p>}
+                {invoice.customerPhone && <p>Phone: {invoice.customerPhone}</p>}
             </div>
             
             <table className="w-full mt-4 border-collapse text-sm">

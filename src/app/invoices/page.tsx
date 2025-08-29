@@ -7,7 +7,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle, DollarSign, CheckCircle, XCircle, Search, AlertCircle } from "lucide-react";
 import InvoiceList from "@/components/invoices/invoice-list";
-import { Invoice, PaymentMethod, SalesOrder } from '@/lib/types';
+import { Invoice, PaymentMethod, SalesOrder, Customer } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc, serverTimestamp, deleteDoc, getDoc, addDoc } from 'firebase/firestore';
@@ -106,15 +106,37 @@ function InvoicesContent() {
   const handleSaveInvoice = async (invoiceData: Omit<Invoice, 'id'> & {id?: string}) => {
     try {
         const { id, ...dataToSave } = invoiceData;
+
+        // Fetch customer details to enrich the invoice
+        let customerData: Partial<Customer> = {};
+        if(dataToSave.customerId) {
+            const customerRef = doc(db, 'customers', dataToSave.customerId);
+            const customerSnap = await getDoc(customerRef);
+            if(customerSnap.exists()) {
+                customerData = customerSnap.data();
+            }
+        }
         
-        if(id && editingInvoice) { // Editing existing invoice
+        const finalData = {
+            ...dataToSave,
+            customerName: customerData.name || dataToSave.customerName,
+            customerTin: customerData.tin || '',
+            customerEmail: customerData.email || '',
+            customerPhone: customerData.phone || '',
+        };
+        
+        if(id) { // Editing existing invoice or creating with a pre-generated ID
             const docRef = doc(db, "invoices", id);
-            await setDoc(docRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
-            toast({ title: "Success", description: "Invoice updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
-        } else if (id) { // Creating new invoice with a pre-generated ID
-            const docRef = doc(db, "invoices", id);
-            await setDoc(docRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
-            toast({ title: "Success", description: "Invoice created successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
+            if (editingInvoice) { // Editing
+                await setDoc(docRef, { ...finalData, modifiedAt: serverTimestamp() }, { merge: true });
+                toast({ title: "Success", description: "Invoice updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
+            } else { // Creating
+                 await setDoc(docRef, { ...finalData, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+                toast({ title: "Success", description: "Invoice created successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
+            }
+        } else { // Should not happen with current logic, but as a fallback
+             await addDoc(collection(db, "invoices"), { ...finalData, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+             toast({ title: "Success", description: "Invoice created successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
         }
         
         // Update Sales Order status

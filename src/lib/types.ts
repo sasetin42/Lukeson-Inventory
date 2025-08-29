@@ -169,6 +169,9 @@ export type Invoice = {
     salesOrderId: string;
     customerId: string;
     customerName?: string;
+    customerTin?: string;
+    customerEmail?: string;
+    customerPhone?: string;
     date: Date | FieldValue | string;
     dueDate: Date | FieldValue | string;
     status: 'Draft' | 'Posted' | 'Paid' | 'Overdue';
