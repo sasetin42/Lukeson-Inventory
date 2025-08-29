@@ -172,10 +172,10 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            if (file.size < 50 * 1024 || file.size > 100 * 1024) {
                 toast({
-                    title: "File too large",
-                    description: "Please upload an image smaller than 5MB.",
+                    title: "Invalid File Size",
+                    description: "Image size must be between 50KB and 100KB.",
                     variant: "destructive",
                 });
                 return;

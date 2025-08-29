@@ -61,6 +61,23 @@ export default function SettingsPage() {
         });
     }
 
+    const handleFileChange = (file: File | null, setter: (file: File | null) => void, fieldName: string) => {
+        if (file) {
+            if (file.size < 50 * 1024 || file.size > 100 * 1024) {
+                toast({
+                    title: "Invalid File Size",
+                    description: `${fieldName} image size must be between 50KB and 100KB.`,
+                    variant: "destructive",
+                });
+                return;
+            }
+            setter(file);
+        } else {
+            setter(null);
+        }
+    }
+
+
     useEffect(() => {
         const fetchSettings = async () => {
             setIsLoading(true);
@@ -216,13 +233,13 @@ export default function SettingsPage() {
                                  <div className="space-y-2">
                                     <Label>Company Logo</Label>
                                     {companyLogo && <Image src={companyLogo} alt="Company Logo" width={100} height={50} className="border p-2 rounded-md" data-ai-hint="logo"/>}
-                                    <Input type="file" onChange={(e) => setCompanyLogoFile(e.target.files?.[0] || null)} accept="image/*" />
+                                    <Input type="file" onChange={(e) => handleFileChange(e.target.files?.[0] || null, setCompanyLogoFile, 'Company Logo')} accept="image/*" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4" /> Site Icon (Favicon)</Label>
                                     <div className="flex items-center gap-4">
                                         {siteIcon && <Image src={siteIcon} alt="Site Icon" width={32} height={32} className="border p-1 rounded-md" data-ai-hint="favicon"/>}
-                                        <Input type="file" onChange={(e) => setSiteIconFile(e.target.files?.[0] || null)} accept="image/png, image/x-icon, image/svg+xml" />
+                                        <Input type="file" onChange={(e) => handleFileChange(e.target.files?.[0] || null, setSiteIconFile, 'Site Icon')} accept="image/png, image/x-icon, image/svg+xml" />
                                     </div>
                                     <p className="text-xs text-muted-foreground">Upload a .png, .ico, or .svg file. Recommended size: 32x32 pixels.</p>
                                 </div>
@@ -267,7 +284,7 @@ export default function SettingsPage() {
                                  <div className="space-y-2">
                                     <Label>Login Form Logo</Label>
                                     {loginLogo && <Image src={loginLogo} alt="Login Logo" width={80} height={80} className="border p-2 rounded-md object-contain" data-ai-hint="logo"/>}
-                                    <Input type="file" onChange={(e) => setLoginLogoFile(e.target.files?.[0] || null)} accept="image/*" />
+                                    <Input type="file" onChange={(e) => handleFileChange(e.target.files?.[0] || null, setLoginLogoFile, 'Login Logo')} accept="image/*" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Background Image</Label>
@@ -278,7 +295,7 @@ export default function SettingsPage() {
                                                 <Upload className="w-8 h-8 mb-4 text-primary" />
                                                 <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                                             </div>
-                                            <Input id="dropzone-file-bg" type="file" className="hidden" onChange={(e) => setLoginBgFile(e.target.files?.[0] || null)} accept="image/*"/>
+                                            <Input id="dropzone-file-bg" type="file" className="hidden" onChange={(e) => handleFileChange(e.target.files?.[0] || null, setLoginBgFile, 'Login Background')} accept="image/*"/>
                                         </label>
                                     </div> 
                                 </div>
@@ -332,7 +349,7 @@ export default function SettingsPage() {
                                 <Label>Loading Logo</Label>
                                 <div className="flex items-center gap-4">
                                     {loadingLogo && <Image src={loadingLogo} alt="Loading Logo" width={80} height={80} className="border p-2 rounded-md object-contain" data-ai-hint="logo"/>}
-                                    <Input type="file" onChange={(e) => setLoadingLogoFile(e.target.files?.[0] || null)} accept="image/*" />
+                                    <Input type="file" onChange={(e) => handleFileChange(e.target.files?.[0] || null, setLoadingLogoFile, 'Loading Logo')} accept="image/*" />
                                 </div>
                             </div>
                         </CardContent>

@@ -111,6 +111,14 @@ export default function SalesOrderTemplate() {
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+             if (file.size < 50 * 1024 || file.size > 100 * 1024) {
+                toast({
+                    title: "Invalid File Size",
+                    description: "Image size must be between 50KB and 100KB.",
+                    variant: "destructive",
+                });
+                return;
+            }
             const reader = new FileReader();
             reader.onloadend = () => {
                 setLogo(reader.result as string);

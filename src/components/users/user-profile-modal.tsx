@@ -46,8 +46,12 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
     const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 2 * 1024 * 1024) { // 2MB limit
-                toast({ title: "File too large", description: "Please upload an image smaller than 2MB.", variant: "destructive" });
+            if (file.size < 50 * 1024 || file.size > 100 * 1024) {
+                toast({
+                    title: "Invalid File Size",
+                    description: "Image size must be between 50KB and 100KB.",
+                    variant: "destructive",
+                });
                 return;
             }
             setAvatarFile(file);

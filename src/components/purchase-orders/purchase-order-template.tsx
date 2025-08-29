@@ -111,6 +111,14 @@ export default function PurchaseOrderTemplate() {
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            if (file.size < 50 * 1024 || file.size > 100 * 1024) {
+                toast({
+                    title: "Invalid File Size",
+                    description: "Image size must be between 50KB and 100KB.",
+                    variant: "destructive",
+                });
+                return;
+            }
             const reader = new FileReader();
             reader.onloadend = () => {
                 setLogo(reader.result as string);
@@ -126,7 +134,6 @@ export default function PurchaseOrderTemplate() {
             </div>
         );
     }
-
 
     return (
         <div>
@@ -197,7 +204,7 @@ export default function PurchaseOrderTemplate() {
                                         <div className="flex text-sm text-gray-600">
                                             <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-focus">
                                                 <span>Upload a file</span>
-                                                <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleImageUpload} />
+                                                <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleImageUpload}/>
                                             </label>
                                             <p className="pl-1">or drag and drop</p>
                                         </div>
