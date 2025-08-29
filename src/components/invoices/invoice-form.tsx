@@ -22,9 +22,10 @@ interface InvoiceFormProps {
   invoice: Invoice | null;
   onSuccess: (invoiceData: Omit<Invoice, 'id'> & {id?: string}) => void;
   onCancel: () => void;
+  onIdGenerated: (id: string) => void;
 }
 
-export default function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFormProps) {
+export default function InvoiceForm({ invoice, onSuccess, onCancel, onIdGenerated }: InvoiceFormProps) {
     const { toast } = useToast();
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [allInvoices, setAllInvoices] = useState<Invoice[]>([]);
@@ -72,11 +73,15 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFor
             const snapshot = await getDocs(invoicesRef);
             const count = snapshot.size;
             const year = new Date().getFullYear();
-            setInvoiceId(`INV-${year}-${(count + 1).toString().padStart(4, '0')}`);
+            const newId = `INV-${year}-${(count + 1).toString().padStart(4, '0')}`;
+            setInvoiceId(newId);
+            onIdGenerated(newId);
         };
 
         if (invoice) {
-            setInvoiceId(invoice.id || '');
+            const id = invoice.id || '';
+            setInvoiceId(id);
+            onIdGenerated(id);
             setCustomerId(invoice.customerId || '');
             setSalesOrderId(invoice.salesOrderId);
             setInvoiceDate(invoice.date ? (invoice.date as any).toDate() : new Date());
@@ -90,7 +95,7 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFor
             generateInvoiceId();
             resetForm(false);
         }
-    }, [invoice]);
+    }, [invoice, onIdGenerated]);
     
     const resetForm = (keepCustomer: boolean) => {
         if(!keepCustomer) setCustomerId('');
@@ -248,11 +253,7 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFor
 
     return (
         <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Hash className="h-4 w-4" /> Invoice ID</Label>
-                    <Input value={invoiceId} disabled />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><User className="h-4 w-4" /> Customer</Label>
                     <Select onValueChange={setCustomerId} value={customerId}>

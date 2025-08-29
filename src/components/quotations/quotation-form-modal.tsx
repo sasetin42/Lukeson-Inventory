@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Quotation } from '@/lib/types';
 import QuotationForm from './quotation-form';
+import { useState } from 'react';
 
 interface QuotationFormModalProps {
   isOpen: boolean;
@@ -24,17 +25,23 @@ export default function QuotationFormModal({
     quotation, 
     onSave,
 }: QuotationFormModalProps) {
+    const [quotationId, setQuotationId] = useState<string | null>(null);
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-            <DialogTitle>{quotation ? 'Edit Quotation' : 'Add New Quotation'}</DialogTitle>
+            <DialogTitle>{quotation ? 'Edit Quotation' : 'Add New Quotation'} {quotationId && <span className="text-primary font-mono">{quotationId}</span>}</DialogTitle>
             <DialogDescription>
                 {quotation ? 'Update the details of this quotation.' : 'Fill in the details below to add a new quotation.'}
             </DialogDescription>
             </DialogHeader>
-            <QuotationForm quotation={quotation} onSuccess={onSave} onCancel={onClose}/>
+            <QuotationForm 
+                quotation={quotation} 
+                onSuccess={onSave} 
+                onCancel={onClose}
+                onIdGenerated={setQuotationId}
+            />
         </DialogContent>
         </Dialog>
     );

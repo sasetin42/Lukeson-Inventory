@@ -20,9 +20,10 @@ interface QuotationFormProps {
   quotation: Quotation | null;
   onSuccess: (quotationData: Omit<Quotation, 'id'> & {id?: string}) => void;
   onCancel: () => void;
+  onIdGenerated: (id: string) => void;
 }
 
-export default function QuotationForm({ quotation, onSuccess, onCancel }: QuotationFormProps) {
+export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGenerated }: QuotationFormProps) {
     const { toast } = useToast();
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
@@ -65,11 +66,15 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
             const snapshot = await getDocs(quotationsRef);
             const quotationsCount = snapshot.size;
             const year = new Date().getFullYear();
-            setQuotationId(`QTN-${year}-${(quotationsCount + 1).toString().padStart(4, '0')}`);
+            const newId = `QTN-${year}-${(quotationsCount + 1).toString().padStart(4, '0')}`;
+            setQuotationId(newId);
+            onIdGenerated(newId);
         };
 
         if (quotation) {
-            setQuotationId(quotation.id || '');
+            const id = quotation.id || '';
+            setQuotationId(id);
+            onIdGenerated(id);
             setCustomerId(quotation.customerId || '');
             setQtnDate(quotation.qtnDate ? (quotation.qtnDate as any).toDate() : new Date());
             setExpiryDate(quotation.expiryDate ? (quotation.expiryDate as any).toDate() : undefined);
@@ -84,7 +89,7 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
             setLines([]);
             setNotes('');
         }
-    }, [quotation]);
+    }, [quotation, onIdGenerated]);
     
     const handleAddLine = () => {
         const newLine: DocumentLine = {
@@ -170,11 +175,7 @@ export default function QuotationForm({ quotation, onSuccess, onCancel }: Quotat
 
     return (
         <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Hash className="h-4 w-4" /> Quotation ID</Label>
-                    <Input value={quotationId} disabled />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><User className="h-4 w-4" /> Customer <span className="text-red-500">*</span></Label>
                     <Select onValueChange={setCustomerId} value={customerId}>
