@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { JobOrder } from '@/lib/types';
 import JobOrderForm from './job-order-form';
+import { useState } from "react";
 
 interface JobOrderFormModalProps {
   isOpen: boolean;
@@ -24,17 +25,23 @@ export default function JobOrderFormModal({
     jobOrder, 
     onSave,
 }: JobOrderFormModalProps) {
+    const [jobOrderId, setJobOrderId] = useState<string | null>(null);
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-            <DialogTitle>{jobOrder ? 'Edit Job Order' : 'Add New Job Order'}</DialogTitle>
+            <DialogTitle>{jobOrder ? 'Edit Job Order' : 'Add New Job Order'} {jobOrderId && <span className="text-primary font-mono">{jobOrderId}</span>}</DialogTitle>
             <DialogDescription>
                 {jobOrder ? 'Update the details of this job order.' : 'Fill in the details below to add a new job order.'}
             </DialogDescription>
             </DialogHeader>
-            <JobOrderForm jobOrder={jobOrder} onSuccess={onSave} onCancel={onClose}/>
+            <JobOrderForm 
+                jobOrder={jobOrder} 
+                onSuccess={onSave} 
+                onCancel={onClose}
+                onIdGenerated={setJobOrderId}
+            />
         </DialogContent>
         </Dialog>
     );

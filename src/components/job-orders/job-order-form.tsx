@@ -20,6 +20,7 @@ interface JobOrderFormProps {
   jobOrder: JobOrder | null;
   onSuccess: (jobOrderData: Omit<JobOrder, 'id'> & {id?: string}) => void;
   onCancel: () => void;
+  onIdGenerated: (id: string) => void;
 }
 
 const DEFAULT_TAX_RATE = 0.12;
@@ -32,7 +33,7 @@ const safeToDate = (date: any): Date | undefined => {
     return undefined;
 }
 
-export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrderFormProps) {
+export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenerated }: JobOrderFormProps) {
     const { toast } = useToast();
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
@@ -80,11 +81,15 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             const snapshot = await getDocs(joRef);
             const joCount = snapshot.size;
             const year = new Date().getFullYear();
-            setJobOrderId(`JO-${year}-${(joCount + 1).toString().padStart(4, '0')}`);
+            const newId = `JO-${year}-${(joCount + 1).toString().padStart(4, '0')}`;
+            setJobOrderId(newId);
+            onIdGenerated(newId);
         };
 
         if (jobOrder) {
-            setJobOrderId(jobOrder.id || '');
+            const id = jobOrder.id || '';
+            setJobOrderId(id);
+            onIdGenerated(id);
             setCustomerId(jobOrder.customerId || '');
             setSalesOrderId(jobOrder.salesOrderId);
             setJobOrderDate(safeToDate(jobOrder.jobOrderDate));
@@ -106,7 +111,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
             setQuotationNotes('');
             setSalesOrderNotes('');
         }
-    }, [jobOrder]);
+    }, [jobOrder, onIdGenerated]);
     
     useEffect(() => {
         const fetchSalesOrders = async () => {
@@ -202,11 +207,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel }: JobOrder
 
     return (
         <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Hash className="h-4 w-4" /> Job Order ID</Label>
-                    <Input value={jobOrderId} disabled />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><User className="h-4 w-4" /> Customer</Label>
                     <Select onValueChange={setCustomerId} value={customerId}>
