@@ -15,6 +15,7 @@ import Image from 'next/image';
 import { Eye, User, Calendar, CreditCard, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { Separator } from '../ui/separator';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface TransactionViewModalProps {
   invoice: Invoice | null;
@@ -38,7 +39,7 @@ export default function TransactionViewModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] flex flex-col">
         <DialogHeader>
             <div className="flex items-start gap-4">
                 <div className="p-2 bg-blue-100 rounded-md">
@@ -52,6 +53,7 @@ export default function TransactionViewModal({
                 </div>
             </div>
         </DialogHeader>
+        <ScrollArea className="flex-1 pr-6 -mr-6">
         <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-2 p-3 rounded-md bg-muted/50">
@@ -104,7 +106,8 @@ export default function TransactionViewModal({
             </div>
           )}
         </div>
-        <DialogFooter>
+        </ScrollArea>
+        <DialogFooter className="mt-auto pt-4 border-t">
           <Button onClick={onClose}>Close</Button>
         </DialogFooter>
       </DialogContent>
