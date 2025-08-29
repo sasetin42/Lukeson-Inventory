@@ -27,12 +27,9 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         showDueDate: true,
         showNotes: true,
         showVat: true,
-        preparedByLabel: 'Prepared by:',
-        preparedByName: 'YMP / MCB / MJTS',
-        receivedByLabel: 'Received by:',
-        receivedByName: 'JUAN DELA CRUZ',
-        verifiedByLabel: 'Verified by:',
-        verifiedByName: 'HIROYOSHI KANAZAWA - VP',
+        preparedBy: 'YMP / MCB / MJTS\nPrepared by',
+        receivedBy: 'JUAN DELA CRUZ\nReceived by',
+        verifiedBy: 'HIROYOSHI KANAZAWA - VP\nVerified by',
     });
     const [salesOrder, setSalesOrder] = useState<SalesOrder | null>(null);
     
@@ -61,7 +58,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         fetchSettingsAndData();
     }, [invoice.salesOrderId]);
 
-    const { accentColor, companyName, tin, address, phone, website, logo, showDueDate, showNotes, showVat, preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName } = templateSettings;
+    const { accentColor, companyName, tin, address, phone, website, logo, showDueDate, showNotes, showVat, preparedBy, receivedBy, verifiedBy } = templateSettings;
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -69,6 +66,17 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
     };
     
     const totalSales = invoice.lines.reduce((acc, line) => acc + line.total, 0);
+
+    const renderSignature = (text: string) => {
+        const [name, ...labelParts] = text.split('\n');
+        const label = labelParts.join('\n');
+        return (
+            <div>
+                <p className="font-bold">{name}</p>
+                <p className="border-t border-black pt-1 mt-1">{label}</p>
+            </div>
+        )
+    }
 
     return (
         <div className="p-8 bg-white text-black">
@@ -158,18 +166,9 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
             </div>
 
             <div className="flex justify-between mt-24 text-center text-xs">
-                <div>
-                    <p className="font-bold">{preparedByName}</p>
-                    <p className="border-t border-black pt-1 mt-1">{preparedByLabel}</p>
-                </div>
-                 <div>
-                    <p className="font-bold">{receivedByName}</p>
-                    <p className="border-t border-black pt-1 mt-1">{receivedByLabel}</p>
-                </div>
-                 <div>
-                    <p className="font-bold">{verifiedByName}</p>
-                    <p className="border-t border-black pt-1 mt-1">{verifiedByLabel}</p>
-                </div>
+                {renderSignature(preparedBy)}
+                {renderSignature(receivedBy)}
+                {renderSignature(verifiedBy)}
             </div>
         </div>
     );

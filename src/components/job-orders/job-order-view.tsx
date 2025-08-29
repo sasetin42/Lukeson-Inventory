@@ -31,12 +31,9 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         showDueDate: true,
         showNotes: true,
         showVat: true,
-        preparedByLabel: 'Prepared by:',
-        preparedByName: 'Admin',
-        receivedByLabel: 'Received by:',
-        receivedByName: '_________________________',
-        verifiedByLabel: 'Verified by:',
-        verifiedByName: '_________________________',
+        preparedBy: 'Admin\nPrepared by',
+        receivedBy: '_________________________\nReceived by',
+        verifiedBy: '_________________________\nVerified by',
     });
     
     useEffect(() => {
@@ -54,7 +51,7 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         fetchSettings();
     }, []);
 
-    const { companyName, address, phone, website, logo, preparedByName, preparedByLabel, receivedByName, receivedByLabel, verifiedByName, verifiedByLabel } = templateSettings;
+    const { companyName, address, phone, website, logo, preparedBy, receivedBy, verifiedBy } = templateSettings;
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -95,6 +92,17 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
             default: return 'outline';
         }
     };
+    
+    const renderSignature = (text: string) => {
+        const [name, ...labelParts] = text.split('\n');
+        const label = labelParts.join('\n');
+        return (
+            <div>
+                <p className="font-bold">{name}</p>
+                <p className="text-xs border-t border-black pt-1 mt-1">{label}</p>
+            </div>
+        )
+    }
 
     return (
         <div className="py-4 text-xs">
@@ -202,18 +210,9 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
             </div>
 
             <div className="flex justify-between mt-16 text-center text-xs">
-                <div>
-                    <p className="font-bold">{preparedByName}</p>
-                    <p className="text-xs border-t border-black pt-1 mt-1">{preparedByLabel}</p>
-                </div>
-                 <div>
-                    <p className="font-bold">{receivedByName}</p>
-                    <p className="text-xs border-t border-black pt-1 mt-1">{receivedByLabel}</p>
-                </div>
-                 <div>
-                    <p className="font-bold">{verifiedByName}</p>
-                    <p className="text-xs border-t border-black pt-1 mt-1">{verifiedByLabel}</p>
-                </div>
+                {renderSignature(preparedBy)}
+                {renderSignature(receivedBy)}
+                {renderSignature(verifiedBy)}
             </div>
         </div>
     );

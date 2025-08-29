@@ -33,12 +33,9 @@ export default function JobOrderSettings() {
     const [website, setWebsite] = useState('https://lukesonlighting.com.ph/');
     const [logo, setLogo] = useState('https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/e903a953-ab33-4f9e-953e-5390916e6373.png?alt=media');
 
-    const [preparedByLabel, setPreparedByLabel] = useState('Prepared by:');
-    const [preparedByName, setPreparedByName] = useState('Admin');
-    const [receivedByLabel, setReceivedByLabel] = useState('Received by:');
-    const [receivedByName, setReceivedByName] = useState('_________________________');
-    const [verifiedByLabel, setVerifiedByLabel] = useState('Verified by:');
-    const [verifiedByName, setVerifiedByName] = useState('_________________________');
+    const [preparedBy, setPreparedBy] = useState('Admin\nPrepared by');
+    const [receivedBy, setReceivedBy] = useState('_________________________\nReceived by');
+    const [verifiedBy, setVerifiedBy] = useState('_________________________\nVerified by');
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -59,12 +56,9 @@ export default function JobOrderSettings() {
                     setEmail(settings.email || 'sales@lukesonlighting.com.ph');
                     setWebsite(settings.website || 'https://lukesonlighting.com.ph/');
                     setLogo(settings.logo || 'https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/e903a953-ab33-4f9e-953e-5390916e6373.png?alt=media');
-                    setPreparedByLabel(settings.preparedByLabel || 'Prepared by:');
-                    setPreparedByName(settings.preparedByName || 'Admin');
-                    setReceivedByLabel(settings.receivedByLabel || 'Received by:');
-                    setReceivedByName(settings.receivedByName || '_________________________');
-                    setVerifiedByLabel(settings.verifiedByLabel || 'Verified by:');
-                    setVerifiedByName(settings.verifiedByName || '_________________________');
+                    setPreparedBy(settings.preparedBy || 'Admin\nPrepared by');
+                    setReceivedBy(settings.receivedBy || '_________________________\nReceived by');
+                    setVerifiedBy(settings.verifiedBy || '_________________________\nVerified by');
                 }
             } catch (error) {
                 console.error("Error fetching template settings:", error);
@@ -85,7 +79,7 @@ export default function JobOrderSettings() {
         setIsSaving(true);
         const settings = {
             accentColor, showDueDate, showNotes, showVat, companyName, address, phone, email, website, logo,
-            preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName,
+            preparedBy, receivedBy, verifiedBy,
         };
 
         try {
@@ -126,6 +120,17 @@ export default function JobOrderSettings() {
             reader.readAsDataURL(file);
         }
     };
+    
+    const renderSignature = (text: string) => {
+        const [name, ...labelParts] = text.split('\n');
+        const label = labelParts.join('\n');
+        return (
+            <div>
+                <p className="font-bold">{name}</p>
+                <p className="text-sm border-t border-black pt-1 mt-1">{label}</p>
+            </div>
+        )
+    }
 
     if (isLoading) {
         return (
@@ -241,28 +246,16 @@ export default function JobOrderSettings() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div>
-                                <Label htmlFor="prepared-by-label">"Prepared by" Label</Label>
-                                <Input id="prepared-by-label" value={preparedByLabel} onChange={(e) => setPreparedByLabel(e.target.value)} />
+                                <Label htmlFor="prepared-by">"Prepared by" Signature</Label>
+                                <Textarea id="prepared-by" value={preparedBy} onChange={(e) => setPreparedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                              <div>
-                                <Label htmlFor="prepared-by-name">Name</Label>
-                                <Input id="prepared-by-name" value={preparedByName} onChange={(e) => setPreparedByName(e.target.value)} />
+                                <Label htmlFor="received-by">"Received by" Signature</Label>
+                                <Textarea id="received-by" value={receivedBy} onChange={(e) => setReceivedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                              <div>
-                                <Label htmlFor="received-by-label">"Received by" Label</Label>
-                                <Input id="received-by-label" value={receivedByLabel} onChange={(e) => setReceivedByLabel(e.target.value)} />
-                            </div>
-                             <div>
-                                <Label htmlFor="received-by-name">Name</Label>
-                                <Input id="received-by-name" value={receivedByName} onChange={(e) => setReceivedByName(e.target.value)} />
-                            </div>
-                             <div>
-                                <Label htmlFor="verified-by-label">"Verified by" Label</Label>
-                                <Input id="verified-by-label" value={verifiedByLabel} onChange={(e) => setVerifiedByLabel(e.target.value)} />
-                            </div>
-                             <div>
-                                <Label htmlFor="verified-by-name">Name</Label>
-                                <Input id="verified-by-name" value={verifiedByName} onChange={(e) => setVerifiedByName(e.target.value)} />
+                                <Label htmlFor="verified-by">"Verified by" Signature</Label>
+                                <Textarea id="verified-by" value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                         </CardContent>
                     </Card>
@@ -323,18 +316,9 @@ export default function JobOrderSettings() {
                         )}
 
                         <div className="flex justify-between mt-24 text-center">
-                            <div>
-                                <p className="font-bold">{preparedByName}</p>
-                                <p className="text-sm border-t border-black pt-1 mt-1">{preparedByLabel}</p>
-                            </div>
-                             <div>
-                                <p className="font-bold">{receivedByName}</p>
-                                <p className="text-sm border-t border-black pt-1 mt-1">{receivedByLabel}</p>
-                            </div>
-                             <div>
-                                <p className="font-bold">{verifiedByName}</p>
-                                <p className="text-sm border-t border-black pt-1 mt-1">{verifiedByLabel}</p>
-                            </div>
+                            {renderSignature(preparedBy)}
+                            {renderSignature(receivedBy)}
+                            {renderSignature(verifiedBy)}
                         </div>
                     </Card>
                 </div>

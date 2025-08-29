@@ -27,12 +27,9 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
         showDueDate: true,
         showNotes: true,
         showVat: true,
-        preparedByLabel: 'Prepared by:',
-        preparedByName: 'YMP / MCB / MJTS',
-        receivedByLabel: 'Received by:',
-        receivedByName: 'JUAN DELA CRUZ',
-        verifiedByLabel: 'Verified by:',
-        verifiedByName: 'HIROYOSHI KANAZAWA - VP',
+        preparedBy: 'YMP / MCB / MJTS\nPrepared by',
+        receivedBy: 'JUAN DELA CRUZ\nReceived by',
+        verifiedBy: 'HIROYOSHI KANAZAWA - VP\nVerified by',
     });
     
     useEffect(() => {
@@ -50,7 +47,7 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
         fetchSettings();
     }, []);
 
-    const { accentColor, companyName, address, phone, website, logo, showNotes, showVat, preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName } = templateSettings;
+    const { accentColor, companyName, address, phone, website, logo, showNotes, showVat, preparedBy, receivedBy, verifiedBy } = templateSettings;
 
     const totals = useMemo(() => {
         const totalSales = salesOrder.lines.reduce((acc, l) => acc + l.total, 0);
@@ -129,6 +126,17 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
             default: return 'outline';
         }
     };
+    
+    const renderSignature = (text: string) => {
+        const [name, ...labelParts] = text.split('\n');
+        const label = labelParts.join('\n');
+        return (
+            <div>
+                <p className="font-bold">{name}</p>
+                <p className="border-t border-black pt-1 mt-1">{label}</p>
+            </div>
+        )
+    }
 
     return (
         <div className="p-8 bg-white text-black">
@@ -235,18 +243,9 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
             )}
 
             <div className="flex justify-between mt-24 text-center text-xs">
-                <div>
-                    <p className="font-bold">{preparedByName}</p>
-                    <p className="border-t border-black pt-1 mt-1">{preparedByLabel}</p>
-                </div>
-                 <div>
-                    <p className="font-bold">{receivedByName}</p>
-                    <p className="border-t border-black pt-1 mt-1">{receivedByLabel}</p>
-                </div>
-                 <div>
-                    <p className="font-bold">{verifiedByName}</p>
-                    <p className="border-t border-black pt-1 mt-1">{verifiedByLabel}</p>
-                </div>
+                {renderSignature(preparedBy)}
+                {renderSignature(receivedBy)}
+                {renderSignature(verifiedBy)}
             </div>
         </div>
     );
