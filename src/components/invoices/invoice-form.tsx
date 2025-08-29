@@ -78,10 +78,9 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel, onIdGenerate
             onIdGenerated(newId);
         };
 
-        if (invoice) {
-            const id = invoice.id || '';
-            setInvoiceId(id);
-            onIdGenerated(id);
+        if (invoice && invoice.id) {
+            setInvoiceId(invoice.id);
+            onIdGenerated(invoice.id);
             setCustomerId(invoice.customerId || '');
             setSalesOrderId(invoice.salesOrderId);
             setInvoiceDate(invoice.date ? (invoice.date as any).toDate() : new Date());
@@ -94,6 +93,14 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel, onIdGenerate
         } else {
             generateInvoiceId();
             resetForm(false);
+            if (invoice) { // From sales order
+                 setCustomerId(invoice.customerId || '');
+                 setSalesOrderId(invoice.salesOrderId);
+                 setLines(invoice.lines || []);
+                 setNotes(invoice.notes || '');
+                 setDiscountType(invoice.discountType || 'Fixed');
+                 setDiscountValue(invoice.discountValue || 0);
+            }
         }
     }, [invoice, onIdGenerated]);
     
@@ -224,7 +231,7 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel, onIdGenerate
             }
 
             const invoiceData = {
-                id: invoice?.id || invoiceId,
+                id: invoice?.id,
                 customerId,
                 customerName: customer?.name || 'N/A',
                 salesOrderId,

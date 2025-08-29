@@ -10,7 +10,7 @@ import InvoiceList from "@/components/invoices/invoice-list";
 import { Invoice, PaymentMethod, SalesOrder } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, setDoc, serverTimestamp, deleteDoc, getDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, serverTimestamp, deleteDoc, getDoc, addDoc } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InvoiceTemplate from '@/components/invoices/invoice-template';
@@ -106,9 +106,15 @@ function InvoicesContent() {
   const handleSaveInvoice = async (invoiceData: Omit<Invoice, 'id'> & {id?: string}) => {
     try {
         const { id, ...dataToSave } = invoiceData;
-        const docRef = doc(db, "invoices", id as string);
-        await setDoc(docRef, { ...dataToSave, createdAt: serverTimestamp() });
-        toast({ title: "Success", description: "Invoice created successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
+        
+        if(id) { // Editing existing invoice
+            const docRef = doc(db, "invoices", id);
+            await setDoc(docRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
+            toast({ title: "Success", description: "Invoice updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
+        } else { // Creating new invoice
+            const docRef = await addDoc(collection(db, "invoices"), { ...dataToSave, createdAt: serverTimestamp() });
+            toast({ title: "Success", description: "Invoice created successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
+        }
         
         // Update Sales Order status
         if (invoiceData.salesOrderId) {
