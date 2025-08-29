@@ -150,7 +150,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                     <div className="flex justify-between"><span>Discount:</span> <span>- ₱{(invoice.discountValue || 0).toFixed(2)}</span></div>
                      <div className="flex justify-between"><span>Subtotal:</span> <span>₱{(totalSales - (invoice.discountValue || 0)).toFixed(2)}</span></div>
                     {showVat && <div className="flex justify-between"><span>VAT (12%):</span> <span>₱{(invoice.vatAmount || 0).toFixed(2)}</span></div>}
-                    <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
+                    <div className="flex justify-between font-bold text-base mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
                         <span>Total Amount Due:</span>
                         <span>₱{invoice.amount.toFixed(2)}</span>
                     </div>
