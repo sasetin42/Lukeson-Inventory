@@ -3,7 +3,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { RecentTransaction } from '@/lib/types';
+import { Invoice, RecentTransaction } from '@/lib/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Activity, ChevronRight } from 'lucide-react';
@@ -13,9 +13,10 @@ import { getInvoiceStatusVariant, getJobOrderStatusVariant, getQuotationStatusVa
 
 interface RecentTransactionsProps {
     transactions: RecentTransaction[];
+    onViewTransaction: (invoice: Invoice) => void;
 }
 
-export default function RecentTransactions({ transactions }: RecentTransactionsProps) {
+export default function RecentTransactions({ transactions, onViewTransaction }: RecentTransactionsProps) {
   return (
     <Card>
       <CardHeader>
@@ -80,9 +81,17 @@ export default function RecentTransactions({ transactions }: RecentTransactionsP
                     </Badge>
                 </TableCell>
                  <TableCell>
-                    <Badge variant={getInvoiceStatusVariant(invoice?.status || 'Draft')}>
-                        {invoice?.status || 'N/A'}
-                    </Badge>
+                    {invoice && invoice.status === 'Paid' ? (
+                        <Button variant="link" className="p-0 h-auto" onClick={() => onViewTransaction(invoice)}>
+                             <Badge variant={getInvoiceStatusVariant(invoice?.status || 'Draft')}>
+                                {invoice?.status || 'N/A'}
+                            </Badge>
+                        </Button>
+                    ) : (
+                        <Badge variant={getInvoiceStatusVariant(invoice?.status || 'Draft')}>
+                            {invoice?.status || 'N/A'}
+                        </Badge>
+                    )}
                 </TableCell>
               </TableRow>
             ))}

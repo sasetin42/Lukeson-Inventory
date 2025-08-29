@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc, addDoc, serverTimestamp, orderBy, query, limit, getDocs } from 'firebase/firestore';
 import PurchaseOrderFormModal from '@/components/purchase-orders/purchase-order-form-modal';
+import TransactionViewModal from '@/components/payments/transaction-view-modal';
 
 export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -26,6 +27,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPurchaseOrder, setEditingPurchaseOrder] = useState<PurchaseOrder | null>(null);
+  const [viewingTransaction, setViewingTransaction] = useState<Invoice | null>(null);
   const { toast } = useToast();
   
   useEffect(() => {
@@ -143,6 +145,10 @@ export default function DashboardPage() {
     };
     handleOpenModal(newPO as PurchaseOrder);
   }
+  
+  const handleViewTransaction = (invoice: Invoice) => {
+    setViewingTransaction(invoice);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -169,7 +175,7 @@ export default function DashboardPage() {
           <SlowMovingItems products={products} sales={flatSales} />
       </div>
 
-      <RecentTransactions transactions={recentTransactions} />
+      <RecentTransactions transactions={recentTransactions} onViewTransaction={handleViewTransaction} />
 
       {isModalOpen && (
           <PurchaseOrderFormModal
@@ -177,6 +183,13 @@ export default function DashboardPage() {
             onClose={handleCloseModal}
             onSave={handleSavePurchaseOrder}
             purchaseOrder={editingPurchaseOrder}
+          />
+      )}
+      {viewingTransaction && (
+          <TransactionViewModal
+            isOpen={!!viewingTransaction}
+            onClose={() => setViewingTransaction(null)}
+            invoice={viewingTransaction}
           />
       )}
     </div>

@@ -186,7 +186,7 @@ export type Invoice = {
     vatExemptSales?: number;
     zeroRatedSales?: number;
     vatAmount?: number;
-    paidDate?: Date | FieldValue | string;
+    paidDate?: Date | FieldValue | string | null;
     paymentMethod?: PaymentMethod;
     transactionProof?: string; // Changed from transactionProofUrl
     archived?: boolean;
