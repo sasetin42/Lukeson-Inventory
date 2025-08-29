@@ -86,10 +86,9 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
             onIdGenerated(newId);
         };
 
-        if (jobOrder) {
-            const id = jobOrder.id || '';
-            setJobOrderId(id);
-            onIdGenerated(id);
+        if (jobOrder && jobOrder.id) {
+            setJobOrderId(jobOrder.id);
+            onIdGenerated(jobOrder.id);
             setCustomerId(jobOrder.customerId || '');
             setSalesOrderId(jobOrder.salesOrderId);
             setJobOrderDate(safeToDate(jobOrder.jobOrderDate));
@@ -182,7 +181,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
             const customer = customers.find(c => c.id === customerId);
             
             const jobOrderData = {
-                id: jobOrder?.id || jobOrderId,
+                id: jobOrder?.id,
                 customerId,
                 customerName: customer?.name || 'N/A',
                 salesOrderId,
@@ -193,7 +192,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
                 notes,
                 totalAmount: calculateTotalAmount(),
             };
-            onSuccess(jobOrderData as Omit<JobOrder, 'id'> & {id?: string});
+            onSuccess(jobOrderData);
         } catch (error) {
             console.error("Failed to save job order:", error);
             toast({ title: "Error", description: "Failed to save job order.", variant: "destructive" });

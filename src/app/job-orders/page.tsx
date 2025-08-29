@@ -147,14 +147,13 @@ function JobOrdersContent() {
       try {
           const { id, ...dataToSave } = jobOrderData;
           
-          if (jobOrderData.id) { // This is an edit
-              const joRef = doc(db, "jobOrders", id as string);
+          if (id) { // This is an edit
+              const joRef = doc(db, "jobOrders", id);
               await setDoc(joRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
               toast({ title: "Success", description: "Job Order updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           } else { // This is a new record
-              const docId = id as string; // The formatted ID is passed from the form
-              const joRef = doc(db, "jobOrders", docId);
-              await setDoc(joRef, { ...dataToSave, status: 'In Progress', createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+              const docRef = doc(collection(db, "jobOrders")); // Let Firestore generate the ID
+              await setDoc(docRef, { ...dataToSave, status: 'In Progress', createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
               toast({ title: "Success", description: "Job Order added successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           }
 
