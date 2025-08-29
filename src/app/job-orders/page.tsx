@@ -45,7 +45,7 @@ function JobOrdersContent() {
           customerName: soData.customerName,
           salesOrderId: soData.id,
           jobOrderDate: new Date(),
-          status: 'Draft',
+          status: 'Scheduled',
           lines: soData.lines,
           totalAmount: soData.totalAmount,
           notes: soData.notes,
@@ -145,15 +145,15 @@ function JobOrdersContent() {
 
   const handleSaveJobOrder = async (jobOrderData: Omit<JobOrder, 'id'> & {id?: string}) => {
       try {
-          const { id, ...dataToSave } = jobOrderData;
-          
-          if (id) { // This is an edit
+          if (jobOrderData.id) { // This is an edit
+              const { id, ...dataToSave } = jobOrderData;
               const joRef = doc(db, "jobOrders", id);
               await setDoc(joRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
               toast({ title: "Success", description: "Job Order updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
-          } else { // This is a new record
+          } else { // This is a new record from sales order
+              const { id, ...dataToSave } = jobOrderData;
               const docRef = doc(collection(db, "jobOrders")); // Let Firestore generate the ID
-              await setDoc(docRef, { ...dataToSave, status: 'In Progress', createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+              await setDoc(docRef, { ...dataToSave, status: 'Scheduled', createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
               toast({ title: "Success", description: "Job Order added successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           }
 
