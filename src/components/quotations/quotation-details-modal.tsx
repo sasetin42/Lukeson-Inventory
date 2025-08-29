@@ -47,6 +47,7 @@ export default function QuotationDetailsModal({
   const router = useRouter();
   const { hasWriteAccess } = useAuth();
   const canWrite = hasWriteAccess('Quotations');
+  const canWriteSales = hasWriteAccess('Sales Orders');
 
   if (!quotation) return null;
 
@@ -79,13 +80,15 @@ export default function QuotationDetailsModal({
   }
 
   const hasSalesOrder = salesOrders.some(so => so.quotationId === quotation.id);
-  const isCreateSODisabled = quotation.status !== 'Accepted' || hasSalesOrder;
+  const isCreateSODisabled = quotation.status !== 'Accepted' || hasSalesOrder || !canWriteSales;
 
   let tooltipMessage = '';
   if (quotation.status !== 'Accepted') {
     tooltipMessage = 'Sales Order can only be created from an "Accepted" quotation.';
   } else if (hasSalesOrder) {
     tooltipMessage = 'A Sales Order for this quotation already exists.';
+  } else if (!canWriteSales) {
+    tooltipMessage = "You don't have permission to create Sales Orders.";
   }
 
 
@@ -176,7 +179,7 @@ export default function QuotationDetailsModal({
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <div tabIndex={isCreateSODisabled ? 0 : -1}>
-                                <Button onClick={handleCreateSalesOrder} disabled={isCreateSODisabled || !canWrite} style={isCreateSODisabled || !canWrite ? { pointerEvents: 'none' } : {}}>
+                                <Button onClick={handleCreateSalesOrder} disabled={isCreateSODisabled} style={isCreateSODisabled ? { pointerEvents: 'none' } : {}}>
                                     <ShoppingCart className="h-4 w-4 mr-2" />
                                     Create Sales Order
                                 </Button>

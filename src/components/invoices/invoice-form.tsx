@@ -110,11 +110,12 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel, onIdGenerate
         setDiscountValue(0);
     }
 
-    const availableSalesOrders = salesOrders.filter(so => {
-        // Exclude if it's already linked to another invoice (and we are not editing that specific invoice)
-        const isAlreadyInvoiced = allInvoices.some(inv => inv.salesOrderId === so.id && inv.id !== (invoice?.id || ''));
-        return !isAlreadyInvoiced;
-    });
+    const availableSalesOrders = useMemo(() => {
+        return salesOrders.filter(so => {
+            const isAlreadyInvoiced = allInvoices.some(inv => inv.salesOrderId === so.id && inv.id !== (invoice?.id || ''));
+            return !isAlreadyInvoiced;
+        });
+    }, [salesOrders, allInvoices, invoice]);
 
     useEffect(() => {
         const fetchSalesOrders = async () => {
@@ -266,7 +267,7 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel, onIdGenerate
                  <div className="space-y-2">
                     <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Link Sales Order</Label>
                     <Select onValueChange={handleSalesOrderChange} value={salesOrderId} disabled={!customerId || availableSalesOrders.length === 0}>
-                        <SelectTrigger><SelectValue placeholder="Select an SO" /></SelectTrigger>
+                        <SelectTrigger><SelectValue placeholder={!customerId ? "Select customer first" : "Select an SO"} /></SelectTrigger>
                         <SelectContent>
                             {availableSalesOrders.map(s => <SelectItem key={s.id} value={s.id}>{s.id}</SelectItem>)}
                         </SelectContent>
