@@ -64,7 +64,7 @@ export default function PaymentList({ invoices, onViewTransaction, onViewSalesIn
                                     <TableCell className="text-right">₱{invoice.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</TableCell>
                                     <TableCell>
                                         {invoice.transactionProof ? (
-                                            <Button variant="outline" size="sm" onClick={() => onViewTransaction(invoice)}>
+                                            <Button size="sm" onClick={() => onViewTransaction(invoice)} className="bg-[#5F8400] text-white hover:bg-[#5F8400]/90">
                                                 <Eye className="mr-2 h-4 w-4" />
                                                 View
                                             </Button>
