@@ -33,13 +33,9 @@ export default function PaymentList({ invoices, onViewTransaction, onViewSalesIn
                         <CardDescription>A list of all successfully paid invoices.</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                         <Button variant="outline">
-                            <List className="mr-2 h-4 w-4" />
-                            Recent Transactions
-                        </Button>
                         <Button variant="outline" onClick={onClearHistory}>
                             <History className="mr-2 h-4 w-4" />
-                            Clearing History
+                            Clear History
                         </Button>
                     </div>
                 </div>

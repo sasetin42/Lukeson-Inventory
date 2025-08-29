@@ -186,6 +186,7 @@ export type Invoice = {
     paidDate?: Date | FieldValue | string;
     paymentMethod?: PaymentMethod;
     transactionProof?: string; // Changed from transactionProofUrl
+    archived?: boolean;
 };
 
 
