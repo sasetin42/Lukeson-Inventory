@@ -86,9 +86,13 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
             onIdGenerated(newId);
         };
 
-        if (jobOrder && jobOrder.id) {
-            setJobOrderId(jobOrder.id);
-            onIdGenerated(jobOrder.id);
+        if (jobOrder) {
+             if (jobOrder.id) { // Editing
+                setJobOrderId(jobOrder.id);
+                onIdGenerated(jobOrder.id);
+             } else { // New from SO
+                generateJobOrderId();
+             }
             setCustomerId(jobOrder.customerId || '');
             setSalesOrderId(jobOrder.salesOrderId);
             setJobOrderDate(safeToDate(jobOrder.jobOrderDate));
@@ -124,7 +128,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
                 const loadedSOs = soSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SalesOrder));
                 setSalesOrders(loadedSOs);
 
-                // If editing a job order, ensure its SO is loaded and dates are set.
+                // If editing a job order or creating from SO, ensure its SO is loaded and dates are set.
                 if (jobOrder?.salesOrderId) {
                      const so = loadedSOs.find(s => s.id === jobOrder.salesOrderId) || salesOrders.find(s => s.id === jobOrder.salesOrderId);
                     if (so) {
@@ -190,7 +194,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
             const customer = customers.find(c => c.id === customerId);
             
             const jobOrderData = {
-                id: jobOrderId,
+                id: jobOrder?.id || jobOrderId,
                 customerId,
                 customerName: customer?.name || 'N/A',
                 salesOrderId,
@@ -215,7 +219,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><User className="h-4 w-4" /> Customer</Label>
-                    <Select onValueChange={setCustomerId} value={customerId}>
+                    <Select onValueChange={setCustomerId} value={customerId} disabled={!!jobOrder?.salesOrderId}>
                         <SelectTrigger><SelectValue placeholder="Select a customer" /></SelectTrigger>
                         <SelectContent>
                             {customers.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
@@ -224,7 +228,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
                 </div>
                 <div className="space-y-2">
                     <Label className="flex items-center gap-2"><FileText className="h-4 w-4" /> Link Sales Order</Label>
-                    <Select onValueChange={handleSalesOrderChange} value={salesOrderId} disabled={!customerId || salesOrders.length === 0}>
+                    <Select onValueChange={handleSalesOrderChange} value={salesOrderId} disabled={!customerId || salesOrders.length === 0 || !!jobOrder?.salesOrderId}>
                         <SelectTrigger><SelectValue placeholder="Select a sales order" /></SelectTrigger>
                         <SelectContent>
                             {salesOrders.map(s => <SelectItem key={s.id} value={s.id}>{s.id}</SelectItem>)}

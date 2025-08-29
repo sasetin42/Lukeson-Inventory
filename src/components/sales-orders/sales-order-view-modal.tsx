@@ -88,6 +88,7 @@ export default function SalesOrderViewModal({
   const handleCreateJobOrder = () => {
     const salesOrderData = encodeURIComponent(JSON.stringify(salesOrder));
     router.push(`/job-orders?fromSalesOrder=${salesOrderData}`);
+    onClose();
   };
 
   const handleEditClick = () => {

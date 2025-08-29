@@ -152,8 +152,8 @@ function JobOrdersContent() {
               toast({ title: "Success", description: "Job Order updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           } else { // This is a new record
               const { id, ...dataToSave } = jobOrderData;
-              const docId = id as string; // The formatted ID is passed from the form
-              const joRef = doc(db, "jobOrders", docId);
+              // Use the generated ID from the form if it exists, otherwise let Firestore auto-generate
+              const joRef = id ? doc(db, "jobOrders", id) : doc(collection(db, 'jobOrders'));
               await setDoc(joRef, { ...dataToSave, status: 'Scheduled', createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
               toast({ title: "Success", description: "Job Order added successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
           }
