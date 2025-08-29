@@ -125,12 +125,17 @@ function InvoicesContent() {
             customerPhone: customerData.phone || '',
         };
         
-        const docRef = doc(db, "invoices", id as string);
-        if (editingInvoice && editingInvoice.id) { // Editing
-            await setDoc(docRef, { ...finalData, modifiedAt: serverTimestamp() }, { merge: true });
-            toast({ title: "Success", description: "Invoice updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
-        } else { // Creating
-             await setDoc(docRef, { ...finalData, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+        if (id) { // This condition is now robust for both edit and create
+            const docRef = doc(db, "invoices", id);
+            if (editingInvoice && editingInvoice.id) { // Editing
+                await setDoc(docRef, { ...finalData, modifiedAt: serverTimestamp() }, { merge: true });
+                toast({ title: "Success", description: "Invoice updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
+            } else { // Creating
+                 await setDoc(docRef, { ...finalData, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
+                toast({ title: "Success", description: "Invoice created successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
+            }
+        } else { // Fallback for any edge case where ID might be missing, though unlikely now
+            await addDoc(collection(db, 'invoices'), { ...finalData, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
             toast({ title: "Success", description: "Invoice created successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
         }
         
