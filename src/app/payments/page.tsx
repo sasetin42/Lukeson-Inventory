@@ -4,11 +4,11 @@
 import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { Banknote, PlusCircle, CheckCircle, Clock, Calendar } from "lucide-react";
+import { Banknote, PlusCircle, CheckCircle, Clock, Calendar, History, List } from "lucide-react";
 import { Invoice, Customer, SalesOrder, Quotation, JobOrder } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, getDocs, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, onSnapshot, writeBatch } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import PaymentList from '@/components/payments/payment-list';
 import { differenceInDays } from 'date-fns';
@@ -115,6 +115,17 @@ export default function PaymentsPage() {
         toast({ title: "Not Found", description: "Associated Customer not found.", variant: "destructive" });
       }
   }
+  
+  const handleClearHistory = async () => {
+    const batch = writeBatch(db);
+    // This is a placeholder for a real clearing/archiving logic
+    // For now, it just gives a toast message
+    toast({
+        title: "Clearing Not Implemented",
+        description: "This feature would typically archive old transactions.",
+        variant: "default"
+    });
+  }
 
 
   return (
@@ -123,6 +134,18 @@ export default function PaymentsPage() {
         title="Payments Received"
         description="Track and manage all customer payments."
         icon={<Banknote className="h-6 w-6 text-indigo-500" />}
+        actions={
+            <div className="flex gap-2">
+                <Button variant="outline" onClick={handleClearHistory}>
+                    <History className="mr-2 h-4 w-4" />
+                    Clearing History
+                </Button>
+                <Button variant="outline">
+                    <List className="mr-2 h-4 w-4" />
+                    Recent Transactions
+                </Button>
+            </div>
+        }
       />
       <div className="grid gap-6 md:grid-cols-3">
         {kpis.map((kpi, index) => (
@@ -180,3 +203,4 @@ export default function PaymentsPage() {
     </div>
   );
 }
+
