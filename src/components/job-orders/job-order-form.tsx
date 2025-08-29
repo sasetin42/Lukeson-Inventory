@@ -176,6 +176,15 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
     };
 
     const handleSubmit = async () => {
+        if (!expectedCompletionDate) {
+            toast({
+                title: "Missing Field",
+                description: "Expected Completion Date is required.",
+                variant: "destructive"
+            });
+            return;
+        }
+
         setIsSaving(true);
         try {
             const customer = customers.find(c => c.id === customerId);
@@ -186,7 +195,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
                 customerName: customer?.name || 'N/A',
                 salesOrderId,
                 jobOrderDate,
-                expectedCompletionDate: expectedCompletionDate || null,
+                expectedCompletionDate: expectedCompletionDate,
                 status: status,
                 lines,
                 notes,
@@ -230,7 +239,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
                     <DatePicker date={jobOrderDate} setDate={setJobOrderDate} />
                 </div>
                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Expected Completion</Label>
+                    <Label className="flex items-center gap-2"><Calendar className="h-4 w-4" /> Expected Completion <span className="text-red-500">*</span></Label>
                     <DatePicker date={expectedCompletionDate} setDate={setExpectedCompletionDate} toDate={salesOrderDeliveryDate} />
                 </div>
                 <div className="space-y-2">
