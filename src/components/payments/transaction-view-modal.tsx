@@ -12,7 +12,9 @@ import {
 import { Invoice } from '@/lib/types';
 import { Button } from '../ui/button';
 import Image from 'next/image';
-import { Eye } from 'lucide-react';
+import { Eye, User, Calendar, CreditCard, DollarSign } from 'lucide-react';
+import { format } from 'date-fns';
+import { Separator } from '../ui/separator';
 
 interface TransactionViewModalProps {
   invoice: Invoice | null;
@@ -28,6 +30,11 @@ export default function TransactionViewModal({
   if (!invoice) return null;
 
   const isPdf = invoice.transactionProof?.startsWith('data:application/pdf');
+  
+  const formatDate = (date: any) => {
+    if (!date) return 'N/A';
+    return format(date.toDate ? date.toDate() : new Date(date), 'PPp');
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -45,7 +52,38 @@ export default function TransactionViewModal({
                 </div>
             </div>
         </DialogHeader>
-        <div className="py-4">
+        <div className="py-4 space-y-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center gap-2 p-3 rounded-md bg-muted/50">
+                    <User className="h-5 w-5 text-purple-500"/>
+                    <div>
+                        <p className="text-xs text-muted-foreground">Customer</p>
+                        <p className="font-semibold">{invoice.customerName}</p>
+                    </div>
+                </div>
+                 <div className="flex items-center gap-2 p-3 rounded-md bg-muted/50">
+                    <Calendar className="h-5 w-5 text-blue-500"/>
+                    <div>
+                        <p className="text-xs text-muted-foreground">Payment Date</p>
+                        <p className="font-semibold">{formatDate(invoice.paidDate)}</p>
+                    </div>
+                </div>
+                 <div className="flex items-center gap-2 p-3 rounded-md bg-muted/50">
+                    <CreditCard className="h-5 w-5 text-orange-500"/>
+                    <div>
+                        <p className="text-xs text-muted-foreground">Payment Method</p>
+                        <p className="font-semibold">{invoice.paymentMethod || 'N/A'}</p>
+                    </div>
+                </div>
+                 <div className="flex items-center gap-2 p-3 rounded-md bg-muted/50">
+                    <DollarSign className="h-5 w-5 text-green-500"/>
+                    <div>
+                        <p className="text-xs text-muted-foreground">Amount Paid</p>
+                        <p className="font-semibold">₱{invoice.amount.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+                    </div>
+                </div>
+            </div>
+            <Separator />
           {invoice.transactionProof ? (
             isPdf ? (
               <iframe src={invoice.transactionProof} className="w-full h-[60vh]" title="Transaction Proof"></iframe>
