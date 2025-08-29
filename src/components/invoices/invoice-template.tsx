@@ -27,6 +27,7 @@ export default function InvoiceTemplate() {
     const [showVat, setShowVat] = useState(true);
 
     const [companyName, setCompanyName] = useState('YAMASHITA MOLD PHILIPPINES CORPORATION');
+    const [tin, setTin] = useState('');
     const [address, setAddress] = useState('Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines');
     const [phone, setPhone] = useState('Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463');
     const [email, setEmail] = useState('contact@yamashitamold.ph');
@@ -54,6 +55,7 @@ export default function InvoiceTemplate() {
                     setShowNotes(settings.showNotes !== false);
                     setShowVat(settings.showVat !== false);
                     setCompanyName(settings.companyName || 'YAMASHITA MOLD PHILIPPINES CORPORATION');
+                    setTin(settings.tin || '');
                     setAddress(settings.address || 'Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines');
                     setPhone(settings.phone || 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463');
                     setEmail(settings.email || 'contact@yamashitamold.ph');
@@ -84,7 +86,7 @@ export default function InvoiceTemplate() {
     const handleSave = async () => {
         setIsSaving(true);
         const settings = {
-            accentColor, showDueDate, showNotes, showVat, companyName, address, phone, email, website, logo,
+            accentColor, showDueDate, showNotes, showVat, companyName, tin, address, phone, email, website, logo,
             preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName,
         };
 
@@ -216,6 +218,10 @@ export default function InvoiceTemplate() {
                                 <Label htmlFor="company-name">Company Name</Label>
                                 <Input id="company-name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                             </div>
+                            <div>
+                                <Label htmlFor="tin">TIN</Label>
+                                <Input id="tin" value={tin} onChange={(e) => setTin(e.target.value)} />
+                            </div>
                              <div>
                                 <Label htmlFor="address">Address</Label>
                                 <Textarea id="address" value={address} onChange={(e) => setAddress(e.target.value)} />
@@ -276,6 +282,7 @@ export default function InvoiceTemplate() {
                                 <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo" />
                                 <div className="text-xs">
                                     <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
+                                    {tin && <p>TIN: {tin}</p>}
                                     <p>{address}</p>
                                     <p>{phone}</p>
                                     <p>{website}</p>

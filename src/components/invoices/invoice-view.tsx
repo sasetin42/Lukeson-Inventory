@@ -19,6 +19,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
     const [templateSettings, setTemplateSettings] = useState({
         accentColor: '#0A3BAA',
         companyName: 'YAMASHITA MOLD PHILIPPINES CORPORATION',
+        tin: '',
         address: 'Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines',
         phone: 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463',
         website: 'www.yamashitamold.ph',
@@ -49,7 +50,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         fetchSettings();
     }, []);
 
-    const { accentColor, companyName, address, phone, website, logo, showDueDate, showNotes, showVat, preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName } = templateSettings;
+    const { accentColor, companyName, tin, address, phone, website, logo, showDueDate, showNotes, showVat, preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName } = templateSettings;
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -65,6 +66,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                     <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo" />
                     <div className="text-xs">
                         <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
+                        {tin && <p>TIN: {tin}</p>}
                         <p>{address}</p>
                         <p>{phone}</p>
                         <p>{website}</p>
