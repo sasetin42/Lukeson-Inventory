@@ -52,7 +52,7 @@ export default function TransactionViewModal({
                 </div>
             </div>
         </DialogHeader>
-        <div className="py-4 space-y-4">
+        <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-2 p-3 rounded-md bg-muted/50">
                     <User className="h-5 w-5 text-purple-500"/>
@@ -86,9 +86,9 @@ export default function TransactionViewModal({
             <Separator />
           {invoice.transactionProof ? (
             isPdf ? (
-              <iframe src={invoice.transactionProof} className="w-full h-[60vh]" title="Transaction Proof"></iframe>
+              <iframe src={invoice.transactionProof} className="w-full h-[60vh] rounded-md border" title="Transaction Proof"></iframe>
             ) : (
-              <div className="relative w-full h-[60vh]">
+              <div className="relative w-full h-[60vh] border rounded-md overflow-hidden">
                 <Image
                   src={invoice.transactionProof}
                   alt="Transaction Proof"
