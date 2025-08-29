@@ -77,19 +77,19 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                     <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo" />
                     <div className="text-xs">
                         <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
-                        {tin && <p>TIN: {tin}</p>}
+                        {tin && <p><strong>TIN:</strong> {tin}</p>}
                         <p>{address}</p>
                         <p>{phone}</p>
                         <p>{website}</p>
                     </div>
                 </div>
                 <div className="text-right">
-                    <h2 className="text-3xl font-bold" style={{ color: accentColor }}>INVOICE</h2>
+                    <h2 className="font-bold" style={{ color: accentColor, fontSize: '25px' }}>INVOICE</h2>
                     <p style={{ fontSize: '12px' }}><strong>Invoice ID:</strong> {invoice.id}</p>
                     <p style={{ fontSize: '12px' }}><strong>Date:</strong> {formatDate(invoice.date)}</p>
                     {showDueDate && <p style={{ fontSize: '12px' }}><strong>Due Date:</strong> {formatDate(invoice.dueDate)}</p>}
-                    {salesOrder?.quotationId && <p style={{ fontSize: '12px' }}><strong>Quotation ID:</strong> {salesOrder.quotationId}</p>}
-                    {invoice.salesOrderId && <p style={{ fontSize: '12px' }}><strong>Sales Order ID:</strong> {invoice.salesOrderId}</p>}
+                    {salesOrder?.quotationId && <p style={{ fontSize: '12px' }}><strong>QTN:</strong> {salesOrder.quotationId}</p>}
+                    {invoice.salesOrderId && <p style={{ fontSize: '12px' }}><strong>SO:</strong> {invoice.salesOrderId}</p>}
                 </div>
             </div>
 
@@ -97,7 +97,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                 <div className="w-1/2">
                     <p className="font-bold">BILL TO:</p>
                     <p>{invoice.customerName}</p>
-                    {invoice.customerTin && <p>TIN: {invoice.customerTin}</p>}
+                    {invoice.customerTin && <p><strong>TIN:</strong> {invoice.customerTin}</p>}
                     {invoice.customerEmail && <p>Email: {invoice.customerEmail}</p>}
                     {invoice.customerPhone && <p>Phone: {invoice.customerPhone}</p>}
                 </div>
