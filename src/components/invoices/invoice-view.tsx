@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Invoice } from '@/lib/types';
+import { Invoice, SalesOrder } from '@/lib/types';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { db } from '@/lib/firebase';
@@ -34,21 +34,32 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         verifiedByLabel: 'Verified by:',
         verifiedByName: 'HIROYOSHI KANAZAWA - VP',
     });
+    const [salesOrder, setSalesOrder] = useState<SalesOrder | null>(null);
     
     useEffect(() => {
-        const fetchSettings = async () => {
+        const fetchSettingsAndData = async () => {
             try {
+                // Fetch template settings
                 const templateRef = doc(db, 'templates', TEMPLATE_DOC_ID);
-                const docSnap = await getDoc(templateRef);
-                if (docSnap.exists()) {
-                    setTemplateSettings(docSnap.data() as typeof templateSettings);
+                const templateSnap = await getDoc(templateRef);
+                if (templateSnap.exists()) {
+                    setTemplateSettings(templateSnap.data() as typeof templateSettings);
+                }
+
+                // Fetch linked sales order to get quotation ID
+                if(invoice.salesOrderId) {
+                    const soRef = doc(db, 'salesOrders', invoice.salesOrderId);
+                    const soSnap = await getDoc(soRef);
+                    if(soSnap.exists()) {
+                        setSalesOrder(soSnap.data() as SalesOrder);
+                    }
                 }
             } catch (error) {
-                console.error("Error fetching template settings for view:", error);
+                console.error("Error fetching related data for view:", error);
             }
         };
-        fetchSettings();
-    }, []);
+        fetchSettingsAndData();
+    }, [invoice.salesOrderId]);
 
     const { accentColor, companyName, tin, address, phone, website, logo, showDueDate, showNotes, showVat, preparedByLabel, preparedByName, receivedByLabel, receivedByName, verifiedByLabel, verifiedByName } = templateSettings;
 
@@ -74,9 +85,11 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                 </div>
                 <div className="text-right">
                     <h2 className="text-3xl font-bold" style={{ color: accentColor }}>INVOICE</h2>
-                    <p className="text-sm"><strong>Invoice ID:</strong> {invoice.id}</p>
-                    <p className="text-sm"><strong>Date:</strong> {formatDate(invoice.date)}</p>
-                    {showDueDate && <p className="text-sm"><strong>Due Date:</strong> {formatDate(invoice.dueDate)}</p>}
+                    <p style={{ fontSize: '12px' }}><strong>Invoice ID:</strong> {invoice.id}</p>
+                    <p style={{ fontSize: '12px' }}><strong>Date:</strong> {formatDate(invoice.date)}</p>
+                    {showDueDate && <p style={{ fontSize: '12px' }}><strong>Due Date:</strong> {formatDate(invoice.dueDate)}</p>}
+                    {salesOrder?.quotationId && <p style={{ fontSize: '12px' }}><strong>Quotation ID:</strong> {salesOrder.quotationId}</p>}
+                    {invoice.salesOrderId && <p style={{ fontSize: '12px' }}><strong>Sales Order ID:</strong> {invoice.salesOrderId}</p>}
                 </div>
             </div>
 
