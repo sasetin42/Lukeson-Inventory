@@ -125,16 +125,16 @@ function InvoicesContent() {
             customerPhone: customerData.phone || '',
         };
         
-        if (id) { // This condition is now robust for both edit and create
+        if (id) {
             const docRef = doc(db, "invoices", id);
             if (editingInvoice && editingInvoice.id) { // Editing
                 await setDoc(docRef, { ...finalData, modifiedAt: serverTimestamp() }, { merge: true });
                 toast({ title: "Success", description: "Invoice updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
-            } else { // Creating
+            } else { // Creating from SO or scratch
                  await setDoc(docRef, { ...finalData, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
                 toast({ title: "Success", description: "Invoice created successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
             }
-        } else { // Fallback for any edge case where ID might be missing, though unlikely now
+        } else { // Should not happen with current logic, but as a fallback
             await addDoc(collection(db, 'invoices'), { ...finalData, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
             toast({ title: "Success", description: "Invoice created successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
         }
@@ -326,3 +326,4 @@ export default function InvoicesPage() {
         </Suspense>
     )
 }
+ 
