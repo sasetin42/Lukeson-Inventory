@@ -38,7 +38,7 @@ export default function ForInvoicingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="p-2 bg-yellow-100 rounded-md">
