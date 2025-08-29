@@ -12,7 +12,7 @@ import JobOrderFormModal from '@/components/job-orders/job-order-form-modal';
 import JobOrderViewModal from '@/components/job-orders/job-order-view-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc, getDoc } from 'firebase/firestore';
 import KpiCard from '@/components/kpi-card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import JobOrderSettings from '@/components/job-orders/job-order-settings';
@@ -210,6 +210,22 @@ function JobOrdersContent() {
             description: `Job order ${jobOrderId} has been updated to "${newStatus}".`,
             variant: "success"
         });
+
+        if (newStatus === 'Completed') {
+            const joDoc = await getDoc(joRef);
+            if (joDoc.exists()) {
+                const jobOrder = joDoc.data() as JobOrder;
+                if (jobOrder.salesOrderId) {
+                    const soRef = doc(db, 'salesOrders', jobOrder.salesOrderId);
+                    await updateDoc(soRef, { status: 'Fulfilled', modifiedAt: serverTimestamp() });
+                    toast({
+                        title: "Sales Order Updated",
+                        description: `Sales Order ${jobOrder.salesOrderId} has been marked as Fulfilled.`,
+                        variant: "success"
+                    });
+                }
+            }
+        }
     } catch (error) {
         console.error("Error updating JO status:", error);
         toast({
