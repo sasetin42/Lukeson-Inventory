@@ -212,16 +212,37 @@ function JobOrdersContent() {
             variant: "success"
         });
 
-        if (newStatus === 'Completed') {
-            const joDoc = await getDoc(joRef);
-            if (joDoc.exists()) {
-                const jobOrder = joDoc.data() as JobOrder;
-                if (jobOrder.salesOrderId) {
-                    const soRef = doc(db, 'salesOrders', jobOrder.salesOrderId);
-                    await updateDoc(soRef, { status: 'Fulfilled', modifiedAt: serverTimestamp() });
+        const joDoc = await getDoc(joRef);
+        if (joDoc.exists()) {
+            const jobOrder = joDoc.data() as JobOrder;
+            if (jobOrder.salesOrderId) {
+                const soRef = doc(db, 'salesOrders', jobOrder.salesOrderId);
+                let soUpdate: { status: string; modifiedAt: any; } | null = null;
+                let soToastMessage: string | null = null;
+                
+                 switch(newStatus) {
+                    case 'Completed':
+                        soUpdate = { status: 'Fulfilled', modifiedAt: serverTimestamp() };
+                        soToastMessage = `Sales Order ${jobOrder.salesOrderId} has been marked as Fulfilled.`;
+                        break;
+                    case 'In Progress':
+                    case 'Scheduled':
+                    case 'On Hold':
+                        soUpdate = { status: 'Confirmed', modifiedAt: serverTimestamp() };
+                        soToastMessage = `Sales Order ${jobOrder.salesOrderId} is now Confirmed.`;
+                        break;
+                    case 'Draft':
+                    case 'Cancelled':
+                        soUpdate = { status: 'Draft', modifiedAt: serverTimestamp() };
+                        soToastMessage = `Sales Order ${jobOrder.salesOrderId} has been reverted to Draft.`;
+                        break;
+                }
+
+                if (soUpdate) {
+                    await updateDoc(soRef, soUpdate);
                     toast({
                         title: "Sales Order Updated",
-                        description: `Sales Order ${jobOrder.salesOrderId} has been marked as Fulfilled.`,
+                        description: soToastMessage!,
                         variant: "success"
                     });
                 }
@@ -337,3 +358,5 @@ export default function JobOrdersPage() {
         </Suspense>
     )
 }
+
+    
