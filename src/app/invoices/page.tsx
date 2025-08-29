@@ -1,12 +1,13 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle, DollarSign, CheckCircle, XCircle, Search, AlertCircle } from "lucide-react";
 import InvoiceList from "@/components/invoices/invoice-list";
-import { Invoice, PaymentMethod } from '@/lib/types';
+import { Invoice, PaymentMethod, SalesOrder } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc, serverTimestamp, deleteDoc, getDoc } from 'firebase/firestore';
@@ -20,7 +21,7 @@ import InvoiceFormModal from '@/components/invoices/invoice-form-modal';
 import InvoiceViewModal from '@/components/invoices/invoice-view-modal';
 import PaymentFormModal from '@/components/payments/payment-form-modal';
 
-export default function InvoicesPage() {
+function InvoicesContent() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,6 +31,30 @@ export default function InvoicesPage() {
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null);
   const [invoiceToPay, setInvoiceToPay] = useState<Invoice | null>(null);
+  const searchParams = useSearchParams();
+  const fromSalesOrder = searchParams.get('fromSalesOrder');
+
+  useEffect(() => {
+    if (fromSalesOrder) {
+        try {
+            const soData: SalesOrder = JSON.parse(decodeURIComponent(fromSalesOrder));
+            const newInvoice: Partial<Invoice> = {
+                customerId: soData.customerId,
+                salesOrderId: soData.id,
+                lines: soData.lines,
+                notes: soData.notes,
+                discountType: soData.discountType,
+                discountValue: soData.discountValue,
+            };
+            setEditingInvoice(newInvoice as Invoice);
+            setIsFormModalOpen(true);
+        } catch (error) {
+            console.error("Error parsing sales order data for invoice:", error);
+            toast({ title: "Error", description: "Could not create invoice from sales order.", variant: "destructive" });
+        }
+    }
+  }, [fromSalesOrder, toast]);
+
 
   useEffect(() => {
     const invoicesRef = collection(db, 'invoices');
@@ -262,4 +287,13 @@ export default function InvoicesPage() {
       )}
     </div>
   );
+}
+
+
+export default function InvoicesPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <InvoicesContent />
+        </Suspense>
+    )
 }

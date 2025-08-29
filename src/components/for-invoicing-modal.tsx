@@ -30,7 +30,6 @@ export default function ForInvoicingModal({
   const router = useRouter();
 
   const handleCreateInvoice = (salesOrder: SalesOrder) => {
-    // This logic might need to be adjusted based on your routing for creating invoices from SOs
     const soData = encodeURIComponent(JSON.stringify(salesOrder));
     router.push(`/invoices?fromSalesOrder=${soData}`);
     onClose();
