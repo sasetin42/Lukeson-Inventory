@@ -132,12 +132,12 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                 <div className="w-1/2">
                     {showNotes && (
                         <div>
-                            <h4 className="font-bold">Notes:</h4>
-                            <p className="text-sm text-muted-foreground">{invoice.notes || 'No notes for this invoice.'}</p>
+                            <h4 className="font-bold text-xs">Notes:</h4>
+                            <p className="text-xs text-muted-foreground">{invoice.notes || 'No notes for this invoice.'}</p>
                         </div>
                     )}
                 </div>
-                <div className="w-1/2 text-sm space-y-1">
+                <div className="w-1/2 text-xs space-y-1">
                     {showVat && (
                         <>
                             <div className="flex justify-between"><span>Vatable Sales:</span> <span>₱{(invoice.vatableSales || 0).toFixed(2)}</span></div>
