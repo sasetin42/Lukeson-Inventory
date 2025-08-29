@@ -13,6 +13,7 @@ import { Product, SalesOrder } from '@/lib/types';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import ForInvoicingModal from './for-invoicing-modal';
 
 type PageHeaderProps = {
   title: string;
@@ -27,6 +28,8 @@ function HeaderActions() {
     const [mounted, setMounted] = useState(false);
     const [lowStockCount, setLowStockCount] = useState(0);
     const [invoiceReadyCount, setInvoiceReadyCount] = useState(0);
+    const [invoiceReadyOrders, setInvoiceReadyOrders] = useState<SalesOrder[]>([]);
+    const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
     const isMobile = useIsMobile();
 
     useEffect(() => {
@@ -45,9 +48,10 @@ function HeaderActions() {
         const salesOrdersQuery = query(collection(db, 'salesOrders'), where('status', '==', 'Fulfilled'));
 
         const unsubscribeSalesOrders = onSnapshot(salesOrdersQuery, (snapshot) => {
-            const salesOrders = snapshot.docs.map(doc => doc.data() as SalesOrder);
-            const invoiceReadyOrders = salesOrders.filter(so => so.invoicedStatus !== 'Fully Invoiced');
-            setInvoiceReadyCount(invoiceReadyOrders.length);
+            const salesOrders = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as SalesOrder));
+            const readyOrders = salesOrders.filter(so => so.invoicedStatus !== 'Fully Invoiced');
+            setInvoiceReadyOrders(readyOrders);
+            setInvoiceReadyCount(readyOrders.length);
         });
 
         return () => {
@@ -103,6 +107,7 @@ function HeaderActions() {
     }
 
     return (
+        <>
         <div className="flex items-center gap-2 sm:gap-4">
              <div className="text-right text-xs text-muted-foreground font-medium hidden lg:block p-2 rounded-md bg-muted/50">
                 {dateTime ? (
@@ -117,13 +122,11 @@ function HeaderActions() {
              <Button 
                 variant={invoiceReadyCount > 0 ? "default" : "outline"} 
                 size="sm" 
-                asChild 
+                onClick={() => setIsInvoiceModalOpen(true)}
                 className={cn(invoiceReadyCount > 0 && "animate-blink", "bg-[#F99B01] text-white hover:bg-[#F99B01]/90")}
             >
-                <Link href="/invoices">
-                    <FileText className="h-4 w-4 mr-2" />
-                    For Invoicing ({invoiceReadyCount})
-                </Link>
+                <FileText className="h-4 w-4 mr-2" />
+                For Invoicing ({invoiceReadyCount})
             </Button>
             <Button 
                 variant={lowStockCount > 0 ? "destructive" : "outline"} 
@@ -142,6 +145,12 @@ function HeaderActions() {
                 <span className="sm:hidden">Optimize</span>
             </Button>
         </div>
+        <ForInvoicingModal
+            isOpen={isInvoiceModalOpen}
+            onClose={() => setIsInvoiceModalOpen(false)}
+            salesOrders={invoiceReadyOrders}
+        />
+        </>
     )
 }
 
