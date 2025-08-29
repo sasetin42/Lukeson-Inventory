@@ -329,8 +329,6 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
                             <SelectItem value="Draft">Draft</SelectItem>
                             <SelectItem value="Confirmed">Confirmed</SelectItem>
                             <SelectItem value="Fulfilled">Fulfilled</SelectItem>
-                            <SelectItem value="Invoiced">Invoiced</SelectItem>
-                            <SelectItem value="Cancelled">Cancelled</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

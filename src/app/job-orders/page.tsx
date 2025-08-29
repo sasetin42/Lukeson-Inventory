@@ -170,12 +170,12 @@ function JobOrdersContent() {
                     soToastMessage = `Sales Order ${jobOrderData.salesOrderId} has been marked as Fulfilled.`;
                     break;
                 case 'In Progress':
+                case 'Scheduled':
+                case 'On Hold':
                     soUpdate = { status: 'Confirmed', modifiedAt: serverTimestamp() };
                     soToastMessage = `Sales Order ${jobOrderData.salesOrderId} is now Confirmed.`;
                     break;
                 case 'Draft':
-                case 'Scheduled':
-                case 'On Hold':
                 case 'Cancelled':
                     soUpdate = { status: 'Draft', modifiedAt: serverTimestamp() };
                     soToastMessage = `Sales Order ${jobOrderData.salesOrderId} has been reverted to Draft.`;
