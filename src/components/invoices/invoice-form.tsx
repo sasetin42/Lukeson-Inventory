@@ -231,7 +231,7 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel, onIdGenerate
             }
 
             const invoiceData = {
-                id: invoice?.id,
+                id: invoice?.id || invoiceId,
                 customerId,
                 customerName: customer?.name || 'N/A',
                 salesOrderId,

@@ -107,12 +107,13 @@ function InvoicesContent() {
     try {
         const { id, ...dataToSave } = invoiceData;
         
-        if(id) { // Editing existing invoice
+        if(id && editingInvoice) { // Editing existing invoice
             const docRef = doc(db, "invoices", id);
             await setDoc(docRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
             toast({ title: "Success", description: "Invoice updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
-        } else { // Creating new invoice
-            const docRef = await addDoc(collection(db, "invoices"), { ...dataToSave, createdAt: serverTimestamp() });
+        } else if (id) { // Creating new invoice with a pre-generated ID
+            const docRef = doc(db, "invoices", id);
+            await setDoc(docRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
             toast({ title: "Success", description: "Invoice created successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
         }
         
