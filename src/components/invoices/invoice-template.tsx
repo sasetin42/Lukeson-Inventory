@@ -219,7 +219,7 @@ export default function InvoiceTemplate() {
                                 <Input id="company-name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
                             </div>
                             <div>
-                                <Label htmlFor="tin">TIN</Label>
+                                <Label htmlFor="tin">VAT REG. TIN</Label>
                                 <Input id="tin" value={tin} onChange={(e) => setTin(e.target.value)} />
                             </div>
                              <div>
@@ -282,7 +282,7 @@ export default function InvoiceTemplate() {
                                 <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo" />
                                 <div className="text-xs">
                                     <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
-                                    {tin && <p>TIN: {tin}</p>}
+                                    {tin && <p>VAT REG. TIN: {tin}</p>}
                                     <p>{address}</p>
                                     <p>{phone}</p>
                                     <p>{website}</p>

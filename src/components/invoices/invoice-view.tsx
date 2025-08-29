@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Invoice, SalesOrder } from '@/lib/types';
@@ -76,7 +77,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                     <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo" />
                     <div className="text-xs">
                         <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
-                        {tin && <p><strong>TIN: {tin}</strong></p>}
+                        {tin && <p><strong>VAT REG. TIN: {tin}</strong></p>}
                         <p>{address}</p>
                         <p>{phone}</p>
                         <p>{website}</p>
@@ -96,7 +97,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                 <div className="w-1/2">
                     <p className="font-bold">BILL TO:</p>
                     <p>{invoice.customerName}</p>
-                    {invoice.customerTin && <p><strong>TIN: {invoice.customerTin}</strong></p>}
+                    {invoice.customerTin && <p><strong>VAT REG. TIN: {invoice.customerTin}</strong></p>}
                     {invoice.customerEmail && <p>Email: {invoice.customerEmail}</p>}
                     {invoice.customerPhone && <p>Phone: {invoice.customerPhone}</p>}
                 </div>
