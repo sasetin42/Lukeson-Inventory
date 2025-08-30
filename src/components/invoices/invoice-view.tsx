@@ -88,7 +88,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         return (
             <div>
                 <p className="font-bold">{name}</p>
-                <p className="border-t border-black pt-1 mt-1">{label}</p>
+                <p className="font-bold border-t border-black pt-1 mt-1">{label}</p>
             </div>
         )
     }
@@ -181,14 +181,14 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
             </div>
 
             <div className="flex justify-between mt-24">
-                <div className="text-[10px] leading-[13px] space-y-1">
+                <div className="text-[8px] leading-[10px] space-y-1">
                     <p>BIR ATP No. {birDetails.birAtpNo} Date of ATP: {birDetails.dateOfAtp}</p>
                     <p>Looseleaf Permit: {birDetails.looseleafPermitNo} Date Issue: {birDetails.permitDateIssue}</p>
                     <p>{birDetails.printersName} {birDetails.printersAddress}</p>
                     <p>NonVAT Reg. TIN: {birDetails.printersTin}</p>
                     <p>Printer's Accreditation No. {birDetails.printersAccreditationNo} Date Issued: {birDetails.printersAccreditationDate}</p>
                 </div>
-                <div className="text-right text-xs">
+                <div className="text-right text-[10px] leading-[13px]">
                      <p>Received the above goods in good order and condition.</p>
                      <div className="mt-4">
                         {renderSignature(verifiedBy)}
