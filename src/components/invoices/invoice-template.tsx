@@ -391,7 +391,6 @@ export default function InvoiceTemplate() {
                         </div>
 
                         <div className="text-xs mt-8 space-y-1">
-                            <p>10 Pads 50x3 0001-0500</p>
                             <p>BIR ATP No. {birDetails.birAtpNo} Date of ATP: {birDetails.dateOfAtp}</p>
                             <p>Looseleaf Permit: {birDetails.looseleafPermitNo} Date Issue: {birDetails.permitDateIssue}</p>
                             <p>{birDetails.printersName} {birDetails.printersAddress}</p>
@@ -404,3 +403,4 @@ export default function InvoiceTemplate() {
         </div>
     );
 }
+
