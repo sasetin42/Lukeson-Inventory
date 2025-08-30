@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -147,7 +148,7 @@ export default function InvoiceTemplate() {
         return (
             <div>
                 <p className="font-bold">{name}</p>
-                <p className="font-bold border-t border-black pt-1 mt-1">{label}</p>
+                <p className="text-[10px] leading-[13px] font-bold border-t border-black pt-1 mt-1">{label}</p>
             </div>
         )
     }
@@ -367,7 +368,7 @@ export default function InvoiceTemplate() {
                                 <div className="flex justify-between font-bold"><span>Total Sales:</span> <span>P11,500.00</span></div>
                                 <div className="flex justify-between"><span>Subtotal:</span> <span>P11,500.00</span></div>
                                 {showVat && <div className="flex justify-between"><span>VAT (12%):</span> <span>P1,380.00</span></div>}
-                                <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
+                                <div className="flex justify-between font-bold text-base mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
                                     <span>Total Amount Due:</span>
                                     <span>P12,880.00</span>
                                 </div>
@@ -384,7 +385,7 @@ export default function InvoiceTemplate() {
                             </div>
                              <div className="text-right text-[10px] leading-[13px]">
                                 <p>Received the above goods in good order and condition.</p>
-                                <div className="mt-4">
+                                <div className="mt-8">
                                      {renderSignature(verifiedBy)}
                                 </div>
                             </div>

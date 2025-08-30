@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Invoice, SalesOrder } from '@/lib/types';
@@ -88,7 +89,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         return (
             <div>
                 <p className="font-bold">{name}</p>
-                <p className="font-bold border-t border-black pt-1 mt-1">{label}</p>
+                <p className="text-[10px] leading-[13px] font-bold border-t border-black pt-1 mt-1">{label}</p>
             </div>
         )
     }
@@ -190,7 +191,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                 </div>
                 <div className="text-right text-[10px] leading-[13px]">
                      <p>Received the above goods in good order and condition.</p>
-                     <div className="mt-4">
+                     <div className="mt-8">
                         {renderSignature(verifiedBy)}
                      </div>
                 </div>
