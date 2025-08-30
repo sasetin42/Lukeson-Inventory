@@ -89,7 +89,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         return (
             <div>
                 <p className="font-bold">{name}</p>
-                <p className="font-bold text-[10px] leading-[13px] border-t border-black pt-1 mt-4">{label}</p>
+                <p className="text-[10px] leading-[13px] font-bold border-t border-black pt-1 mt-4">{label}</p>
             </div>
         )
     }
@@ -110,15 +110,15 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                     </div>
                     <div className="text-right">
                         <h2 className="font-bold" style={{ color: accentColor, fontSize: '25px' }}>INVOICE</h2>
-                        <p style={{ fontSize: '12px' }}><strong>Invoice ID:</strong> {invoice.id}</p>
-                        <p style={{ fontSize: '12px' }}><strong>Date:</strong> {formatDate(invoice.date)}</p>
-                        {showDueDate && <p style={{ fontSize: '12px' }}><strong>Due Date:</strong> {formatDate(invoice.dueDate)}</p>}
-                        {salesOrder?.quotationId && <p style={{ fontSize: '12px' }}><strong>QTN:</strong> {salesOrder.quotationId}</p>}
-                        {invoice.salesOrderId && <p style={{ fontSize: '12px' }}><strong>SO:</strong> {invoice.salesOrderId}</p>}
+                        <p style={{ fontSize: '12px', lineHeight: '16px' }}><strong>Invoice ID:</strong> {invoice.id}</p>
+                        <p style={{ fontSize: '12px', lineHeight: '16px' }}><strong>Date:</strong> {formatDate(invoice.date)}</p>
+                        {showDueDate && <p style={{ fontSize: '12px', lineHeight: '16px' }}><strong>Due Date:</strong> {formatDate(invoice.dueDate)}</p>}
+                        {salesOrder?.quotationId && <p style={{ fontSize: '12px', lineHeight: '16px' }}><strong>QTN:</strong> {salesOrder.quotationId}</p>}
+                        {invoice.salesOrderId && <p style={{ fontSize: '12px', lineHeight: '16px' }}><strong>SO:</strong> {invoice.salesOrderId}</p>}
                     </div>
                 </div>
 
-                <div className="mt-8 text-sm flex justify-between">
+                <div className="mt-8 text-sm flex justify-between" style={{ fontSize: '12px', lineHeight: '16px' }}>
                     <div className="w-1/2">
                         <p className="font-bold">BILL TO:</p>
                         <p>{invoice.customerName}</p>
@@ -201,3 +201,4 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         </div>
     );
 }
+

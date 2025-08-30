@@ -288,7 +288,7 @@ export default function InvoiceTemplate() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                              <div>
-                                <Label htmlFor="verifiedBy">"Customer signature over printed name" Signature</Label>
+                                <Label htmlFor="verifiedBy">Customer signature over printed name</Label>
                                 <Textarea id="verifiedBy" value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                         </CardContent>
@@ -313,13 +313,13 @@ export default function InvoiceTemplate() {
                                 </div>
                                 <div className="text-right">
                                     <h2 className="text-3xl font-bold" style={{ color: accentColor }}>INVOICE</h2>
-                                    <p className="text-sm"><strong>Invoice ID:</strong> INV-2025-001</p>
-                                    <p className="text-sm"><strong>Date:</strong> Jan 15, 2024</p>
-                                    {showDueDate && <p className="text-sm"><strong>Due Date:</strong> Feb 14, 2024</p>}
+                                    <p style={{ fontSize: '12px', lineHeight: '16px' }}><strong>Invoice ID:</strong> INV-2025-001</p>
+                                    <p style={{ fontSize: '12px', lineHeight: '16px' }}><strong>Date:</strong> Jan 15, 2024</p>
+                                    {showDueDate && <p style={{ fontSize: '12px', lineHeight: '16px' }}><strong>Due Date:</strong> Feb 14, 2024</p>}
                                 </div>
                             </div>
 
-                            <div className="mt-8">
+                            <div className="mt-8" style={{ fontSize: '12px', lineHeight: '16px' }}>
                                 <p className="font-bold">BILL TO:</p>
                                 <p>Metro Construction Inc.</p>
                                 <p>123 Main Street, Makati City</p>
@@ -399,3 +399,4 @@ export default function InvoiceTemplate() {
         </div>
     );
 }
+
