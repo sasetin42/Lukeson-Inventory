@@ -35,7 +35,7 @@ export default function InvoiceTemplate() {
     const [logo, setLogo] = useState('https://placehold.co/100x50.png');
 
     const [preparedBy, setPreparedBy] = useState('YMP / MCB / MJTS\nPrepared by');
-    const [verifiedBy, setVerifiedBy] = useState('HIROYOSHI KANAZAWA - VP\nVerified by');
+    const [verifiedBy, setVerifiedBy] = useState('_________________________\nCustomer signature over printed name');
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -58,7 +58,7 @@ export default function InvoiceTemplate() {
                     setWebsite(settings.website || 'www.yamashitamold.ph');
                     setLogo(settings.logo || 'https://placehold.co/100x50.png');
                     setPreparedBy(settings.preparedBy || 'YMP / MCB / MJTS\nPrepared by');
-                    setVerifiedBy(settings.verifiedBy || 'HIROYOSHI KANAZAWA - VP\nVerified by');
+                    setVerifiedBy(settings.verifiedBy || '_________________________\nCustomer signature over printed name');
                 }
             } catch (error) {
                 console.error("Error fetching template settings:", error);
@@ -254,7 +254,7 @@ export default function InvoiceTemplate() {
                                 <Textarea id="prepared-by" value={preparedBy} onChange={(e) => setPreparedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                              <div>
-                                <Label htmlFor="verified-by">"Verified by" Signature</Label>
+                                <Label htmlFor="verified-by">Customer signature over printed name</Label>
                                 <Textarea id="verified-by" value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                         </CardContent>

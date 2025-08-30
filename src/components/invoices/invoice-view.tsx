@@ -28,7 +28,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         showNotes: true,
         showVat: true,
         preparedBy: 'YMP / MCB / MJTS\nPrepared by',
-        verifiedBy: 'HIROYOSHI KANAZAWA - VP\nVerified by',
+        verifiedBy: '_________________________\nCustomer signature over printed name',
     });
     const [salesOrder, setSalesOrder] = useState<SalesOrder | null>(null);
     

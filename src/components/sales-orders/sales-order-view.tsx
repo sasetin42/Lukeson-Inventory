@@ -28,7 +28,7 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
         showNotes: true,
         showVat: true,
         preparedBy: 'YMP / MCB / MJTS\nPrepared by',
-        verifiedBy: 'HIROYOSHI KANAZAWA - VP\nVerified by',
+        verifiedBy: 'HIROYOSHI KANAZAWA - VP\nCustomer signature over printed name',
     });
     
     useEffect(() => {

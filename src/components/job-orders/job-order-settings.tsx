@@ -34,7 +34,7 @@ export default function JobOrderSettings() {
     const [logo, setLogo] = useState('https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/e903a953-ab33-4f9e-953e-5390916e6373.png?alt=media');
 
     const [preparedBy, setPreparedBy] = useState('Admin\nPrepared by');
-    const [verifiedBy, setVerifiedBy] = useState('_________________________\nVerified by');
+    const [verifiedBy, setVerifiedBy] = useState('_________________________\nCustomer signature over printed name');
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -56,7 +56,7 @@ export default function JobOrderSettings() {
                     setWebsite(settings.website || 'https://lukesonlighting.com.ph/');
                     setLogo(settings.logo || 'https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/e903a953-ab33-4f9e-953e-5390916e6373.png?alt=media');
                     setPreparedBy(settings.preparedBy || 'Admin\nPrepared by');
-                    setVerifiedBy(settings.verifiedBy || '_________________________\nVerified by');
+                    setVerifiedBy(settings.verifiedBy || '_________________________\nCustomer signature over printed name');
                 }
             } catch (error) {
                 console.error("Error fetching template settings:", error);
@@ -248,7 +248,7 @@ export default function JobOrderSettings() {
                                 <Textarea id="prepared-by" value={preparedBy} onChange={(e) => setPreparedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                              <div>
-                                <Label htmlFor="verified-by">"Verified by" Signature</Label>
+                                <Label htmlFor="verified-by">Customer signature over printed name</Label>
                                 <Textarea id="verified-by" value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                         </CardContent>

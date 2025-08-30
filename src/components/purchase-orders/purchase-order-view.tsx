@@ -27,7 +27,7 @@ export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewPr
         showDueDate: true,
         showNotes: true,
         preparedBy: 'YMP / MCB / MJTS\nPrepared by',
-        verifiedBy: 'HIROYOSHI KANAZAWA - VP\nVerified by',
+        verifiedBy: 'HIROYOSHI KANAZAWA - VP\nCustomer signature over printed name',
     });
     
     useEffect(() => {

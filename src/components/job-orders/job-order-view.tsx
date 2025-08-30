@@ -32,7 +32,7 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         showNotes: true,
         showVat: true,
         preparedBy: 'Admin\nPrepared by',
-        verifiedBy: '_________________________\nVerified by',
+        verifiedBy: '_________________________\nCustomer signature over printed name',
     });
     
     useEffect(() => {
