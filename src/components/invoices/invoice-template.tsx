@@ -36,6 +36,25 @@ export default function InvoiceTemplate() {
 
     const [preparedBy, setPreparedBy] = useState('YMP / MCB / MJTS\nPrepared by');
     const [verifiedBy, setVerifiedBy] = useState('_________________________\nCustomer signature over printed name');
+    
+    // BIR and Printer Details
+    const [birDetails, setBirDetails] = useState({
+        birAtpNo: 'OCN: 028AU20250000001901',
+        dateOfAtp: 'February 3, 2025',
+        looseleafPermitNo: 'LLAR-028-0324-00022',
+        permitDateIssue: 'March 21, 2024',
+        printersName: 'A. Depano Prtg. Press',
+        printersAddress: '#14 Mabituan St., Masambong Q.C.',
+        printersTin: '158-832-790-00000',
+        printersAccreditationNo: '038MP20240000000020',
+        printersAccreditationDate: '01-11-2024',
+    });
+    
+    const handleBirDetailsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        setBirDetails(prev => ({ ...prev, [id]: value }));
+    }
+
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -59,6 +78,9 @@ export default function InvoiceTemplate() {
                     setLogo(settings.logo || 'https://placehold.co/100x50.png');
                     setPreparedBy(settings.preparedBy || 'YMP / MCB / MJTS\nPrepared by');
                     setVerifiedBy(settings.verifiedBy || '_________________________\nCustomer signature over printed name');
+                    if (settings.birDetails) {
+                        setBirDetails(settings.birDetails);
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching template settings:", error);
@@ -79,7 +101,7 @@ export default function InvoiceTemplate() {
         setIsSaving(true);
         const settings = {
             accentColor, showDueDate, showNotes, showVat, companyName, tin, address, phone, email, website, logo,
-            preparedBy, verifiedBy,
+            preparedBy, verifiedBy, birDetails,
         };
 
         try {
@@ -246,16 +268,33 @@ export default function InvoiceTemplate() {
 
                     <Card>
                         <CardHeader>
+                            <CardTitle>BIR & Printer's Accreditation Details</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div><Label htmlFor="birAtpNo">BIR ATP No.</Label><Input id="birAtpNo" value={birDetails.birAtpNo} onChange={handleBirDetailsChange} /></div>
+                            <div><Label htmlFor="dateOfAtp">Date of ATP</Label><Input id="dateOfAtp" value={birDetails.dateOfAtp} onChange={handleBirDetailsChange} /></div>
+                            <div><Label htmlFor="looseleafPermitNo">Looseleaf Permit No.</Label><Input id="looseleafPermitNo" value={birDetails.looseleafPermitNo} onChange={handleBirDetailsChange} /></div>
+                            <div><Label htmlFor="permitDateIssue">Permit Date Issue</Label><Input id="permitDateIssue" value={birDetails.permitDateIssue} onChange={handleBirDetailsChange} /></div>
+                            <div><Label htmlFor="printersName">Printer's Name</Label><Input id="printersName" value={birDetails.printersName} onChange={handleBirDetailsChange} /></div>
+                            <div><Label htmlFor="printersAddress">Printer's Address</Label><Input id="printersAddress" value={birDetails.printersAddress} onChange={handleBirDetailsChange} /></div>
+                            <div><Label htmlFor="printersTin">Printer's TIN</Label><Input id="printersTin" value={birDetails.printersTin} onChange={handleBirDetailsChange} /></div>
+                            <div><Label htmlFor="printersAccreditationNo">Printer's Accreditation No.</Label><Input id="printersAccreditationNo" value={birDetails.printersAccreditationNo} onChange={handleBirDetailsChange} /></div>
+                            <div><Label htmlFor="printersAccreditationDate">Accreditation Date</Label><Input id="printersAccreditationDate" value={birDetails.printersAccreditationDate} onChange={handleBirDetailsChange} /></div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
                             <CardTitle>Footer Settings</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                            <div>
-                                <Label htmlFor="prepared-by">"Prepared by" Signature</Label>
-                                <Textarea id="prepared-by" value={preparedBy} onChange={(e) => setPreparedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
+                                <Label htmlFor="preparedBy">"Prepared by" Signature</Label>
+                                <Textarea id="preparedBy" value={preparedBy} onChange={(e) => setPreparedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                              <div>
-                                <Label htmlFor="verified-by">Customer signature over printed name</Label>
-                                <Textarea id="verified-by" value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
+                                <Label htmlFor="verifiedBy">Customer signature over printed name</Label>
+                                <Textarea id="verifiedBy" value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                         </CardContent>
                     </Card>
@@ -266,10 +305,10 @@ export default function InvoiceTemplate() {
                     <Card className="p-8">
                         <div className="flex justify-between items-start">
                              <div className="flex items-center gap-4">
-                                <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo" />
+                                <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo"/>
                                 <div className="text-xs">
                                     <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
-                                    {tin && <p>VAT REG. TIN: {tin}</p>}
+                                    {tin && <p><strong>VAT REG. TIN: {tin}</strong></p>}
                                     <p>{address}</p>
                                     <p>{phone}</p>
                                     <p>{website}</p>
@@ -342,7 +381,22 @@ export default function InvoiceTemplate() {
 
                         <div className="flex justify-between mt-24 text-center">
                             {renderSignature(preparedBy)}
-                            {renderSignature(verifiedBy)}
+                            <div className="text-left">
+                                <p>Received the above goods in good order and condition.</p>
+                                <div className="flex items-end mt-4">
+                                    <span className="mr-2">By:</span>
+                                    {renderSignature(verifiedBy)}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="text-xs mt-8 space-y-1">
+                            <p>10 Pads 50x3 0001-0500</p>
+                            <p>BIR ATP No. {birDetails.birAtpNo} Date of ATP: {birDetails.dateOfAtp}</p>
+                            <p>Looseleaf Permit: {birDetails.looseleafPermitNo} Date Issue: {birDetails.permitDateIssue}</p>
+                            <p>{birDetails.printersName} {birDetails.printersAddress}</p>
+                            <p>NonVAT Reg. TIN: {birDetails.printersTin}</p>
+                            <p>Printer's Accreditation No. {birDetails.printersAccreditationNo} Date Issued: {birDetails.printersAccreditationDate}</p>
                         </div>
                     </Card>
                 </div>
