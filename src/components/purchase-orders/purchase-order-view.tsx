@@ -62,6 +62,7 @@ export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewPr
     };
     
     const renderSignature = (text: string) => {
+        if (!text) return null;
         const [name, ...labelParts] = text.split('\n');
         const label = labelParts.join('\n');
         return (

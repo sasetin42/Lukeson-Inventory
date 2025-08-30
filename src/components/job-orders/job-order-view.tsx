@@ -92,6 +92,7 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
     };
     
     const renderSignature = (text: string) => {
+        if (!text) return null;
         const [name, ...labelParts] = text.split('\n');
         const label = labelParts.join('\n');
         return (

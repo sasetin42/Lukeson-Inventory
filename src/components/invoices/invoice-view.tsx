@@ -82,6 +82,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
     const totalSales = invoice.lines.reduce((acc, line) => acc + line.total, 0);
 
     const renderSignature = (text: string) => {
+        if (!text) return null;
         const [name, ...labelParts] = text.split('\n');
         const label = labelParts.join('\n');
         return (
