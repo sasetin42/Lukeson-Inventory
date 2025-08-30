@@ -27,7 +27,6 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         showDueDate: true,
         showNotes: true,
         showVat: true,
-        preparedBy: 'YMP / MCB / MJTS\nPrepared by',
         verifiedBy: '_________________________\nCustomer signature over printed name',
         birDetails: {
             birAtpNo: 'OCN: 028AU20250000001901',
@@ -73,7 +72,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         fetchSettingsAndData();
     }, [invoice.salesOrderId]);
 
-    const { accentColor, companyName, tin, address, phone, website, logo, showDueDate, showNotes, showVat, preparedBy, verifiedBy, birDetails } = templateSettings;
+    const { accentColor, companyName, tin, address, phone, website, logo, showDueDate, showNotes, showVat, verifiedBy, birDetails } = templateSettings;
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -180,8 +179,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                 </div>
             </div>
 
-            <div className="flex justify-between mt-24 text-center text-xs">
-                {renderSignature(preparedBy)}
+            <div className="flex justify-end mt-24 text-center text-xs">
                 <div className="text-left">
                     <div className="flex items-end mt-4">
                         <span className="mr-2">By:</span>

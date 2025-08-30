@@ -31,7 +31,6 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         showDueDate: true,
         showNotes: true,
         showVat: true,
-        preparedBy: 'Admin\nPrepared by',
         verifiedBy: '_________________________\nCustomer signature over printed name',
     });
     
@@ -50,7 +49,7 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         fetchSettings();
     }, []);
 
-    const { companyName, address, phone, website, logo, preparedBy, verifiedBy } = templateSettings;
+    const { companyName, address, phone, website, logo, verifiedBy } = templateSettings;
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -208,8 +207,7 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
                 </div>
             </div>
 
-            <div className="flex justify-between mt-16 text-center text-xs">
-                {renderSignature(preparedBy)}
+            <div className="flex justify-end mt-16 text-center text-xs">
                 {renderSignature(verifiedBy)}
             </div>
         </div>

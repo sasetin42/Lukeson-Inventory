@@ -34,7 +34,6 @@ export default function InvoiceTemplate() {
     const [website, setWebsite] = useState('www.yamashitamold.ph');
     const [logo, setLogo] = useState('https://placehold.co/100x50.png');
 
-    const [preparedBy, setPreparedBy] = useState('YMP / MCB / MJTS\nPrepared by');
     const [verifiedBy, setVerifiedBy] = useState('_________________________\nCustomer signature over printed name');
     
     // BIR and Printer Details
@@ -76,7 +75,6 @@ export default function InvoiceTemplate() {
                     setEmail(settings.email || 'contact@yamashitamold.ph');
                     setWebsite(settings.website || 'www.yamashitamold.ph');
                     setLogo(settings.logo || 'https://placehold.co/100x50.png');
-                    setPreparedBy(settings.preparedBy || 'YMP / MCB / MJTS\nPrepared by');
                     setVerifiedBy(settings.verifiedBy || '_________________________\nCustomer signature over printed name');
                     if (settings.birDetails) {
                         setBirDetails(settings.birDetails);
@@ -101,7 +99,7 @@ export default function InvoiceTemplate() {
         setIsSaving(true);
         const settings = {
             accentColor, showDueDate, showNotes, showVat, companyName, tin, address, phone, email, website, logo,
-            preparedBy, verifiedBy, birDetails,
+            verifiedBy, birDetails,
         };
 
         try {
@@ -288,10 +286,6 @@ export default function InvoiceTemplate() {
                             <CardTitle>Footer Settings</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                           <div>
-                                <Label htmlFor="preparedBy">"Prepared by" Signature</Label>
-                                <Textarea id="preparedBy" value={preparedBy} onChange={(e) => setPreparedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
-                            </div>
                              <div>
                                 <Label htmlFor="verifiedBy">Customer signature over printed name</Label>
                                 <Textarea id="verifiedBy" value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
@@ -379,8 +373,7 @@ export default function InvoiceTemplate() {
                             </div>
                         )}
 
-                        <div className="flex justify-between mt-24 text-center">
-                            {renderSignature(preparedBy)}
+                        <div className="flex justify-end mt-24 text-center">
                             <div className="text-left">
                                 <p>Received the above goods in good order and condition.</p>
                                 <div className="flex items-end mt-4">
@@ -403,4 +396,3 @@ export default function InvoiceTemplate() {
         </div>
     );
 }
-

@@ -24,10 +24,8 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
         phone: 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463',
         website: 'www.yamashitamold.ph',
         logo: 'https://placehold.co/100x50.png',
-        showDueDate: true,
         showNotes: true,
         showVat: true,
-        preparedBy: 'YMP / MCB / MJTS\nPrepared by',
         verifiedBy: 'HIROYOSHI KANAZAWA - VP\nCustomer signature over printed name',
     });
     
@@ -46,7 +44,7 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
         fetchSettings();
     }, []);
 
-    const { accentColor, companyName, address, phone, website, logo, showNotes, showVat, preparedBy, verifiedBy } = templateSettings;
+    const { accentColor, companyName, address, phone, website, logo, showNotes, showVat, verifiedBy } = templateSettings;
 
     const totals = useMemo(() => {
         const totalSales = salesOrder.lines.reduce((acc, l) => acc + l.total, 0);
@@ -241,8 +239,7 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
               </div>
             )}
 
-            <div className="flex justify-between mt-24 text-center text-xs">
-                {renderSignature(preparedBy)}
+            <div className="flex justify-end mt-24 text-center text-xs">
                 {renderSignature(verifiedBy)}
             </div>
         </div>

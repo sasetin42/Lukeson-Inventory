@@ -33,7 +33,6 @@ export default function SalesOrderTemplate() {
     const [website, setWebsite] = useState('www.yamashitamold.ph');
     const [logo, setLogo] = useState('https://placehold.co/100x50.png');
 
-    const [preparedBy, setPreparedBy] = useState('YMP / MCB / MJTS\nPrepared by');
     const [verifiedBy, setVerifiedBy] = useState('HIROYOSHI KANAZAWA - VP\nCustomer signature over printed name');
 
 
@@ -56,7 +55,6 @@ export default function SalesOrderTemplate() {
                     setEmail(settings.email || 'contact@yamashitamold.ph');
                     setWebsite(settings.website || 'www.yamashitamold.ph');
                     setLogo(settings.logo || 'https://placehold.co/100x50.png');
-                    setPreparedBy(settings.preparedBy || 'YMP / MCB / MJTS\nPrepared by');
                     setVerifiedBy(settings.verifiedBy || 'HIROYOSHI KANAZAWA - VP\nCustomer signature over printed name');
                 }
             } catch (error) {
@@ -78,7 +76,7 @@ export default function SalesOrderTemplate() {
         setIsSaving(true);
         const settings = {
             accentColor, showDueDate, showNotes, showVat, companyName, address, phone, email, website, logo,
-            preparedBy, verifiedBy,
+            verifiedBy,
         };
 
         try {
@@ -244,10 +242,6 @@ export default function SalesOrderTemplate() {
                             <CardTitle>Footer Settings</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                           <div>
-                                <Label htmlFor="prepared-by">"Prepared by" Signature</Label>
-                                <Textarea id="prepared-by" value={preparedBy} onChange={(e) => setPreparedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
-                            </div>
                              <div>
                                 <Label htmlFor="verified-by">Customer signature over printed name</Label>
                                 <Textarea id="verified-by" value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
@@ -335,8 +329,7 @@ export default function SalesOrderTemplate() {
                             </div>
                         )}
 
-                        <div className="flex justify-between mt-24 text-center">
-                            {renderSignature(preparedBy)}
+                        <div className="flex justify-end mt-24 text-center">
                             {renderSignature(verifiedBy)}
                         </div>
                     </Card>
