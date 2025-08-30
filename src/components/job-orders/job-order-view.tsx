@@ -32,7 +32,6 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         showNotes: true,
         showVat: true,
         preparedBy: 'Admin\nPrepared by',
-        receivedBy: '_________________________\nReceived by',
         verifiedBy: '_________________________\nVerified by',
     });
     
@@ -51,7 +50,7 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         fetchSettings();
     }, []);
 
-    const { companyName, address, phone, website, logo, preparedBy, receivedBy, verifiedBy } = templateSettings;
+    const { companyName, address, phone, website, logo, preparedBy, verifiedBy } = templateSettings;
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -108,7 +107,7 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         <div className="py-4 text-xs">
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-4">
-                    <Image src={logo} alt="Company Logo" width={60} height={60} className="mb-2" data-ai-hint="company logo" />
+                    <Image src={logo} alt="Company Logo" width={60} height={60} className="mb-2" data-ai-hint="logo" />
                     <div>
                         <h2 className="text-lg font-bold">{companyName}</h2>
                         <p className="text-xs text-muted-foreground">{address}</p>
@@ -211,7 +210,6 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
 
             <div className="flex justify-between mt-16 text-center text-xs">
                 {renderSignature(preparedBy)}
-                {renderSignature(receivedBy)}
                 {renderSignature(verifiedBy)}
             </div>
         </div>

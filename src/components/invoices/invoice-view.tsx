@@ -28,7 +28,6 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         showNotes: true,
         showVat: true,
         preparedBy: 'YMP / MCB / MJTS\nPrepared by',
-        receivedBy: 'JUAN DELA CRUZ\nReceived by',
         verifiedBy: 'HIROYOSHI KANAZAWA - VP\nVerified by',
     });
     const [salesOrder, setSalesOrder] = useState<SalesOrder | null>(null);
@@ -58,7 +57,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         fetchSettingsAndData();
     }, [invoice.salesOrderId]);
 
-    const { accentColor, companyName, tin, address, phone, website, logo, showDueDate, showNotes, showVat, preparedBy, receivedBy, verifiedBy } = templateSettings;
+    const { accentColor, companyName, tin, address, phone, website, logo, showDueDate, showNotes, showVat, preparedBy, verifiedBy } = templateSettings;
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -167,7 +166,6 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
 
             <div className="flex justify-between mt-24 text-center text-xs">
                 {renderSignature(preparedBy)}
-                {renderSignature(receivedBy)}
                 {renderSignature(verifiedBy)}
             </div>
         </div>

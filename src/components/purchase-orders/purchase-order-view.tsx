@@ -26,9 +26,7 @@ export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewPr
         logo: 'https://placehold.co/100x50.png',
         showDueDate: true,
         showNotes: true,
-        showVat: true,
         preparedBy: 'YMP / MCB / MJTS\nPrepared by',
-        receivedBy: 'JUAN DELA CRUZ\nReceived by',
         verifiedBy: 'HIROYOSHI KANAZAWA - VP\nVerified by',
     });
     
@@ -47,7 +45,7 @@ export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewPr
         fetchSettings();
     }, []);
 
-    const { accentColor, companyName, address, phone, website, logo, showDueDate, showNotes, preparedBy, receivedBy, verifiedBy } = templateSettings;
+    const { accentColor, companyName, address, phone, website, logo, showDueDate, showNotes, preparedBy, verifiedBy } = templateSettings;
 
     const formatDate = (date: any) => {
         if (!date) return 'N/A';
@@ -149,7 +147,6 @@ export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewPr
 
             <div className="flex justify-between mt-24 text-center text-xs">
                 {renderSignature(preparedBy)}
-                {renderSignature(receivedBy)}
                 {renderSignature(verifiedBy)}
             </div>
         </div>

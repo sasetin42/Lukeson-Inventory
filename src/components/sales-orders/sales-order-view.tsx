@@ -28,7 +28,6 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
         showNotes: true,
         showVat: true,
         preparedBy: 'YMP / MCB / MJTS\nPrepared by',
-        receivedBy: 'JUAN DELA CRUZ\nReceived by',
         verifiedBy: 'HIROYOSHI KANAZAWA - VP\nVerified by',
     });
     
@@ -47,7 +46,7 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
         fetchSettings();
     }, []);
 
-    const { accentColor, companyName, address, phone, website, logo, showNotes, showVat, preparedBy, receivedBy, verifiedBy } = templateSettings;
+    const { accentColor, companyName, address, phone, website, logo, showNotes, showVat, preparedBy, verifiedBy } = templateSettings;
 
     const totals = useMemo(() => {
         const totalSales = salesOrder.lines.reduce((acc, l) => acc + l.total, 0);
@@ -244,7 +243,6 @@ export default function SalesOrderView({ salesOrder, quotation }: SalesOrderView
 
             <div className="flex justify-between mt-24 text-center text-xs">
                 {renderSignature(preparedBy)}
-                {renderSignature(receivedBy)}
                 {renderSignature(verifiedBy)}
             </div>
         </div>

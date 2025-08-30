@@ -34,7 +34,6 @@ export default function JobOrderSettings() {
     const [logo, setLogo] = useState('https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/e903a953-ab33-4f9e-953e-5390916e6373.png?alt=media');
 
     const [preparedBy, setPreparedBy] = useState('Admin\nPrepared by');
-    const [receivedBy, setReceivedBy] = useState('_________________________\nReceived by');
     const [verifiedBy, setVerifiedBy] = useState('_________________________\nVerified by');
 
     useEffect(() => {
@@ -57,7 +56,6 @@ export default function JobOrderSettings() {
                     setWebsite(settings.website || 'https://lukesonlighting.com.ph/');
                     setLogo(settings.logo || 'https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/e903a953-ab33-4f9e-953e-5390916e6373.png?alt=media');
                     setPreparedBy(settings.preparedBy || 'Admin\nPrepared by');
-                    setReceivedBy(settings.receivedBy || '_________________________\nReceived by');
                     setVerifiedBy(settings.verifiedBy || '_________________________\nVerified by');
                 }
             } catch (error) {
@@ -79,7 +77,7 @@ export default function JobOrderSettings() {
         setIsSaving(true);
         const settings = {
             accentColor, showDueDate, showNotes, showVat, companyName, address, phone, email, website, logo,
-            preparedBy, receivedBy, verifiedBy,
+            preparedBy, verifiedBy,
         };
 
         try {
@@ -250,10 +248,6 @@ export default function JobOrderSettings() {
                                 <Textarea id="prepared-by" value={preparedBy} onChange={(e) => setPreparedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                              <div>
-                                <Label htmlFor="received-by">"Received by" Signature</Label>
-                                <Textarea id="received-by" value={receivedBy} onChange={(e) => setReceivedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
-                            </div>
-                             <div>
                                 <Label htmlFor="verified-by">"Verified by" Signature</Label>
                                 <Textarea id="verified-by" value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
@@ -317,7 +311,6 @@ export default function JobOrderSettings() {
 
                         <div className="flex justify-between mt-24 text-center">
                             {renderSignature(preparedBy)}
-                            {renderSignature(receivedBy)}
                             {renderSignature(verifiedBy)}
                         </div>
                     </Card>

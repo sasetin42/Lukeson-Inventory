@@ -34,7 +34,6 @@ export default function PurchaseOrderTemplate() {
     const [logo, setLogo] = useState('https://placehold.co/100x50.png');
 
     const [preparedBy, setPreparedBy] = useState('YMP / MCB / MJTS\nPrepared by');
-    const [receivedBy, setReceivedBy] = useState('JUAN DELA CRUZ\nReceived by');
     const [verifiedBy, setVerifiedBy] = useState('HIROYOSHI KANAZAWA - VP\nVerified by');
 
     useEffect(() => {
@@ -57,7 +56,6 @@ export default function PurchaseOrderTemplate() {
                     setWebsite(settings.website || 'www.yamashitamold.ph');
                     setLogo(settings.logo || 'https://placehold.co/100x50.png');
                     setPreparedBy(settings.preparedBy || 'YMP / MCB / MJTS\nPrepared by');
-                    setReceivedBy(settings.receivedBy || 'JUAN DELA CRUZ\nReceived by');
                     setVerifiedBy(settings.verifiedBy || 'HIROYOSHI KANAZAWA - VP\nVerified by');
                 }
             } catch (error) {
@@ -79,7 +77,7 @@ export default function PurchaseOrderTemplate() {
         setIsSaving(true);
         const settings = {
             accentColor, showDueDate, showNotes, showVat, companyName, address, phone, email, website, logo,
-            preparedBy, receivedBy, verifiedBy,
+            preparedBy, verifiedBy,
         };
 
         try {
@@ -244,14 +242,10 @@ export default function PurchaseOrderTemplate() {
                         <CardHeader>
                             <CardTitle>Footer Settings</CardTitle>
                         </CardHeader>
-                         <CardContent className="space-y-4">
-                           <div>
+                        <CardContent className="space-y-4">
+                            <div>
                                 <Label htmlFor="prepared-by">"Prepared by" Signature</Label>
                                 <Textarea id="prepared-by" value={preparedBy} onChange={(e) => setPreparedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
-                            </div>
-                             <div>
-                                <Label htmlFor="received-by">"Received by" Signature</Label>
-                                <Textarea id="received-by" value={receivedBy} onChange={(e) => setReceivedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                              <div>
                                 <Label htmlFor="verified-by">"Verified by" Signature</Label>
@@ -342,7 +336,6 @@ export default function PurchaseOrderTemplate() {
 
                         <div className="flex justify-between mt-24 text-center">
                            {renderSignature(preparedBy)}
-                           {renderSignature(receivedBy)}
                            {renderSignature(verifiedBy)}
                         </div>
                     </Card>
