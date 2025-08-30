@@ -148,7 +148,7 @@ export default function InvoiceTemplate() {
         return (
             <div>
                 <p className="font-bold">{name}</p>
-                <p className="text-[10px] leading-[13px] font-bold border-t border-black pt-1 mt-1">{label}</p>
+                <p className="font-bold text-[10px] leading-[13px] border-t border-black pt-1 mt-4">{label}</p>
             </div>
         )
     }
@@ -288,7 +288,7 @@ export default function InvoiceTemplate() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                              <div>
-                                <Label htmlFor="verifiedBy">Customer signature over printed name</Label>
+                                <Label htmlFor="verifiedBy">"Customer signature over printed name" Signature</Label>
                                 <Textarea id="verifiedBy" value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                         </CardContent>
@@ -298,84 +298,86 @@ export default function InvoiceTemplate() {
                 {/* Preview Section */}
                 <div className="lg:col-span-2">
                     <Card className="p-8">
-                        <div className="flex justify-between items-start">
-                             <div className="flex items-center gap-4">
-                                <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo"/>
-                                <div className="text-xs">
-                                    <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
-                                    {tin && <p><strong>VAT REG. TIN: {tin}</strong></p>}
-                                    <p>{address}</p>
-                                    <p>{phone}</p>
-                                    <p>{website}</p>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <h2 className="text-3xl font-bold" style={{ color: accentColor }}>INVOICE</h2>
-                                <p className="text-sm"><strong>Invoice ID:</strong> INV-2025-001</p>
-                                <p className="text-sm"><strong>Date:</strong> Jan 15, 2024</p>
-                                {showDueDate && <p className="text-sm"><strong>Due Date:</strong> Feb 14, 2024</p>}
-                            </div>
-                        </div>
-
-                        <div className="mt-8">
-                            <p className="font-bold">BILL TO:</p>
-                            <p>Metro Construction Inc.</p>
-                            <p>123 Main Street, Makati City</p>
-                        </div>
-                        
-                        <table className="w-full mt-4 border-collapse">
-                            <thead>
-                                <tr>
-                                    <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Description</th>
-                                    <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Qty</th>
-                                    <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Unit Price</th>
-                                    <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr className="border-b">
-                                    <td className="p-2">Product A</td>
-                                    <td className="p-2">2</td>
-                                    <td className="p-2">P5,000.00</td>
-                                    <td className="p-2">P10,000.00</td>
-                                </tr>
-                                <tr className="border-b">
-                                    <td className="p-2">Service B</td>
-                                    <td className="p-2">1</td>
-                                    <td className="p-2">P1,500.00</td>
-                                    <td className="p-2">P1,500.00</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        
-                        <div className="flex justify-between mt-4">
-                            <div className="w-1/2">
-                                {showNotes && (
-                                    <div>
-                                        <h4 className="font-bold text-xs">Notes:</h4>
-                                        <p className="text-xs text-muted-foreground">Sample notes for the invoice...</p>
+                      <div className="flex flex-col justify-between min-h-[950px]">
+                        <div>
+                            <div className="flex justify-between items-start">
+                                <div className="flex items-center gap-4">
+                                    <Image src={logo} width={100} height={50} alt="Company Logo" data-ai-hint="logo"/>
+                                    <div className="text-xs">
+                                        <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
+                                        {tin && <p><strong>VAT REG. TIN: {tin}</strong></p>}
+                                        <p>{address}</p>
+                                        <p>{phone}</p>
+                                        <p>{website}</p>
                                     </div>
-                                )}
+                                </div>
+                                <div className="text-right">
+                                    <h2 className="text-3xl font-bold" style={{ color: accentColor }}>INVOICE</h2>
+                                    <p className="text-sm"><strong>Invoice ID:</strong> INV-2025-001</p>
+                                    <p className="text-sm"><strong>Date:</strong> Jan 15, 2024</p>
+                                    {showDueDate && <p className="text-sm"><strong>Due Date:</strong> Feb 14, 2024</p>}
+                                </div>
                             </div>
-                            <div className="w-1/2 text-xs space-y-1">
-                                {showVat && (
-                                    <>
-                                        <div className="flex justify-between"><span>Vatable Sales:</span> <span>P0.00</span></div>
-                                        <div className="flex justify-between"><span>VAT-Exempt Sales:</span> <span>P0.00</span></div>
-                                        <div className="flex justify-between"><span>Zero-Rated Sales:</span> <span>P0.00</span></div>
-                                    </>
-                                )}
-                                <div className="flex justify-between font-bold"><span>Total Sales:</span> <span>P11,500.00</span></div>
-                                <div className="flex justify-between"><span>Subtotal:</span> <span>P11,500.00</span></div>
-                                {showVat && <div className="flex justify-between"><span>VAT (12%):</span> <span>P1,380.00</span></div>}
-                                <div className="flex justify-between font-bold text-base mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
-                                    <span>Total Amount Due:</span>
-                                    <span>P12,880.00</span>
+
+                            <div className="mt-8">
+                                <p className="font-bold">BILL TO:</p>
+                                <p>Metro Construction Inc.</p>
+                                <p>123 Main Street, Makati City</p>
+                            </div>
+                            
+                            <table className="w-full mt-4 border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Description</th>
+                                        <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Qty</th>
+                                        <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Unit Price</th>
+                                        <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr className="border-b">
+                                        <td className="p-2">Product A</td>
+                                        <td className="p-2">2</td>
+                                        <td className="p-2">P5,000.00</td>
+                                        <td className="p-2">P10,000.00</td>
+                                    </tr>
+                                    <tr className="border-b">
+                                        <td className="p-2">Service B</td>
+                                        <td className="p-2">1</td>
+                                        <td className="p-2">P1,500.00</td>
+                                        <td className="p-2">P1,500.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div className="flex justify-between mt-4">
+                                <div className="w-1/2">
+                                    {showNotes && (
+                                        <div>
+                                            <h4 className="font-bold text-xs">Notes:</h4>
+                                            <p className="text-xs text-muted-foreground">Sample notes for the invoice...</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="w-1/2 text-xs space-y-1">
+                                    {showVat && (
+                                        <>
+                                            <div className="flex justify-between"><span>Vatable Sales:</span> <span>P0.00</span></div>
+                                            <div className="flex justify-between"><span>VAT-Exempt Sales:</span> <span>P0.00</span></div>
+                                            <div className="flex justify-between"><span>Zero-Rated Sales:</span> <span>P0.00</span></div>
+                                        </>
+                                    )}
+                                    <div className="flex justify-between font-bold"><span>Total Sales:</span> <span>P11,500.00</span></div>
+                                    <div className="flex justify-between"><span>Subtotal:</span> <span>P11,500.00</span></div>
+                                    {showVat && <div className="flex justify-between"><span>VAT (12%):</span> <span>P1,380.00</span></div>}
+                                    <div className="flex justify-between font-bold text-base mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
+                                        <span>Total Amount Due:</span>
+                                        <span>P12,880.00</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div className="flex justify-between mt-24">
+                        <div className="flex justify-between mt-8">
                             <div className="text-[8px] leading-[10px] space-y-1">
                                 <p>BIR ATP No. {birDetails.birAtpNo} Date of ATP: {birDetails.dateOfAtp}</p>
                                 <p>Looseleaf Permit: {birDetails.looseleafPermitNo} Date Issue: {birDetails.permitDateIssue}</p>
@@ -383,13 +385,14 @@ export default function InvoiceTemplate() {
                                 <p>NonVAT Reg. TIN: {birDetails.printersTin}</p>
                                 <p>Printer's Accreditation No. {birDetails.printersAccreditationNo} Date Issued: {birDetails.printersAccreditationDate}</p>
                             </div>
-                             <div className="text-right text-[10px] leading-[13px]">
-                                <p>Received the above goods in good order and condition.</p>
+                            <div className="text-right text-[10px] leading-[13px]">
+                                <p className="mb-2">Received the above goods in good order and condition.</p>
                                 <div className="mt-8">
-                                     {renderSignature(verifiedBy)}
+                                    {renderSignature(verifiedBy)}
                                 </div>
                             </div>
                         </div>
+                      </div>
                     </Card>
                 </div>
             </div>
