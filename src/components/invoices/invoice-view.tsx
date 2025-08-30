@@ -164,7 +164,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                     {showVat && (
                         <>
                             <div className="flex justify-between"><span>Vatable Sales:</span> <span>₱{(invoice.vatableSales || 0).toFixed(2)}</span></div>
-                            <div className="flex justify-between"><span>VAT-Exempt Sales:</span> <span>₱{(invoice.vatExemptSales || 0).toFixed(2)}</span></div>
+                            <div className="flex justify-between"><span>VAT-Exempt Sales:</span> <span>₱{(invoice.zeroRatedSales || 0).toFixed(2)}</span></div>
                             <div className="flex justify-between"><span>Zero-Rated Sales:</span> <span>₱{(invoice.zeroRatedSales || 0).toFixed(2)}</span></div>
                             <Separator className="my-1"/>
                         </>
