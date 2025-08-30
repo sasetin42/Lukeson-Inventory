@@ -367,29 +367,27 @@ export default function InvoiceTemplate() {
                                 <div className="flex justify-between font-bold"><span>Total Sales:</span> <span>P11,500.00</span></div>
                                 <div className="flex justify-between"><span>Subtotal:</span> <span>P11,500.00</span></div>
                                 {showVat && <div className="flex justify-between"><span>VAT (12%):</span> <span>P1,380.00</span></div>}
-                                <div className="flex justify-between font-bold text-base mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
+                                <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
                                     <span>Total Amount Due:</span>
                                     <span>P12,880.00</span>
                                 </div>
                             </div>
                         </div>
 
-
                         <div className="flex justify-between mt-24">
-                            <div className="text-left text-xs">
+                            <div className="text-[10px] leading-[13px] space-y-1">
+                                <p>BIR ATP No. {birDetails.birAtpNo} Date of ATP: {birDetails.dateOfAtp}</p>
+                                <p>Looseleaf Permit: {birDetails.looseleafPermitNo} Date Issue: {birDetails.permitDateIssue}</p>
+                                <p>{birDetails.printersName} {birDetails.printersAddress}</p>
+                                <p>NonVAT Reg. TIN: {birDetails.printersTin}</p>
+                                <p>Printer's Accreditation No. {birDetails.printersAccreditationNo} Date Issued: {birDetails.printersAccreditationDate}</p>
+                            </div>
+                            <div className="text-right text-xs">
                                 <p>Received the above goods in good order and condition.</p>
                                 <div className="mt-4">
                                      {renderSignature(verifiedBy)}
                                 </div>
                             </div>
-                        </div>
-
-                         <div className="text-[10px] leading-[13px] mt-8 space-y-1">
-                            <p>BIR ATP No. {birDetails.birAtpNo} Date of ATP: {birDetails.dateOfAtp}</p>
-                            <p>Looseleaf Permit: {birDetails.looseleafPermitNo} Date Issue: {birDetails.permitDateIssue}</p>
-                            <p>{birDetails.printersName} {birDetails.printersAddress}</p>
-                            <p>NonVAT Reg. TIN: {birDetails.printersTin}</p>
-                            <p>Printer's Accreditation No. {birDetails.printersAccreditationNo} Date Issued: {birDetails.printersAccreditationDate}</p>
                         </div>
                     </Card>
                 </div>

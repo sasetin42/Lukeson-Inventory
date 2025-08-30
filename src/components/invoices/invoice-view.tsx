@@ -119,7 +119,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                 <div className="w-1/2">
                     <p className="font-bold">BILL TO:</p>
                     <p>{invoice.customerName}</p>
-                    {invoice.customerTin && <p><strong>TIN: {invoice.customerTin}</strong></p>}
+                    {invoice.customerTin && <p>TIN: {invoice.customerTin}</p>}
                     {invoice.customerEmail && <p>Email: {invoice.customerEmail}</p>}
                     {invoice.customerPhone && <p>Phone: {invoice.customerPhone}</p>}
                 </div>
@@ -180,20 +180,19 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
             </div>
 
             <div className="flex justify-between mt-24">
-                <div className="text-left text-xs">
+                <div className="text-[10px] leading-[13px] space-y-1">
+                    <p>BIR ATP No. {birDetails.birAtpNo} Date of ATP: {birDetails.dateOfAtp}</p>
+                    <p>Looseleaf Permit: {birDetails.looseleafPermitNo} Date Issue: {birDetails.permitDateIssue}</p>
+                    <p>{birDetails.printersName} {birDetails.printersAddress}</p>
+                    <p>NonVAT Reg. TIN: {birDetails.printersTin}</p>
+                    <p>Printer's Accreditation No. {birDetails.printersAccreditationNo} Date Issued: {birDetails.printersAccreditationDate}</p>
+                </div>
+                <div className="text-right text-xs">
                      <p>Received the above goods in good order and condition.</p>
                      <div className="mt-4">
                         {renderSignature(verifiedBy)}
                      </div>
                 </div>
-            </div>
-            
-             <div className="text-[10px] leading-[13px] mt-8 space-y-1">
-                <p>BIR ATP No. {birDetails.birAtpNo} Date of ATP: {birDetails.dateOfAtp}</p>
-                <p>Looseleaf Permit: {birDetails.looseleafPermitNo} Date Issue: {birDetails.permitDateIssue}</p>
-                <p>{birDetails.printersName} {birDetails.printersAddress}</p>
-                <p>NonVAT Reg. TIN: {birDetails.printersTin}</p>
-                <p>Printer's Accreditation No. {birDetails.printersAccreditationNo} Date Issued: {birDetails.printersAccreditationDate}</p>
             </div>
         </div>
     );
