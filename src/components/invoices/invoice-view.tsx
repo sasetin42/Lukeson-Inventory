@@ -152,7 +152,7 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
             
             <div className="flex justify-between mt-4">
                 <div className="w-1/2">
-                    {showNotes && (
+                     {showNotes && (
                         <div>
                             <h4 className="font-bold text-xs">Notes:</h4>
                             <p className="text-xs text-muted-foreground">{invoice.notes || 'No notes for this invoice.'}</p>
@@ -179,17 +179,16 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                 </div>
             </div>
 
-            <div className="flex justify-end mt-24 text-center text-xs">
-                <div className="text-left">
-                    <div className="flex items-end mt-4">
-                        <span className="mr-2">By:</span>
+            <div className="flex justify-between mt-24">
+                <div className="text-left text-xs">
+                     <p>Received the above goods in good order and condition.</p>
+                     <div className="mt-4">
                         {renderSignature(verifiedBy)}
-                    </div>
+                     </div>
                 </div>
             </div>
-
-            <div className="text-xs mt-8 space-y-1">
-                <p>Received the above goods in good order and condition.</p>
+            
+             <div className="text-[10px] leading-[13px] mt-8 space-y-1">
                 <p>BIR ATP No. {birDetails.birAtpNo} Date of ATP: {birDetails.dateOfAtp}</p>
                 <p>Looseleaf Permit: {birDetails.looseleafPermitNo} Date Issue: {birDetails.permitDateIssue}</p>
                 <p>{birDetails.printersName} {birDetails.printersAddress}</p>

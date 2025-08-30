@@ -347,8 +347,16 @@ export default function InvoiceTemplate() {
                             </tbody>
                         </table>
                         
-                        <div className="flex justify-end mt-4">
-                            <div className="w-1/3 text-sm">
+                        <div className="flex justify-between mt-4">
+                            <div className="w-1/2">
+                                {showNotes && (
+                                    <div>
+                                        <h4 className="font-bold text-xs">Notes:</h4>
+                                        <p className="text-xs text-muted-foreground">Sample notes for the invoice...</p>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="w-1/2 text-xs space-y-1">
                                 {showVat && (
                                     <>
                                         <div className="flex justify-between"><span>Vatable Sales:</span> <span>P0.00</span></div>
@@ -359,31 +367,24 @@ export default function InvoiceTemplate() {
                                 <div className="flex justify-between font-bold"><span>Total Sales:</span> <span>P11,500.00</span></div>
                                 <div className="flex justify-between"><span>Subtotal:</span> <span>P11,500.00</span></div>
                                 {showVat && <div className="flex justify-between"><span>VAT (12%):</span> <span>P1,380.00</span></div>}
-                                <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
-                                    <span>Total:</span>
+                                <div className="flex justify-between font-bold text-base mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
+                                    <span>Total Amount Due:</span>
                                     <span>P12,880.00</span>
                                 </div>
                             </div>
                         </div>
 
-                         {showNotes && (
-                            <div className="mt-8">
-                                <h4 className="font-bold">Notes:</h4>
-                                <p className="text-sm text-muted-foreground">Sample notes for the invoice...</p>
-                            </div>
-                        )}
 
-                        <div className="flex justify-end mt-24 text-center">
-                            <div className="text-left">
+                        <div className="flex justify-between mt-24">
+                            <div className="text-left text-xs">
                                 <p>Received the above goods in good order and condition.</p>
-                                <div className="flex items-end mt-4">
-                                    <span className="mr-2">By:</span>
-                                    {renderSignature(verifiedBy)}
+                                <div className="mt-4">
+                                     {renderSignature(verifiedBy)}
                                 </div>
                             </div>
                         </div>
 
-                        <div className="text-xs mt-8 space-y-1">
+                         <div className="text-[10px] leading-[13px] mt-8 space-y-1">
                             <p>BIR ATP No. {birDetails.birAtpNo} Date of ATP: {birDetails.dateOfAtp}</p>
                             <p>Looseleaf Permit: {birDetails.looseleafPermitNo} Date Issue: {birDetails.permitDateIssue}</p>
                             <p>{birDetails.printersName} {birDetails.printersAddress}</p>
