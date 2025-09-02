@@ -283,11 +283,11 @@ function AppContent({ children }: { children: React.ReactNode }) {
               <Button
                 className="w-full text-xs"
                 style={{
-                  background: 'linear-gradient(to right, #42BBFF, #6C47B5)',
+                  background: 'linear-gradient(to right, #10A3D8, #054B8C)',
                   color: '#FFFFFF'
                 }}
               >
-                Develop by: SaSe App Solutions
+                Develop by: SaSe Web Solutions
               </Button>
             </div>
           </SidebarFooter>
