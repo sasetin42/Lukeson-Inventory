@@ -129,9 +129,9 @@ export default function LoginPage() {
                 </form>
                  {footerText && footerLink && (
                     <div className="text-center p-4 pt-0 text-sm">
-                        <Link href={footerLink} className="text-muted-foreground hover:text-primary transition-colors">
-                            {footerText}
-                        </Link>
+                        <a href="https://sasewebsolutions.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
+                            Develop by: SaSe Web Solutions
+                        </a>
                     </div>
                 )}
             </Card>
