@@ -279,10 +279,10 @@ function AppContent({ children }: { children: React.ReactNode }) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <div className="px-2 mt-2">
-              <a href="https://sasewebsolutions.com/" target="_blank" rel="noopener noreferrer" className="w-full">
+            <div className="px-2 mt-2 flex justify-center">
+              <a href="https://sasewebsolutions.com/" target="_blank" rel="noopener noreferrer">
                 <Button
-                  className="w-full text-xs"
+                  className="text-xs h-auto px-3 py-1.5"
                   style={{
                     background: 'linear-gradient(to right, #10A3D8, #054B8C)',
                     color: '#FFFFFF'

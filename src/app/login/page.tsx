@@ -127,10 +127,10 @@ export default function LoginPage() {
                         </Button>
                     </CardFooter>
                 </form>
-                 <div className="px-6 pb-4">
-                     <a href="https://sasewebsolutions.com/" target="_blank" rel="noopener noreferrer" className="w-full">
+                 <div className="px-6 pb-4 flex justify-center">
+                     <a href="https://sasewebsolutions.com/" target="_blank" rel="noopener noreferrer">
                         <Button
-                        className="w-full text-xs"
+                        className="text-xs h-auto px-3 py-1.5"
                         style={{
                             background: 'linear-gradient(to right, #10A3D8, #054B8C)',
                             color: '#FFFFFF'
