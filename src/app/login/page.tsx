@@ -127,13 +127,19 @@ export default function LoginPage() {
                         </Button>
                     </CardFooter>
                 </form>
-                 {footerText && footerLink && (
-                    <div className="text-center p-4 pt-0 text-sm">
-                        <a href="https://sasewebsolutions.com/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
-                            Develop by: SaSe Web Solutions
-                        </a>
-                    </div>
-                )}
+                 <div className="px-6 pb-4">
+                     <a href="https://sasewebsolutions.com/" target="_blank" rel="noopener noreferrer" className="w-full">
+                        <Button
+                        className="w-full text-xs"
+                        style={{
+                            background: 'linear-gradient(to right, #10A3D8, #054B8C)',
+                            color: '#FFFFFF'
+                        }}
+                        >
+                        Develop by: SaSe Web Solutions
+                        </Button>
+                    </a>
+                </div>
             </Card>
         </div>
     );
