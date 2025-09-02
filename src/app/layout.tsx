@@ -280,15 +280,17 @@ function AppContent({ children }: { children: React.ReactNode }) {
               </DropdownMenuContent>
             </DropdownMenu>
             <div className="px-2 mt-2">
-              <Button
-                className="w-full text-xs"
-                style={{
-                  background: 'linear-gradient(to right, #10A3D8, #054B8C)',
-                  color: '#FFFFFF'
-                }}
-              >
-                Develop by: SaSe Web Solutions
-              </Button>
+              <a href="https://sasewebsolutions.com/" target="_blank" rel="noopener noreferrer" className="w-full">
+                <Button
+                  className="w-full text-xs"
+                  style={{
+                    background: 'linear-gradient(to right, #10A3D8, #054B8C)',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  Develop by: SaSe Web Solutions
+                </Button>
+              </a>
             </div>
           </SidebarFooter>
         </Sidebar>
