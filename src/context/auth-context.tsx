@@ -1,13 +1,14 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { auth, db, storage } from '@/lib/firebase';
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { User, Role, PermissionLevel, LoadingScreenSettings } from '@/lib/types';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useToast } from '@/hooks/use-toast';
 
 interface UserProfile {
     name: string;
@@ -50,6 +51,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const pathname = usePathname();
+    const { toast } = useToast();
+    const inactivityTimer = useRef<NodeJS.Timeout>();
+
+    const logout = async () => {
+        await signOut(auth);
+    };
+
+    const handleInactivity = () => {
+        logout();
+        toast({
+            title: "Session Expired",
+            description: "You have been logged out due to inactivity.",
+            variant: "default"
+        });
+    };
+
+    const resetInactivityTimer = () => {
+        if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+        inactivityTimer.current = setTimeout(handleInactivity, 3600000); // 1 hour
+    };
+
+    useEffect(() => {
+        if (firebaseUser) {
+            const events = ['mousemove', 'keydown', 'mousedown', 'touchstart'];
+            
+            const reset = () => resetInactivityTimer();
+
+            events.forEach(event => window.addEventListener(event, reset));
+            resetInactivityTimer(); // Initial setup
+
+            return () => {
+                events.forEach(event => window.removeEventListener(event, reset));
+                if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+            };
+        }
+    }, [firebaseUser]);
 
     const fetchUserData = async (fbUser: FirebaseUser) => {
         try {
@@ -166,10 +203,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userDocRef = doc(db, 'users', userCredential.user.uid);
         await setDoc(userDocRef, { lastLoginAt: serverTimestamp() }, { merge: true });
         await fetchUserData(userCredential.user);
-    };
-
-    const logout = async () => {
-        await signOut(auth);
     };
     
     const updateUserProfile = async (name: string, avatarFile: File | null): Promise<void> => {
