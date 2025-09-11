@@ -39,6 +39,7 @@ import {
   Calendar as CalendarIcon,
   Pencil,
   User,
+  Palette,
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -123,6 +124,7 @@ export default function ProductDetailsModal({
     { label: 'LED Qty', value: product.ledQty ? `${product.ledQty}L` : null, icon: Lightbulb, color: 'text-yellow-500' },
     { label: 'Voltage', value: product.voltage ? `${product.voltage}v` : null, icon: Zap, color: 'text-orange-500' },
     { label: 'Wattage', value: product.wattage ? `${product.wattage}w` : null, icon: Power, color: 'text-red-500' },
+    { label: 'CCT', value: product.cct, icon: Palette, color: 'text-cyan-500' },
     { label: 'Meters', value: product.meters ? `${product.meters}m` : null, icon: Ruler, color: 'text-blue-500' },
     { label: 'Location', value: product.location, icon: MapPin, color: 'text-pink-500' },
     { label: 'Stock', value: product.stock, icon: Warehouse, color: 'text-green-500', status: product.status },
