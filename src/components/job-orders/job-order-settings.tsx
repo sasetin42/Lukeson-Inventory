@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,6 +14,7 @@ import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { processImage } from '@/lib/image-utils';
 
 const TEMPLATE_DOC_ID = 'jobOrder';
 
@@ -32,6 +34,7 @@ export default function JobOrderSettings() {
     const [email, setEmail] = useState('sales@lukesonlighting.com.ph');
     const [website, setWebsite] = useState('https://lukesonlighting.com.ph/');
     const [logo, setLogo] = useState('https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/e903a953-ab33-4f9e-953e-5390916e6373.png?alt=media');
+    const [logoFile, setLogoFile] = useState<File | null>(null);
 
     const [verifiedBy, setVerifiedBy] = useState('_________________________\nCustomer signature over printed name');
 
@@ -73,8 +76,19 @@ export default function JobOrderSettings() {
 
     const handleSave = async () => {
         setIsSaving(true);
+        let finalLogo = logo;
+        if (logoFile) {
+            try {
+                finalLogo = await processImage(logoFile);
+            } catch (error: any) {
+                toast({ title: "Error Processing Image", description: error.message, variant: "destructive" });
+                setIsSaving(false);
+                return;
+            }
+        }
+        
         const settings = {
-            accentColor, showDueDate, showNotes, showVat, companyName, address, phone, email, website, logo,
+            accentColor, showDueDate, showNotes, showVat, companyName, address, phone, email, website, logo: finalLogo,
             verifiedBy,
         };
 
@@ -101,14 +115,15 @@ export default function JobOrderSettings() {
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size < 50 * 1024 || file.size > 100 * 1024) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
                 toast({
                     title: "Invalid File Size",
-                    description: "Image size must be between 50KB and 100KB.",
+                    description: "Image size must be less than 2MB.",
                     variant: "destructive",
                 });
                 return;
             }
+            setLogoFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setLogo(reader.result as string);
@@ -209,7 +224,7 @@ export default function JobOrderSettings() {
                                             </label>
                                             <p className="pl-1">or drag and drop</p>
                                         </div>
-                                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
                                     </div>
                                 </div>
                             </div>

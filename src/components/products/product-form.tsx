@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -16,6 +17,7 @@ import { Progress } from '../ui/progress';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, getDocs } from 'firebase/firestore';
 import { EditableSelectOptions } from '../editable-select-options';
+import { processImage } from '@/lib/image-utils';
 
 interface ProductFormProps {
   product: Product | null;
@@ -173,23 +175,31 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         setCct('');
     }, [category]);
     
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size < 50 * 1024 || file.size > 100 * 1024) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
                 toast({
                     title: "Invalid File Size",
-                    description: "Image size must be between 50KB and 100KB.",
+                    description: "Image size must be less than 2MB.",
                     variant: "destructive",
                 });
                 return;
             }
-            setImageFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+            
+            try {
+                const compressedDataUrl = await processImage(file, 2);
+                setImagePreview(compressedDataUrl);
+                // Convert data URL back to a file object if needed for upload, though we'll upload the data URL.
+                // For simplicity, we can just pass the data URL. Let's adjust the save logic.
+                setImageFile(file); // Keep original file for reference if needed, but we'll use the preview.
+            } catch(error: any) {
+                toast({
+                    title: "Image Processing Error",
+                    description: error.message || "Failed to process image.",
+                    variant: "destructive",
+                });
+            }
         }
     };
 
@@ -240,7 +250,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 uom,
                 expiryDateTracking,
                 status: stockStatus,
-                imageFile,
+                imageFile: null, // We are sending the dataURL in productImage
                 modifiedAt: new Date().toISOString(),
             };
     
@@ -641,5 +651,3 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         </div>
     );
 }
-
-    

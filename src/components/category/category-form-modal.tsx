@@ -21,6 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Upload, X } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
+import { processImage } from '@/lib/image-utils';
 
 interface CategoryFormModalProps {
   isOpen: boolean;
@@ -81,23 +82,28 @@ export default function CategoryFormModal({
         setEditingCategory(null);
     }
     
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size < 50 * 1024 || file.size > 100 * 1024) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
                 toast({
                     title: "Invalid File Size",
-                    description: "Image size must be between 50KB and 100KB.",
+                    description: "Image size must be less than 2MB.",
                     variant: "destructive",
                 });
                 return;
             }
             setImageFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+            try {
+                const compressedDataUrl = await processImage(file, 2);
+                setImagePreview(compressedDataUrl);
+            } catch (error: any) {
+                 toast({
+                    title: "Image Processing Error",
+                    description: error.message || "Failed to process image.",
+                    variant: "destructive",
+                });
+            }
         }
     };
 
@@ -119,7 +125,7 @@ export default function CategoryFormModal({
                 name,
                 description,
                 productImage: imagePreview || '',
-                imageFile
+                imageFile: null,
             };
 
             onSave(categoryData);

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -19,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '../ui/progress';
 import Image from 'next/image';
+import { processImage } from '@/lib/image-utils';
 
 interface PaymentFormModalProps {
   isOpen: boolean;
@@ -29,34 +31,24 @@ interface PaymentFormModalProps {
 
 const paymentMethods: PaymentMethod[] = ['Cash', 'Gcash', 'Maya', 'Credit Card', 'Bank Transfer'];
 
-const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
 export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: PaymentFormModalProps) {
     const { toast } = useToast();
     const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | undefined>();
-    const [transactionFile, setTransactionFile] = useState<File | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [transactionProofPreview, setTransactionProofPreview] = useState<string | null>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                toast({ title: "File too large", description: "Please upload a file smaller than 5MB.", variant: "destructive" });
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                toast({ title: "File too large", description: "Please upload a file smaller than 2MB.", variant: "destructive" });
                 return;
             }
             if (!['image/jpeg', 'image/png', 'application/pdf'].includes(file.type)) {
                  toast({ title: "Invalid File Type", description: "Please upload a JPG, PNG, or PDF file.", variant: "destructive" });
                 return;
             }
-            setTransactionFile(file);
+            
             const reader = new FileReader();
             reader.onloadend = () => {
                 setTransactionProofPreview(reader.result as string);
@@ -66,15 +58,13 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
     };
     
     const removeImage = () => {
-        setTransactionFile(null);
         setTransactionProofPreview(null);
     };
 
     const handleSubmit = async () => {
         setIsSaving(true);
         try {
-            const dataUri = transactionFile ? await fileToDataUri(transactionFile) : undefined;
-            await onSave(invoice.id, paymentMethod, dataUri);
+            await onSave(invoice.id, paymentMethod, transactionProofPreview || undefined);
         } catch (error) {
             toast({ title: "Error", description: "Failed to upload transaction proof.", variant: "destructive" });
         } finally {
@@ -137,7 +127,7 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                         <Upload className="w-8 h-8 mb-4 text-primary" />
                                         <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                        <p className="text-xs text-muted-foreground">PNG, JPG, or PDF (MAX. 5MB)</p>
+                                        <p className="text-xs text-muted-foreground">PNG, JPG, or PDF (MAX. 2MB)</p>
                                     </div>
                                     <Input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} accept="image/jpeg,image/png,application/pdf" disabled={isSaving} />
                                 </label>
@@ -150,7 +140,7 @@ export default function PaymentFormModal({ isOpen, onClose, onSave, invoice }: P
                     <Button variant="outline" onClick={handleMarkAsPosted} disabled={isSaving}>Mark as Posted</Button>
                     <div className="flex gap-2">
                         <Button variant="cancel" onClick={onClose} disabled={isSaving}>Cancel</Button>
-                        <Button type="submit" onClick={handleSubmit} disabled={isSaving || !paymentMethod || !transactionFile}>
+                        <Button type="submit" onClick={handleSubmit} disabled={isSaving || !paymentMethod || !transactionProofPreview}>
                             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {isSaving ? 'Saving...' : 'Mark as Paid'}
                         </Button>

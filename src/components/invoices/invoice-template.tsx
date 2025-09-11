@@ -14,6 +14,7 @@ import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { processImage } from '@/lib/image-utils';
 
 const TEMPLATE_DOC_ID = 'invoice';
 
@@ -34,6 +35,7 @@ export default function InvoiceTemplate() {
     const [email, setEmail] = useState('contact@yamashitamold.ph');
     const [website, setWebsite] = useState('www.yamashitamold.ph');
     const [logo, setLogo] = useState('https://placehold.co/100x50.png');
+    const [logoFile, setLogoFile] = useState<File | null>(null);
 
     const [verifiedBy, setVerifiedBy] = useState('_________________________\nCustomer signature over printed name');
     
@@ -98,8 +100,19 @@ export default function InvoiceTemplate() {
 
     const handleSave = async () => {
         setIsSaving(true);
+        let finalLogo = logo;
+        if (logoFile) {
+            try {
+                finalLogo = await processImage(logoFile);
+            } catch (error: any) {
+                toast({ title: "Error Processing Image", description: error.message, variant: "destructive" });
+                setIsSaving(false);
+                return;
+            }
+        }
+        
         const settings = {
-            accentColor, showDueDate, showNotes, showVat, companyName, tin, address, phone, email, website, logo,
+            accentColor, showDueDate, showNotes, showVat, companyName, tin, address, phone, email, website, logo: finalLogo,
             verifiedBy, birDetails,
         };
 
@@ -126,14 +139,15 @@ export default function InvoiceTemplate() {
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size < 50 * 1024 || file.size > 100 * 1024) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
                 toast({
                     title: "Invalid File Size",
-                    description: "Image size must be between 50KB and 100KB.",
+                    description: "Image size must be less than 2MB.",
                     variant: "destructive",
                 });
                 return;
             }
+            setLogoFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 setLogo(reader.result as string);
@@ -234,7 +248,7 @@ export default function InvoiceTemplate() {
                                             </label>
                                             <p className="pl-1">or drag and drop</p>
                                         </div>
-                                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                        <p className="text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
                                     </div>
                                 </div>
                             </div>
@@ -399,4 +413,3 @@ export default function InvoiceTemplate() {
         </div>
     );
 }
-

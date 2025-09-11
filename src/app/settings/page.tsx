@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -14,6 +15,7 @@ import { db } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
+import { processImage } from '@/lib/image-utils';
 
 const COMPANY_SETTINGS_DOC_ID = 'companyProfile';
 const LOGIN_SETTINGS_DOC_ID = 'loginScreen';
@@ -52,30 +54,32 @@ export default function SettingsPage() {
     const [loadingLogo, setLoadingLogo] = useState('');
     const [loadingLogoFile, setLoadingLogoFile] = useState<File | null>(null);
 
-    const fileToDataUri = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
-
-    const handleFileChange = (file: File | null, setter: (file: File | null) => void, fieldName: string) => {
+    const handleFileChange = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+        setFile: (file: File | null) => void,
+        setPreview: (url: string) => void,
+        fieldName: string
+    ) => {
+        const file = e.target.files?.[0];
         if (file) {
-            if (file.size < 50 * 1024 || file.size > 100 * 1024) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
                 toast({
                     title: "Invalid File Size",
-                    description: `${fieldName} image size must be between 50KB and 100KB.`,
+                    description: `${fieldName} image size must be less than 2MB.`,
                     variant: "destructive",
                 });
                 return;
             }
-            setter(file);
-        } else {
-            setter(null);
+            setFile(file);
+            try {
+                const dataUrl = await processImage(file);
+                setPreview(dataUrl);
+            } catch (error: any) {
+                toast({ title: "Image Processing Error", description: error.message, variant: "destructive" });
+                setFile(null);
+            }
         }
-    }
+    };
 
 
     useEffect(() => {
@@ -135,17 +139,7 @@ export default function SettingsPage() {
         setIsSaving(true);
         try {
             // Company Profile
-            const companySettings: any = { name: companyName, siteTitle, address, phone, email, website };
-            if (companyLogoFile) {
-                companySettings.logo = await fileToDataUri(companyLogoFile);
-            } else {
-                companySettings.logo = companyLogo;
-            }
-            if (siteIconFile) {
-                companySettings.siteIcon = await fileToDataUri(siteIconFile);
-            } else {
-                companySettings.siteIcon = siteIcon;
-            }
+            const companySettings: any = { name: companyName, siteTitle, address, phone, email, website, logo: companyLogo, siteIcon: siteIcon };
             await setDoc(doc(db, 'settings', COMPANY_SETTINGS_DOC_ID), companySettings, { merge: true });
 
             // Login Screen
@@ -154,26 +148,13 @@ export default function SettingsPage() {
                 description: loginDescription,
                 footerText: loginFooterText,
                 footerLink: loginFooterLink,
+                background: loginBg,
+                logo: loginLogo,
             };
-            if (loginBgFile) {
-                loginSettings.background = await fileToDataUri(loginBgFile);
-            } else {
-                loginSettings.background = loginBg;
-            }
-             if (loginLogoFile) {
-                loginSettings.logo = await fileToDataUri(loginLogoFile);
-            } else {
-                loginSettings.logo = loginLogo;
-            }
             await setDoc(doc(db, 'settings', LOGIN_SETTINGS_DOC_ID), loginSettings, { merge: true });
             
             // Loading Screen
-            const loadingSettings: any = { text: loadingText, backgroundColor: loadingBgColor };
-            if (loadingLogoFile) {
-                loadingSettings.logo = await fileToDataUri(loadingLogoFile);
-            } else {
-                loadingSettings.logo = loadingLogo;
-            }
+            const loadingSettings: any = { text: loadingText, backgroundColor: loadingBgColor, logo: loadingLogo };
             await setDoc(doc(db, 'settings', LOADING_SETTINGS_DOC_ID), loadingSettings, { merge: true });
 
             toast({ title: "Success", description: "Settings saved successfully. Changes may require a page refresh to take effect.", variant: "success" });
@@ -233,13 +214,13 @@ export default function SettingsPage() {
                                  <div className="space-y-2">
                                     <Label>Company Logo</Label>
                                     {companyLogo && <Image src={companyLogo} alt="Company Logo" width={100} height={50} className="border p-2 rounded-md" data-ai-hint="logo"/>}
-                                    <Input type="file" onChange={(e) => handleFileChange(e.target.files?.[0] || null, setCompanyLogoFile, 'Company Logo')} accept="image/*" />
+                                    <Input type="file" onChange={(e) => handleFileChange(e, setCompanyLogoFile, setCompanyLogo, 'Company Logo')} accept="image/*" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4" /> Site Icon (Favicon)</Label>
                                     <div className="flex items-center gap-4">
                                         {siteIcon && <Image src={siteIcon} alt="Site Icon" width={32} height={32} className="border p-1 rounded-md" data-ai-hint="favicon"/>}
-                                        <Input type="file" onChange={(e) => handleFileChange(e.target.files?.[0] || null, setSiteIconFile, 'Site Icon')} accept="image/png, image/x-icon, image/svg+xml" />
+                                        <Input type="file" onChange={(e) => handleFileChange(e, setSiteIconFile, setSiteIcon, 'Site Icon')} accept="image/png, image/x-icon, image/svg+xml" />
                                     </div>
                                     <p className="text-xs text-muted-foreground">Upload a .png, .ico, or .svg file. Recommended size: 32x32 pixels.</p>
                                 </div>
@@ -284,7 +265,7 @@ export default function SettingsPage() {
                                  <div className="space-y-2">
                                     <Label>Login Form Logo</Label>
                                     {loginLogo && <Image src={loginLogo} alt="Login Logo" width={80} height={80} className="border p-2 rounded-md object-contain" data-ai-hint="logo"/>}
-                                    <Input type="file" onChange={(e) => handleFileChange(e.target.files?.[0] || null, setLoginLogoFile, 'Login Logo')} accept="image/*" />
+                                    <Input type="file" onChange={(e) => handleFileChange(e, setLoginLogoFile, setLoginLogo, 'Login Logo')} accept="image/*" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Background Image</Label>
@@ -295,7 +276,7 @@ export default function SettingsPage() {
                                                 <Upload className="w-8 h-8 mb-4 text-primary" />
                                                 <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                                             </div>
-                                            <Input id="dropzone-file-bg" type="file" className="hidden" onChange={(e) => handleFileChange(e.target.files?.[0] || null, setLoginBgFile, 'Login Background')} accept="image/*"/>
+                                            <Input id="dropzone-file-bg" type="file" className="hidden" onChange={(e) => handleFileChange(e, setLoginBgFile, setLoginBg, 'Login Background')} accept="image/*"/>
                                         </label>
                                     </div> 
                                 </div>
@@ -349,7 +330,7 @@ export default function SettingsPage() {
                                 <Label>Loading Logo</Label>
                                 <div className="flex items-center gap-4">
                                     {loadingLogo && <Image src={loadingLogo} alt="Loading Logo" width={80} height={80} className="border p-2 rounded-md object-contain" data-ai-hint="logo"/>}
-                                    <Input type="file" onChange={(e) => handleFileChange(e.target.files?.[0] || null, setLoadingLogoFile, 'Loading Logo')} accept="image/*" />
+                                    <Input type="file" onChange={(e) => handleFileChange(e, setLoadingLogoFile, setLoadingLogo, 'Loading Logo')} accept="image/*" />
                                 </div>
                             </div>
                         </CardContent>

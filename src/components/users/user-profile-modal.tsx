@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -20,6 +21,7 @@ import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { useAuth } from '@/context/auth-context';
 import Image from 'next/image';
+import { processImage } from '@/lib/image-utils';
 
 interface UserProfileModalProps {
   isOpen: boolean;
@@ -43,23 +45,28 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
         }
     }, [isOpen, profile]);
 
-    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size < 50 * 1024 || file.size > 100 * 1024) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
                 toast({
                     title: "Invalid File Size",
-                    description: "Image size must be between 50KB and 100KB.",
+                    description: "Image size must be less than 2MB.",
                     variant: "destructive",
                 });
                 return;
             }
             setAvatarFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setAvatarPreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+            try {
+                const compressedDataUrl = await processImage(file, 2);
+                setAvatarPreview(compressedDataUrl);
+            } catch (error: any) {
+                 toast({
+                    title: "Image Processing Error",
+                    description: error.message || "Failed to process image.",
+                    variant: "destructive",
+                });
+            }
         }
     };
     
