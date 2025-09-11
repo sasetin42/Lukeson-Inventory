@@ -67,6 +67,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [meters, setMeters] = useState('');
     const [size, setSize] = useState('');
     const [color, setColor] = useState('');
+    const [cct, setCct] = useState('');
 
 
     useEffect(() => {
@@ -120,6 +121,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         setUploadProgress(null);
         setSize('');
         setColor('');
+        setCct('');
     };
     
     useEffect(() => {
@@ -153,6 +155,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             setExpiryDateTracking(product.expiryDateTracking || false);
             setSize(product.size || '');
             setColor(product.color || '');
+            setCct(product.cct || '');
         } else {
             resetForm();
             generateProductCode();
@@ -167,6 +170,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         setMeters('');
         setSize('');
         setColor('');
+        setCct('');
     }, [category]);
     
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -245,6 +249,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 if (voltage) productData.voltage = parseInt(voltage);
                 if (wattage) productData.wattage = Number(wattage);
                 if (meters) productData.meters = Number(meters);
+                if (cct) productData.cct = cct;
             }
     
             if (category === 'POWER SUPPLY') {
@@ -364,7 +369,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const renderStriplightFields = () => (
         <>
             {renderSharedFields()}
-             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="led-qty" className="flex items-center gap-2"><Lightbulb className="h-4 w-4 text-yellow-500" /> LED Qty</Label>
                     <EditableSelectOptions
@@ -374,6 +379,17 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                         placeholder="Qty"
                         label="LED Qty"
                         unit="L"
+                    />
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="cct" className="flex items-center gap-2"><Palette className="h-4 w-4 text-orange-500" /> CCT</Label>
+                    <EditableSelectOptions
+                        value={cct}
+                        onValueChange={setCct}
+                        optionsType="cct"
+                        placeholder="e.g. 3000K"
+                        label="CCT"
+                        unit="K"
                     />
                 </div>
                 <div className="space-y-2">

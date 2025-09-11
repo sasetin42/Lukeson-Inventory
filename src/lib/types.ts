@@ -331,6 +331,7 @@ export type Product = {
     meters?: number;
     size?: string;
     color?: string;
+    cct?: string;
     location: string;
     createdAt: Date | FieldValue | string;
     modifiedAt?: Date | FieldValue | string;
