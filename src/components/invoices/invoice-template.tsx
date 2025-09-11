@@ -136,11 +136,18 @@ export default function InvoiceTemplate() {
         }
     };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+             const { id, update } = toast({
+                title: 'Processing Image',
+                description: 'Compressing and converting your image...',
+                variant: 'default',
+                icon: <Loader2 className="animate-spin" />
+            });
             if (file.size > 2 * 1024 * 1024) { // 2MB limit
-                toast({
+                update({
+                    id,
                     title: "Invalid File Size",
                     description: "Image size must be less than 2MB.",
                     variant: "destructive",
@@ -148,11 +155,23 @@ export default function InvoiceTemplate() {
                 return;
             }
             setLogoFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setLogo(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+            try {
+                const compressedDataUrl = await processImage(file);
+                setLogo(compressedDataUrl);
+                update({
+                    id,
+                    title: 'Success',
+                    description: 'Image processed successfully.',
+                    variant: 'success'
+                });
+            } catch (error: any) {
+                update({
+                    id,
+                    title: "Image Processing Error",
+                    description: error.message || "Failed to process image.",
+                    variant: "destructive",
+                });
+            }
         }
     };
     
@@ -302,8 +321,8 @@ export default function InvoiceTemplate() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                              <div>
-                                <Label htmlFor="verifiedBy">Customer signature over printed name</Label>
-                                <Textarea id="verifiedBy" value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
+                                <Label htmlFor="verified-by">Customer signature over printed name</Label>
+                                <Textarea id="verified-by" value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)} placeholder="Line 1: Name&#10;Line 2: Title" />
                             </div>
                         </CardContent>
                     </Card>

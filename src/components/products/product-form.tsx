@@ -178,8 +178,16 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            const { id, update } = toast({
+                title: 'Processing Image',
+                description: 'Compressing and converting your image...',
+                variant: 'default',
+                icon: <Loader2 className="animate-spin" />
+            });
+
             if (file.size > 2 * 1024 * 1024) { // 2MB limit
-                toast({
+                update({
+                    id,
                     title: "Invalid File Size",
                     description: "Image size must be less than 2MB.",
                     variant: "destructive",
@@ -190,11 +198,16 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             try {
                 const compressedDataUrl = await processImage(file, 2);
                 setImagePreview(compressedDataUrl);
-                // Convert data URL back to a file object if needed for upload, though we'll upload the data URL.
-                // For simplicity, we can just pass the data URL. Let's adjust the save logic.
-                setImageFile(file); // Keep original file for reference if needed, but we'll use the preview.
+                setImageFile(file);
+                update({
+                    id,
+                    title: 'Success',
+                    description: 'Image processed successfully.',
+                    variant: 'success'
+                });
             } catch(error: any) {
-                toast({
+                 update({
+                    id,
                     title: "Image Processing Error",
                     description: error.message || "Failed to process image.",
                     variant: "destructive",
@@ -651,3 +664,4 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         </div>
     );
 }
+
