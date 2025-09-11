@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Progress } from '../ui/progress';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, getDocs } from 'firebase/firestore';
+import { EditableSelectOptions } from '../editable-select-options';
 
 interface ProductFormProps {
   product: Product | null;
@@ -23,7 +24,6 @@ interface ProductFormProps {
 }
 
 const uomOptions = ["pcs", "box", "roll", "m", "kg", "pack"];
-const ledQtyOptions = ["240", "180", "120", "72", "60"];
 const voltageOptions = ["220", "24", "12"];
 const powerSupplyVoltageOptions = ["48", "24", "12"];
 
@@ -367,12 +367,14 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="led-qty" className="flex items-center gap-2"><Lightbulb className="h-4 w-4 text-yellow-500" /> LED Qty</Label>
-                    <Select onValueChange={setLedQty} value={ledQty}>
-                        <SelectTrigger id="led-qty"><SelectValue placeholder="Qty" /></SelectTrigger>
-                        <SelectContent>
-                            {ledQtyOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}L</SelectItem>)}
-                        </SelectContent>
-                    </Select>
+                    <EditableSelectOptions
+                        value={ledQty}
+                        onValueChange={setLedQty}
+                        optionsType="ledQty"
+                        placeholder="Qty"
+                        label="LED Qty"
+                        unit="L"
+                    />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="voltage" className="flex items-center gap-2"><Zap className="h-4 w-4 text-orange-500" /> Voltage</Label>
@@ -623,3 +625,5 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         </div>
     );
 }
+
+    
