@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Quotation, DocumentLine, Customer, Product } from '@/lib/types';
+import { Quotation, DocumentLine, Customer, Product, VatType } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Textarea } from '../ui/textarea';
 import { Loader2, User, Calendar, Hash, FileText, PlusCircle, Trash2, AlertCircle } from 'lucide-react';
@@ -22,6 +22,10 @@ interface QuotationFormProps {
   onCancel: () => void;
   onIdGenerated: (id: string) => void;
 }
+
+const vatTypes: VatType[] = ['VATable', 'VAT-Exempt', 'Zero-Rated'];
+const DEFAULT_TAX_RATE = 0.12;
+
 
 export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGenerated }: QuotationFormProps) {
     const { toast } = useToast();
@@ -99,7 +103,7 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
             quantity: 1,
             uom: '',
             unitPrice: 0,
-            taxRate: 0.12, // Default tax
+            taxRate: DEFAULT_TAX_RATE,
             total: 0,
             vatType: 'VATable'
         };
@@ -114,23 +118,25 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
 
     const handleLineChange = (index: number, field: keyof DocumentLine, value: any) => {
         const newLines = [...lines];
-        (newLines[index] as any)[field] = value;
+        const line = newLines[index];
+        (line as any)[field] = value;
 
         if (field === 'itemId') {
             const product = products.find(p => p.id === value);
             if (product) {
-                newLines[index].description = product.name;
-                newLines[index].unitPrice = product.price;
-                newLines[index].uom = product.uom;
+                line.description = product.name;
+                line.unitPrice = product.price;
+                line.uom = product.uom;
             }
         }
         
-        // Recalculate total
-        const line = newLines[index];
+        if (field === 'vatType') {
+            line.taxRate = value === 'VATable' ? DEFAULT_TAX_RATE : 0;
+        }
+
         const subtotal = line.quantity * line.unitPrice;
-        const taxableAmount = subtotal;
-        const taxAmount = taxableAmount * line.taxRate;
-        line.total = taxableAmount + taxAmount;
+        const taxAmount = subtotal * line.taxRate;
+        line.total = subtotal + taxAmount;
 
         setLines(newLines);
     };
@@ -203,9 +209,8 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
                             <TableRow>
                                 <TableHead className="w-[30%]">Product</TableHead>
                                 <TableHead>Qty</TableHead>
-                                <TableHead>UOM</TableHead>
-                                <TableHead>Available</TableHead>
                                 <TableHead>Unit Price</TableHead>
+                                <TableHead>VAT Type</TableHead>
                                 <TableHead>Total</TableHead>
                                 <TableHead className="w-[50px]"></TableHead>
                             </TableRow>
@@ -224,12 +229,16 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
                                     <TableCell>
                                         <Input type="number" value={line.quantity} onChange={e => handleLineChange(index, 'quantity', Number(e.target.value))} className="w-20" />
                                     </TableCell>
-                                     <TableCell>{line.uom}</TableCell>
-                                     <TableCell>
-                                        {products.find(p => p.id === line.itemId)?.stock ?? 'N/A'}
-                                     </TableCell>
                                     <TableCell>
                                         <Input type="number" value={line.unitPrice} onChange={e => handleLineChange(index, 'unitPrice', Number(e.target.value))} className="w-28" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Select value={line.vatType} onValueChange={(v: VatType) => handleLineChange(index, 'vatType', v)}>
+                                            <SelectTrigger><SelectValue /></SelectTrigger>
+                                            <SelectContent>
+                                                {vatTypes.map(vt => <SelectItem key={vt} value={vt}>{vt}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
                                     </TableCell>
                                     <TableCell>₱{line.total.toFixed(2)}</TableCell>
                                     <TableCell>
