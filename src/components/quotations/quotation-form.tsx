@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { DatePicker } from '../ui/date-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from 'date-fns';
+import { Separator } from '../ui/separator';
 
 interface QuotationFormProps {
   quotation: Quotation | null;
@@ -42,6 +43,8 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
     const [status, setStatus] = useState<Quotation['status']>('Draft');
     const [lines, setLines] = useState<DocumentLine[]>([]);
     const [notes, setNotes] = useState('');
+    const [discountType, setDiscountType] = useState<'Fixed' | 'Percent'>('Fixed');
+    const [discountValue, setDiscountValue] = useState(0);
     
     useEffect(() => {
         const fetchData = async () => {
@@ -85,6 +88,8 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
             setStatus(quotation.status || 'Draft');
             setLines(quotation.lines || []);
             setNotes(quotation.notes || '');
+            setDiscountType(quotation.discountType || 'Fixed');
+            setDiscountValue(quotation.discountValue || 0);
         } else {
             generateQuotationId();
             const defaultExpiry = new Date();
@@ -92,6 +97,8 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
             setExpiryDate(defaultExpiry);
             setLines([]);
             setNotes('');
+            setDiscountType('Fixed');
+            setDiscountValue(0);
         }
     }, [quotation, onIdGenerated]);
     
@@ -135,15 +142,55 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
         }
 
         const subtotal = line.quantity * line.unitPrice;
-        const taxAmount = subtotal * line.taxRate;
-        line.total = subtotal + taxAmount;
+        line.total = subtotal; // Total before overall discount
 
         setLines(newLines);
     };
 
-    const calculateTotalAmount = () => {
-        return lines.reduce((acc, line) => acc + line.total, 0);
-    };
+    const totals = useMemo(() => {
+        const totalSales = lines.reduce((acc, l) => acc + l.total, 0);
+
+        let vatableSales = 0;
+        let vatExemptSales = 0;
+        let zeroRatedSales = 0;
+
+        const discountAmount = discountType === 'Fixed' 
+            ? Math.min(discountValue, totalSales)
+            : totalSales * (Math.min(discountValue, 100) / 100);
+
+        const totalAfterDiscount = totalSales - discountAmount;
+        let vatAmount = 0;
+
+        if(totalSales > 0) {
+            lines.forEach(line => {
+                const proportion = line.total / totalSales;
+                const lineDiscount = discountAmount * proportion;
+                const discountedTotal = line.total - lineDiscount;
+
+                if (line.vatType === 'VATable') {
+                    const baseAmount = discountedTotal / (1 + line.taxRate)
+                    vatableSales += baseAmount;
+                    vatAmount += baseAmount * line.taxRate;
+                } else if (line.vatType === 'VAT-Exempt') {
+                    vatExemptSales += discountedTotal;
+                } else if (line.vatType === 'Zero-Rated') {
+                    zeroRatedSales += discountedTotal;
+                }
+            });
+        }
+        
+        const totalAmount = totalAfterDiscount;
+        
+        return {
+            vatableSales,
+            vatExemptSales,
+            zeroRatedSales,
+            totalSales,
+            discountAmount,
+            vatAmount: vatAmount < 0 ? 0 : vatAmount,
+            totalAmount: totalAmount < 0 ? 0 : totalAmount,
+        }
+    }, [lines, discountType, discountValue]);
 
     const handleSubmit = async () => {
         if (!customerId) {
@@ -168,9 +215,15 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
                 status,
                 lines,
                 notes,
-                totalAmount: calculateTotalAmount(),
+                totalAmount: totals.totalAmount,
+                discountType,
+                discountValue,
+                vatableSales: totals.vatableSales,
+                vatExemptSales: totals.vatExemptSales,
+                zeroRatedSales: totals.zeroRatedSales,
+                vatAmount: totals.vatAmount,
             };
-            onSuccess(quotationData);
+            onSuccess(quotationData as any);
         } catch (error) {
             console.error("Failed to save quotation:", error);
             toast({ title: "Error", description: "Failed to save quotation.", variant: "destructive" });
@@ -207,12 +260,12 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[30%]">Product</TableHead>
-                                <TableHead>Qty</TableHead>
-                                <TableHead>Unit Price</TableHead>
-                                <TableHead>VAT Type</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead className="w-[50px]"></TableHead>
+                                <TableHead className="w-[35%]">Product</TableHead>
+                                <TableHead className="w-[10%]">Qty</TableHead>
+                                <TableHead className="w-[15%]">Unit Price</TableHead>
+                                <TableHead className="w-[20%]">VAT Type</TableHead>
+                                <TableHead className="w-[15%] text-right">Total</TableHead>
+                                <TableHead className="w-[5%]"></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -227,20 +280,20 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
                                         </Select>
                                     </TableCell>
                                     <TableCell>
-                                        <Input type="number" value={line.quantity} onChange={e => handleLineChange(index, 'quantity', Number(e.target.value))} className="w-20" />
+                                        <Input type="number" value={line.quantity} onChange={e => handleLineChange(index, 'quantity', Number(e.target.value))} />
                                     </TableCell>
                                     <TableCell>
-                                        <Input type="number" value={line.unitPrice} onChange={e => handleLineChange(index, 'unitPrice', Number(e.target.value))} className="w-28" />
+                                        <Input type="number" value={line.unitPrice} onChange={e => handleLineChange(index, 'unitPrice', Number(e.target.value))} />
                                     </TableCell>
                                     <TableCell>
                                         <Select value={line.vatType} onValueChange={(v: VatType) => handleLineChange(index, 'vatType', v)}>
-                                            <SelectTrigger><SelectValue /></SelectTrigger>
+                                            <SelectTrigger><SelectValue/></SelectTrigger>
                                             <SelectContent>
                                                 {vatTypes.map(vt => <SelectItem key={vt} value={vt}>{vt}</SelectItem>)}
                                             </SelectContent>
                                         </Select>
                                     </TableCell>
-                                    <TableCell>₱{line.total.toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">₱{line.total.toFixed(2)}</TableCell>
                                     <TableCell>
                                         <Button variant="ghost" size="icon" onClick={() => handleRemoveLine(index)}>
                                             <Trash2 className="h-4 w-4 text-red-500" />
@@ -256,16 +309,55 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
                 </Button>
             </div>
 
-            <div className="space-y-2">
-                <Label htmlFor="notes">Notes (Optional)</Label>
-                <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add any notes for the customer..."/>
+             <div className="flex gap-8">
+                <div className="w-1/2 space-y-2">
+                    <Label htmlFor="notes">Notes (Optional)</Label>
+                    <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Add any notes for the customer..."/>
+                </div>
+                <div className="w-1/2 space-y-2">
+                    <div className="flex justify-between items-center py-1">
+                        <span className="text-muted-foreground">Vatable Sales:</span>
+                        <span className="font-medium">₱{totals.vatableSales.toFixed(2)}</span>
+                    </div>
+                     <div className="flex justify-between items-center py-1">
+                        <span className="text-muted-foreground">VAT-Exempt Sales:</span>
+                        <span className="font-medium">₱{totals.vatExemptSales.toFixed(2)}</span>
+                    </div>
+                     <div className="flex justify-between items-center py-1">
+                        <span className="text-muted-foreground">Zero-Rated Sales:</span>
+                        <span className="font-medium">₱{totals.zeroRatedSales.toFixed(2)}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center py-1 font-semibold">
+                        <span>Total Sales:</span>
+                        <span>₱{totals.totalSales.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-1">
+                        <span className="text-muted-foreground">Discount:</span>
+                        <div className="flex items-center gap-2">
+                            <Select value={discountType} onValueChange={(v: 'Fixed' | 'Percent') => setDiscountType(v)}>
+                                <SelectTrigger className="w-[100px] h-8"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Fixed">Fixed</SelectItem>
+                                    <SelectItem value="Percent">Percent</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Input type="number" value={discountValue} onChange={e => setDiscountValue(Number(e.target.value))} className="w-24 h-8" />
+                        </div>
+                    </div>
+                    <div className="flex justify-between items-center py-1">
+                        <span className="text-muted-foreground">VAT ({DEFAULT_TAX_RATE * 100}%):</span>
+                        <span className="font-medium">₱{totals.vatAmount.toFixed(2)}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center py-1 text-xl font-bold">
+                        <span>Amount Due:</span>
+                        <span>₱{totals.totalAmount.toFixed(2)}</span>
+                    </div>
+                </div>
             </div>
 
             <div className="flex justify-end items-center gap-6 mt-4">
-                <div className="text-right">
-                    <p className="text-muted-foreground">Total Amount</p>
-                    <p className="text-2xl font-bold">₱{calculateTotalAmount().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                </div>
                  <div className="flex justify-end gap-2">
                     <Button variant="cancel" onClick={onCancel} disabled={isSaving}>Cancel</Button>
                     <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
@@ -277,3 +369,5 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
         </div>
     );
 }
+
+    

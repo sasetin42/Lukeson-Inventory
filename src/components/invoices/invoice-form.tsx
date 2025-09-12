@@ -392,4 +392,5 @@ export default function InvoiceForm({ invoice, onSuccess, onCancel, onIdGenerate
         </div>
     );
 }
- 
+
+    
