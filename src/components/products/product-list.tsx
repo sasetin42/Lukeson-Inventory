@@ -51,7 +51,7 @@ const categoryIcons: { [key: string]: React.ReactElement } = {
     'ALUMINIUM PROFILE': <Square className="h-4 w-4 text-gray-500" />,
 };
 
-type SortOption = 'code-asc' | 'code-desc' | 'date-asc' | 'date-desc';
+type SortOption = 'name-asc' | 'name-desc' | 'date-asc' | 'date-desc';
 
 export default function ProductList({ products, onEdit, onDelete, onAddCategory, onViewStockHistory }: ProductListProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -64,7 +64,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
     const [mounted, setMounted] = useState(false);
     const { hasWriteAccess } = useAuth();
     const canWrite = hasWriteAccess('Products');
-    const [sortBy, setSortBy] = useState<SortOption>('code-asc');
+    const [sortBy, setSortBy] = useState<SortOption>('name-asc');
 
     useEffect(() => {
         setMounted(true);
@@ -113,11 +113,11 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
         let sortedProducts = [...products];
 
         switch(sortBy) {
-            case 'code-asc':
-                sortedProducts.sort((a, b) => (a.productCode || '').localeCompare(b.productCode || ''));
+            case 'name-asc':
+                sortedProducts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
                 break;
-            case 'code-desc':
-                sortedProducts.sort((a, b) => (b.productCode || '').localeCompare(a.productCode || ''));
+            case 'name-desc':
+                sortedProducts.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
                 break;
             case 'date-asc':
                 sortedProducts.sort((a, b) => {
@@ -211,8 +211,8 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
                             <SelectValue placeholder="Sort by..." />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="code-asc"><ArrowDownAZ className="h-4 w-4 mr-2" />Name (A-Z)</SelectItem>
-                            <SelectItem value="code-desc"><ArrowUpAZ className="h-4 w-4 mr-2" />Name (Z-A)</SelectItem>
+                            <SelectItem value="name-asc"><ArrowDownAZ className="h-4 w-4 mr-2" />Name (A-Z)</SelectItem>
+                            <SelectItem value="name-desc"><ArrowUpAZ className="h-4 w-4 mr-2" />Name (Z-A)</SelectItem>
                             <SelectItem value="date-desc"><CalendarClock className="h-4 w-4 mr-2" />Date (Newest)</SelectItem>
                             <SelectItem value="date-asc"><CalendarClock className="h-4 w-4 mr-2" />Date (Oldest)</SelectItem>
                         </SelectContent>
