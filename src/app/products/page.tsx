@@ -209,7 +209,7 @@ export default function ProductsPage() {
             title="Stock Alerts" 
             description={`${lowStock} active alerts`} 
             icon="alert"
-            href="#"
+            href="/stock-alerts"
             color="red"
         />
       </div>
