@@ -248,8 +248,12 @@ export default function CategoryFormModal({
                                 ))}
                            </div>
                         </ScrollArea>
-                        {totalPages > 1 && (
-                            <div className="flex justify-center items-center gap-2 mt-4">
+                    </div>
+                </div>
+                <DialogFooter className="justify-between">
+                    <div>
+                         {totalPages > 1 && (
+                            <div className="flex justify-center items-center gap-2">
                                 <Button
                                     variant="outline"
                                     size="sm"
@@ -272,13 +276,13 @@ export default function CategoryFormModal({
                             </div>
                         )}
                     </div>
-                </div>
-                <DialogFooter>
-                    <Button variant="cancel" onClick={onClose} disabled={isSaving}>Cancel</Button>
-                    <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
-                        {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {editingCategory ? 'Save Changes' : 'Add Category'}
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="cancel" onClick={onClose} disabled={isSaving}>Cancel</Button>
+                        <Button type="submit" onClick={handleSubmit} disabled={isSaving}>
+                            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {editingCategory ? 'Save Changes' : 'Add Category'}
+                        </Button>
+                    </div>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
