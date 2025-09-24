@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download, Power, LayoutGrid, Package, Layers, PowerOff, Lamp, Square, History } from "lucide-react";
+import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download, Power, LayoutGrid, Package, Layers, PowerOff, Lamp, Square, History, ArrowDownAZ, ArrowUpAZ, CalendarClock } from "lucide-react";
 import { Product, ItemCategory } from "@/lib/types";
 import {
   DropdownMenu,
@@ -51,6 +51,8 @@ const categoryIcons: { [key: string]: React.ReactElement } = {
     'ALUMINIUM PROFILE': <Square className="h-4 w-4 text-gray-500" />,
 };
 
+type SortOption = 'code-asc' | 'code-desc' | 'date-asc' | 'date-desc';
+
 export default function ProductList({ products, onEdit, onDelete, onAddCategory, onViewStockHistory }: ProductListProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
@@ -62,6 +64,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
     const [mounted, setMounted] = useState(false);
     const { hasWriteAccess } = useAuth();
     const canWrite = hasWriteAccess('Products');
+    const [sortBy, setSortBy] = useState<SortOption>('code-asc');
 
     useEffect(() => {
         setMounted(true);
@@ -107,13 +110,38 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
     }
     
     const filteredProducts = useMemo(() => {
-        return products.filter(product => {
+        let sortedProducts = [...products];
+
+        switch(sortBy) {
+            case 'code-asc':
+                sortedProducts.sort((a, b) => (a.productCode || '').localeCompare(b.productCode || ''));
+                break;
+            case 'code-desc':
+                sortedProducts.sort((a, b) => (b.productCode || '').localeCompare(a.productCode || ''));
+                break;
+            case 'date-asc':
+                sortedProducts.sort((a, b) => {
+                    const dateA = a.createdAt ? (a.createdAt as any).toDate ? (a.createdAt as any).toDate() : new Date(a.createdAt as string) : new Date(0);
+                    const dateB = b.createdAt ? (b.createdAt as any).toDate ? (b.createdAt as any).toDate() : new Date(b.createdAt as string) : new Date(0);
+                    return dateA.getTime() - dateB.getTime();
+                });
+                break;
+            case 'date-desc':
+                sortedProducts.sort((a, b) => {
+                    const dateA = a.createdAt ? (a.createdAt as any).toDate ? (a.createdAt as any).toDate() : new Date(a.createdAt as string) : new Date(0);
+                    const dateB = b.createdAt ? (b.createdAt as any).toDate ? (b.createdAt as any).toDate() : new Date(b.createdAt as string) : new Date(0);
+                    return dateB.getTime() - dateA.getTime();
+                });
+                break;
+        }
+
+        return sortedProducts.filter(product => {
             const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                                   (product.sku && product.sku.toLowerCase().includes(searchQuery.toLowerCase()));
             const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
             return matchesSearch && matchesCategory;
-        }).sort((a, b) => (a.productCode || '').localeCompare(b.productCode || ''));
-    }, [products, searchQuery, categoryFilter]);
+        });
+    }, [products, searchQuery, categoryFilter, sortBy]);
 
     const getStockStatus = (stock: number, reOrderLevel: number) => {
         const maxStock = reOrderLevel * 5; // Assuming max stock is 5x re-order level
@@ -148,36 +176,47 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
                 </TabsList>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                <div className="relative flex-1 sm:flex-auto">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                        placeholder="Search products..." 
-                        className="pl-10 w-full"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                    <SelectValue placeholder="All Categories" />
-                    </SelectTrigger>
-                    <SelectContent>
-                    <SelectItem value="all">
-                        <div className="flex items-center gap-2">
-                            <LayoutGrid className="h-4 w-4" />
-                            All Categories
-                        </div>
-                    </SelectItem>
-                    {categories.map(cat => (
-                        <SelectItem key={cat.id} value={cat.name}>
+                    <div className="relative flex-1 sm:flex-auto">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                            placeholder="Search products..." 
+                            className="pl-10 w-full"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                        <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="All Categories" />
+                        </SelectTrigger>
+                        <SelectContent>
+                        <SelectItem value="all">
                             <div className="flex items-center gap-2">
-                                {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
-                                {cat.name}
+                                <LayoutGrid className="h-4 w-4" />
+                                All Categories
                             </div>
                         </SelectItem>
-                    ))}
-                    </SelectContent>
-                </Select>
+                        {categories.map(cat => (
+                            <SelectItem key={cat.id} value={cat.name}>
+                                <div className="flex items-center gap-2">
+                                    {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
+                                    {cat.name}
+                                </div>
+                            </SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+                    <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+                        <SelectTrigger className="w-full sm:w-[180px]">
+                            <SelectValue placeholder="Sort by..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="code-asc"><ArrowDownAZ className="h-4 w-4 mr-2" />Name (A-Z)</SelectItem>
+                            <SelectItem value="code-desc"><ArrowUpAZ className="h-4 w-4 mr-2" />Name (Z-A)</SelectItem>
+                            <SelectItem value="date-desc"><CalendarClock className="h-4 w-4 mr-2" />Date (Newest)</SelectItem>
+                            <SelectItem value="date-asc"><CalendarClock className="h-4 w-4 mr-2" />Date (Oldest)</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
             <TabsContent value="products" className="mt-6">
