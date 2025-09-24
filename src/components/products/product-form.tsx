@@ -610,42 +610,11 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 return renderStriplightFields();
             case 'POWER SUPPLY':
                 return renderPowerSupplyFields();
-            case 'GENERAL LIGHTING':
-                return renderGeneralLightingFields();
             case 'ALUMINIUM PROFILE':
                 return renderAluminiumProfileFields();
+            case 'GENERAL LIGHTING':
             default:
-                return (
-                    <div className="space-y-4">
-                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="product-code" className="flex items-center gap-2"><FileText className="h-4 w-4" /> Product Code</Label>
-                                <Input id="product-code" value={productCode} disabled />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="category" className="flex items-center gap-2"><LayoutGrid className="h-4 w-4 text-red-500" /> Product Category</Label>
-                                <Select onValueChange={setCategory} value={category}>
-                                    <SelectTrigger id="category">
-                                        <SelectValue placeholder="Select a category to begin" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {categories.map(cat => (
-                                            <SelectItem key={cat.id} value={cat.name}>
-                                                <div className="flex items-center gap-2">
-                                                    {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
-                                                    {cat.name}
-                                                </div>
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-center h-48 border-2 border-dashed rounded-lg">
-                            <p className="text-muted-foreground">Please select a category to see relevant fields.</p>
-                        </div>
-                    </div>
-                );
+                return renderGeneralLightingFields();
         }
     };
 
@@ -664,4 +633,3 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         </div>
     );
 }
-
