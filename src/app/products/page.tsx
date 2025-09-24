@@ -16,6 +16,7 @@ import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { useAuth } from '@/context/auth-context';
 import StockHistoryModal from '@/components/products/stock-history-modal';
+import StockAdjustmentModal from '@/components/products/stock-adjustment-modal';
 
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -28,6 +29,7 @@ export default function ProductsPage() {
     const [editingCategory, setEditingCategory] = useState<ItemCategory | null>(null);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [isStockHistoryModalOpen, setIsStockHistoryModalOpen] = useState(false);
+    const [isStockAdjustmentModalOpen, setIsStockAdjustmentModalOpen] = useState(false);
     const [viewingStockHistoryFor, setViewingStockHistoryFor] = useState<Product | null>(null);
     const { toast } = useToast();
     const { hasWriteAccess } = useAuth();
@@ -164,6 +166,19 @@ export default function ProductsPage() {
         toast({ title: "Success", description: "Category deleted successfully.", variant: "success" });
     }
 
+    const handleStockAdjustment = async (productId: string, newStock: number, reason: string) => {
+        const productRef = doc(db, 'products', productId);
+        try {
+            await updateDoc(productRef, { stock: newStock });
+            // You might want to log this adjustment to a separate collection for auditing
+            toast({ title: "Stock Adjusted", description: `Stock for product ${productId} has been set to ${newStock}.`, variant: "success" });
+            setIsStockAdjustmentModalOpen(false);
+        } catch (error) {
+            console.error("Error adjusting stock:", error);
+            toast({ title: "Error", description: "Failed to adjust stock.", variant: "destructive" });
+        }
+    };
+
 
   return (
     <div className="flex flex-col gap-4">
@@ -195,7 +210,7 @@ export default function ProductsPage() {
             title="Adjust Stock" 
             description="Modify inventory levels" 
             icon="repeat"
-            href="/products"
+            onClick={() => setIsStockAdjustmentModalOpen(true)}
             color="green"
         />
         <ActionCard 
@@ -249,6 +264,14 @@ export default function ProductsPage() {
             salesOrders={salesOrders}
             purchaseOrders={purchaseOrders}
         />
+      )}
+      {isStockAdjustmentModalOpen && (
+          <StockAdjustmentModal
+            isOpen={isStockAdjustmentModalOpen}
+            onClose={() => setIsStockAdjustmentModalOpen(false)}
+            products={products}
+            onSave={handleStockAdjustment}
+          />
       )}
     </div>
   );
