@@ -195,14 +195,14 @@ export default function ProductsPage() {
             title="Adjust Stock" 
             description="Modify inventory levels" 
             icon="repeat"
-            href="#"
+            href="/products"
             color="green"
         />
         <ActionCard 
             title="Create PO" 
             description="New purchase order" 
             icon="cart"
-            href="#"
+            href="/purchase-orders"
             color="purple"
         />
         <ActionCard 
