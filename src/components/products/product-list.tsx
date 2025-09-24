@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download, Power, LayoutGrid, Package, Layers, PowerOff, Lamp, Square, History, ArrowDownAZ, ArrowUpAZ, CalendarClock } from "lucide-react";
+import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download, Power, LayoutGrid, Package, Layers, PowerOff, Lamp, Square, History, ArrowDownAZ, ArrowUpAZ, CalendarClock, ArrowUp, ArrowDown } from "lucide-react";
 import { Product, ItemCategory } from "@/lib/types";
 import {
   DropdownMenu,
@@ -51,7 +51,8 @@ const categoryIcons: { [key: string]: React.ReactElement } = {
     'ALUMINIUM PROFILE': <Square className="h-4 w-4 text-gray-500" />,
 };
 
-type SortOption = 'name-asc' | 'name-desc' | 'date-asc' | 'date-desc';
+type SortKey = 'name' | 'createdAt' | 'modifiedAt';
+type SortDirection = 'asc' | 'desc';
 
 export default function ProductList({ products, onEdit, onDelete, onAddCategory, onViewStockHistory }: ProductListProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -64,7 +65,8 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
     const [mounted, setMounted] = useState(false);
     const { hasWriteAccess } = useAuth();
     const canWrite = hasWriteAccess('Products');
-    const [sortBy, setSortBy] = useState<SortOption>('name-asc');
+    const [sortKey, setSortKey] = useState<SortKey>('name');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
     useEffect(() => {
         setMounted(true);
@@ -80,6 +82,27 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
         };
         fetchCategories();
     }, []);
+
+    const handleSort = (key: SortKey) => {
+        if (sortKey === key) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortKey(key);
+            setSortDirection('asc');
+        }
+    };
+
+    const SortableHeader = ({ sortKey: key, children }: { sortKey: SortKey, children: React.ReactNode }) => {
+        const isActive = sortKey === key;
+        return (
+            <TableHead onClick={() => handleSort(key)} className="cursor-pointer hover:bg-muted">
+                <div className="flex items-center gap-2">
+                    {children}
+                    {isActive && (sortDirection === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
+                </div>
+            </TableHead>
+        );
+    };
 
     const formatDateTime = (date: any) => {
         if (!date) return { date: 'N/A', time: '' };
@@ -110,30 +133,25 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
     }
     
     const filteredProducts = useMemo(() => {
-        let sortedProducts = [...products];
+        let sortedProducts = [...products].sort((a, b) => {
+            const valA = a[sortKey];
+            const valB = b[sortKey];
 
-        switch(sortBy) {
-            case 'name-asc':
-                sortedProducts.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-                break;
-            case 'name-desc':
-                sortedProducts.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
-                break;
-            case 'date-asc':
-                sortedProducts.sort((a, b) => {
-                    const dateA = a.createdAt ? (a.createdAt as any).toDate ? (a.createdAt as any).toDate() : new Date(a.createdAt as string) : new Date(0);
-                    const dateB = b.createdAt ? (b.createdAt as any).toDate ? (b.createdAt as any).toDate() : new Date(b.createdAt as string) : new Date(0);
-                    return dateA.getTime() - dateB.getTime();
-                });
-                break;
-            case 'date-desc':
-                sortedProducts.sort((a, b) => {
-                    const dateA = a.createdAt ? (a.createdAt as any).toDate ? (a.createdAt as any).toDate() : new Date(a.createdAt as string) : new Date(0);
-                    const dateB = b.createdAt ? (b.createdAt as any).toDate ? (b.createdAt as any).toDate() : new Date(b.createdAt as string) : new Date(0);
-                    return dateB.getTime() - dateA.getTime();
-                });
-                break;
-        }
+            if (valA instanceof Date && valB instanceof Date) {
+                return sortDirection === 'asc' ? valA.getTime() - valB.getTime() : valB.getTime() - valA.getTime();
+            }
+            
+            if (valA && (valA as any).toDate && valB && (valB as any).toDate) {
+                 const dateA = (valA as any).toDate();
+                 const dateB = (valB as any).toDate();
+                 return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+            }
+
+            if (typeof valA === 'string' && typeof valB === 'string') {
+                return sortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+            }
+            return 0;
+        });
 
         return sortedProducts.filter(product => {
             const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -141,7 +159,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
             const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
             return matchesSearch && matchesCategory;
         });
-    }, [products, searchQuery, categoryFilter, sortBy]);
+    }, [products, searchQuery, categoryFilter, sortKey, sortDirection]);
 
     const getStockStatus = (stock: number, reOrderLevel: number) => {
         const maxStock = reOrderLevel * 5; // Assuming max stock is 5x re-order level
@@ -206,17 +224,6 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
                         ))}
                         </SelectContent>
                     </Select>
-                    <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-                        <SelectTrigger className="w-full sm:w-[180px]">
-                            <SelectValue placeholder="Sort by..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="name-asc"><ArrowDownAZ className="h-4 w-4 mr-2" />Name (A-Z)</SelectItem>
-                            <SelectItem value="name-desc"><ArrowUpAZ className="h-4 w-4 mr-2" />Name (Z-A)</SelectItem>
-                            <SelectItem value="date-desc"><CalendarClock className="h-4 w-4 mr-2" />Date (Newest)</SelectItem>
-                            <SelectItem value="date-asc"><CalendarClock className="h-4 w-4 mr-2" />Date (Oldest)</SelectItem>
-                        </SelectContent>
-                    </Select>
                 </div>
             </div>
             <TabsContent value="products" className="mt-6">
@@ -249,12 +256,12 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
                     <TableHeader>
                         <TableRow>
                         <TableHead className="w-[80px]">Image</TableHead>
-                        <TableHead>Product</TableHead>
+                        <SortableHeader sortKey="name">Product</SortableHeader>
                         <TableHead>Category</TableHead>
                         <TableHead>Price</TableHead>
                         <TableHead>Stock Status</TableHead>
-                        <TableHead>Date Created</TableHead>
-                        <TableHead>Date Modified</TableHead>
+                        <SortableHeader sortKey="createdAt">Date Created</SortableHeader>
+                        <SortableHeader sortKey="modifiedAt">Date Modified</SortableHeader>
                         <TableHead className="w-[50px]"></TableHead>
                         </TableRow>
                     </TableHeader>
