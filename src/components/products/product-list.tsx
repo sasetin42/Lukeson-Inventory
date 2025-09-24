@@ -137,19 +137,17 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
             const valA = a[sortKey];
             const valB = b[sortKey];
 
-            if (valA instanceof Date && valB instanceof Date) {
-                return sortDirection === 'asc' ? valA.getTime() - valB.getTime() : valB.getTime() - valA.getTime();
-            }
-            
-            if (valA && (valA as any).toDate && valB && (valB as any).toDate) {
-                 const dateA = (valA as any).toDate();
-                 const dateB = (valB as any).toDate();
-                 return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+            // Handle date sorting for both Date objects and Firestore Timestamps
+            if (valA && valB && (valA instanceof Date || (valA as any).toDate) && (valB instanceof Date || (valB as any).toDate)) {
+                const dateA = valA instanceof Date ? valA : (valA as any).toDate();
+                const dateB = valB instanceof Date ? valB : (valB as any).toDate();
+                return sortDirection === 'asc' ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
             }
 
             if (typeof valA === 'string' && typeof valB === 'string') {
                 return sortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
             }
+            
             return 0;
         });
 
