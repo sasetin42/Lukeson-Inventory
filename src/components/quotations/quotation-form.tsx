@@ -357,7 +357,7 @@ export default function QuotationForm({ quotation, onSuccess, onCancel, onIdGene
                             <Label htmlFor="other-amount" className="text-xs">Amount</Label>
                             <Input id="other-amount" type="number" value={otherAmount} onChange={e => setOtherAmount(e.target.value)} placeholder="0.00" />
                         </div>
-                        <Button variant="secondary" onClick={handleAddOtherLine} className="self-end">Add Custom</Button>
+                        <Button onClick={handleAddOtherLine} className="self-end bg-[#5E8500] text-white hover:bg-[#5E8500]/90">Add Custom</Button>
                     </div>
                 </div>
             </div>
