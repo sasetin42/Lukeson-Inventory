@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Invoice } from '@/lib/types';
+import { Invoice, Product } from '@/lib/types';
 import { Button } from '../ui/button';
 import InvoiceView from './invoice-view';
 import { Printer, Edit } from 'lucide-react';
@@ -19,6 +19,7 @@ import { getInvoiceStatusVariant } from '../badge-variants';
 
 interface InvoiceViewModalProps {
   invoice: Invoice | null;
+  products: Product[];
   isOpen: boolean;
   onClose: () => void;
   onEdit: (invoice: Invoice) => void;
@@ -26,6 +27,7 @@ interface InvoiceViewModalProps {
 
 export default function InvoiceViewModal({
   invoice,
+  products,
   isOpen,
   onClose,
   onEdit,
@@ -93,7 +95,7 @@ export default function InvoiceViewModal({
         </DialogHeader>
         <div className="max-h-[70vh] overflow-y-auto p-1">
           <div ref={printableRef}>
-            <InvoiceView invoice={invoice} />
+            <InvoiceView invoice={invoice} products={products} />
           </div>
         </div>
         <DialogFooter className="justify-end">

@@ -2,21 +2,23 @@
 
 'use client';
 
-import { Invoice, SalesOrder } from '@/lib/types';
+import { Invoice, SalesOrder, Product } from '@/lib/types';
 import { format } from 'date-fns';
 import Image from 'next/image';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { Separator } from '../ui/separator';
+import ProductImage from '../products/product-image';
 
 interface InvoiceViewProps {
   invoice: Invoice;
+  products: Product[];
 }
 
 const TEMPLATE_DOC_ID = 'invoice';
 
-export default function InvoiceView({ invoice }: InvoiceViewProps) {
+export default function InvoiceView({ invoice, products }: InvoiceViewProps) {
     const [templateSettings, setTemplateSettings] = useState({
         accentColor: '#0A3BAA',
         companyName: 'YAMASHITA MOLD PHILIPPINES CORPORATION',
@@ -142,14 +144,24 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
                         </tr>
                     </thead>
                     <tbody>
-                        {invoice.lines.map((line, index) => (
+                        {invoice.lines.map((line, index) => {
+                            const product = products.find(p => p.id === line.itemId);
+                            return (
                             <tr key={index} className="border-b">
-                                <td className="p-2">{line.description}</td>
+                                <td className="p-2">
+                                    <div className="flex items-center gap-2">
+                                        <ProductImage path={product?.productImage} alt={line.description} width={40} height={40} className="rounded-md" />
+                                        <div>
+                                            <p className="font-medium">{line.description}</p>
+                                            <p className="text-xs text-muted-foreground">{product?.description}</p>
+                                        </div>
+                                    </div>
+                                </td>
                                 <td className="p-2 text-right">{line.quantity}</td>
                                 <td className="p-2 text-right">₱{line.unitPrice.toFixed(2)}</td>
                                 <td className="p-2 text-right">₱{line.total.toFixed(2)}</td>
                             </tr>
-                        ))}
+                        )})}
                     </tbody>
                 </table>
                 
@@ -201,4 +213,5 @@ export default function InvoiceView({ invoice }: InvoiceViewProps) {
         </div>
     );
 }
+
 

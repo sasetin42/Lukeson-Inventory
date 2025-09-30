@@ -7,7 +7,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle, DollarSign, CheckCircle, XCircle, Search, AlertCircle } from "lucide-react";
 import InvoiceList from "@/components/invoices/invoice-list";
-import { Invoice, PaymentMethod, SalesOrder, Customer } from '@/lib/types';
+import { Invoice, PaymentMethod, SalesOrder, Customer, Product } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc, serverTimestamp, deleteDoc, getDoc, addDoc } from 'firebase/firestore';
@@ -23,6 +23,7 @@ import PaymentFormModal from '@/components/payments/payment-form-modal';
 
 function InvoicesContent() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -58,7 +59,9 @@ function InvoicesContent() {
 
   useEffect(() => {
     const invoicesRef = collection(db, 'invoices');
-    const unsubscribe = onSnapshot(invoicesRef, (snapshot) => {
+    const productsRef = collection(db, 'products');
+
+    const unsubscribeInvoices = onSnapshot(invoicesRef, (snapshot) => {
       const loadedInvoices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
       setInvoices(loadedInvoices);
     }, (error) => {
@@ -69,8 +72,19 @@ function InvoicesContent() {
         variant: "destructive"
       });
     });
+    
+    const unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
+        setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
+    }, (error) => {
+        console.error("Error fetching products: ", error);
+        toast({ title: "Error", description: "Failed to load product data.", variant: "destructive" });
+    });
 
-    return () => unsubscribe();
+
+    return () => {
+        unsubscribeInvoices();
+        unsubscribeProducts();
+    };
   }, [toast]);
 
   const filteredInvoices = useMemo(() => {
@@ -300,6 +314,7 @@ function InvoicesContent() {
             isOpen={!!viewingInvoice}
             onClose={() => setViewingInvoice(null)}
             invoice={viewingInvoice}
+            products={products}
             onEdit={(invoiceToEdit) => {
               setViewingInvoice(null);
               handleOpenFormModal(invoiceToEdit);
