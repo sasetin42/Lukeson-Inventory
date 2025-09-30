@@ -15,6 +15,7 @@ import { DatePicker } from '../ui/date-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from '../ui/textarea';
 import { Separator } from '../ui/separator';
+import { Combobox } from '../ui/combobox';
 
 interface SalesOrderFormProps {
   salesOrder: SalesOrder | null;
@@ -48,6 +49,8 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
     const [discountValue, setDiscountValue] = useState(0);
     const [quotationId, setQuotationId] = useState<string | undefined>(undefined);
     const [isStatusDisabled, setIsStatusDisabled] = useState(true);
+    const [otherDescription, setOtherDescription] = useState('');
+    const [otherAmount, setOtherAmount] = useState('');
     
     useEffect(() => {
         const fetchData = async () => {
@@ -172,6 +175,36 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
             total: 0,
         };
         setLines([...lines, newLine]);
+    };
+
+    const handleAddOtherLine = () => {
+        if (!otherDescription || !otherAmount) {
+            toast({ title: "Missing Fields", description: "Please enter a description and amount for the custom item.", variant: "destructive"});
+            return;
+        }
+
+        const amount = parseFloat(otherAmount);
+        if (isNaN(amount)) {
+            toast({ title: "Invalid Amount", description: "Please enter a valid number for the amount.", variant: "destructive"});
+            return;
+        }
+
+        const newLine: DocumentLine = {
+            id: `other-${Date.now()}`,
+            itemId: 'OTHER',
+            description: otherDescription,
+            quantity: 1,
+            uom: 'unit',
+            unitPrice: amount,
+            taxRate: DEFAULT_TAX_RATE,
+            total: amount,
+            vatType: 'VATable'
+        };
+        setLines([...lines, newLine]);
+
+        // Reset fields
+        setOtherDescription('');
+        setOtherAmount('');
     };
 
     const handleRemoveLine = (index: number) => {
@@ -300,6 +333,8 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
             setIsSaving(false);
         }
     };
+    
+    const productOptions = products.map(p => ({ label: p.name, value: p.id }));
 
     return (
         <div className="grid gap-6 py-4">
@@ -352,12 +387,16 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
                             {lines.map((line, index) => (
                                 <TableRow key={line.id}>
                                     <TableCell>
-                                        <Select value={line.itemId} onValueChange={(v) => handleLineChange(index, 'itemId', v)}>
-                                            <SelectTrigger><SelectValue placeholder="Select Product"/></SelectTrigger>
-                                            <SelectContent>
-                                                {products.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
+                                        {line.itemId === 'OTHER' ? (
+                                            <Input value={line.description} onChange={e => handleLineChange(index, 'description', e.target.value)} />
+                                        ) : (
+                                            <Combobox
+                                                options={productOptions}
+                                                value={line.itemId}
+                                                onChange={(value) => handleLineChange(index, 'itemId', value)}
+                                                placeholder="Select Product"
+                                            />
+                                        )}
                                     </TableCell>
                                     <TableCell>
                                         <Input type="number" value={line.quantity} onChange={e => handleLineChange(index, 'quantity', Number(e.target.value))} />
@@ -384,9 +423,22 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
                         </TableBody>
                     </Table>
                 </div>
-                <Button variant="outline" size="sm" onClick={handleAddLine} className="mt-2">
-                    <PlusCircle className="mr-2 h-4 w-4"/> Add Line Item
-                </Button>
+                <div className="flex items-end gap-2 mt-2">
+                    <Button variant="outline" size="sm" onClick={handleAddLine}>
+                        <PlusCircle className="mr-2 h-4 w-4"/> Add Product Line
+                    </Button>
+                     <div className="flex-grow grid grid-cols-3 gap-2 items-end">
+                        <div className="space-y-1">
+                            <Label htmlFor="other-desc" className="text-xs">Other/Custom Item</Label>
+                            <Input id="other-desc" value={otherDescription} onChange={e => setOtherDescription(e.target.value)} placeholder="Description" />
+                        </div>
+                         <div className="space-y-1">
+                            <Label htmlFor="other-amount" className="text-xs">Amount</Label>
+                            <Input id="other-amount" type="number" value={otherAmount} onChange={e => setOtherAmount(e.target.value)} placeholder="0.00" />
+                        </div>
+                        <Button onClick={handleAddOtherLine} className="self-end bg-[#5E8500] text-white hover:bg-[#5E8500]/90">Add Custom</Button>
+                    </div>
+                </div>
             </div>
             
             <div className="flex gap-8">
@@ -457,5 +509,3 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
         </div>
     );
 }
-
-    
