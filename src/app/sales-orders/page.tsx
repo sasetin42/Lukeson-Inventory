@@ -7,7 +7,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, PlusCircle, CheckCircle, Clock, XCircle, DollarSign, AlertCircle, Trash2, Search } from "lucide-react";
 import SalesOrderList from "@/components/sales-orders/sales-order-list";
-import { SalesOrder, Customer, Quotation, JobOrder } from '@/lib/types';
+import { SalesOrder, Customer, Quotation, JobOrder, Product } from '@/lib/types';
 import SalesOrderFormModal from "@/components/sales-orders/sales-order-form-modal";
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
@@ -25,6 +25,7 @@ function SalesOrdersContent() {
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isJoViewModalOpen, setIsJoViewModalOpen] = useState(false);
@@ -68,6 +69,7 @@ function SalesOrdersContent() {
     const salesOrdersRef = collection(db, 'salesOrders');
     const quotationsRef = collection(db, 'quotations');
     const jobOrdersRef = collection(db, 'jobOrders');
+    const productsRef = collection(db, 'products');
 
     let q = query(salesOrdersRef);
     if (customerIdFilter) {
@@ -98,10 +100,18 @@ function SalesOrdersContent() {
         toast({ title: "Error", description: "Failed to load job orders.", variant: "destructive" });
     });
     
+    const unsubProducts = onSnapshot(productsRef, (snapshot) => {
+        setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
+    }, (error) => {
+        console.error("Error fetching products:", error);
+        toast({ title: "Error", description: "Failed to load products.", variant: "destructive" });
+    });
+
     return () => {
         unsubSOs();
         unsubQtns();
         unsubJOs();
+        unsubProducts();
     };
   }, [customerIdFilter, toast]);
 
@@ -265,6 +275,7 @@ function SalesOrdersContent() {
           quotations={quotations}
           jobOrders={jobOrders}
           onEdit={handleOpenModal}
+          products={products}
         />
       )}
 
@@ -306,9 +317,3 @@ export default function SalesOrdersPage() {
         </Suspense>
     )
 }
-
-    
-
-      
-
-    

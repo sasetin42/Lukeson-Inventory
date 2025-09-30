@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { SalesOrder, JobOrder, Quotation } from '@/lib/types';
+import { SalesOrder, JobOrder, Quotation, Product } from '@/lib/types';
 import { Button } from '../ui/button';
 import SalesOrderView from './sales-order-view';
 import { Printer, PlusCircle, Edit } from 'lucide-react';
@@ -22,6 +22,7 @@ interface SalesOrderViewModalProps {
   salesOrder: SalesOrder | null;
   quotations: Quotation[];
   jobOrders: JobOrder[];
+  products: Product[];
   isOpen: boolean;
   onClose: () => void;
   onEdit: (salesOrder: SalesOrder) => void;
@@ -31,6 +32,7 @@ export default function SalesOrderViewModal({
   salesOrder,
   quotations,
   jobOrders,
+  products,
   isOpen,
   onClose,
   onEdit,
@@ -122,7 +124,7 @@ export default function SalesOrderViewModal({
         </DialogHeader>
         <div className="max-h-[70vh] overflow-y-auto p-1">
           <div ref={printableRef}>
-            <SalesOrderView salesOrder={salesOrder} quotation={quotation} />
+            <SalesOrderView salesOrder={salesOrder} quotation={quotation} products={products} />
           </div>
         </div>
         <DialogFooter className="justify-between">
