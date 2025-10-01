@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ForInvoicingModal from './for-invoicing-modal';
+import { SidebarTrigger } from './ui/sidebar';
 
 type PageHeaderProps = {
   title: string;
@@ -180,6 +181,7 @@ export default function PageHeader({ title, description, icon, actions }: PageHe
     <div className="space-y-2 sticky top-0 bg-background z-10 -mx-4 px-4 md:-mx-6 md:px-6 border-b">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 gap-4">
         <div className="flex items-center gap-3 flex-1">
+          <SidebarTrigger />
           {icon && <div className="[&>svg]:size-7 [&>svg]:transition-all [&>svg]:duration-300 header-[data-scrolled=true]_[&>svg]:size-6">{icon}</div>}
           <div className="grid gap-0">
             <h1 className="text-lg md:text-xl font-bold tracking-tight leading-tight transition-all duration-300 header-[data-scrolled=true]_&]:text-lg">{title}</h1>

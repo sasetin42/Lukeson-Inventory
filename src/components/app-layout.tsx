@@ -1,7 +1,7 @@
 
 'use client';
 
-import { SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarInset } from '@/components/ui/sidebar';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
@@ -47,7 +47,7 @@ export default function AppLayout({
     return (
         <SidebarInset className="flex flex-col transition-all duration-300 ease-in-out">
             <header ref={headerRef} data-scrolled={scrolled} className="sticky top-0 z-10 flex h-auto items-center gap-4 border-b bg-background px-4 py-2 transition-all duration-300 sm:h-auto sm:border-0 md:px-6">
-                <SidebarTrigger />
+                
                 <div className="flex-1" />
             </header>
             <main ref={mainRef} className="flex-1 overflow-auto p-4 pt-0 md:p-6 md:pt-0">
