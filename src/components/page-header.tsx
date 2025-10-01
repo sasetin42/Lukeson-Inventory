@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import { Button } from './ui/button';
-import { Zap, AlertTriangle, FileText, Loader2, CheckCircle } from 'lucide-react';
+import { Zap, AlertTriangle, FileText, Loader2, CheckCircle, Maximize, Minimize } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
@@ -31,6 +31,7 @@ function HeaderActions() {
     const [invoiceReadyOrders, setInvoiceReadyOrders] = useState<SalesOrder[]>([]);
     const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
     const isMobile = useIsMobile();
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -53,11 +54,17 @@ function HeaderActions() {
             setInvoiceReadyOrders(readyOrders);
             setInvoiceReadyCount(readyOrders.length);
         });
+        
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
 
         return () => {
             clearInterval(timer);
             unsubscribeProducts();
             unsubscribeSalesOrders();
+            document.removeEventListener('fullscreenchange', handleFullscreenChange);
         };
     }, []);
 
@@ -79,6 +86,16 @@ function HeaderActions() {
             });
         }, 1000);
     }
+    
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    };
 
     if (!mounted) {
         return null;
@@ -143,6 +160,9 @@ function HeaderActions() {
                 <Zap className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Optimize System</span>
                 <span className="sm:hidden">Optimize</span>
+            </Button>
+            <Button variant="outline" size="icon" onClick={toggleFullscreen}>
+                {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
             </Button>
         </div>
         <ForInvoicingModal
