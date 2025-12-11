@@ -7,7 +7,6 @@ import { getStorage } from 'firebase/storage';
 const firebaseConfig = {
   apiKey: "AIzaSyBsmEybb-ASyKOifiWleLs9kZsy2NMwAJQ",
   authDomain: "lukeson-inventory.firebaseapp.com",
-  databaseURL: "https://lukeson-inventory-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "lukeson-inventory",
   storageBucket: "lukeson-inventory.appspot.com",
   messagingSenderId: "365879575919",
