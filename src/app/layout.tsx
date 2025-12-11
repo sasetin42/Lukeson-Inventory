@@ -147,16 +147,22 @@ function AppContent({ children }: { children: React.ReactNode }) {
   };
   
   if (isLoading) {
-    const { logo, text, backgroundColor } = loadingScreenSettings;
+    const { logo: loadingLogo, text, backgroundColor } = loadingScreenSettings;
+    const displayLogo = loadingLogo || companyProfile.logo;
+    
     return (
         <div 
-            className="flex h-screen w-full flex-col items-center justify-center gap-4 transition-colors duration-500" 
+            className="flex h-screen w-full flex-col items-center justify-center gap-6 bg-background transition-colors duration-500 fade-in" 
             style={{ backgroundColor: backgroundColor || 'hsl(var(--background))' }}
         >
-            {logo && <Image src={logo} alt="Loading Logo" width={120} height={120} className="animate-pulse" data-ai-hint="logo"/>}
-            <div className="flex items-center gap-2">
-                <Loader2 className="h-6 w-6 animate-spin" />
-                <p className="text-lg font-semibold">{text || 'Loading...'}</p>
+            {displayLogo ? (
+                <Image src={displayLogo} alt="Loading Logo" width={120} height={120} className="animate-pulse-subtle rounded-md" data-ai-hint="logo" />
+            ) : (
+                <Logo className="h-24 w-24 text-primary animate-pulse-subtle" />
+            )}
+            <div className="flex items-center gap-3">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <p className="text-lg font-semibold tracking-wide">{text || 'Loading...'}</p>
             </div>
         </div>
     );
