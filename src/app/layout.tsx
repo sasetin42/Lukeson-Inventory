@@ -19,9 +19,6 @@ import { useToast } from '@/hooks/use-toast';
 import { AuthProvider, useAuth } from '@/context/auth-context';
 import SupportModal from '@/components/support/support-modal';
 import Image from 'next/image';
-import { Maven_Pro } from 'next/font/google'
-
-const mavenPro = Maven_Pro({ subsets: ['latin'] })
 
 export const navGroups = [
   {
@@ -341,7 +338,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head/>
-      <body className={`${mavenPro.className} font-body antialiased h-full bg-background transition-colors duration-300`} suppressHydrationWarning={true}>
+      <body className={`font-body antialiased h-full bg-background transition-colors duration-300`} suppressHydrationWarning={true}>
         <AuthProvider>
             <DynamicFaviconAndTitle />
             <AppContent>{children}</AppContent>
