@@ -1,6 +1,5 @@
 
 'use client';
-import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
@@ -20,12 +19,9 @@ import { useToast } from '@/hooks/use-toast';
 import { AuthProvider, useAuth } from '@/context/auth-context';
 import SupportModal from '@/components/support/support-modal';
 import Image from 'next/image';
+import { Maven_Pro } from 'next/font/google'
 
-
-// export const metadata: Metadata = {
-//   title: 'IMIS Pro - All-in-One Business Management',
-//   description: 'A comprehensive, all-in-one business management system tailored for businesses in the Philippines.',
-// };
+const mavenPro = Maven_Pro({ subsets: ['latin'] })
 
 export const navGroups = [
   {
@@ -155,10 +151,8 @@ function AppContent({ children }: { children: React.ReactNode }) {
             className="flex h-screen w-full flex-col items-center justify-center gap-6 bg-background transition-colors duration-500 fade-in" 
             style={{ backgroundColor: backgroundColor || 'hsl(var(--background))' }}
         >
-            {displayLogo ? (
+            {displayLogo && (
                 <Image src={displayLogo} alt="Loading Logo" width={120} height={120} className="animate-pulse-subtle rounded-md" data-ai-hint="logo" />
-            ) : (
-                <Logo className="h-24 w-24 text-primary animate-pulse-subtle" />
             )}
             <div className="flex items-center gap-3">
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -346,14 +340,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-        <title>IMIS Pro - All-in-One Business Management</title>
-        <meta name="description" content="A comprehensive, all-in-one business management system tailored for businesses in the Philippines." />
-      </head>
-      <body className="font-body antialiased h-full bg-background transition-colors duration-300" suppressHydrationWarning={true}>
+      <head/>
+      <body className={`${mavenPro.className} font-body antialiased h-full bg-background transition-colors duration-300`} suppressHydrationWarning={true}>
         <AuthProvider>
             <DynamicFaviconAndTitle />
             <AppContent>{children}</AppContent>
