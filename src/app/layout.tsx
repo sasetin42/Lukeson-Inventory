@@ -11,7 +11,6 @@ import { Logo } from '@/components/icons/logo';
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, SidebarContent, SidebarSeparator } from '@/components/ui/sidebar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/components/app-layout';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import UserProfileModal from '@/components/users/user-profile-modal';
@@ -106,30 +105,10 @@ export const navGroups = [
 function AppContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, logout, firebaseUser, userRole, rolePermissions, profile, companyProfile, loadingScreenSettings } = useAuth();
   const { toast } = useToast();
-  const [openAccordion, setOpenAccordion] = useState(['Overview', 'Inventory', 'Sales']);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const pathname = usePathname();
 
-  const handleAccordionChange = (value: string[]) => {
-      const alwaysOpen = ['Overview', 'Inventory', 'Sales'];
-      let newOpenState = [...value];
-
-      for (const item of alwaysOpen) {
-        if (!newOpenState.includes(item)) {
-          newOpenState.push(item);
-        }
-      }
-      
-      const changedItem = value.find(item => !openAccordion.includes(item)) || openAccordion.find(item => !value.includes(item));
-
-      if (changedItem && !alwaysOpen.includes(changedItem)) {
-        newOpenState = newOpenState.filter(item => alwaysOpen.includes(item) || item === changedItem);
-      }
-      
-      setOpenAccordion(newOpenState);
-  }
-  
   const handleLogout = async () => {
     try {
         await logout();
@@ -199,42 +178,33 @@ function AppContent({ children }: { children: React.ReactNode }) {
           </SidebarHeader>
           <SidebarContent className="[&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
             <div className="flex flex-col gap-2 px-2">
-              <Accordion 
-                type="multiple"
-                className="w-full" 
-                value={openAccordion} 
-                onValueChange={handleAccordionChange}
-              >
                 {filteredNavGroups.map((group, groupIndex) => (
                   <div key={group.title}>
                     {groupIndex > 0 && <SidebarSeparator className="my-2" />}
                     <h3 className={`text-sm font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
                     {group.items.map((item) => (
-                        <AccordionItem value={item.title} key={item.title}>
-                          <AccordionTrigger>
+                        <div key={item.title}>
                             <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
                                 <span className="text-[14px] font-bold">{item.title}</span>
                             </div>
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <SidebarMenu className="ml-4 border-l border-gray-200 dark:border-gray-700 py-1">
-                              {item.links.map((link) => (
-                                <SidebarMenuItem key={link.label}>
-                                  <SidebarMenuButton asChild>
-                                    <Link href={link.href}>
-                                      <link.icon className={link.color} />
-                                      <span className="font-normal leading-[18px] text-[14px]">{link.label}</span>
-                                    </Link>
-                                  </SidebarMenuButton>
-                                </SidebarMenuItem>
-                              ))}
-                            </SidebarMenu>
-                          </AccordionContent>
-                        </AccordionItem>
+                            <div>
+                                <SidebarMenu className="ml-4 border-l border-gray-200 dark:border-gray-700 py-1">
+                                {item.links.map((link) => (
+                                    <SidebarMenuItem key={link.label}>
+                                    <SidebarMenuButton asChild>
+                                        <Link href={link.href}>
+                                        <link.icon className={link.color} />
+                                        <span className="font-normal leading-[18px] text-[14px]">{link.label}</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                ))}
+                                </SidebarMenu>
+                            </div>
+                        </div>
                     ))}
                   </div>
                 ))}
-              </Accordion>
             </div>
           </SidebarContent>
           <SidebarFooter className="mt-auto">
