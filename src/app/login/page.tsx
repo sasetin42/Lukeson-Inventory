@@ -78,20 +78,31 @@ export default function LoginPage() {
         backgroundImage: `url(${background})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-    } : {};
+    } : {
+        background: 'radial-gradient(circle at center, #0F172A 0%, #020617 100%)',
+    };
+
+    const showOverlay = !!background;
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-background" style={backgroundStyle}>
-             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-            <Card className="w-full max-w-sm z-10">
+        <div className="relative flex items-center justify-center min-h-screen overflow-hidden bg-background" style={backgroundStyle}>
+             {/* Ambient glow effects */}
+             {!background && (
+                <>
+                    <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-[#578A00]/15 rounded-full blur-[130px]" />
+                    <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-[#10A3D8]/15 rounded-full blur-[130px]" />
+                </>
+             )}
+             {showOverlay && <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />}
+            <Card className="w-full max-w-sm z-10 shadow-2xl border-white/5 bg-slate-900/40 backdrop-blur-md text-white">
                 <CardHeader className="text-center">
                     {logo ? (
                         <Image src={logo} alt="Company Logo" width={60} height={60} className="mx-auto" data-ai-hint="logo"/>
                     ) : (
-                        <Logo className="mx-auto h-12 w-12 text-primary" />
+                        <Logo className="mx-auto h-12 w-12 text-[#578A00]" />
                     )}
-                    <CardTitle className="mt-4">{title}</CardTitle>
-                    <CardDescription>{description}</CardDescription>
+                    <CardTitle className="mt-4 text-white font-bold tracking-tight">{title}</CardTitle>
+                    <CardDescription className="text-slate-400">{description}</CardDescription>
                 </CardHeader>
                 <form onSubmit={handleLogin}>
                     <CardContent className="space-y-4">

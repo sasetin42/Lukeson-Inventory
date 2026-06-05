@@ -269,7 +269,22 @@ export default function SettingsPage() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Background Image</Label>
-                                    {loginBg && <Image src={loginBg} alt="Login Background" width={200} height={120} className="border p-2 rounded-md object-cover" data-ai-hint="background"/>}
+                                    {loginBg && (
+                                        <div className="flex items-center gap-4 mb-2">
+                                            <Image src={loginBg} alt="Login Background" width={200} height={120} className="border p-2 rounded-md object-cover" data-ai-hint="background"/>
+                                            <Button 
+                                                variant="destructive" 
+                                                type="button" 
+                                                size="sm" 
+                                                onClick={() => {
+                                                    setLoginBg('');
+                                                    setLoginBgFile(null);
+                                                }}
+                                            >
+                                                Remove Image
+                                            </Button>
+                                        </div>
+                                    )}
                                     <div className="flex items-center justify-center w-full">
                                         <label htmlFor="dropzone-file-bg" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80">
                                             <div className="flex flex-col items-center justify-center pt-5 pb-6">
