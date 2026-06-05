@@ -124,6 +124,8 @@ export type Quotation = {
     totalAmount: number;
     lines: DocumentLine[];
     notes?: string;
+    discountType?: 'Fixed' | 'Percent';
+    discountValue?: number;
 };
 
 export type SalesOrder = {

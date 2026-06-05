@@ -126,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
             
             if (companyDocSnap.exists()) {
-                const companyData = companyDocSnap.data();
+                const companyData = companyDocSnap.data() || {};
                 setCompanyProfile({ 
                     name: companyData.name || 'IMIS Pro', 
                     logo: companyData.logo || '', 
@@ -136,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             if (loadingScreenSnap.exists()) {
-                setLoadingScreenSettings(loadingScreenSnap.data());
+                setLoadingScreenSettings(loadingScreenSnap.data() || {});
             }
 
             if (userData?.role) {

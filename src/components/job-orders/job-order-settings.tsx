@@ -46,7 +46,7 @@ export default function JobOrderSettings() {
                 const docSnap = await getDoc(templateRef);
 
                 if (docSnap.exists()) {
-                    const settings = docSnap.data();
+                    const settings = docSnap.data() || {};
                     setAccentColor(settings.accentColor || '#F97316');
                     setShowDueDate(settings.showDueDate !== false);
                     setShowNotes(settings.showNotes !== false);

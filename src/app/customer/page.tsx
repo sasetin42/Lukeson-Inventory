@@ -100,7 +100,7 @@ export default function CustomerPage() {
           <KpiCard
             key={index}
             title={kpi.title}
-            value={kpi.value as string}
+            value={`${kpi.value}`}
             icon={kpi.icon}
             color={kpi.color}
             style={{ animationDelay: `${index * 100}ms` }}

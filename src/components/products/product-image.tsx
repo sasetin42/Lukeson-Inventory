@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Skeleton } from '../ui/skeleton';
 
 interface ProductImageProps {
-  path?: string;
+  path?: string | null;
   alt: string;
   className?: string;
   width?: number;

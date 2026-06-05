@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Banknote, PlusCircle, CheckCircle, Clock, Calendar, History, List, AlertCircle } from "lucide-react";
-import { Invoice, Customer, SalesOrder, Quotation, JobOrder } from '@/lib/types';
+import { Invoice, Customer, SalesOrder, Quotation, JobOrder, Product } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, onSnapshot, writeBatch, query, where } from 'firebase/firestore';
@@ -26,6 +26,7 @@ export default function PaymentsPage() {
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
   const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [viewingTransaction, setViewingTransaction] = useState<Invoice | null>(null);
   const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
@@ -43,6 +44,7 @@ export default function PaymentsPage() {
     const salesOrdersRef = collection(db, 'salesOrders');
     const quotationsRef = collection(db, 'quotations');
     const jobOrdersRef = collection(db, 'jobOrders');
+    const productsRef = collection(db, 'products');
 
     const unsubInvoices = onSnapshot(invoicesRef, (snapshot) => {
         const loadedInvoices = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
@@ -67,6 +69,10 @@ export default function PaymentsPage() {
     const unsubJobOrders = onSnapshot(jobOrdersRef, (snapshot) => {
         setJobOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as JobOrder)));
     });
+
+    const unsubProducts = onSnapshot(productsRef, (snapshot) => {
+        setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
+    });
     
     return () => {
         unsubInvoices();
@@ -74,6 +80,7 @@ export default function PaymentsPage() {
         unsubSalesOrders();
         unsubQuotations();
         unsubJobOrders();
+        unsubProducts();
     };
   }, [toast]);
   
@@ -183,6 +190,7 @@ export default function PaymentsPage() {
             isOpen={!!viewingInvoice}
             onClose={() => setViewingInvoice(null)}
             invoice={viewingInvoice}
+            products={products}
             onEdit={handleEditInvoice}
         />
       )}

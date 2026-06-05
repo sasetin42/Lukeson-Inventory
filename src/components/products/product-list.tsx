@@ -126,7 +126,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
     };
 
     const handleToggleStatus = (productToToggle: Product) => {
-        const newStatus = productToToggle.status === 'Discontinued' ? 'In Stock' : 'Discontinued';
+        const newStatus: Product['status'] = productToToggle.status === 'Discontinued' ? 'In Stock' : 'Discontinued';
         const updatedProduct = { ...productToToggle, status: newStatus };
         onEdit(updatedProduct); // This will trigger the parent's save logic. A bit of a hack for local state.
         toast({ title: 'Success', description: `Product has been ${newStatus === 'Discontinued' ? 'deactivated' : 'activated'}.`, variant: 'success' });
@@ -290,7 +290,7 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
                                 <TableCell>
                                     <div className="flex flex-col gap-1 w-[100px]">
                                         <span>{product.stock} units</span>
-                                        <Progress value={stockStatus.percentage} className="h-2 [&>*]:bg-none" style={{'--tw-bg-opacity': '1', backgroundColor: 'hsl(var(--muted))'}}>
+                                        <Progress value={stockStatus.percentage} className="h-2 [&>*]:bg-none" style={{'--tw-bg-opacity': '1', backgroundColor: 'hsl(var(--muted))'} as React.CSSProperties}>
                                         <div className={`h-full rounded-full`} style={{ width: `${stockStatus.percentage}%`, backgroundColor: stockStatus.color }} />
                                         </Progress>
                                     </div>

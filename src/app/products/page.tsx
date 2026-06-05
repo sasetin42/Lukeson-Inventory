@@ -191,6 +191,7 @@ export default function ProductsPage() {
         {productKpis.map((kpi) => (
           <KpiCard
             key={kpi.title}
+            title={kpi.title}
             value={kpi.value}
             icon={kpi.icon}
             subtext={kpi.subtext}

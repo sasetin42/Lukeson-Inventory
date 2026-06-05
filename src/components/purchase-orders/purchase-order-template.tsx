@@ -46,7 +46,7 @@ export default function PurchaseOrderTemplate() {
                 const docSnap = await getDoc(templateRef);
 
                 if (docSnap.exists()) {
-                    const settings = docSnap.data();
+                    const settings = docSnap.data() || {};
                     setAccentColor(settings.accentColor || '#0A3BA3');
                     setShowDueDate(settings.showDueDate !== false);
                     setShowNotes(settings.showNotes !== false);

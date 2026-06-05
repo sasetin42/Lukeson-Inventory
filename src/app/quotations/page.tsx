@@ -6,7 +6,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { FileText, PlusCircle, Check, Clock, DollarSign, CheckCircle, AlertCircle, Search } from "lucide-react";
 import QuotationList from "@/components/quotations/quotation-list";
-import { Quotation, Customer, SalesOrder, JobOrder } from '@/lib/types';
+import { Quotation, Customer, SalesOrder, JobOrder, Product } from '@/lib/types';
 import QuotationFormModal from '@/components/quotations/quotation-form-modal';
 import QuotationDetailsModal from '@/components/quotations/quotation-details-modal';
 import { useToast } from '@/hooks/use-toast';
@@ -24,6 +24,7 @@ export default function QuotationsPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [salesOrders, setSalesOrders] = useState<SalesOrder[]>([]);
   const [jobOrders, setJobOrders] = useState<JobOrder[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
@@ -44,6 +45,7 @@ export default function QuotationsPage() {
     const customersRef = collection(db, 'customers');
     const salesOrdersRef = collection(db, 'salesOrders');
     const jobOrdersRef = collection(db, 'jobOrders');
+    const productsRef = collection(db, 'products');
 
     const unsubscribeQtns = onSnapshot(quotationsRef, (snapshot) => {
         const loadedQuotations = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quotation));
@@ -77,12 +79,16 @@ export default function QuotationsPage() {
         toast({ title: "Error", description: "Failed to load job orders.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
     });
 
+    const unsubscribeProducts = onSnapshot(productsRef, (snapshot) => {
+        setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
+    });
 
     return () => {
         unsubscribeQtns();
         unsubscribeCustomers();
         unsubscribeSalesOrders();
         unsubscribeJobOrders();
+        unsubscribeProducts();
     };
   }, [toast]);
 
@@ -265,6 +271,7 @@ export default function QuotationsPage() {
             isOpen={isSalesOrderModalOpen}
             onClose={handleCloseSalesOrderModal}
             salesOrder={viewingSalesOrder}
+            products={products}
             quotations={quotations}
             jobOrders={jobOrders}
             onEdit={(so) => {

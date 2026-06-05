@@ -64,7 +64,7 @@ export default function JournalEntryFormModal({ isOpen, onClose, onSave, entry, 
         
         const entryData = {
             id: entry?.id,
-            date,
+            date: date || new Date(),
             description,
             lines: lines as JournalEntryLine[],
         };

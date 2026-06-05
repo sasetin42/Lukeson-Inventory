@@ -3,7 +3,7 @@
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Product, SalesOrder } from '@/lib/types';
-import { categoryMap } from '@/lib/category-map';
+
 
 interface InventoryTurnoverByCategoryChartProps {
     dateRange: number;
