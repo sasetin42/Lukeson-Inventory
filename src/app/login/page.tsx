@@ -116,7 +116,7 @@ export default function LoginPage() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
                                 disabled={isLoading}
-                                className="text-slate-900 bg-white"
+                                style={{ color: '#0f172a', backgroundColor: '#ffffff' }}
                             />
                         </div>
                         <div className="space-y-2">
@@ -129,7 +129,7 @@ export default function LoginPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
                                 disabled={isLoading}
-                                className="text-slate-900 bg-white"
+                                style={{ color: '#0f172a', backgroundColor: '#ffffff' }}
                             />
                         </div>
                     </CardContent>
