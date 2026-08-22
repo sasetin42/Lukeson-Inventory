@@ -303,8 +303,15 @@ export default function SalesOrderTemplate() {
                                 <h2 className="font-bold text-[16px] leading-tight" style={{ color: accentColor }}>SALES ORDER</h2>
                                 <div className="text-[11px] leading-snug text-neutral-700 mt-0.5 space-y-0.5">
                                     <p><strong>SO:</strong> SO-2025-001</p>
-                                    <p><strong>Date:</strong> Jan 15, 2024</p>
-                                    {showDueDate && <p><strong>Due Date:</strong> Feb 14, 2024</p>}
+                                    <p>
+                                        <span><strong>Date:</strong> Jan 15, 2024</span>
+                                        {showDueDate && (
+                                            <>
+                                                <span className="mx-1.5 text-neutral-400">|</span>
+                                                <span><strong>Due Date:</strong> Feb 14, 2024</span>
+                                            </>
+                                        )}
+                                    </p>
                                     <p><strong>Delivery Receipt:</strong> SO-2025-002</p>
                                 </div>
                             </div>

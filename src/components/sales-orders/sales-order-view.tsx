@@ -157,8 +157,11 @@ export default function SalesOrderView({ salesOrder, quotation, products }: Sale
                     <h2 className="font-bold text-[16px] leading-tight" style={{ color: accentColor }}>SALES ORDER</h2>
                     <div className="text-[11px] leading-snug text-neutral-700 mt-0.5 space-y-0.5">
                         <p><strong>SO:</strong> {salesOrder.id}</p>
-                        <p><strong>Date:</strong> {formatDate(salesOrder.orderDate)}</p>
-                        <p><strong>Delivery Date:</strong> {formatDate(salesOrder.deliveryDate)}</p>
+                        <p>
+                            <span><strong>Date:</strong> {formatDate(salesOrder.orderDate)}</span>
+                            <span className="mx-1.5 text-neutral-400">|</span>
+                            <span><strong>Delivery Date:</strong> {formatDate(salesOrder.deliveryDate)}</span>
+                        </p>
                         {salesOrder.quotationId && <p><strong>Quotation ID:</strong> {salesOrder.quotationId}</p>}
                     </div>
                     <div className="flex justify-end items-center gap-1.5 mt-1.5">
