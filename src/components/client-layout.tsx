@@ -48,10 +48,10 @@ function AppContent({ children }: { children: React.ReactNode }) {
   
   if (pathname === '/login') {
       return (
-        <SidebarProvider>
+        <div className="w-full min-h-screen">
           <NavigationProgress />
           {children}
-        </SidebarProvider>
+        </div>
       );
   }
 

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { Logo } from '@/components/icons/logo';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -25,12 +25,12 @@ export default function LoginPage() {
     const router = useRouter();
     const { toast } = useToast();
 
-    const [title, setTitle] = useState('IMIS Pro');
-    const [description, setDescription] = useState('Enter your credentials to access your workspace');
+    const [title, setTitle] = useState('LUKESON COMPANY');
+    const [description, setDescription] = useState('Inventory Management Information System (IMIS)');
     const [background, setBackground] = useState('');
     const [logo, setLogo] = useState('');
-    const [footerText, setFooterText] = useState('');
-    const [footerLink, setFooterLink] = useState('');
+    const [footerText, setFooterText] = useState('Develop by: SaSe Web Solutions');
+    const [footerLink, setFooterLink] = useState('https://sasewebsolutions.com/');
 
     useEffect(() => {
         const fetchLoginSettings = async () => {
@@ -39,12 +39,12 @@ export default function LoginPage() {
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    setTitle(data.title || 'IMIS Pro');
-                    setDescription(data.description || 'Enter your credentials to access your workspace');
-                    setBackground(data.background || '');
-                    setLogo(data.logo || '');
-                    setFooterText(data.footerText || '');
-                    setFooterLink(data.footerLink || '');
+                    if (data.title) setTitle(data.title);
+                    if (data.description) setDescription(data.description);
+                    if (data.background) setBackground(data.background);
+                    if (data.logo) setLogo(data.logo);
+                    if (data.footerText) setFooterText(data.footerText);
+                    if (data.footerLink) setFooterLink(data.footerLink);
                 }
             } catch (error) {
                 console.error("Error fetching login screen settings:", error);
@@ -80,103 +80,143 @@ export default function LoginPage() {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
     } : {
-        background: 'radial-gradient(circle at center, #0F172A 0%, #020617 100%)',
+        background: 'radial-gradient(ellipse at 50% 30%, #0c1524 0%, #030712 100%)',
     };
 
-    const showOverlay = !!background;
-
     return (
-        <div className="relative flex items-center justify-center min-h-screen overflow-hidden bg-background" style={backgroundStyle}>
-             {/* Ambient glow effects */}
-             {!background && (
-                <>
-                    <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-[#578A00]/15 rounded-full blur-[130px]" />
-                    <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-[#10A3D8]/15 rounded-full blur-[130px]" />
-                </>
-             )}
-             {showOverlay && <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />}
-            <Card className="w-full max-w-sm z-10 shadow-2xl border-white/5 bg-slate-900/40 backdrop-blur-md text-white">
-                <CardHeader className="text-center">
-                    {logo ? (
-                        <div className="flex justify-center mb-2">
-                            <Image 
-                                src={logo} 
-                                alt="Company Logo" 
-                                width={80} 
-                                height={80} 
-                                className="max-h-20 w-auto object-contain" 
-                                data-ai-hint="logo"
-                            />
-                        </div>
-                    ) : (
-                        <Logo className="mx-auto h-12 w-12 text-[#578A00]" />
-                    )}
-                    <CardTitle className="mt-4 text-white font-bold tracking-tight">{title}</CardTitle>
-                    <CardDescription className="text-slate-400">{description}</CardDescription>
-                </CardHeader>
-                <form onSubmit={handleLogin}>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="admin@example.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                disabled={isLoading}
-                                style={{ color: '#0f172a', backgroundColor: '#ffffff' }}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <div className="relative">
-                                <Input
-                                    id="password"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                    disabled={isLoading}
-                                    style={{ color: '#0f172a', backgroundColor: '#ffffff', paddingRight: '2.5rem' }}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 focus:outline-none"
-                                >
-                                    {showPassword ? (
-                                        <EyeOff className="h-5 w-5" />
-                                    ) : (
-                                        <Eye className="h-5 w-5" />
-                                    )}
-                                </button>
+        <div className="relative flex items-center justify-center min-h-screen w-full overflow-hidden bg-slate-950 px-4 py-8 select-none" style={backgroundStyle}>
+            {/* Ambient Background Glow Mesh for Glassmorphism */}
+            <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#578A00]/20 rounded-full blur-[140px] pointer-events-none" />
+            <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#10A3D8]/20 rounded-full blur-[140px] pointer-events-none" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[160px] pointer-events-none" />
+
+            {/* Backdrop Blur Overlay for Custom Background */}
+            {background && <div className="absolute inset-0 bg-black/65 backdrop-blur-md" />}
+
+            {/* Black Glassmorphic Card */}
+            <div className="relative w-full max-w-sm sm:max-w-md z-10">
+                {/* Glow Border Effect */}
+                <div className="absolute -inset-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent rounded-2xl pointer-events-none" />
+
+                <Card className="relative w-full rounded-2xl border border-white/10 bg-black/60 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.85)] text-white overflow-hidden">
+                    <CardHeader className="text-center pt-8 pb-4">
+                        {logo ? (
+                            <div className="flex justify-center mb-3">
+                                <div className="p-1 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
+                                    <Image 
+                                        src={logo} 
+                                        alt="Company Logo" 
+                                        width={84} 
+                                        height={84} 
+                                        className="h-20 w-20 object-contain rounded-xl" 
+                                        data-ai-hint="logo"
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    </CardContent>
-                    <CardFooter>
-                        <Button type="submit" className="w-full bg-[#578A00] hover:bg-[#578A00]/90" disabled={isLoading}>
-                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Log In
-                        </Button>
-                    </CardFooter>
-                </form>
-                 <div className="px-6 pb-4 flex justify-center">
-                     <a href="https://sasewebsolutions.com/" target="_blank" rel="noopener noreferrer">
-                        <Button
-                        className="text-xs h-auto px-3 py-1.5"
-                        style={{
-                            background: 'linear-gradient(to right, #10A3D8, #054B8C)',
-                            color: '#FFFFFF'
-                        }}
+                        ) : (
+                            <div className="flex justify-center mb-3">
+                                <div className="p-3 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
+                                    <Logo className="h-12 w-12 text-[#578A00]" />
+                                </div>
+                            </div>
+                        )}
+                        <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase drop-shadow-sm">
+                            {title}
+                        </CardTitle>
+                        <CardDescription className="text-xs sm:text-sm text-slate-400 mt-1">
+                            {description}
+                        </CardDescription>
+                    </CardHeader>
+
+                    <form onSubmit={handleLogin}>
+                        <CardContent className="space-y-4 px-6 sm:px-8">
+                            {/* Email Field */}
+                            <div className="space-y-1.5 group">
+                                <Label htmlFor="email" className="text-xs font-semibold tracking-wider text-slate-300 uppercase">
+                                    Email
+                                </Label>
+                                <div className="relative flex items-center">
+                                    <Mail className="absolute left-3.5 h-4 w-4 text-slate-400 group-focus-within:text-[#578A00] transition-colors pointer-events-none" />
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        placeholder="admin@example.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                        disabled={isLoading}
+                                        className="pl-10 h-11 bg-white/[0.06] hover:bg-white/[0.09] focus:bg-black/80 border-white/15 focus:border-[#578A00] text-white placeholder:text-slate-500 rounded-xl transition-all shadow-inner focus-visible:ring-1 focus-visible:ring-[#578A00]"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Password Field */}
+                            <div className="space-y-1.5 group">
+                                <Label htmlFor="password" className="text-xs font-semibold tracking-wider text-slate-300 uppercase">
+                                    Password
+                                </Label>
+                                <div className="relative flex items-center">
+                                    <Lock className="absolute left-3.5 h-4 w-4 text-slate-400 group-focus-within:text-[#578A00] transition-colors pointer-events-none" />
+                                    <Input
+                                        id="password"
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="Enter your password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                        disabled={isLoading}
+                                        className="pl-10 pr-11 h-11 bg-white/[0.06] hover:bg-white/[0.09] focus:bg-black/80 border-white/15 focus:border-[#578A00] text-white placeholder:text-slate-500 rounded-xl transition-all shadow-inner focus-visible:ring-1 focus-visible:ring-[#578A00]"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 p-1 rounded-md text-slate-400 hover:text-white transition-colors focus:outline-none focus:ring-1 focus:ring-white/20"
+                                        title={showPassword ? "Hide password" : "Show password"}
+                                    >
+                                        {showPassword ? (
+                                            <EyeOff className="h-4 w-4" />
+                                        ) : (
+                                            <Eye className="h-4 w-4" />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </CardContent>
+
+                        <CardFooter className="pt-2 pb-6 px-6 sm:px-8">
+                            <Button 
+                                type="submit" 
+                                className="w-full h-11 font-semibold text-white bg-gradient-to-r from-[#578A00] to-[#6ba800] hover:from-[#4c7a00] hover:to-[#5e9600] rounded-xl shadow-[0_4px_20px_rgba(87,138,0,0.35)] hover:shadow-[0_6px_25px_rgba(87,138,0,0.5)] active:scale-[0.99] transition-all duration-200 border border-lime-400/20" 
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Logging in...
+                                    </>
+                                ) : (
+                                    "Log In"
+                                )}
+                            </Button>
+                        </CardFooter>
+                    </form>
+
+                    {/* Footer Badge */}
+                    <div className="px-6 pb-6 flex justify-center">
+                        <a 
+                            href={footerLink || "https://sasewebsolutions.com/"} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-flex"
                         >
-                        Develop by: SaSe Web Solutions
-                        </Button>
-                    </a>
-                </div>
-            </Card>
+                            <span className="text-[11px] font-medium px-4 py-1.5 rounded-full text-white bg-gradient-to-r from-[#10A3D8] to-[#054B8C] hover:from-[#0e94c5] hover:to-[#043e74] border border-cyan-400/30 shadow-[0_2px_12px_rgba(16,163,216,0.3)] transition-all hover:scale-105 active:scale-95">
+                                {footerText || "Develop by: SaSe Web Solutions"}
+                            </span>
+                        </a>
+                    </div>
+                </Card>
+            </div>
         </div>
     );
 }
+
