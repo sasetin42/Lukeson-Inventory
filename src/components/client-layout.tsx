@@ -99,22 +99,22 @@ function AppContent({ children }: { children: React.ReactNode }) {
                 {filteredNavGroups.map((group, groupIndex) => (
                   <div key={group.title}>
                     {groupIndex > 0 && <SidebarSeparator className="my-2" />}
-                    <h3 className={`text-sm font-semibold uppercase tracking-wider px-2 py-2 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
+                    <h3 className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-1.5 ${group.color || 'text-muted-foreground'}`}>{group.title}</h3>
                     {group.items.map((item) => (
                         <div key={item.title}>
-                            <div className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
-                                <span className="text-[14px] font-bold">{item.title}</span>
+                            <div className="flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 w-full">
+                                <span className="text-[12px] font-semibold">{item.title}</span>
                             </div>
                             <div>
-                                <SidebarMenu className="ml-4 border-l border-gray-200 dark:border-gray-700 py-1">
+                                <SidebarMenu className="ml-3.5 border-l border-gray-200 dark:border-gray-700 py-0.5">
                                 {item.links.map((link) => {
                                     const isActive = pathname === link.href;
                                     return (
                                       <SidebarMenuItem key={link.label}>
-                                        <SidebarMenuButton asChild isActive={isActive} className={isActive ? 'bg-primary/10 text-primary font-semibold' : ''}>
+                                        <SidebarMenuButton asChild isActive={isActive} className={isActive ? 'bg-primary/10 text-primary font-medium text-[12px]' : 'text-[12px] font-medium'}>
                                             <Link href={link.href} prefetch={true}>
                                               <link.icon className={isActive ? 'text-primary' : link.color} />
-                                              <span className="font-normal leading-[18px] text-[14px]">{link.label}</span>
+                                              <span className="font-medium leading-[16px] text-[12px]">{link.label}</span>
                                             </Link>
                                         </SidebarMenuButton>
                                       </SidebarMenuItem>
