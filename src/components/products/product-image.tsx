@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -11,14 +10,25 @@ interface ProductImageProps {
   width?: number;
   height?: number;
   'data-ai-hint'?: string;
+  style?: React.CSSProperties;
 }
 
-export default function ProductImage({ path, alt, className, width = 48, height = 48, ...props }: ProductImageProps) {
+export default function ProductImage({ path, alt, className, width = 48, height = 48, style, ...props }: ProductImageProps) {
   // If path is a valid URL, use it. Otherwise, show placeholder.
   const imageUrl = path && (path.startsWith('data:image') || path.startsWith('http')) 
     ? path 
     : `https://placehold.co/${width}x${height}.png`;
   
+  const defaultStyle: React.CSSProperties = {
+    maxWidth: `${width}px`,
+    maxHeight: `${height}px`,
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
+    flexShrink: 0,
+    ...style,
+  };
+
   if (!path) {
     return (
         <Image
@@ -27,6 +37,7 @@ export default function ProductImage({ path, alt, className, width = 48, height 
           width={width}
           height={height}
           className={className}
+          style={defaultStyle}
           {...props}
         />
     );
@@ -39,8 +50,9 @@ export default function ProductImage({ path, alt, className, width = 48, height 
       width={width}
       height={height}
       className={className}
+      style={defaultStyle}
       {...props}
-      unoptimized // Add this if you are using external images without loader configuration
+      unoptimized
     />
   );
 }

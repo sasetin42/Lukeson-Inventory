@@ -14,7 +14,7 @@ import { Role } from '@/lib/types';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import { navGroups } from '@/app/layout';
+import { navGroups } from '@/components/client-layout';
 import { Table, TableBody, TableCell, TableRow, TableHead, TableHeader } from '../ui/table';
 import { CheckCircle2, Eye, XCircle } from 'lucide-react';
 
@@ -61,7 +61,7 @@ export default function RoleDetailsModal({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {navGroups.map(group => (
+                    {navGroups.map((group: any) => (
                          <React.Fragment key={group.title}>
                             <TableRow className="bg-muted/50">
                                 <TableCell colSpan={2} className="font-bold text-primary">{group.title}</TableCell>

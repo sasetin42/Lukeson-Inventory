@@ -178,14 +178,16 @@ function StockAlertsTable({ products, isOutOfStock = false, onCreatePO }: { prod
                 {products.map((product) => (
                     <TableRow key={product.id}>
                         <TableCell>
-                            <ProductImage
-                                path={product.productImage}
-                                alt={product.name}
-                                width={48}
-                                height={48}
-                                className="rounded-md"
-                                data-ai-hint="product image"
-                            />
+                            <div className="h-10 w-10 rounded-md border bg-muted flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                                <ProductImage
+                                    path={product.productImage}
+                                    alt={product.name}
+                                    width={40}
+                                    height={40}
+                                    className="h-full w-full object-contain"
+                                    data-ai-hint="product image"
+                                />
+                            </div>
                         </TableCell>
                         <TableCell className="font-medium">{product.name}</TableCell>
                         <TableCell>{product.sku}</TableCell>

@@ -98,7 +98,16 @@ export default function LoginPage() {
             <Card className="w-full max-w-sm z-10 shadow-2xl border-white/5 bg-slate-900/40 backdrop-blur-md text-white">
                 <CardHeader className="text-center">
                     {logo ? (
-                        <Image src={logo} alt="Company Logo" width={60} height={60} className="mx-auto" data-ai-hint="logo"/>
+                        <div className="flex justify-center mb-2">
+                            <Image 
+                                src={logo} 
+                                alt="Company Logo" 
+                                width={80} 
+                                height={80} 
+                                className="max-h-20 w-auto object-contain" 
+                                data-ai-hint="logo"
+                            />
+                        </div>
                     ) : (
                         <Logo className="mx-auto h-12 w-12 text-[#578A00]" />
                     )}

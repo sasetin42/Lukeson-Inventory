@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,37 +38,39 @@ export default function TopSellingItems({ sales, products }: TopSellingItemsProp
   
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-                <TrendingUpIcon className="h-5 w-5 text-green-500" />
-                <CardTitle>Top-Selling Items</CardTitle>
+                <TrendingUpIcon className="h-5 w-5 text-green-500 shrink-0" />
+                <CardTitle className="text-base font-semibold">Top-Selling Items</CardTitle>
             </div>
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" className="h-8 text-xs gap-1" asChild>
                 <Link href="/products">
                     View All
-                    <ChevronRight className="h-4 w-4 ml-1" />
+                    <ChevronRight className="h-3.5 w-3.5" />
                 </Link>
             </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {topSelling.map((item) => (
-            <div key={item!.id} className="flex items-center gap-4">
-              <ProductImage
-                path={item!.productImage}
-                alt={item!.name}
-                width={40}
-                height={40}
-                className="rounded-md"
-                data-ai-hint="product image"
-              />
-              <div className="flex-1">
-                <p className="font-medium text-sm truncate">{item!.name}</p>
+            <div key={item!.id} className="flex items-center gap-3 p-2 rounded-lg border bg-card/60 hover:bg-muted/50 transition-colors">
+              <div className="h-12 w-12 rounded-md border bg-muted flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                <ProductImage
+                  path={item!.productImage}
+                  alt={item!.name}
+                  width={48}
+                  height={48}
+                  className="h-full w-full object-contain"
+                  data-ai-hint="product image"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-sm truncate text-foreground" title={item!.name}>{item!.name}</p>
                 <p className="text-xs text-muted-foreground">{item!.unitsSold} units sold</p>
               </div>
-              <p className="text-sm font-semibold">₱{item!.revenue.toLocaleString()}</p>
+              <p className="text-sm font-bold text-emerald-600 shrink-0 whitespace-nowrap">₱{item!.revenue.toLocaleString()}</p>
             </div>
           ))}
         </div>

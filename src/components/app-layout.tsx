@@ -51,7 +51,9 @@ export default function AppLayout({
                 <div className="flex-1" />
             </header>
             <main ref={mainRef} className="flex-1 overflow-auto p-4 pt-0 md:p-6 md:pt-0">
-                {children}
+                <div key={pathname} className="fade-in transition-all duration-300">
+                    {children}
+                </div>
             </main>
         </SidebarInset>
     );

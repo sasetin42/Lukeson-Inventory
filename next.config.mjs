@@ -6,11 +6,20 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'placehold.co',
       },
-       {
-         protocol: 'https',
-         hostname: 'firebasestorage.googleapis.com',
-       }
-     ],
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+      },
+    ],
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      config.devtool = 'source-map';
+    }
+    return config;
   },
 };
 

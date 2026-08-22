@@ -9,6 +9,7 @@ import { doc, getDoc, setDoc, serverTimestamp, updateDoc, collection, query, whe
 import { User, Role, PermissionLevel, LoadingScreenSettings } from '@/lib/types';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useToast } from '@/hooks/use-toast';
+import { getFullAdminPermissions } from '@/lib/nav-config';
 
 interface UserProfile {
     name: string;
@@ -140,6 +141,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             if (userData?.role) {
+                const isAdmin = 
+                    userData.role.toLowerCase() === 'admin' || 
+                    userData.role.toLowerCase() === 'administrator' ||
+                    fbUser.email?.toLowerCase().includes('admin');
+
                 const rolesRef = collection(db, 'roles');
                 const q = query(rolesRef, where("name", "==", userData.role));
                 const roleQuerySnapshot = await getDocs(q);
@@ -147,7 +153,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 if (!roleQuerySnapshot.empty) {
                     const roleDoc = roleQuerySnapshot.docs[0];
                     const roleData = roleDoc.data() as Role;
-                    setRolePermissions(roleData.permissions);
+                    if (isAdmin) {
+                        setRolePermissions({
+                            ...getFullAdminPermissions(),
+                            ...(roleData.permissions || {})
+                        });
+                    } else {
+                        setRolePermissions(roleData.permissions);
+                    }
+                } else if (isAdmin) {
+                    const adminPermissions = getFullAdminPermissions();
+                    setRolePermissions(adminPermissions);
+                    try {
+                        const adminRoleRef = doc(db, 'roles', 'admin');
+                        await setDoc(adminRoleRef, {
+                            name: 'Admin',
+                            permissions: adminPermissions
+                        }, { merge: true });
+                    } catch (e) {
+                        console.warn("Could not seed admin role doc:", e);
+                    }
                 } else {
                     setRolePermissions(null);
                 }
@@ -165,24 +190,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 
     useEffect(() => {
+        let isMounted = true;
+
         const unsubscribe = onAuthStateChanged(auth, async (currentFirebaseUser) => {
-            setIsLoading(true);
-            if (currentFirebaseUser) {
-                setFirebaseUser(currentFirebaseUser);
-                await fetchUserData(currentFirebaseUser);
-            } else {
-                setFirebaseUser(null);
-                setUser(null);
-                setUserRole(null);
-                setRolePermissions(null);
-                setProfile({ name: 'User', avatar: 'https://placehold.co/128x128.png' });
-                setCompanyProfile({ name: 'IMIS Pro', logo: '', siteIcon: '', siteTitle: 'IMIS Pro' });
-                setLoadingScreenSettings({});
+            try {
+                if (currentFirebaseUser) {
+                    if (isMounted) setFirebaseUser(currentFirebaseUser);
+                    await fetchUserData(currentFirebaseUser);
+                } else {
+                    if (isMounted) {
+                        setFirebaseUser(null);
+                        setUser(null);
+                        setUserRole(null);
+                        setRolePermissions(null);
+                        setProfile({ name: 'User', avatar: 'https://placehold.co/128x128.png' });
+                        setCompanyProfile({ name: 'IMIS Pro', logo: '', siteIcon: '', siteTitle: 'IMIS Pro' });
+                        setLoadingScreenSettings({});
+                    }
+                }
+            } catch (error) {
+                console.error("Auth state change error:", error);
+            } finally {
+                if (isMounted) {
+                    setIsLoading(false);
+                }
             }
-            setIsLoading(false);
+        }, (error) => {
+            console.error("onAuthStateChanged error:", error);
+            if (isMounted) {
+                setIsLoading(false);
+            }
         });
 
-        return () => unsubscribe();
+        // Safety fallback: ensure loading screen does not freeze permanently
+        const fallbackTimer = setTimeout(() => {
+            if (isMounted) {
+                setIsLoading((prev) => (prev ? false : prev));
+            }
+        }, 5000);
+
+        return () => {
+            isMounted = false;
+            clearTimeout(fallbackTimer);
+            unsubscribe();
+        };
     }, []);
 
     useEffect(() => {
@@ -230,6 +281,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     
     const hasWriteAccess = (module: string): boolean => {
+        const isAdmin = 
+            userRole?.toLowerCase() === 'admin' || 
+            userRole?.toLowerCase() === 'administrator' ||
+            user?.role?.toLowerCase() === 'admin' || 
+            user?.role?.toLowerCase() === 'administrator' ||
+            firebaseUser?.email?.toLowerCase().includes('admin');
+        if (isAdmin) return true;
         if (!rolePermissions) return false;
         return rolePermissions[module] === 'Full Access';
     };

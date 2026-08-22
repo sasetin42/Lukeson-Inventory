@@ -16,7 +16,7 @@ import { createUserWithEmailAndPassword, sendPasswordResetEmail } from "firebase
 import KpiCard from '@/components/kpi-card';
 import RolesPermissions from '@/components/users/roles-permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { navGroups } from '@/app/layout';
+import { navGroups } from '@/components/client-layout';
 import UserDetailsModal from '@/components/users/user-details-modal';
 import RoleDetailsModal from '@/components/users/role-details-modal';
 import { useAuth } from '@/context/auth-context';

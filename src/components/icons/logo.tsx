@@ -11,17 +11,17 @@ export function Logo(props: SVGProps<SVGSVGElement>) {
         {...props}
     >
         <path
-            d="M5.10_3.97_C5.35_3.4_5.88_3_6.5_3_H17.5_C18.12_3_18.65_3.4_18.9_3.97_L21_8_H3_L5.10_3.97_Z"
+            d="M5.10 3.97 C5.35 3.4 5.88 3 6.5 3 H17.5 C18.12 3 18.65 3.4 18.9 3.97 L21 8 H3 L5.10 3.97 Z"
             fill="currentColor"
             className="text-primary/50"
         ></path>
         <path
-            d="M19_9_L17_15_H7_L5_9_H19_Z"
+            d="M19 9 L17 15 H7 L5 9 H19 Z"
             fill="currentColor"
             className="text-primary/70"
         ></path>
         <path
-            d="M17_16_L15_22_H9_L7_16_H17_Z"
+            d="M17 16 L15 22 H9 L7 16 H17 Z"
             fill="currentColor"
             className="text-primary"
         ></path>

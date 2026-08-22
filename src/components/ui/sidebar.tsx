@@ -423,7 +423,7 @@ const SidebarContent = React.forwardRef<
       ref={ref}
       data-sidebar="content"
       className={cn(
-        "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+        "flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden group-data-[collapsible=icon]:overflow-hidden",
         className
       )}
       {...props}
@@ -563,6 +563,7 @@ const SidebarMenuButton = React.forwardRef<
   (
     {
       asChild = false,
+      isActive: isActiveProp,
       variant = "default",
       size = "default",
       tooltip,
@@ -574,8 +575,7 @@ const SidebarMenuButton = React.forwardRef<
     const Comp = asChild ? Slot : "button"
     const { isMobile, state } = useSidebar()
     const pathname = usePathname()
-    // @ts-ignore
-    const isActive = props.href === pathname
+    const isActive = isActiveProp ?? ((props as any).href === pathname)
 
     const iconColor = React.useMemo(() => {
         const child = React.Children.toArray(props.children).find(c => React.isValidElement(c) && (c.props as any).className?.includes('text-'))

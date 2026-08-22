@@ -213,13 +213,13 @@ export default function SettingsPage() {
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                  <div className="space-y-2">
                                     <Label>Company Logo</Label>
-                                    {companyLogo && <Image src={companyLogo} alt="Company Logo" width={100} height={50} className="border p-2 rounded-md" data-ai-hint="logo"/>}
+                                    {companyLogo && <Image src={companyLogo} alt="Company Logo" width={100} height={50} style={{ width: 'auto', height: 'auto' }} className="border p-2 rounded-md" data-ai-hint="logo"/>}
                                     <Input type="file" onChange={(e) => handleFileChange(e, setCompanyLogoFile, setCompanyLogo, 'Company Logo')} accept="image/*" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4" /> Site Icon (Favicon)</Label>
                                     <div className="flex items-center gap-4">
-                                        {siteIcon && <Image src={siteIcon} alt="Site Icon" width={32} height={32} className="border p-1 rounded-md" data-ai-hint="favicon"/>}
+                                        {siteIcon && <Image src={siteIcon} alt="Site Icon" width={32} height={32} style={{ width: 'auto', height: 'auto' }} className="border p-1 rounded-md" data-ai-hint="favicon"/>}
                                         <Input type="file" onChange={(e) => handleFileChange(e, setSiteIconFile, setSiteIcon, 'Site Icon')} accept="image/png, image/x-icon, image/svg+xml" />
                                     </div>
                                     <p className="text-xs text-muted-foreground">Upload a .png, .ico, or .svg file. Recommended size: 32x32 pixels.</p>
@@ -264,14 +264,14 @@ export default function SettingsPage() {
                             <div className="grid grid-cols-2 gap-6">
                                  <div className="space-y-2">
                                     <Label>Login Form Logo</Label>
-                                    {loginLogo && <Image src={loginLogo} alt="Login Logo" width={80} height={80} className="border p-2 rounded-md object-contain" data-ai-hint="logo"/>}
+                                    {loginLogo && <Image src={loginLogo} alt="Login Logo" width={80} height={80} style={{ width: 'auto', height: 'auto' }} className="border p-2 rounded-md object-contain" data-ai-hint="logo"/>}
                                     <Input type="file" onChange={(e) => handleFileChange(e, setLoginLogoFile, setLoginLogo, 'Login Logo')} accept="image/*" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Background Image</Label>
                                     {loginBg && (
                                         <div className="flex items-center gap-4 mb-2">
-                                            <Image src={loginBg} alt="Login Background" width={200} height={120} className="border p-2 rounded-md object-cover" data-ai-hint="background"/>
+                                            <Image src={loginBg} alt="Login Background" width={200} height={120} style={{ width: 'auto', height: 'auto' }} className="border p-2 rounded-md object-cover" data-ai-hint="background"/>
                                             <Button 
                                                 variant="destructive" 
                                                 type="button" 
@@ -344,7 +344,7 @@ export default function SettingsPage() {
                              <div className="space-y-2">
                                 <Label>Loading Logo</Label>
                                 <div className="flex items-center gap-4">
-                                    {loadingLogo && <Image src={loadingLogo} alt="Loading Logo" width={80} height={80} className="border p-2 rounded-md object-contain" data-ai-hint="logo"/>}
+                                    {loadingLogo && <Image src={loadingLogo} alt="Loading Logo" width={80} height={80} style={{ width: 'auto', height: 'auto' }} className="border p-2 rounded-md object-contain" data-ai-hint="logo"/>}
                                     <Input type="file" onChange={(e) => handleFileChange(e, setLoadingLogoFile, setLoadingLogo, 'Loading Logo')} accept="image/*" />
                                 </div>
                             </div>
