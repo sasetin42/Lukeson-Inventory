@@ -183,72 +183,83 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
     return (
     <>
         <Card>
-        <CardHeader>
+        <CardHeader className="p-4 sm:p-6">
             <Tabs defaultValue="products">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <TabsList>
-                <TabsTrigger value="products">Products ({filteredProducts.length})</TabsTrigger>
-                <TabsTrigger value="orders">Orders</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+                <TabsList className="shrink-0">
+                    <TabsTrigger value="products">Products ({filteredProducts.length})</TabsTrigger>
+                    <TabsTrigger value="orders">Orders</TabsTrigger>
+                    <TabsTrigger value="analytics">Analytics</TabsTrigger>
                 </TabsList>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                    <div className="relative flex-1 sm:flex-auto">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
+                    <div className="relative w-full sm:w-[180px] md:w-[220px]">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input 
                             placeholder="Search products..." 
-                            className="pl-10 w-full"
+                            className="pl-8 h-9 text-xs w-full"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                        <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder="All Categories" />
+                        <SelectTrigger className="h-9 text-xs w-full sm:w-[150px]">
+                            <SelectValue placeholder="All Categories" />
                         </SelectTrigger>
                         <SelectContent>
-                        <SelectItem value="all">
-                            <div className="flex items-center gap-2">
-                                <LayoutGrid className="h-4 w-4" />
-                                All Categories
-                            </div>
-                        </SelectItem>
-                        {categories.map(cat => (
-                            <SelectItem key={cat.id} value={cat.name}>
-                                <div className="flex items-center gap-2">
-                                    {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
-                                    {cat.name}
+                            <SelectItem value="all">
+                                <div className="flex items-center gap-2 text-xs">
+                                    <LayoutGrid className="h-3.5 w-3.5" />
+                                    All Categories
                                 </div>
                             </SelectItem>
-                        ))}
+                            {categories.map(cat => (
+                                <SelectItem key={cat.id} value={cat.name}>
+                                    <div className="flex items-center gap-2 text-xs">
+                                        {categoryIcons[cat.name.toUpperCase()] || <Package className="h-3.5 w-3.5" />}
+                                        {cat.name}
+                                    </div>
+                                </SelectItem>
+                            ))}
                         </SelectContent>
                     </Select>
+                    <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-9 px-3 text-xs text-purple-600 border-purple-600 hover:bg-purple-50 hover:text-purple-700" 
+                        onClick={onAddCategory} 
+                        disabled={!canWrite}
+                    >
+                        <LayoutGrid className="mr-1.5 h-3.5 w-3.5" />
+                        Add Category
+                    </Button>
+                    <Button 
+                        size="sm" 
+                        className="h-9 px-3 text-xs" 
+                        onClick={() => onEdit(null)} 
+                        disabled={!canWrite}
+                    >
+                        <PlusCircle className="mr-1.5 h-3.5 w-3.5" />
+                        Add Product
+                    </Button>
+                    <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-9 w-9 shrink-0" 
+                        title="Import"
+                    >
+                        <Upload className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-9 w-9 shrink-0" 
+                        title="Export"
+                    >
+                        <Download className="h-4 w-4" />
+                    </Button>
                 </div>
             </div>
-            <TabsContent value="products" className="mt-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-                    <div>
-                        <CardTitle>Products</CardTitle>
-                        <CardDescription>Your current inventory of products.</CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <Button variant="outline" className="text-purple-600 border-purple-600 hover:bg-purple-50 hover:text-purple-700" onClick={onAddCategory} disabled={!canWrite}>
-                            <LayoutGrid className="mr-2 h-4 w-4" />
-                            Add Category
-                        </Button>
-                        <Button onClick={() => onEdit(null)} disabled={!canWrite}>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Add Product
-                        </Button>
-                        <Button variant="outline">
-                        <Upload className="mr-2 h-4 w-4" />
-                        Import
-                        </Button>
-                        <Button variant="outline">
-                        <Download className="mr-2 h-4 w-4" />
-                        Export
-                        </Button>
-                    </div>
-                </div>
+            <TabsContent value="products" className="mt-4">
                 <div className="overflow-x-auto">
                     <Table className="mt-4 min-w-[800px]">
                     <TableHeader>
