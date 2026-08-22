@@ -127,14 +127,14 @@ function AppContent({ children }: { children: React.ReactNode }) {
             <SidebarSeparator className="mb-2" />
              <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="justify-start w-full gap-2 p-2 h-auto">
-                  <Avatar className="h-8 w-8">
+                <Button variant="ghost" className="justify-start w-full gap-2 px-2 py-1.5 h-auto text-left items-center rounded-lg">
+                  <Avatar className="h-7 w-7 shrink-0">
                     <AvatarImage src={profile.avatar} alt={profile.name} data-ai-hint="user avatar" />
-                    <AvatarFallback>{firebaseUser?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback className="text-xs">{firebaseUser?.email?.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <div className="text-left">
-                    <p className="text-sm font-medium text-foreground">{profile.name}</p>
-                    <p className="text-xs text-muted-foreground">{firebaseUser?.email}</p>
+                  <div className="text-left min-w-0 flex-1 overflow-hidden">
+                    <p className="text-xs font-semibold text-foreground leading-none truncate">{profile.name}</p>
+                    <p className="text-[11px] text-muted-foreground leading-none truncate mt-1" title={firebaseUser?.email || ''}>{firebaseUser?.email}</p>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
