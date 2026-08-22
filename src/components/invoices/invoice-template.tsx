@@ -335,7 +335,7 @@ export default function InvoiceTemplate() {
                         <div>
                             <div className="flex justify-between items-start">
                                 <div className="flex items-center gap-4">
-                                    <Image src={logo} width={100} height={50} style={{ width: 'auto', height: 'auto' }} alt="Company Logo" data-ai-hint="logo"/>
+                                    <Image src={logo} width={96} height={64} className="max-h-16 max-w-24 w-auto h-auto object-contain shrink-0" alt="Company Logo" data-ai-hint="logo"/>
                                     <div className="text-xs">
                                         <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
                                         {tin && <p><strong>VAT REG. TIN: {tin}</strong></p>}

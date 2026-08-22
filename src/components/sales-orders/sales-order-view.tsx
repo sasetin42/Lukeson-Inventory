@@ -143,7 +143,7 @@ export default function SalesOrderView({ salesOrder, quotation, products }: Sale
         <div className="p-8 bg-white text-black">
             <div className="flex justify-between items-start">
                  <div className="flex items-center gap-4">
-                    <Image src={logo} width={100} height={50} style={{ width: 'auto', height: 'auto' }} alt="Company Logo" data-ai-hint="logo"/>
+                    <Image src={logo} width={96} height={64} className="max-h-16 max-w-24 w-auto h-auto object-contain shrink-0" alt="Company Logo" data-ai-hint="logo"/>
                     <div style={{ fontSize: '13px' }}>
                         <p className="font-bold" style={{ color: accentColor, fontSize: '20px', lineHeight: '25px' }}>{companyName}</p>
                         <p>{address}</p>

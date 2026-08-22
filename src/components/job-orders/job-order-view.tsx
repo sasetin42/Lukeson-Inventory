@@ -107,7 +107,7 @@ export default function JobOrderView({ jobOrder, salesOrder, quotation }: JobOrd
         <div className="py-4 text-xs">
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-4">
-                    <Image src={logo} alt="Company Logo" width={60} height={60} style={{ width: 'auto', height: 'auto' }} className="mb-2" data-ai-hint="logo" />
+                    <Image src={logo} alt="Company Logo" width={60} height={60} className="max-h-14 max-w-20 w-auto h-auto object-contain shrink-0 mb-2" data-ai-hint="logo" />
                     <div>
                         <h2 className="text-lg font-bold">{companyName}</h2>
                         <p className="text-xs text-muted-foreground">{address}</p>
