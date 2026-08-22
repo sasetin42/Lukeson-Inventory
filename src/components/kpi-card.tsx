@@ -52,7 +52,7 @@ export default function KpiCard({ title, value, icon: Icon, trend, color = 'blue
         <Icon className={cn('h-5 w-5', colorClasses[color])} />
       </CardHeader>
       <CardContent>
-        <div className={cn("text-3xl font-bold", color === 'yellow' ? 'text-yellow-600' : 'text-foreground')}>
+        <div className={cn("text-[25px] leading-tight font-bold tracking-tight", color === 'yellow' ? 'text-yellow-600' : 'text-foreground')}>
           {value}
         </div>
         {trend && (
