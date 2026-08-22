@@ -286,84 +286,90 @@ export default function SalesOrderTemplate() {
 
                 {/* Preview Section */}
                 <div className="lg:col-span-2">
-                    <Card className="p-8">
+                    <Card className="p-6">
                         <div className="flex justify-between items-start">
-                             <div className="flex items-center gap-4">
-                                <Image src={logo} width={96} height={64} className="max-h-16 max-w-24 w-auto h-auto object-contain shrink-0" alt="Company Logo" data-ai-hint="logo"/>
-                                <div className="text-xs">
-                                    <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
-                                    <p>{address}</p>
-                                    <p>{phone}</p>
-                                    <p>{website}</p>
+                             <div className="flex items-center gap-3">
+                                <Image src={logo} width={56} height={56} className="max-h-12 max-w-16 w-auto h-auto object-contain shrink-0" alt="Company Logo" data-ai-hint="logo"/>
+                                <div>
+                                    <p className="font-bold text-[15px] leading-tight" style={{ color: accentColor }}>{companyName}</p>
+                                    <div className="text-[11px] leading-snug text-neutral-600 mt-0.5 space-y-0.5">
+                                        <p>{address}</p>
+                                        <p>{phone}</p>
+                                        <p>{website}</p>
+                                    </div>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <h2 className="text-3xl font-bold" style={{ color: accentColor }}>SALES ORDER</h2>
-                                <p className="text-sm"><strong>Invoice ID:</strong> SO-2025-001</p>
-                                <p className="text-sm"><strong>Date:</strong> Jan 15, 2024</p>
-                                {showDueDate && <p className="text-sm"><strong>Due Date:</strong> Feb 14, 2024</p>}
-                                <p className="text-sm"><strong>Delivery Receipt Number:</strong> SO-2025-002</p>
+                                <h2 className="font-bold text-[16px] leading-tight" style={{ color: accentColor }}>SALES ORDER</h2>
+                                <div className="text-[11px] leading-snug text-neutral-700 mt-0.5 space-y-0.5">
+                                    <p><strong>SO:</strong> SO-2025-001</p>
+                                    <p><strong>Date:</strong> Jan 15, 2024</p>
+                                    {showDueDate && <p><strong>Due Date:</strong> Feb 14, 2024</p>}
+                                    <p><strong>Delivery Receipt:</strong> SO-2025-002</p>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="mt-8">
-                            <p className="font-bold">BILL TO:</p>
-                            <p>Metro Construction Inc.</p>
-                            <p>123 Main Street, Makati City</p>
+                        <div className="mt-4 text-xs">
+                            <p className="text-[11px] font-bold text-neutral-900 mb-0.5">BILL TO:</p>
+                            <div className="text-[11px] leading-tight text-neutral-700 space-y-0.5">
+                                <p className="font-medium text-neutral-900">Metro Construction Inc.</p>
+                                <p>123 Main Street, Makati City</p>
+                            </div>
                         </div>
                         
-                        <table className="w-full mt-4 border-collapse">
+                        <table className="w-full mt-3 border-collapse text-xs">
                             <thead>
                                 <tr>
-                                    <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Description</th>
-                                    <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Qty</th>
-                                    <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Unit Price</th>
-                                    <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Total</th>
+                                    <th className="p-1.5 text-left text-white font-semibold" style={{backgroundColor: accentColor}}>Description</th>
+                                    <th className="p-1.5 text-right text-white font-semibold w-16" style={{backgroundColor: accentColor}}>Qty</th>
+                                    <th className="p-1.5 text-right text-white font-semibold w-24" style={{backgroundColor: accentColor}}>Unit Price</th>
+                                    <th className="p-1.5 text-right text-white font-semibold w-24" style={{backgroundColor: accentColor}}>Total</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr className="border-b">
-                                    <td className="p-2">Product A</td>
-                                    <td className="p-2">2</td>
-                                    <td className="p-2">P5,000.00</td>
-                                    <td className="p-2">P10,000.00</td>
+                                    <td className="p-1.5">Product A</td>
+                                    <td className="p-1.5 text-right font-medium">2</td>
+                                    <td className="p-1.5 text-right">₱5,000.00</td>
+                                    <td className="p-1.5 text-right font-medium">₱10,000.00</td>
                                 </tr>
                                 <tr className="border-b">
-                                    <td className="p-2">Service B</td>
-                                    <td className="p-2">1</td>
-                                    <td className="p-2">P1,500.00</td>
-                                    <td className="p-2">P1,500.00</td>
+                                    <td className="p-1.5">Service B</td>
+                                    <td className="p-1.5 text-right font-medium">1</td>
+                                    <td className="p-1.5 text-right">₱1,500.00</td>
+                                    <td className="p-1.5 text-right font-medium">₱1,500.00</td>
                                 </tr>
                             </tbody>
                         </table>
                         
-                        <div className="flex justify-end mt-4">
-                            <div className="w-1/3 text-sm">
+                        <div className="flex justify-end mt-3">
+                            <div className="w-1/2 md:w-5/12 text-xs space-y-0.5">
                                 {showVat && (
                                     <>
-                                        <div className="flex justify-between"><span>Vatable Sales:</span> <span>P0.00</span></div>
-                                        <div className="flex justify-between"><span>VAT-Exempt Sales:</span> <span>P0.00</span></div>
-                                        <div className="flex justify-between"><span>Zero-Rated Sales:</span> <span>P0.00</span></div>
+                                        <div className="flex justify-between text-[11px] py-0.5"><span>Vatable Sales:</span> <span>₱0.00</span></div>
+                                        <div className="flex justify-between text-[11px] py-0.5"><span>VAT-Exempt Sales:</span> <span>₱0.00</span></div>
+                                        <div className="flex justify-between text-[11px] py-0.5"><span>Zero-Rated Sales:</span> <span>₱0.00</span></div>
                                     </>
                                 )}
-                                <div className="flex justify-between font-bold"><span>Total Sales:</span> <span>P11,500.00</span></div>
-                                <div className="flex justify-between"><span>Subtotal:</span> <span>P11,500.00</span></div>
-                                {showVat && <div className="flex justify-between"><span>VAT (12%):</span> <span>P1,380.00</span></div>}
-                                <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
+                                <div className="flex justify-between font-semibold text-[11px] py-0.5"><span>Total Sales:</span> <span>₱11,500.00</span></div>
+                                <div className="flex justify-between text-[11px] py-0.5"><span>Subtotal:</span> <span>₱11,500.00</span></div>
+                                {showVat && <div className="flex justify-between text-[11px] py-0.5"><span>VAT (12%):</span> <span>₱1,380.00</span></div>}
+                                <div className="flex justify-between font-bold text-sm mt-1.5 pt-1.5 border-t-2" style={{borderColor: accentColor}}>
                                     <span>Total:</span>
-                                    <span>P12,880.00</span>
+                                    <span>₱12,880.00</span>
                                 </div>
                             </div>
                         </div>
 
                          {showNotes && (
-                            <div className="mt-8">
-                                <h4 className="font-bold">Notes:</h4>
-                                <p className="text-sm text-muted-foreground">Sample notes for the sales order...</p>
+                            <div className="mt-4 text-xs">
+                                <h4 className="font-bold text-[11px]">Notes:</h4>
+                                <p className="text-[11px] text-muted-foreground">Sample notes for the sales order...</p>
                             </div>
                         )}
 
-                        <div className="flex justify-end mt-24 text-center">
+                        <div className="flex justify-end mt-10 text-center text-xs">
                             {renderSignature(verifiedBy)}
                         </div>
                     </Card>

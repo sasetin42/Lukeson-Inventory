@@ -140,62 +140,70 @@ export default function SalesOrderView({ salesOrder, quotation, products }: Sale
     }
 
     return (
-        <div className="p-8 bg-white text-black">
+        <div className="p-6 bg-white text-black">
             <div className="flex justify-between items-start">
-                 <div className="flex items-center gap-4">
-                    <Image src={logo} width={96} height={64} className="max-h-16 max-w-24 w-auto h-auto object-contain shrink-0" alt="Company Logo" data-ai-hint="logo"/>
-                    <div style={{ fontSize: '13px' }}>
-                        <p className="font-bold" style={{ color: accentColor, fontSize: '20px', lineHeight: '25px' }}>{companyName}</p>
-                        <p>{address}</p>
-                        <p>{phone}</p>
-                        <p>{website}</p>
+                 <div className="flex items-center gap-3">
+                    <Image src={logo} width={56} height={56} className="max-h-12 max-w-16 w-auto h-auto object-contain shrink-0" alt="Company Logo" data-ai-hint="logo"/>
+                    <div>
+                        <p className="font-bold text-[15px] leading-tight" style={{ color: accentColor }}>{companyName}</p>
+                        <div className="text-[11px] leading-snug text-neutral-600 mt-0.5 space-y-0.5">
+                            <p>{address}</p>
+                            <p>{phone}</p>
+                            <p>{website}</p>
+                        </div>
                     </div>
                 </div>
                 <div className="text-right">
-                    <h2 className="font-bold" style={{ color: accentColor, fontSize: '20px', lineHeight: '25px' }}>SALES ORDER</h2>
-                    <p style={{ fontSize: '13px' }}><strong>SO:</strong> {salesOrder.id}</p>
-                    <p style={{ fontSize: '13px' }}><strong>Date:</strong> {formatDate(salesOrder.orderDate)}</p>
-                    <p style={{ fontSize: '13px' }}><strong>Delivery Date:</strong> {formatDate(salesOrder.deliveryDate)}</p>
-                    {salesOrder.quotationId && <p style={{ fontSize: '13px' }}><strong>Quotation ID:</strong> {salesOrder.quotationId}</p>}
-                    <div className="flex justify-end items-center gap-2 mt-2">
+                    <h2 className="font-bold text-[16px] leading-tight" style={{ color: accentColor }}>SALES ORDER</h2>
+                    <div className="text-[11px] leading-snug text-neutral-700 mt-0.5 space-y-0.5">
+                        <p><strong>SO:</strong> {salesOrder.id}</p>
+                        <p><strong>Date:</strong> {formatDate(salesOrder.orderDate)}</p>
+                        <p><strong>Delivery Date:</strong> {formatDate(salesOrder.deliveryDate)}</p>
+                        {salesOrder.quotationId && <p><strong>Quotation ID:</strong> {salesOrder.quotationId}</p>}
+                    </div>
+                    <div className="flex justify-end items-center gap-1.5 mt-1.5">
                         {quotation && (
                             <>
-                                <span className="text-xs font-semibold">Quotation:</span>
-                                <Badge variant={getQuotationStatusVariant(quotation.status)}>{quotation.status}</Badge>
-                                <span className="text-xs font-semibold">|</span>
+                                <span className="text-[10px] font-semibold text-neutral-600">Quotation:</span>
+                                <Badge variant={getQuotationStatusVariant(quotation.status)} className="text-[10px] py-0 px-1.5">{quotation.status}</Badge>
+                                <span className="text-[10px] text-neutral-400">|</span>
                             </>
                         )}
-                        <span className="text-xs font-semibold">Sales Order:</span>
-                        <Badge variant={getStatusVariant(salesOrder.status)}>{salesOrder.status}</Badge>
+                        <span className="text-[10px] font-semibold text-neutral-600">Sales Order:</span>
+                        <Badge variant={getStatusVariant(salesOrder.status)} className="text-[10px] py-0 px-1.5">{salesOrder.status}</Badge>
                     </div>
                 </div>
             </div>
 
-            <div className="mt-8 text-sm flex">
+            <div className="mt-4 text-xs flex gap-6">
                 <div className="w-1/2">
-                    <p className="font-bold">BILL TO:</p>
-                    <p>{salesOrder.customerName}</p>
-                    {salesOrder.customerTin && <p>TIN: {salesOrder.customerTin}</p>}
-                    {salesOrder.customerEmail && <p>Email: {salesOrder.customerEmail}</p>}
-                    {salesOrder.customerPhone && <p>Phone: {salesOrder.customerPhone}</p>}
+                    <p className="text-[11px] font-bold text-neutral-900 mb-0.5">BILL TO:</p>
+                    <div className="text-[11px] leading-tight text-neutral-700 space-y-0.5">
+                        <p className="font-medium text-neutral-900">{salesOrder.customerName}</p>
+                        {salesOrder.customerTin && <p>TIN: {salesOrder.customerTin}</p>}
+                        {salesOrder.customerEmail && <p>Email: {salesOrder.customerEmail}</p>}
+                        {salesOrder.customerPhone && <p>Phone: {salesOrder.customerPhone}</p>}
+                    </div>
                 </div>
                 <div className="w-1/2">
-                    <p className="font-bold">SHIPPING ADDRESS:</p>
-                    {salesOrder.customerShippingAddress ? (
-                        <p>{salesOrder.customerShippingAddress}</p>
-                    ) : (
-                        <p>Same as billing address.</p>
-                    )}
+                    <p className="text-[11px] font-bold text-neutral-900 mb-0.5">SHIPPING ADDRESS:</p>
+                    <div className="text-[11px] leading-tight text-neutral-700">
+                        {salesOrder.customerShippingAddress ? (
+                            <p>{salesOrder.customerShippingAddress}</p>
+                        ) : (
+                            <p className="text-neutral-500 italic">Same as billing address.</p>
+                        )}
+                    </div>
                 </div>
             </div>
             
-            <table className="w-full mt-4 border-collapse text-sm">
+            <table className="w-full mt-3 border-collapse text-xs">
                 <thead>
                     <tr>
-                        <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Description</th>
-                        <th className="p-2 text-right text-white" style={{backgroundColor: accentColor}}>Qty</th>
-                        <th className="p-2 text-right text-white" style={{backgroundColor: accentColor}}>Unit Price</th>
-                        <th className="p-2 text-right text-white" style={{backgroundColor: accentColor}}>Total</th>
+                        <th className="p-1.5 text-left text-white font-semibold" style={{backgroundColor: accentColor}}>Description</th>
+                        <th className="p-1.5 text-right text-white font-semibold w-16" style={{backgroundColor: accentColor}}>Qty</th>
+                        <th className="p-1.5 text-right text-white font-semibold w-24" style={{backgroundColor: accentColor}}>Unit Price</th>
+                        <th className="p-1.5 text-right text-white font-semibold w-24" style={{backgroundColor: accentColor}}>Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -203,37 +211,37 @@ export default function SalesOrderView({ salesOrder, quotation, products }: Sale
                         const product = products.find(p => p.id === line.itemId);
                         return (
                         <tr key={index} className="border-b">
-                            <td className="p-2">
+                            <td className="p-1.5">
                                 <div className="flex items-center gap-2">
-                                    <ProductImage path={product?.productImage} alt={line.description} width={40} height={40} className="rounded-md" />
+                                    <ProductImage path={product?.productImage} alt={line.description} width={32} height={32} className="rounded shrink-0 w-8 h-8 object-cover" />
                                     <div>
-                                        <p className="font-medium">{line.description}</p>
-                                        <p className="text-xs text-muted-foreground">{product?.description}</p>
+                                        <p className="font-medium text-xs leading-tight">{line.description}</p>
+                                        {product?.description && <p className="text-[10px] text-muted-foreground leading-tight">{product.description}</p>}
                                     </div>
                                 </div>
                             </td>
-                            <td className="p-2 text-right">{line.quantity}</td>
-                            <td className="p-2 text-right">₱{line.unitPrice.toFixed(2)}</td>
-                            <td className="p-2 text-right">₱{line.total.toFixed(2)}</td>
+                            <td className="p-1.5 text-right font-medium">{line.quantity}</td>
+                            <td className="p-1.5 text-right">₱{line.unitPrice.toFixed(2)}</td>
+                            <td className="p-1.5 text-right font-medium">₱{line.total.toFixed(2)}</td>
                         </tr>
                     )})}
                 </tbody>
             </table>
             
-            <div className="flex justify-end mt-4">
-                <div className="w-1/2 text-sm">
+            <div className="flex justify-end mt-3">
+                <div className="w-1/2 md:w-5/12 text-xs space-y-0.5">
                     {showVat && (
                         <>
-                            <div className="flex justify-between"><span>Vatable Sales:</span> <span>₱{totals.vatableSales.toFixed(2)}</span></div>
-                            <div className="flex justify-between"><span>VAT-Exempt Sales:</span> <span>₱{totals.vatExemptSales.toFixed(2)}</span></div>
-                            <div className="flex justify-between"><span>Zero-Rated Sales:</span> <span>₱{totals.zeroRatedSales.toFixed(2)}</span></div>
+                            <div className="flex justify-between text-[11px] py-0.5"><span>Vatable Sales:</span> <span>₱{totals.vatableSales.toFixed(2)}</span></div>
+                            <div className="flex justify-between text-[11px] py-0.5"><span>VAT-Exempt Sales:</span> <span>₱{totals.vatExemptSales.toFixed(2)}</span></div>
+                            <div className="flex justify-between text-[11px] py-0.5"><span>Zero-Rated Sales:</span> <span>₱{totals.zeroRatedSales.toFixed(2)}</span></div>
                         </>
                     )}
-                    <div className="flex justify-between font-bold"><span>Total Sales:</span> <span>₱{totals.totalSales.toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span>Discount:</span> <span>- ₱{totals.discountAmount.toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span>Subtotal:</span> <span>₱{(totals.totalSales - totals.discountAmount).toFixed(2)}</span></div>
-                    {showVat && <div className="flex justify-between"><span>VAT (12%):</span> <span>₱{totals.vatAmount.toFixed(2)}</span></div>}
-                    <div className="flex justify-between font-bold text-lg mt-2 pt-2 border-t-2" style={{borderColor: accentColor}}>
+                    <div className="flex justify-between font-semibold text-[11px] py-0.5"><span>Total Sales:</span> <span>₱{totals.totalSales.toFixed(2)}</span></div>
+                    {totals.discountAmount > 0 && <div className="flex justify-between text-[11px] py-0.5 text-red-600"><span>Discount:</span> <span>- ₱{totals.discountAmount.toFixed(2)}</span></div>}
+                    <div className="flex justify-between text-[11px] py-0.5"><span>Subtotal:</span> <span>₱{(totals.totalSales - totals.discountAmount).toFixed(2)}</span></div>
+                    {showVat && <div className="flex justify-between text-[11px] py-0.5"><span>VAT (12%):</span> <span>₱{totals.vatAmount.toFixed(2)}</span></div>}
+                    <div className="flex justify-between font-bold text-sm mt-1.5 pt-1.5 border-t-2" style={{borderColor: accentColor}}>
                         <span>Total:</span>
                         <span>₱{salesOrder.totalAmount.toFixed(2)}</span>
                     </div>
@@ -241,19 +249,19 @@ export default function SalesOrderView({ salesOrder, quotation, products }: Sale
             </div>
 
             {showNotes && (
-              <div className="grid grid-cols-2 gap-4 mt-8">
+              <div className="grid grid-cols-2 gap-4 mt-4 text-xs">
                 <div>
-                  <h4 className="font-bold">Quotation Notes:</h4>
-                  <p className="text-sm text-muted-foreground">{salesOrder.notes || "No quotation notes."}</p>
+                  <h4 className="font-bold text-[11px]">Quotation Notes:</h4>
+                  <p className="text-[11px] text-muted-foreground">{salesOrder.notes || "No quotation notes."}</p>
                 </div>
                 <div>
-                  <h4 className="font-bold">Sales Order Notes:</h4>
-                  <p className="text-sm text-muted-foreground">{salesOrder.notes || "No sales order notes."}</p>
+                  <h4 className="font-bold text-[11px]">Sales Order Notes:</h4>
+                  <p className="text-[11px] text-muted-foreground">{salesOrder.notes || "No sales order notes."}</p>
                 </div>
               </div>
             )}
 
-            <div className="flex justify-end mt-24 text-center text-xs">
+            <div className="flex justify-end mt-10 text-center text-xs">
                 {renderSignature(verifiedBy)}
             </div>
         </div>
