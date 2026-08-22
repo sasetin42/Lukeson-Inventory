@@ -47,7 +47,12 @@ function AppContent({ children }: { children: React.ReactNode }) {
   }
   
   if (pathname === '/login') {
-      return <>{children}</>;
+      return (
+        <SidebarProvider>
+          <NavigationProgress />
+          {children}
+        </SidebarProvider>
+      );
   }
 
   const isAdmin = 
