@@ -28,12 +28,12 @@ export default function InvoiceTemplate() {
     const [showNotes, setShowNotes] = useState(true);
     const [showVat, setShowVat] = useState(true);
 
-    const [companyName, setCompanyName] = useState('YAMASHITA MOLD PHILIPPINES CORPORATION');
+    const [companyName, setCompanyName] = useState('LUKESON LIGHTING AND ELECTRICAL SERVICES COMPANY');
     const [tin, setTin] = useState('');
-    const [address, setAddress] = useState('Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines');
-    const [phone, setPhone] = useState('Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463');
-    const [email, setEmail] = useState('contact@yamashitamold.ph');
-    const [website, setWebsite] = useState('www.yamashitamold.ph');
+    const [address, setAddress] = useState('20 Genoveva St. Brgy. Gulod Novaliches, 1114 Quezon City, Philippines.');
+    const [phone, setPhone] = useState('Phone: 09176018881 | 09178162341');
+    const [email, setEmail] = useState('contact@lukesonlighting.com.ph');
+    const [website, setWebsite] = useState('https://www.lukesonlighting.com.ph');
     const [logo, setLogo] = useState('https://placehold.co/100x50.png');
     const [logoFile, setLogoFile] = useState<File | null>(null);
 
@@ -71,12 +71,25 @@ export default function InvoiceTemplate() {
                     setShowDueDate(settings.showDueDate !== false);
                     setShowNotes(settings.showNotes !== false);
                     setShowVat(settings.showVat !== false);
-                    setCompanyName(settings.companyName || 'YAMASHITA MOLD PHILIPPINES CORPORATION');
+                    const cName = settings.companyName === 'YAMASHITA MOLD PHILIPPINES CORPORATION' || settings.companyName === 'LUKESON COMPANY' || !settings.companyName
+                        ? 'LUKESON LIGHTING AND ELECTRICAL SERVICES COMPANY' 
+                        : settings.companyName;
+                    const cAddr = settings.address?.includes('Daichi') || settings.address === '20 Genoveva, Novaliches, Quezon City, Metro Manila' || !settings.address
+                        ? '20 Genoveva St. Brgy. Gulod Novaliches, 1114 Quezon City, Philippines.' 
+                        : settings.address;
+                    const cPhone = settings.phone?.includes('972-1848') || settings.phone?.includes('912 378 5841') || !settings.phone
+                        ? 'Phone: 09176018881 | 09178162341' 
+                        : settings.phone;
+                    const cWeb = settings.website?.includes('yamashitamold') || settings.website === 'https://lukesonlighting.com.ph/' || !settings.website
+                        ? 'https://www.lukesonlighting.com.ph' 
+                        : settings.website;
+
+                    setCompanyName(cName);
                     setTin(settings.tin || '');
-                    setAddress(settings.address || 'Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines');
-                    setPhone(settings.phone || 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463');
-                    setEmail(settings.email || 'contact@yamashitamold.ph');
-                    setWebsite(settings.website || 'www.yamashitamold.ph');
+                    setAddress(cAddr);
+                    setPhone(cPhone);
+                    setEmail(settings.email || 'contact@lukesonlighting.com.ph');
+                    setWebsite(cWeb);
                     setLogo(settings.logo || 'https://placehold.co/100x50.png');
                     setVerifiedBy(settings.verifiedBy || '_________________________\nCustomer signature over printed name');
                     if (settings.birDetails) {

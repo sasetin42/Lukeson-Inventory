@@ -22,10 +22,10 @@ const TEMPLATE_DOC_ID = 'salesOrder';
 export default function SalesOrderView({ salesOrder, quotation, products }: SalesOrderViewProps) {
     const [templateSettings, setTemplateSettings] = useState({
         accentColor: '#0A3BAA',
-        companyName: 'YAMASHITA MOLD PHILIPPINES CORPORATION',
-        address: 'Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines',
-        phone: 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463',
-        website: 'www.yamashitamold.ph',
+        companyName: 'LUKESON LIGHTING AND ELECTRICAL SERVICES COMPANY',
+        address: '20 Genoveva St. Brgy. Gulod Novaliches, 1114 Quezon City, Philippines.',
+        phone: 'Phone: 09176018881 | 09178162341',
+        website: 'https://www.lukesonlighting.com.ph',
         logo: 'https://placehold.co/100x50.png',
         showNotes: true,
         showVat: true,
@@ -38,7 +38,27 @@ export default function SalesOrderView({ salesOrder, quotation, products }: Sale
                 const templateRef = doc(db, 'templates', TEMPLATE_DOC_ID);
                 const docSnap = await getDoc(templateRef);
                 if (docSnap.exists()) {
-                    setTemplateSettings(docSnap.data() as typeof templateSettings);
+                    const data = docSnap.data() as typeof templateSettings;
+                    const cName = data.companyName === 'YAMASHITA MOLD PHILIPPINES CORPORATION' || data.companyName === 'LUKESON COMPANY' || !data.companyName
+                        ? 'LUKESON LIGHTING AND ELECTRICAL SERVICES COMPANY' 
+                        : data.companyName;
+                    const cAddr = data.address?.includes('Daichi') || data.address === '20 Genoveva, Novaliches, Quezon City, Metro Manila' || !data.address
+                        ? '20 Genoveva St. Brgy. Gulod Novaliches, 1114 Quezon City, Philippines.' 
+                        : data.address;
+                    const cPhone = data.phone?.includes('972-1848') || data.phone?.includes('912 378 5841') || !data.phone
+                        ? 'Phone: 09176018881 | 09178162341' 
+                        : data.phone;
+                    const cWeb = data.website?.includes('yamashitamold') || data.website === 'https://lukesonlighting.com.ph/' || !data.website
+                        ? 'https://www.lukesonlighting.com.ph' 
+                        : data.website;
+
+                    setTemplateSettings({
+                        ...data,
+                        companyName: cName,
+                        address: cAddr,
+                        phone: cPhone,
+                        website: cWeb,
+                    });
                 }
             } catch (error) {
                 console.error("Error fetching template settings for view:", error);

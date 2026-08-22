@@ -21,11 +21,11 @@ const TEMPLATE_DOC_ID = 'invoice';
 export default function InvoiceView({ invoice, products }: InvoiceViewProps) {
     const [templateSettings, setTemplateSettings] = useState({
         accentColor: '#0A3BAA',
-        companyName: 'YAMASHITA MOLD PHILIPPINES CORPORATION',
+        companyName: 'LUKESON LIGHTING AND ELECTRICAL SERVICES COMPANY',
         tin: '',
-        address: 'Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines',
-        phone: 'Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463',
-        website: 'www.yamashitamold.ph',
+        address: '20 Genoveva St. Brgy. Gulod Novaliches, 1114 Quezon City, Philippines.',
+        phone: 'Phone: 09176018881 | 09178162341',
+        website: 'https://www.lukesonlighting.com.ph',
         logo: 'https://placehold.co/100x50.png',
         showDueDate: true,
         showNotes: true,
@@ -53,9 +53,26 @@ export default function InvoiceView({ invoice, products }: InvoiceViewProps) {
                 const templateSnap = await getDoc(templateRef);
                 if (templateSnap.exists()) {
                     const data = templateSnap.data();
+                    const cName = data.companyName === 'YAMASHITA MOLD PHILIPPINES CORPORATION' || data.companyName === 'LUKESON COMPANY' || !data.companyName
+                        ? 'LUKESON LIGHTING AND ELECTRICAL SERVICES COMPANY' 
+                        : data.companyName;
+                    const cAddr = data.address?.includes('Daichi') || data.address === '20 Genoveva, Novaliches, Quezon City, Metro Manila' || !data.address
+                        ? '20 Genoveva St. Brgy. Gulod Novaliches, 1114 Quezon City, Philippines.' 
+                        : data.address;
+                    const cPhone = data.phone?.includes('972-1848') || data.phone?.includes('912 378 5841') || !data.phone
+                        ? 'Phone: 09176018881 | 09178162341' 
+                        : data.phone;
+                    const cWeb = data.website?.includes('yamashitamold') || data.website === 'https://lukesonlighting.com.ph/' || !data.website
+                        ? 'https://www.lukesonlighting.com.ph' 
+                        : data.website;
+
                     setTemplateSettings({
                         ...templateSettings,
                         ...data,
+                        companyName: cName,
+                        address: cAddr,
+                        phone: cPhone,
+                        website: cWeb,
                         birDetails: { ...templateSettings.birDetails, ...data.birDetails }
                     });
                 }

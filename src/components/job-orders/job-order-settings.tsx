@@ -28,11 +28,11 @@ export default function JobOrderSettings() {
     const [showNotes, setShowNotes] = useState(true);
     const [showVat, setShowVat] = useState(true);
 
-    const [companyName, setCompanyName] = useState('LUKESON LIGHTING COMPANY');
-    const [address, setAddress] = useState('20 Genoveva, Novaliches, Quezon City, Metro Manila');
-    const [phone, setPhone] = useState('Phone: +63 912 378 5841');
+    const [companyName, setCompanyName] = useState('LUKESON LIGHTING AND ELECTRICAL SERVICES COMPANY');
+    const [address, setAddress] = useState('20 Genoveva St. Brgy. Gulod Novaliches, 1114 Quezon City, Philippines.');
+    const [phone, setPhone] = useState('Phone: 09176018881 | 09178162341');
     const [email, setEmail] = useState('sales@lukesonlighting.com.ph');
-    const [website, setWebsite] = useState('https://lukesonlighting.com.ph/');
+    const [website, setWebsite] = useState('https://www.lukesonlighting.com.ph');
     const [logo, setLogo] = useState('https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/e903a953-ab33-4f9e-953e-5390916e6373.png?alt=media');
     const [logoFile, setLogoFile] = useState<File | null>(null);
 
@@ -51,11 +51,24 @@ export default function JobOrderSettings() {
                     setShowDueDate(settings.showDueDate !== false);
                     setShowNotes(settings.showNotes !== false);
                     setShowVat(settings.showVat !== false);
-                    setCompanyName(settings.companyName || 'LUKESON LIGHTING COMPANY');
-                    setAddress(settings.address || '20 Genoveva, Novaliches, Quezon City, Metro Manila');
-                    setPhone(settings.phone || 'Phone: +63 912 378 5841');
+                    const cName = settings.companyName === 'YAMASHITA MOLD PHILIPPINES CORPORATION' || settings.companyName === 'LUKESON LIGHTING COMPANY' || settings.companyName === 'LUKESON COMPANY' || !settings.companyName
+                        ? 'LUKESON LIGHTING AND ELECTRICAL SERVICES COMPANY' 
+                        : settings.companyName;
+                    const cAddr = settings.address?.includes('Daichi') || settings.address === '20 Genoveva, Novaliches, Quezon City, Metro Manila' || !settings.address
+                        ? '20 Genoveva St. Brgy. Gulod Novaliches, 1114 Quezon City, Philippines.' 
+                        : settings.address;
+                    const cPhone = settings.phone?.includes('972-1848') || settings.phone?.includes('912 378 5841') || !settings.phone
+                        ? 'Phone: 09176018881 | 09178162341' 
+                        : settings.phone;
+                    const cWeb = settings.website?.includes('yamashitamold') || settings.website === 'https://lukesonlighting.com.ph/' || !settings.website
+                        ? 'https://www.lukesonlighting.com.ph' 
+                        : settings.website;
+
+                    setCompanyName(cName);
+                    setAddress(cAddr);
+                    setPhone(cPhone);
                     setEmail(settings.email || 'sales@lukesonlighting.com.ph');
-                    setWebsite(settings.website || 'https://lukesonlighting.com.ph/');
+                    setWebsite(cWeb);
                     setLogo(settings.logo || 'https://firebasestorage.googleapis.com/v0/b/lukeson-inventory.appspot.com/o/e903a953-ab33-4f9e-953e-5390916e6373.png?alt=media');
                     setVerifiedBy(settings.verifiedBy || '_________________________\nCustomer signature over printed name');
                 }

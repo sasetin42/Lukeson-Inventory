@@ -17,11 +17,11 @@ export default function PurchaseRequestTemplate() {
     const [showNotes, setShowNotes] = useState(true);
     const [showVat, setShowVat] = useState(true);
 
-    const [companyName, setCompanyName] = useState('YAMASHITA MOLD PHILIPPINES CORPORATION');
-    const [address, setAddress] = useState('Lot 8, Block 1, Daichi Industrail Park-SEZ, Brgy. Maguyam, Silang, Cavite Philippines');
-    const [phone, setPhone] = useState('Phone: (046) 972-1848; 430-0057; 430-0058; (02) 886-4463');
-    const [email, setEmail] = useState('contact@yamashitamold.ph');
-    const [website, setWebsite] = useState('www.yamashitamold.ph');
+    const [companyName, setCompanyName] = useState('LUKESON LIGHTING AND ELECTRICAL SERVICES COMPANY');
+    const [address, setAddress] = useState('20 Genoveva St. Brgy. Gulod Novaliches, 1114 Quezon City, Philippines.');
+    const [phone, setPhone] = useState('Phone: 09176018881 | 09178162341');
+    const [email, setEmail] = useState('contact@lukesonlighting.com.ph');
+    const [website, setWebsite] = useState('https://www.lukesonlighting.com.ph');
 
     const [preparedByLabel, setPreparedByLabel] = useState('Prepared by:');
     const [preparedByName, setPreparedByName] = useState('YMP / MCB / MJTS');
