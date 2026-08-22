@@ -25,7 +25,7 @@ export default function LoginPage() {
     const router = useRouter();
     const { toast } = useToast();
 
-    const [title, setTitle] = useState('LUKESON COMPANY');
+    const [title, setTitle] = useState('LUKESON LIGHTING AND ELECTRICAL SERVICES COMPANY');
     const [description, setDescription] = useState('Inventory Management Information System (IMIS)');
     const [background, setBackground] = useState('');
     const [logo, setLogo] = useState('');
@@ -39,7 +39,10 @@ export default function LoginPage() {
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    if (data.title) setTitle(data.title);
+                    const loginTitle = (!data.title || data.title === 'LUKESON COMPANY' || data.title === 'IMIS Pro')
+                        ? 'LUKESON LIGHTING AND ELECTRICAL SERVICES COMPANY'
+                        : data.title;
+                    setTitle(loginTitle);
                     if (data.description) setDescription(data.description);
                     if (data.background) setBackground(data.background);
                     if (data.logo) setLogo(data.logo);
@@ -80,12 +83,12 @@ export default function LoginPage() {
         backgroundSize: 'cover',
         backgroundPosition: 'center',
     } : {
-        background: 'radial-gradient(ellipse at 50% 30%, #0c1524 0%, #030712 100%)',
+        background: 'radial-gradient(ellipse at center, #111827 0%, #030712 60%, #000000 100%)',
     };
 
     return (
-        <div className="relative flex items-center justify-center min-h-screen w-full overflow-hidden bg-slate-950 px-4 py-8 select-none" style={backgroundStyle}>
-            {/* Ambient Background Glow Mesh for Glassmorphism */}
+        <div className="relative flex items-center justify-center min-h-screen w-full overflow-hidden bg-black px-4 py-8" style={backgroundStyle}>
+            {/* Ambient Background Glows */}
             <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#578A00]/20 rounded-full blur-[140px] pointer-events-none" />
             <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#10A3D8]/20 rounded-full blur-[140px] pointer-events-none" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[160px] pointer-events-none" />
@@ -120,7 +123,7 @@ export default function LoginPage() {
                                 </div>
                             </div>
                         )}
-                        <CardTitle className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase drop-shadow-sm">
+                        <CardTitle className="text-sm sm:text-base font-bold tracking-tight text-white uppercase drop-shadow-sm leading-snug px-2">
                             {title}
                         </CardTitle>
                         <CardDescription className="text-xs sm:text-sm text-slate-400 mt-1">
