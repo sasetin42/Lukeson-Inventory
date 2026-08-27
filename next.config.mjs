@@ -1,6 +1,9 @@
+const isProd = process.env.NODE_ENV === 'production';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  ...(isProd ? { output: 'export' } : {}),
+  trailingSlash: true,
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -21,6 +24,15 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   optimizeFonts: false,
+  experimental: {
+    optimizePackageImports: [],
+  },
+  webpack: (config, { dev }) => {
+    if (dev) {
+      config.cache = false;
+    }
+    return config;
+  },
 };
 
 export default nextConfig;

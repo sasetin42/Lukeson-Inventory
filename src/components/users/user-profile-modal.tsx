@@ -102,7 +102,9 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
             return;
         }
         try {
-            await updateUserProfile(name, avatarFile);
+            // Pass compressed preview data URL if changed, or avatarFile
+            const imageToSave = avatarPreview && avatarPreview.startsWith('data:') ? avatarPreview : avatarFile;
+            await updateUserProfile(name, imageToSave);
             toast({ title: 'Success', description: 'Your profile has been updated.', variant: 'success' });
             onClose();
         } catch (error: any) {

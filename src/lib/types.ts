@@ -110,6 +110,7 @@ export type DocumentLine = {
     taxRate: number;
     total: number;
     vatType: VatType;
+    isDiscountable?: boolean;
 };
 
 
@@ -118,6 +119,10 @@ export type Quotation = {
     id: string; // QTN-YYYY-XXXX
     customerId: string;
     customerName?: string;
+    customerTin?: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    customerShippingAddress?: string;
     qtnDate: Date | FieldValue | string;
     expiryDate: Date | FieldValue | string;
     status: 'Draft' | 'Sent' | 'Accepted' | 'Expired';
@@ -340,6 +345,7 @@ export type Product = {
     status: 'In Stock' | 'Low Stock' | 'Out of Stock' | 'Discontinued';
     uom: string;
     expiryDateTracking: boolean;
+    isDiscountable?: boolean;
 };
 
 export type StockHistory = {

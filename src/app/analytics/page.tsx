@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -65,7 +65,7 @@ export default function AnalyticsPage() {
       unsubscribeSales();
       unsubscribeSuppliers();
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     function calculateKpis() {

@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -73,7 +73,7 @@ export default function JobOrderForm({ jobOrder, onSuccess, onCancel, onIdGenera
             }
         };
         fetchData();
-    }, [toast]);
+    }, []);
     
     useEffect(() => {
         const generateJobOrderId = async () => {

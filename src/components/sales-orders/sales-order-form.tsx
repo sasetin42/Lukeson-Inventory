@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -77,7 +77,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
             }
         };
         fetchData();
-    }, [toast]);
+    }, []);
     
     useEffect(() => {
         const generateSalesOrderId = async () => {
@@ -224,6 +224,7 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
                 line.description = product.name;
                 line.unitPrice = product.price;
                 line.uom = product.uom;
+                line.isDiscountable = product.isDiscountable !== false;
             }
         }
         
@@ -239,22 +240,27 @@ export default function SalesOrderForm({ salesOrder, onSuccess, onCancel, onIdGe
 
     const totals = useMemo(() => {
         const totalSales = lines.reduce((acc, l) => acc + l.total, 0);
+        const discountableSales = lines.filter(l => l.isDiscountable !== false).reduce((acc, l) => acc + l.total, 0);
 
         let vatableSales = 0;
         let vatExemptSales = 0;
         let zeroRatedSales = 0;
 
         const discountAmount = discountType === 'Fixed' 
-            ? Math.min(discountValue, totalSales)
-            : totalSales * (Math.min(discountValue, 100) / 100);
+            ? Math.min(discountValue, discountableSales)
+            : discountableSales * (Math.min(discountValue, 100) / 100);
 
         const totalAfterDiscount = totalSales - discountAmount;
         let vatAmount = 0;
 
         if(totalSales > 0) {
             lines.forEach(line => {
-                const proportion = line.total / totalSales;
-                const lineDiscount = discountAmount * proportion;
+                const isLineDiscountable = line.isDiscountable !== false;
+                let lineDiscount = 0;
+                if (isLineDiscountable && discountableSales > 0) {
+                    const proportion = line.total / discountableSales;
+                    lineDiscount = discountAmount * proportion;
+                }
                 const discountedTotal = line.total - lineDiscount;
 
                 if (line.vatType === 'VATable') {

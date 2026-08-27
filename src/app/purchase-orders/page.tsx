@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -42,7 +42,7 @@ export default function PurchaseOrdersPage() {
     });
 
     return () => unsubscribe();
-  }, [toast]);
+  }, []);
 
   const handleOpenModal = (purchaseOrder: PurchaseOrder | null) => {
     setEditingPurchaseOrder(purchaseOrder);

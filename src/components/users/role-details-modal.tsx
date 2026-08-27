@@ -14,7 +14,7 @@ import { Role } from '@/lib/types';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import { navGroups } from '@/components/client-layout';
+import { navGroups } from '@/lib/nav-config';
 import { Table, TableBody, TableCell, TableRow, TableHead, TableHeader } from '../ui/table';
 import { CheckCircle2, Eye, XCircle } from 'lucide-react';
 

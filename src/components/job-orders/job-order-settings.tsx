@@ -1,4 +1,4 @@
-
+﻿
 
 'use client';
 
@@ -85,7 +85,7 @@ export default function JobOrderSettings() {
         };
 
         fetchSettings();
-    }, [toast]);
+    }, []);
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -301,7 +301,7 @@ export default function JobOrderSettings() {
                     <Card className="p-8">
                         <div className="flex justify-between items-start">
                              <div className="flex items-center gap-4">
-                                <Image src={logo} width={96} height={64} className="max-h-16 max-w-24 w-auto h-auto object-contain shrink-0" alt="Company Logo" data-ai-hint="logo"/>
+                                <Image src={logo} width={96} height={64} style={{ width: 'auto', height: 'auto' }} className="max-h-16 max-w-24 object-contain shrink-0" alt="Company Logo" data-ai-hint="logo"/>
                                 <div className="text-xs">
                                     <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
                                     <p>{address}</p>

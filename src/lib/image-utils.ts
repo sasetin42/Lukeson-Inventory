@@ -16,8 +16,8 @@ export const processImage = (file: File, maxSizeMB: number = 2): Promise<string>
                     return reject(new Error('Failed to get canvas context'));
                 }
                 
-                const MAX_WIDTH = 1920;
-                const MAX_HEIGHT = 1080;
+                const MAX_WIDTH = 600;
+                const MAX_HEIGHT = 600;
                 let width = img.width;
                 let height = img.height;
 
@@ -37,7 +37,7 @@ export const processImage = (file: File, maxSizeMB: number = 2): Promise<string>
                 canvas.height = height;
                 ctx.drawImage(img, 0, 0, width, height);
 
-                const dataUrl = canvas.toDataURL('image/webp', 0.85);
+                const dataUrl = canvas.toDataURL('image/webp', 0.75);
                 
                 // Check size
                 const base64Length = dataUrl.length - (dataUrl.indexOf(',') + 1);

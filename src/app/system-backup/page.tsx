@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -77,7 +77,7 @@ export default function SystemBackupPage() {
         return () => {
             unsubscribeBackups();
         }
-    }, [toast]);
+    }, []);
 
     const handleBackupNow = async () => {
         setIsBackingUp(true);

@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,7 +13,7 @@ import ProductFormModal from '@/components/products/product-form-modal';
 import CategoryFormModal from '@/components/category/category-form-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp, updateDoc, writeBatch } from 'firebase/firestore';
 import { useAuth } from '@/context/auth-context';
 import StockHistoryModal from '@/components/products/stock-history-modal';
 import StockAdjustmentModal from '@/components/products/stock-adjustment-modal';
@@ -74,7 +74,7 @@ export default function ProductsPage() {
             unsubscribeSales();
             unsubscribePurchases();
         };
-    }, [toast]);
+    }, []);
     
     const totalProducts = products.length;
     const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
@@ -170,12 +170,73 @@ export default function ProductsPage() {
         const productRef = doc(db, 'products', productId);
         try {
             await updateDoc(productRef, { stock: newStock });
-            // You might want to log this adjustment to a separate collection for auditing
             toast({ title: "Stock Adjusted", description: `Stock for product ${productId} has been set to ${newStock}.`, variant: "success" });
             setIsStockAdjustmentModalOpen(false);
         } catch (error) {
             console.error("Error adjusting stock:", error);
             toast({ title: "Error", description: "Failed to adjust stock.", variant: "destructive" });
+        }
+    };
+
+    const handleBulkDelete = async (productIds: string[]) => {
+        if (!productIds || productIds.length === 0) return;
+        try {
+            const batch = writeBatch(db);
+            productIds.forEach((id) => {
+                const productRef = doc(db, 'products', id);
+                batch.delete(productRef);
+            });
+            await batch.commit();
+            toast({
+                title: "Products Deleted",
+                description: `Successfully deleted ${productIds.length} product${productIds.length === 1 ? '' : 's'}.`,
+                variant: "success",
+            });
+        } catch (error) {
+            console.error("Error performing bulk delete:", error);
+            toast({
+                title: "Error",
+                description: "Failed to delete selected products.",
+                variant: "destructive",
+            });
+            throw error;
+        }
+    };
+
+    const handleBulkStockUpdate = async (updates: { id: string; newStock: number }[], reason: string) => {
+        if (!updates || updates.length === 0) return;
+        try {
+            const batch = writeBatch(db);
+            updates.forEach(({ id, newStock }) => {
+                const targetProduct = products.find(p => p.id === id);
+                const reOrderLevel = targetProduct?.reOrderLevel ?? 0;
+                let status = targetProduct?.status || 'In Stock';
+                if (status !== 'Discontinued') {
+                    status = newStock > 0
+                        ? (newStock <= reOrderLevel ? 'Low Stock' : 'In Stock')
+                        : 'Out of Stock';
+                }
+                const productRef = doc(db, 'products', id);
+                batch.update(productRef, {
+                    stock: newStock,
+                    status: status,
+                    modifiedAt: serverTimestamp(),
+                });
+            });
+            await batch.commit();
+            toast({
+                title: "Stock Updated",
+                description: `Successfully updated stock for ${updates.length} product${updates.length === 1 ? '' : 's'}. (${reason})`,
+                variant: "success",
+            });
+        } catch (error) {
+            console.error("Error performing bulk stock update:", error);
+            toast({
+                title: "Error",
+                description: "Failed to update stock for selected products.",
+                variant: "destructive",
+            });
+            throw error;
         }
     };
 
@@ -233,6 +294,8 @@ export default function ProductsPage() {
         products={products} 
         onEdit={handleOpenProductModal} 
         onDelete={handleDeleteProduct}
+        onBulkDelete={handleBulkDelete}
+        onBulkUpdateStock={handleBulkStockUpdate}
         onAddCategory={() => setIsCategoryModalOpen(true)}
         onViewStockHistory={handleOpenStockHistoryModal}
       />

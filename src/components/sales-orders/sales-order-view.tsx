@@ -5,7 +5,6 @@
 import { useMemo, useState, useEffect } from 'react';
 import { SalesOrder, VatType, Quotation, Product } from '@/lib/types';
 import { format } from 'date-fns';
-import Image from 'next/image';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { Badge } from '../ui/badge';
@@ -71,22 +70,27 @@ export default function SalesOrderView({ salesOrder, quotation, products }: Sale
 
     const totals = useMemo(() => {
         const totalSales = salesOrder.lines.reduce((acc, l) => acc + l.total, 0);
+        const discountableSales = salesOrder.lines.filter(l => l.isDiscountable !== false).reduce((acc, l) => acc + l.total, 0);
 
         let vatableSales = 0;
         let vatExemptSales = 0;
         let zeroRatedSales = 0;
 
         const discountAmount = salesOrder.discountType === 'Fixed' 
-            ? Math.min(salesOrder.discountValue || 0, totalSales)
-            : totalSales * (Math.min(salesOrder.discountValue || 0, 100) / 100);
+            ? Math.min(salesOrder.discountValue || 0, discountableSales)
+            : discountableSales * (Math.min(salesOrder.discountValue || 0, 100) / 100);
 
         const totalAfterDiscount = totalSales - discountAmount;
         let vatAmount = 0;
 
         if(totalSales > 0) {
             salesOrder.lines.forEach(line => {
-                const proportion = line.total / totalSales;
-                const lineDiscount = discountAmount * proportion;
+                const isLineDiscountable = line.isDiscountable !== false;
+                let lineDiscount = 0;
+                if (isLineDiscountable && discountableSales > 0) {
+                    const proportion = line.total / discountableSales;
+                    lineDiscount = discountAmount * proportion;
+                }
                 const discountedTotal = line.total - lineDiscount;
 
                 if (line.vatType === 'VATable') {
@@ -163,7 +167,6 @@ export default function SalesOrderView({ salesOrder, quotation, products }: Sale
         <div className="p-6 bg-white text-black">
             <div className="flex justify-between items-start">
                  <div className="flex items-center gap-3">
-                    <Image src={logo} width={56} height={56} className="max-h-12 max-w-16 w-auto h-auto object-contain shrink-0" alt="Company Logo" data-ai-hint="logo"/>
                     <div>
                         <p className="font-bold text-[15px] leading-tight" style={{ color: accentColor }}>{companyName}</p>
                         <div className="text-[11px] leading-snug text-neutral-600 mt-0.5 space-y-0.5">
@@ -220,32 +223,44 @@ export default function SalesOrderView({ salesOrder, quotation, products }: Sale
                 </div>
             </div>
             
-            <table className="w-full mt-3 border-collapse text-xs">
+            <table className="w-full mt-3 border-collapse text-xs table-fixed">
                 <thead>
                     <tr>
-                        <th className="p-1.5 text-left text-white font-semibold" style={{backgroundColor: accentColor}}>Description</th>
-                        <th className="p-1.5 text-right text-white font-semibold w-16" style={{backgroundColor: accentColor}}>Qty</th>
-                        <th className="p-1.5 text-right text-white font-semibold w-24" style={{backgroundColor: accentColor}}>Unit Price</th>
-                        <th className="p-1.5 text-right text-white font-semibold w-24" style={{backgroundColor: accentColor}}>Total</th>
+                        <th className="p-2 text-left text-white font-semibold align-middle" style={{backgroundColor: accentColor}}>Description</th>
+                        <th className="p-2 text-right text-white font-semibold w-16 align-middle" style={{backgroundColor: accentColor}}>Qty</th>
+                        <th className="p-2 text-right text-white font-semibold w-24 align-middle" style={{backgroundColor: accentColor}}>Unit Price</th>
+                        <th className="p-2 text-right text-white font-semibold w-24 align-middle" style={{backgroundColor: accentColor}}>Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     {salesOrder.lines.map((line, index) => {
                         const product = products.find(p => p.id === line.itemId);
                         return (
-                        <tr key={index} className="border-b">
-                            <td className="p-1.5">
-                                <div className="flex items-center gap-2">
-                                    <ProductImage path={product?.productImage} alt={line.description} width={32} height={32} className="rounded shrink-0 w-8 h-8 object-cover" />
-                                    <div>
-                                        <p className="font-medium text-xs leading-tight">{line.description}</p>
-                                        {product?.description && <p className="text-[10px] text-muted-foreground leading-tight">{product.description}</p>}
+                        <tr key={index} className="border-b h-14 hover:bg-neutral-50/50 transition-colors">
+                            <td className="p-2 align-middle">
+                                <div className="flex items-center gap-2.5 min-h-[36px]">
+                                    <div className="w-9 h-9 shrink-0 rounded border border-neutral-200 bg-neutral-50 overflow-hidden flex items-center justify-center p-0.5 shadow-2xs">
+                                        <ProductImage
+                                            path={product?.productImage}
+                                            alt={line.description}
+                                            width={500}
+                                            height={500}
+                                            className="w-full h-full object-contain"
+                                        />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="font-semibold text-xs leading-tight text-neutral-900 truncate">{line.description}</p>
+                                        {product?.sku ? (
+                                            <p className="text-[10px] text-muted-foreground leading-tight truncate">SKU: {product.sku}</p>
+                                        ) : (
+                                            <p className="text-[10px] text-neutral-400 leading-tight">No SKU</p>
+                                        )}
                                     </div>
                                 </div>
                             </td>
-                            <td className="p-1.5 text-right font-medium">{line.quantity}</td>
-                            <td className="p-1.5 text-right">₱{line.unitPrice.toFixed(2)}</td>
-                            <td className="p-1.5 text-right font-medium">₱{line.total.toFixed(2)}</td>
+                            <td className="p-2 text-right font-semibold text-xs align-middle">{line.quantity}</td>
+                            <td className="p-2 text-right text-xs align-middle">₱{Number(line.unitPrice || 0).toFixed(2)}</td>
+                            <td className="p-2 text-right font-bold text-xs align-middle">₱{Number(line.total || 0).toFixed(2)}</td>
                         </tr>
                     )})}
                 </tbody>

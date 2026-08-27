@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -39,7 +39,7 @@ export default function JournalEntriesPage() {
         unsubscribeEntries();
         unsubscribeAccounts();
     }
-  }, [toast]);
+  }, []);
 
   const handleOpenModal = (entry: JournalEntry | null) => {
     setEditingEntry(entry);

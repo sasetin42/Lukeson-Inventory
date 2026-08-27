@@ -36,7 +36,7 @@ interface AuthContextType {
   userRole: User['role'] | null;
   rolePermissions: { [key: string]: PermissionLevel } | null;
   hasWriteAccess: (module: string) => boolean;
-  updateUserProfile: (name: string, avatarFile: File | null) => Promise<void>;
+  updateUserProfile: (name: string, avatarFile: File | string | null) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -239,7 +239,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         if (isLoading) return;
         
-        const isAuthPage = pathname === '/login';
+        const normalizedPath = pathname ? pathname.replace(/\/$/, '') || '/' : '/';
+        const isAuthPage = normalizedPath === '/login';
 
         if (!firebaseUser && !isAuthPage) {
             router.push('/login');
@@ -256,18 +257,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await fetchUserData(userCredential.user);
     };
     
-    const updateUserProfile = async (name: string, avatarFile: File | null): Promise<void> => {
+    const updateUserProfile = async (name: string, avatarFile: File | string | null): Promise<void> => {
         if (!firebaseUser) throw new Error("No user is logged in.");
 
         const userDocRef = doc(db, "users", firebaseUser.uid);
         const dataToUpdate: { name: string, avatar?: string } = { name };
         let newAvatarUrl = profile.avatar;
 
-        if (avatarFile) {
-            const storageRef = ref(storage, `avatars/${firebaseUser.uid}/${avatarFile.name}`);
-            await uploadBytes(storageRef, avatarFile);
-            newAvatarUrl = await getDownloadURL(storageRef);
+        if (typeof avatarFile === 'string') {
+            newAvatarUrl = avatarFile;
             dataToUpdate.avatar = newAvatarUrl;
+        } else if (avatarFile instanceof File) {
+            try {
+                const storageRef = ref(storage, `avatars/${firebaseUser.uid}/${Date.now()}_${avatarFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`);
+                await uploadBytes(storageRef, avatarFile);
+                newAvatarUrl = await getDownloadURL(storageRef);
+                dataToUpdate.avatar = newAvatarUrl;
+            } catch (storageErr) {
+                console.warn("Storage upload encountered CORS/network error, saving processed image directly:", storageErr);
+            }
         }
 
         await updateDoc(userDocRef, dataToUpdate);

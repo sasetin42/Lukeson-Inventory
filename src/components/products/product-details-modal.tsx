@@ -130,6 +130,7 @@ export default function ProductDetailsModal({
     { label: 'Stock', value: product.stock, icon: Warehouse, color: 'text-green-500', status: product.status },
     { label: 'Re-Order Level', value: product.reOrderLevel, icon: AlertTriangle, color: 'text-yellow-500' },
     { label: 'Expiry Tracking', value: product.expiryDateTracking ? 'Enabled' : 'Disabled', icon: CalendarClock, color: 'text-cyan-500', isBool: true },
+    { label: 'Discount Eligibility', value: product.isDiscountable !== false ? 'Include in Discount' : 'Exclude from Discount', icon: Percent, color: product.isDiscountable !== false ? 'text-green-500' : 'text-red-500' },
   ];
 
   const availableDetails = allDetails.filter(detail => detail.value !== null && detail.value !== undefined && detail.value !== '');

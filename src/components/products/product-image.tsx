@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import { Skeleton } from '../ui/skeleton';
 
 interface ProductImageProps {
   path?: string | null;
@@ -14,45 +13,55 @@ interface ProductImageProps {
 }
 
 export default function ProductImage({ path, alt, className, width = 48, height = 48, style, ...props }: ProductImageProps) {
-  // If path is a valid URL, use it. Otherwise, show placeholder.
-  const imageUrl = path && (path.startsWith('data:image') || path.startsWith('http')) 
-    ? path 
-    : `https://placehold.co/${width}x${height}.png`;
-  
   const defaultStyle: React.CSSProperties = {
     maxWidth: `${width}px`,
     maxHeight: `${height}px`,
-    width: '100%',
-    height: '100%',
+    width: 'auto',
+    height: 'auto',
     objectFit: 'contain',
     flexShrink: 0,
     ...style,
   };
 
-  if (!path) {
+  // For data URLs: plain <img> — next/image cannot optimize them and fires aspect-ratio warnings
+  if (path && path.startsWith('data:image')) {
     return (
-        <Image
-          src={`https://placehold.co/${width}x${height}.png`}
-          alt={alt}
-          width={width}
-          height={height}
-          className={className}
-          style={defaultStyle}
-          {...props}
-        />
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={path}
+        alt={alt}
+        className={className}
+        style={defaultStyle}
+        {...(props as React.ImgHTMLAttributes<HTMLImageElement>)}
+      />
     );
   }
 
+  // For real remote URLs: use next/image for optimization
+  if (path && path.startsWith('http')) {
+    return (
+      <Image
+        src={path}
+        alt={alt}
+        width={width}
+        height={height}
+        className={className}
+        style={defaultStyle}
+        unoptimized
+        {...props}
+      />
+    );
+  }
+
+  // Fallback placeholder
   return (
-    <Image
-      src={imageUrl}
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`https://placehold.co/${width}x${height}.png`}
       alt={alt}
-      width={width}
-      height={height}
       className={className}
       style={defaultStyle}
-      {...props}
-      unoptimized
+      {...(props as React.ImgHTMLAttributes<HTMLImageElement>)}
     />
   );
 }

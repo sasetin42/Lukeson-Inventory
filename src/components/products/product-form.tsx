@@ -15,7 +15,7 @@ import { Switch } from '../ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '../ui/progress';
 import { db } from '@/lib/firebase';
-import { collection, onSnapshot, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, getDocs, getCountFromServer } from 'firebase/firestore';
 import { EditableSelectOptions } from '../editable-select-options';
 import { processImage } from '@/lib/image-utils';
 
@@ -61,6 +61,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     const [price, setPrice] = useState('');
     const [reOrderLevel, setReOrderLevel] = useState('');
     const [expiryDateTracking, setExpiryDateTracking] = useState(false);
+    const [isDiscountable, setIsDiscountable] = useState(true);
     
     // Category specific fields
     const [ledQty, setLedQty] = useState('');
@@ -120,6 +121,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         setPrice('');
         setReOrderLevel('');
         setExpiryDateTracking(false);
+        setIsDiscountable(true);
         setUploadProgress(null);
         setSize('');
         setColor('');
@@ -128,11 +130,18 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     
     useEffect(() => {
         const generateProductCode = async () => {
-            const productsRef = collection(db, 'products');
-            const snapshot = await getDocs(productsRef);
-            const productsCount = snapshot.size;
-            const year = new Date().getFullYear();
-            setProductCode(`PRO-${year}-${(productsCount + 1).toString().padStart(3, '0')}`);
+            try {
+                const productsRef = collection(db, 'products');
+                const snapshot = await getCountFromServer(productsRef);
+                const productsCount = snapshot.data().count;
+                const year = new Date().getFullYear();
+                setProductCode(`PRO-${year}-${(productsCount + 1).toString().padStart(3, '0')}`);
+            } catch (error) {
+                console.error("Error generating product code:", error);
+                const year = new Date().getFullYear();
+                const randomCode = Math.floor(100 + Math.random() * 900);
+                setProductCode(`PRO-${year}-${randomCode}`);
+            }
         };
 
         if (product) {
@@ -155,6 +164,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             setPrice(product.price?.toString() || '0');
             setReOrderLevel(product.reOrderLevel?.toString() || '');
             setExpiryDateTracking(product.expiryDateTracking || false);
+            setIsDiscountable(product.isDiscountable !== false);
             setSize(product.size || '');
             setColor(product.color || '');
             setCct(product.cct || '');
@@ -262,6 +272,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 reOrderLevel: reOrderLevelNum,
                 uom,
                 expiryDateTracking,
+                isDiscountable,
                 status: stockStatus,
                 imageFile: null, // We are sending the dataURL in productImage
                 modifiedAt: new Date().toISOString(),
@@ -307,7 +318,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
 
     const renderSharedFields = () => (
         <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="product-code" className="flex items-center gap-2"><FileText className="h-4 w-4" /> Product Code</Label>
                     <Input id="product-code" value={productCode} disabled />
@@ -322,7 +333,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                             {categories.map(cat => (
                                 <SelectItem key={cat.id} value={cat.name}>
                                     <div className="flex items-center gap-2">
-                                        {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
+                                         {categoryIcons[cat.name.toUpperCase()] || <Package className="h-4 w-4" />}
                                         {cat.name}
                                     </div>
                                 </SelectItem>
@@ -340,6 +351,27 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                            {suppliers.map(s => (
                                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="discount-status" className="flex items-center gap-2">
+                        <Percent className="h-4 w-4 text-orange-500" /> Discount Eligibility
+                    </Label>
+                    <Select 
+                        value={isDiscountable ? 'include' : 'exclude'} 
+                        onValueChange={(val) => setIsDiscountable(val === 'include')}
+                    >
+                        <SelectTrigger id="discount-status" className={isDiscountable ? "border-green-500/50" : "border-red-500/50"}>
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="include">
+                                <span className="font-medium text-green-600 dark:text-green-400">Include in Discount</span>
+                            </SelectItem>
+                            <SelectItem value="exclude">
+                                <span className="font-medium text-red-600 dark:text-red-400">Exclude from Discount</span>
+                            </SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

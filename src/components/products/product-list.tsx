@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download, Power, LayoutGrid, Package, Layers, PowerOff, Lamp, Square, History, ArrowDownAZ, ArrowUpAZ, CalendarClock, ArrowUp, ArrowDown } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { MoreHorizontal, Search, Edit, Trash2, Eye, PlusCircle, Upload, Download, Power, LayoutGrid, Package, Layers, PowerOff, Lamp, Square, History, ArrowDownAZ, ArrowUpAZ, CalendarClock, ArrowUp, ArrowDown, CheckSquare, X, RefreshCw } from "lucide-react";
 import { Product, ItemCategory } from "@/lib/types";
 import {
   DropdownMenu,
@@ -18,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import ProductDetailsModal from './product-details-modal';
+import BulkStockModal from './bulk-stock-modal';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -40,6 +42,8 @@ interface ProductListProps {
     products: Product[];
     onEdit: (product: Product | null) => void;
     onDelete: (product: Product) => void;
+    onBulkDelete?: (productIds: string[]) => Promise<void>;
+    onBulkUpdateStock?: (updates: { id: string; newStock: number }[], reason: string) => Promise<void>;
     onAddCategory: () => void;
     onViewStockHistory: (product: Product) => void;
 }
@@ -54,10 +58,14 @@ const categoryIcons: { [key: string]: React.ReactElement } = {
 type SortKey = 'name' | 'createdAt' | 'modifiedAt';
 type SortDirection = 'asc' | 'desc';
 
-export default function ProductList({ products, onEdit, onDelete, onAddCategory, onViewStockHistory }: ProductListProps) {
+export default function ProductList({ products, onEdit, onDelete, onBulkDelete, onBulkUpdateStock, onAddCategory, onViewStockHistory }: ProductListProps) {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+    const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+    const [isBulkStockModalOpen, setIsBulkStockModalOpen] = useState(false);
+    const [isBulkDeleteAlertOpen, setIsBulkDeleteAlertOpen] = useState(false);
+    const [isBulkDeleting, setIsBulkDeleting] = useState(false);
     const [categories, setCategories] = useState<ItemCategory[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
@@ -175,6 +183,50 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
             color: color
         }
     }
+
+    const isAllSelected = filteredProducts.length > 0 && filteredProducts.every(p => selectedProductIds.includes(p.id));
+    const isSomeSelected = selectedProductIds.length > 0 && !isAllSelected;
+
+    const handleSelectAll = (checked: boolean) => {
+        if (checked) {
+            const allIds = Array.from(new Set([...selectedProductIds, ...filteredProducts.map(p => p.id)]));
+            setSelectedProductIds(allIds);
+        } else {
+            const filteredIds = new Set(filteredProducts.map(p => p.id));
+            setSelectedProductIds(selectedProductIds.filter(id => !filteredIds.has(id)));
+        }
+    };
+
+    const handleToggleSelectProduct = (productId: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        setSelectedProductIds(prev =>
+            prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId]
+        );
+    };
+
+    const selectedProductsList = useMemo(() => {
+        return products.filter(p => selectedProductIds.includes(p.id));
+    }, [products, selectedProductIds]);
+
+    const handleConfirmBulkDelete = async () => {
+        if (!onBulkDelete || selectedProductIds.length === 0) return;
+        setIsBulkDeleting(true);
+        try {
+            await onBulkDelete(selectedProductIds);
+            setSelectedProductIds([]);
+            setIsBulkDeleteAlertOpen(false);
+        } catch (error) {
+            console.error("Bulk delete error:", error);
+        } finally {
+            setIsBulkDeleting(false);
+        }
+    };
+
+    const handleExecuteBulkStockUpdate = async (updates: { id: string; newStock: number }[], reason: string) => {
+        if (!onBulkUpdateStock) return;
+        await onBulkUpdateStock(updates, reason);
+        setSelectedProductIds([]);
+    };
   
     if (!mounted) {
         return null;
@@ -260,10 +312,62 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
                 </div>
             </div>
             <TabsContent value="products" className="mt-4">
+                {/* Bulk Actions Banner */}
+                {selectedProductIds.length > 0 && (
+                    <div className="mb-3 p-3 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-lg flex flex-wrap items-center justify-between gap-3 animate-in fade-in-50 duration-150">
+                        <div className="flex items-center gap-2">
+                            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white text-xs font-bold">
+                                {selectedProductIds.length}
+                            </span>
+                            <span className="text-xs font-medium text-blue-950 dark:text-blue-200">
+                                {selectedProductIds.length} product{selectedProductIds.length === 1 ? '' : 's'} selected
+                            </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 px-2.5 text-xs border-blue-300 text-blue-700 hover:bg-blue-100 hover:text-blue-800 dark:border-blue-700 dark:text-blue-300"
+                                onClick={() => setIsBulkStockModalOpen(true)}
+                                disabled={!canWrite}
+                            >
+                                <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                                Update Stock
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="destructive"
+                                className="h-8 px-2.5 text-xs bg-red-600 hover:bg-red-700"
+                                onClick={() => setIsBulkDeleteAlertOpen(true)}
+                                disabled={!canWrite}
+                            >
+                                <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                                Delete Selected ({selectedProductIds.length})
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+                                onClick={() => setSelectedProductIds([])}
+                            >
+                                <X className="mr-1 h-3.5 w-3.5" />
+                                Deselect
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
                 <div className="overflow-x-auto">
-                    <Table className="mt-4 min-w-[800px]">
+                    <Table className="mt-4 min-w-[850px]">
                     <TableHeader>
                         <TableRow>
+                        <TableHead className="w-[44px] px-2 text-center">
+                            <Checkbox
+                                checked={isAllSelected ? true : isSomeSelected ? "indeterminate" : false}
+                                onCheckedChange={handleSelectAll}
+                                aria-label="Select all products"
+                            />
+                        </TableHead>
                         <TableHead className="w-[80px]">Image</TableHead>
                         <SortableHeader sortKey="name">Product</SortableHeader>
                         <TableHead>Category</TableHead>
@@ -279,8 +383,16 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
                         const createdAt = formatDateTime(product.createdAt);
                         const modifiedAt = formatDateTime(product.modifiedAt);
                         const stockStatus = getStockStatus(product.stock, product.reOrderLevel);
+                        const isSelected = selectedProductIds.includes(product.id);
                         return (
-                            <TableRow key={product.id}>
+                            <TableRow key={product.id} className={isSelected ? "bg-blue-50/40 dark:bg-blue-950/20" : ""}>
+                                <TableCell className="w-[44px] px-2 text-center" onClick={(e) => e.stopPropagation()}>
+                                    <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={() => handleToggleSelectProduct(product.id)}
+                                        aria-label={`Select product ${product.name}`}
+                                    />
+                                </TableCell>
                                 <TableCell>
                                     <div className="h-10 w-10 rounded-md border bg-muted flex items-center justify-center p-1 shrink-0 overflow-hidden">
                                         <ProductImage 
@@ -378,6 +490,41 @@ export default function ProductList({ products, onEdit, onDelete, onAddCategory,
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
+
+        {/* Bulk Delete Alert Dialog */}
+        <AlertDialog open={isBulkDeleteAlertOpen} onOpenChange={setIsBulkDeleteAlertOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                <AlertDialogTitle className="text-destructive flex items-center gap-2">
+                    <Trash2 className="h-5 w-5" />
+                    Delete {selectedProductIds.length} Selected Products?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. You are about to permanently delete <strong>{selectedProductIds.length}</strong> product{selectedProductIds.length === 1 ? '' : 's'} and remove their records from the database.
+                </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                <AlertDialogCancel disabled={isBulkDeleting}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                    onClick={handleConfirmBulkDelete}
+                    disabled={isBulkDeleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                    {isBulkDeleting ? 'Deleting...' : `Delete ${selectedProductIds.length} Products`}
+                </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Bulk Stock Adjustment Modal */}
+        {isBulkStockModalOpen && (
+            <BulkStockModal
+                isOpen={isBulkStockModalOpen}
+                onClose={() => setIsBulkStockModalOpen(false)}
+                selectedProducts={selectedProductsList}
+                onSave={handleExecuteBulkStockUpdate}
+            />
+        )}
     </>
   );
 }

@@ -1,5 +1,4 @@
-
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import PageHeader from "@/components/page-header";
@@ -9,6 +8,7 @@ import QuotationList from "@/components/quotations/quotation-list";
 import { Quotation, Customer, SalesOrder, JobOrder, Product } from '@/lib/types';
 import QuotationFormModal from '@/components/quotations/quotation-form-modal';
 import QuotationDetailsModal from '@/components/quotations/quotation-details-modal';
+import QuotationViewModal from '@/components/quotations/quotation-view-modal';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -27,12 +27,14 @@ export default function QuotationsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isSalesOrderModalOpen, setIsSalesOrderModalOpen] = useState(false);
   const [isJobOrderModalOpen, setIsJobOrderModalOpen] = useState(false);
 
   const [editingQuotation, setEditingQuotation] = useState<Quotation | null>(null);
   const [viewingQuotation, setViewingQuotation] = useState<Quotation | null>(null);
+  const [printingQuotation, setPrintingQuotation] = useState<Quotation | null>(null);
   const [viewingCustomer, setViewingCustomer] = useState<Customer | null>(null);
   const [viewingSalesOrder, setViewingSalesOrder] = useState<SalesOrder | null>(null);
   const [viewingJobOrder, setViewingJobOrder] = useState<JobOrder | null>(null);
@@ -90,7 +92,7 @@ export default function QuotationsPage() {
         unsubscribeJobOrders();
         unsubscribeProducts();
     };
-  }, [toast]);
+  }, []);
 
   const filteredQuotations = useMemo(() => {
     return quotations.filter(quotation => {
@@ -105,7 +107,8 @@ export default function QuotationsPage() {
   const handleOpenFormModal = (quotation: Quotation | null) => {
     setEditingQuotation(quotation);
     setIsFormModalOpen(true);
-    setIsDetailsModalOpen(false); // Close details modal if open
+    setIsDetailsModalOpen(false);
+    setIsPrintModalOpen(false);
   };
   
   const handleCloseFormModal = () => {
@@ -122,6 +125,16 @@ export default function QuotationsPage() {
     setIsDetailsModalOpen(false);
     setViewingQuotation(null);
   }
+
+  const handleOpenPrintModal = (quotation: Quotation) => {
+    setPrintingQuotation(quotation);
+    setIsPrintModalOpen(true);
+  };
+
+  const handleClosePrintModal = () => {
+    setIsPrintModalOpen(false);
+    setPrintingQuotation(null);
+  };
   
   const handleOpenCustomerModal = (customer: Customer) => {
     setViewingCustomer(customer);
@@ -153,15 +166,14 @@ export default function QuotationsPage() {
     setViewingJobOrder(null);
   }
 
-
   const handleSaveQuotation = async (quotationData: Omit<Quotation, 'id'> & { id?: string }) => {
     try {
-      if (editingQuotation) { // We are editing
+      if (editingQuotation) {
         const { id, ...dataToSave } = quotationData;
         const docRef = doc(db, "quotations", editingQuotation.id);
         await setDoc(docRef, { ...dataToSave, modifiedAt: serverTimestamp() }, { merge: true });
         toast({ title: "Success", description: "Quotation updated successfully.", variant: "success", icon: <CheckCircle className="h-5 w-5" /> });
-      } else { // We are creating
+      } else {
         const { id, ...dataToSave } = quotationData;
         const docRef = doc(db, "quotations", id as string);
         await setDoc(docRef, { ...dataToSave, createdAt: serverTimestamp(), modifiedAt: serverTimestamp() });
@@ -174,7 +186,6 @@ export default function QuotationsPage() {
       toast({ title: "Error", description: "Failed to save quotation.", variant: "destructive", icon: <AlertCircle className="h-5 w-5" /> });
     }
   };
-
 
   const handleDeleteQuotation = async (quotationId: string) => {
     await deleteDoc(doc(db, "quotations", quotationId));
@@ -205,7 +216,6 @@ export default function QuotationsPage() {
       { title: "Acceptance Rate", value: `${acceptanceRate.toFixed(1)}%`, icon: Check, color: "purple" as const }
   ];
 
-
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -231,6 +241,7 @@ export default function QuotationsPage() {
         customers={customers}
         salesOrders={salesOrders}
         onView={handleOpenDetailsModal}
+        onPrintPreview={handleOpenPrintModal}
         onEdit={handleOpenFormModal}
         onCreate={() => handleOpenFormModal(null)}
         onDelete={handleDeleteQuotation}
@@ -255,7 +266,18 @@ export default function QuotationsPage() {
           isOpen={isDetailsModalOpen}
           onClose={handleCloseDetailsModal}
           onEdit={handleOpenFormModal}
+          onPrintPreview={handleOpenPrintModal}
           quotation={viewingQuotation}
+          salesOrders={salesOrders}
+        />
+      )}
+      {isPrintModalOpen && (
+        <QuotationViewModal
+          isOpen={isPrintModalOpen}
+          onClose={handleClosePrintModal}
+          onEdit={handleOpenFormModal}
+          quotation={printingQuotation}
+          products={products}
           salesOrders={salesOrders}
         />
       )}

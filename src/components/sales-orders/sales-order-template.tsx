@@ -1,4 +1,4 @@
-
+﻿
 
 'use client';
 
@@ -86,7 +86,7 @@ export default function SalesOrderTemplate() {
         };
 
         fetchSettings();
-    }, [toast]);
+    }, []);
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -302,7 +302,7 @@ export default function SalesOrderTemplate() {
                     <Card className="p-6">
                         <div className="flex justify-between items-start">
                              <div className="flex items-center gap-3">
-                                <Image src={logo} width={56} height={56} className="max-h-12 max-w-16 w-auto h-auto object-contain shrink-0" alt="Company Logo" data-ai-hint="logo"/>
+                                <Image src={logo} width={56} height={56} style={{ width: 'auto', height: 'auto' }} className="max-h-12 max-w-16 object-contain shrink-0" alt="Company Logo" data-ai-hint="logo"/>
                                 <div>
                                     <p className="font-bold text-[15px] leading-tight" style={{ color: accentColor }}>{companyName}</p>
                                     <div className="text-[11px] leading-snug text-neutral-600 mt-0.5 space-y-0.5">

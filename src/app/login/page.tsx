@@ -111,7 +111,8 @@ export default function LoginPage() {
                                         alt="Company Logo" 
                                         width={84} 
                                         height={84} 
-                                        className="h-20 w-20 object-contain rounded-xl" 
+                                        style={{ width: 'auto', height: 'auto' }}
+                                        className="max-h-20 max-w-20 object-contain rounded-xl" 
                                         data-ai-hint="logo"
                                     />
                                 </div>

@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -56,7 +56,7 @@ export default function ReportsPage() {
         );
 
         return () => unsubscribes.forEach(unsub => unsub());
-    }, [toast]);
+    }, []);
 
     const totalRevenue = sales.reduce((acc, so) => acc + so.totalAmount, 0);
     const totalPurchaseValue = purchases.reduce((acc, po) => acc + po.totalAmount, 0);

@@ -4,7 +4,6 @@
 
 import { Invoice, SalesOrder, Product } from '@/lib/types';
 import { format } from 'date-fns';
-import Image from 'next/image';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
@@ -118,7 +117,6 @@ export default function InvoiceView({ invoice, products }: InvoiceViewProps) {
             <div>
                 <div className="flex justify-between items-start">
                     <div className="flex items-center gap-4">
-                        <Image src={logo} width={96} height={64} className="max-h-16 max-w-24 w-auto h-auto object-contain shrink-0" alt="Company Logo" data-ai-hint="logo" />
                         <div className="text-xs">
                             <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
                             {tin && <p><strong>VAT REG. TIN: {tin}</strong></p>}
@@ -151,32 +149,44 @@ export default function InvoiceView({ invoice, products }: InvoiceViewProps) {
                     </div>
                 </div>
                 
-                <table className="w-full mt-4 border-collapse text-sm">
+                <table className="w-full mt-4 border-collapse text-xs table-fixed">
                     <thead>
                         <tr>
-                            <th className="p-2 text-left text-white" style={{backgroundColor: accentColor}}>Description</th>
-                            <th className="p-2 text-right text-white" style={{backgroundColor: accentColor}}>Qty</th>
-                            <th className="p-2 text-right text-white" style={{backgroundColor: accentColor}}>Unit Price</th>
-                            <th className="p-2 text-right text-white" style={{backgroundColor: accentColor}}>Total</th>
+                            <th className="p-2 text-left text-white font-semibold align-middle" style={{backgroundColor: accentColor}}>Description</th>
+                            <th className="p-2 text-right text-white font-semibold w-16 align-middle" style={{backgroundColor: accentColor}}>Qty</th>
+                            <th className="p-2 text-right text-white font-semibold w-24 align-middle" style={{backgroundColor: accentColor}}>Unit Price</th>
+                            <th className="p-2 text-right text-white font-semibold w-24 align-middle" style={{backgroundColor: accentColor}}>Total</th>
                         </tr>
                     </thead>
                     <tbody>
                         {invoice.lines.map((line, index) => {
                             const product = products.find(p => p.id === line.itemId);
                             return (
-                            <tr key={index} className="border-b">
-                                <td className="p-2">
-                                    <div className="flex items-center gap-2">
-                                        <ProductImage path={product?.productImage} alt={line.description} width={40} height={40} className="rounded-md" />
-                                        <div>
-                                            <p className="font-medium">{line.description}</p>
-                                            <p className="text-xs text-muted-foreground">{product?.description}</p>
+                            <tr key={index} className="border-b h-14 hover:bg-neutral-50/50 transition-colors">
+                                <td className="p-2 align-middle">
+                                    <div className="flex items-center gap-2.5 min-h-[36px]">
+                                        <div className="w-9 h-9 shrink-0 rounded border border-neutral-200 bg-neutral-50 overflow-hidden flex items-center justify-center p-0.5 shadow-2xs">
+                                            <ProductImage
+                                                path={product?.productImage}
+                                                alt={line.description}
+                                                width={500}
+                                                height={500}
+                                                className="w-full h-full object-contain"
+                                            />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="font-semibold text-xs leading-tight text-neutral-900 truncate">{line.description}</p>
+                                            {product?.sku ? (
+                                                <p className="text-[10px] text-muted-foreground leading-tight truncate">SKU: {product.sku}</p>
+                                            ) : (
+                                                <p className="text-[10px] text-neutral-400 leading-tight">No SKU</p>
+                                            )}
                                         </div>
                                     </div>
                                 </td>
-                                <td className="p-2 text-right">{line.quantity}</td>
-                                <td className="p-2 text-right">₱{line.unitPrice.toFixed(2)}</td>
-                                <td className="p-2 text-right">₱{line.total.toFixed(2)}</td>
+                                <td className="p-2 text-right font-semibold text-xs align-middle">{line.quantity}</td>
+                                <td className="p-2 text-right text-xs align-middle">₱{Number(line.unitPrice || 0).toFixed(2)}</td>
+                                <td className="p-2 text-right font-bold text-xs align-middle">₱{Number(line.total || 0).toFixed(2)}</td>
                             </tr>
                         )})}
                     </tbody>

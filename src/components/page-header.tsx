@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import { Button } from './ui/button';
-import { Zap, AlertTriangle, FileText, Loader2, CheckCircle, Maximize, Minimize } from 'lucide-react';
+import { Zap, AlertTriangle, FileText, Loader2, CheckCircle, Maximize, Minimize, Truck, Calendar, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
@@ -14,7 +14,9 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ForInvoicingModal from './for-invoicing-modal';
+import DeliveryReceiptModal from './delivery-receipts/delivery-receipt-modal';
 import { SidebarTrigger } from './ui/sidebar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 type PageHeaderProps = {
   title: string;
@@ -31,6 +33,9 @@ function HeaderActions() {
     const [invoiceReadyCount, setInvoiceReadyCount] = useState(0);
     const [invoiceReadyOrders, setInvoiceReadyOrders] = useState<SalesOrder[]>([]);
     const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+    const [deliveryReadyCount, setDeliveryReadyCount] = useState(0);
+    const [deliveryReadyOrders, setDeliveryReadyOrders] = useState<SalesOrder[]>([]);
+    const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
     const isMobile = useIsMobile();
     const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -55,7 +60,15 @@ function HeaderActions() {
             setInvoiceReadyOrders(readyOrders);
             setInvoiceReadyCount(readyOrders.length);
         });
-        
+
+        const allSalesOrdersQuery = collection(db, 'salesOrders');
+        const unsubscribeAllSalesOrders = onSnapshot(allSalesOrdersQuery, (snapshot) => {
+            const allSOs = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as SalesOrder));
+            const activeDeliveries = allSOs.filter(so => so.status !== 'Cancelled' && so.status !== 'Draft');
+            setDeliveryReadyOrders(activeDeliveries);
+            setDeliveryReadyCount(activeDeliveries.length);
+        });
+
         const handleFullscreenChange = () => {
             setIsFullscreen(!!document.fullscreenElement);
         };
@@ -65,6 +78,7 @@ function HeaderActions() {
             clearInterval(timer);
             unsubscribeProducts();
             unsubscribeSalesOrders();
+            unsubscribeAllSalesOrders();
             document.removeEventListener('fullscreenchange', handleFullscreenChange);
         };
     }, []);
@@ -87,7 +101,7 @@ function HeaderActions() {
             });
         }, 1000);
     }
-    
+
     const toggleFullscreen = () => {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen();
@@ -98,81 +112,237 @@ function HeaderActions() {
         }
     };
 
-    if (!mounted) {
-        return null;
-    }
-    
-    if (isMobile) {
-        return (
-            <div className="flex items-center gap-2">
-                 <Button 
-                    variant={lowStockCount > 0 ? "destructive" : "outline"} 
-                    size="sm" 
-                    asChild 
-                    className={cn("text-xs", lowStockCount > 0 && "animate-blink")}
-                >
-                    <Link href="/stock-alerts">
-                        <AlertTriangle className="h-3 w-3 mr-1" />
-                        ({lowStockCount})
-                    </Link>
-                </Button>
-                 <Button size="sm" onClick={handleOptimize} className="text-xs bg-[#5F8400] text-[#FFFFFF] hover:bg-[#5F8400]/90">
-                    <Zap className="h-3 w-3 mr-1" />
-                    Optimize
-                </Button>
-            </div>
-        )
-    }
+    if (!mounted) return null;
 
     return (
-        <>
-        <div className="flex items-center gap-2 sm:gap-4">
-             <div className="text-right text-xs text-muted-foreground font-medium hidden lg:block p-2 rounded-md bg-muted/50">
-                {dateTime ? (
-                    <>
-                        <div>{format(dateTime, 'E, MMM d, yyyy')}</div>
-                        <div>{format(dateTime, 'h:mm:ss a')}</div>
-                    </>
-                ) : (
-                    'Loading...'
-                )}
-            </div>
-             <Button 
-                variant={invoiceReadyCount > 0 ? "default" : "outline"} 
-                size="sm" 
-                onClick={() => setIsInvoiceModalOpen(true)}
-                className={cn(invoiceReadyCount > 0 && "animate-blink", "bg-[#F99B01] text-white hover:bg-[#F99B01]/90")}
-            >
-                <FileText className="h-4 w-4 mr-2" />
-                For Invoicing ({invoiceReadyCount})
-            </Button>
-            <Button 
-                variant={lowStockCount > 0 ? "destructive" : "outline"} 
-                size="sm" 
-                asChild 
-                className={cn(lowStockCount > 0 && "animate-blink")}
-            >
-                <Link href="/stock-alerts">
-                    <AlertTriangle className="h-4 w-4 mr-2" />
-                    Stock Alert ({lowStockCount})
-                </Link>
-            </Button>
-            <Button size="sm" onClick={handleOptimize} className="bg-[#5F8400] text-[#FFFFFF] hover:bg-[#5F8400]/90">
-                <Zap className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Optimize System</span>
-                <span className="sm:hidden">Optimize</span>
-            </Button>
-            <Button variant="outline" size="icon" onClick={toggleFullscreen}>
-                {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-            </Button>
-        </div>
-        <ForInvoicingModal
-            isOpen={isInvoiceModalOpen}
-            onClose={() => setIsInvoiceModalOpen(false)}
-            salesOrders={invoiceReadyOrders}
-        />
-        </>
-    )
+        <TooltipProvider delayDuration={300}>
+            {isMobile ? (
+                <div className="flex items-center gap-1.5">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setIsDeliveryModalOpen(true)}
+                                className={cn("relative bg-[#2563EB] text-white hover:bg-[#1D4ED8] h-8 w-8", deliveryReadyCount > 0 && "animate-blink")}
+                            >
+                                <Truck className="h-4 w-4" />
+                                {deliveryReadyCount > 0 && (
+                                    <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[#2563EB] text-[10px] font-bold shadow">
+                                        {deliveryReadyCount}
+                                    </span>
+                                )}
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="font-medium">
+                            Delivery Receipt ({deliveryReadyCount})
+                        </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant={lowStockCount > 0 ? "destructive" : "outline"}
+                                size="icon"
+                                asChild
+                                className={cn("relative h-8 w-8", lowStockCount > 0 && "animate-blink")}
+                            >
+                                <Link href="/stock-alerts" prefetch={false}>
+                                    <AlertTriangle className="h-4 w-4" />
+                                    {lowStockCount > 0 && (
+                                        <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-destructive text-[10px] font-bold shadow">
+                                            {lowStockCount}
+                                        </span>
+                                    )}
+                                </Link>
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="font-medium">
+                            Stock Alert ({lowStockCount})
+                        </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                size="icon"
+                                onClick={handleOptimize}
+                                className="h-8 w-8 bg-[#5F8400] text-white hover:bg-[#5F8400]/90"
+                            >
+                                <Zap className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="font-medium">
+                            Optimize System
+                        </TooltipContent>
+                    </Tooltip>
+
+                    <DeliveryReceiptModal
+                        isOpen={isDeliveryModalOpen}
+                        onClose={() => setIsDeliveryModalOpen(false)}
+                        salesOrders={deliveryReadyOrders}
+                    />
+                </div>
+            ) : (
+                <>
+                    <div className="flex items-center gap-2 sm:gap-2.5">
+                        {/* Enhanced Date & Time Display */}
+                        <div className="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-card/80 dark:bg-card/60 border shadow-xs backdrop-blur-xs select-none">
+                            <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/85 border-r pr-2.5 border-border/80">
+                                <Calendar className="h-3.5 w-3.5 text-primary shrink-0" />
+                                <span>{dateTime ? format(dateTime, 'EEE, MMM d, yyyy') : '--, --- --, ----'}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs font-mono font-bold tracking-tight text-primary">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0 ml-0.5" />
+                                <span className="tabular-nums">{dateTime ? format(dateTime, 'hh:mm:ss a') : '--:--:-- --'}</span>
+                            </div>
+                        </div>
+
+                        {/* For Invoicing */}
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant={invoiceReadyCount > 0 ? "default" : "outline"}
+                                    size="icon"
+                                    onClick={() => setIsInvoiceModalOpen(true)}
+                                    className={cn(
+                                        "relative h-9 w-9 bg-[#F99B01] text-white hover:bg-[#F99B01]/90 border-0",
+                                        invoiceReadyCount > 0 && "animate-blink"
+                                    )}
+                                >
+                                    <FileText className="h-4 w-4" />
+                                    {invoiceReadyCount > 0 && (
+                                        <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[#F99B01] text-[10px] font-bold shadow-md ring-1 ring-[#F99B01]/20">
+                                            {invoiceReadyCount}
+                                        </span>
+                                    )}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="font-semibold text-xs px-3 py-2">
+                                <div className="flex items-center gap-1.5">
+                                    <FileText className="h-3.5 w-3.5 text-[#F99B01]" />
+                                    For Invoicing
+                                    <span className="ml-1 rounded-full bg-[#F99B01] text-white text-[10px] font-bold px-1.5 py-0.5 leading-none">
+                                        {invoiceReadyCount}
+                                    </span>
+                                </div>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        {/* Delivery Receipt */}
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant={deliveryReadyCount > 0 ? "default" : "outline"}
+                                    size="icon"
+                                    onClick={() => setIsDeliveryModalOpen(true)}
+                                    className={cn(
+                                        "relative h-9 w-9 bg-[#2563EB] text-white hover:bg-[#1D4ED8] border-0",
+                                        deliveryReadyCount > 0 && "animate-blink"
+                                    )}
+                                >
+                                    <Truck className="h-4 w-4" />
+                                    {deliveryReadyCount > 0 && (
+                                        <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-[#2563EB] text-[10px] font-bold shadow-md ring-1 ring-[#2563EB]/20">
+                                            {deliveryReadyCount}
+                                        </span>
+                                    )}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="font-semibold text-xs px-3 py-2">
+                                <div className="flex items-center gap-1.5">
+                                    <Truck className="h-3.5 w-3.5 text-[#2563EB]" />
+                                    Delivery Receipt
+                                    <span className="ml-1 rounded-full bg-[#2563EB] text-white text-[10px] font-bold px-1.5 py-0.5 leading-none">
+                                        {deliveryReadyCount}
+                                    </span>
+                                </div>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        {/* Stock Alert */}
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant={lowStockCount > 0 ? "destructive" : "outline"}
+                                    size="icon"
+                                    asChild
+                                    className={cn(
+                                        "relative h-9 w-9",
+                                        lowStockCount > 0 && "animate-blink"
+                                    )}
+                                >
+                                    <Link href="/stock-alerts" prefetch={false}>
+                                        <AlertTriangle className="h-4 w-4" />
+                                        {lowStockCount > 0 && (
+                                            <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-white text-destructive text-[10px] font-bold shadow-md ring-1 ring-destructive/20">
+                                                {lowStockCount}
+                                            </span>
+                                        )}
+                                    </Link>
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="font-semibold text-xs px-3 py-2">
+                                <div className="flex items-center gap-1.5">
+                                    <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
+                                    Stock Alert
+                                    <span className="ml-1 rounded-full bg-destructive text-white text-[10px] font-bold px-1.5 py-0.5 leading-none">
+                                        {lowStockCount}
+                                    </span>
+                                </div>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        {/* Optimize System */}
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    size="icon"
+                                    onClick={handleOptimize}
+                                    className="h-9 w-9 bg-[#5F8400] text-white hover:bg-[#5F8400]/90 border-0"
+                                >
+                                    <Zap className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="font-semibold text-xs px-3 py-2">
+                                <div className="flex items-center gap-1.5">
+                                    <Zap className="h-3.5 w-3.5 text-[#5F8400]" />
+                                    Optimize System
+                                </div>
+                            </TooltipContent>
+                        </Tooltip>
+
+                        {/* Fullscreen */}
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="outline" size="icon" onClick={toggleFullscreen} className="h-9 w-9">
+                                    {isFullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="font-semibold text-xs px-3 py-2">
+                                {isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+                            </TooltipContent>
+                        </Tooltip>
+                    </div>
+
+                    <ForInvoicingModal
+                        isOpen={isInvoiceModalOpen}
+                        onClose={() => setIsInvoiceModalOpen(false)}
+                        salesOrders={invoiceReadyOrders}
+                    />
+                    <DeliveryReceiptModal
+                        isOpen={isDeliveryModalOpen}
+                        onClose={() => setIsDeliveryModalOpen(false)}
+                        salesOrders={deliveryReadyOrders}
+                    />
+                </>
+            )}
+        </TooltipProvider>
+    );
 }
 
 
@@ -196,3 +366,4 @@ export default function PageHeader({ title, description, icon, actions }: PageHe
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -82,7 +82,7 @@ export default function PaymentsPage() {
         unsubJobOrders();
         unsubProducts();
     };
-  }, [toast]);
+  }, []);
   
   const paidInvoices = invoices.filter(inv => inv.status === 'Paid' && !inv.archived);
   const totalCollected = paidInvoices.reduce((acc, inv) => acc + inv.amount, 0);

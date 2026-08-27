@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react';
 import { Quotation, Customer, SalesOrder } from '@/lib/types';
@@ -6,7 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Edit, Trash2, Eye, CheckCircle, User, Search, PlusCircle } from "lucide-react";
+import { MoreVertical, Edit, Trash2, Eye, CheckCircle, User, Search, PlusCircle, Printer, FileText } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,8 +26,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { format } from 'date-fns';
-import Link from 'next/link';
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useAuth } from '@/context/auth-context';
@@ -30,6 +36,7 @@ interface QuotationListProps {
     customers: Customer[];
     salesOrders: SalesOrder[];
     onView: (quotation: Quotation) => void;
+    onPrintPreview: (quotation: Quotation) => void;
     onEdit: (quotation: Quotation) => void;
     onCreate: () => void;
     onDelete: (quotationId: string) => void;
@@ -47,6 +54,7 @@ export default function QuotationList({
     customers, 
     salesOrders, 
     onView, 
+    onPrintPreview,
     onEdit, 
     onCreate,
     onDelete, 
@@ -141,8 +149,7 @@ export default function QuotationList({
                         </Select>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <TooltipProvider>
+                <CardContent className="overflow-x-auto">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -152,7 +159,7 @@ export default function QuotationList({
                                 <TableHead>Amount</TableHead>
                                 <TableHead>Quotation Status</TableHead>
                                 <TableHead>Sales Order Status</TableHead>
-                                <TableHead className="w-[150px]">Actions</TableHead>
+                                <TableHead className="w-[100px] text-center">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -181,37 +188,51 @@ export default function QuotationList({
                                             <Badge variant="outline">N/A</Badge>
                                         )}
                                     </TableCell>
-                                    <TableCell className="flex items-center gap-1">
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button variant="ghost" size="icon" onClick={() => onView(quotation)}>
-                                                    <Eye className="h-4 w-4 text-blue-500" />
+                                    <TableCell className="text-center">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                                                    <MoreVertical className="h-4 w-4" />
+                                                    <span className="sr-only">Open menu</span>
                                                 </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>View Details</TooltipContent>
-                                        </Tooltip>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button variant="ghost" size="icon" onClick={() => openApproveAlert(quotation)} disabled={quotation.status === 'Accepted' || !canWrite}>
-                                                    <CheckCircle className="h-4 w-4 text-green-500" />
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>Mark as Accepted</TooltipContent>
-                                        </Tooltip>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={() => openDeleteAlert(quotation)} disabled={!canWrite}>
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent>Delete</TooltipContent>
-                                        </Tooltip>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-48">
+                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem onClick={() => onPrintPreview(quotation)}>
+                                                    <Printer className="mr-2 h-4 w-4 text-orange-500" />
+                                                    Print Preview
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => onView(quotation)}>
+                                                    <Eye className="mr-2 h-4 w-4 text-blue-500" />
+                                                    View Details
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => onEdit(quotation)} disabled={!canWrite}>
+                                                    <Edit className="mr-2 h-4 w-4 text-green-500" />
+                                                    Edit Quotation
+                                                </DropdownMenuItem>
+                                                {quotation.status !== 'Accepted' && (
+                                                    <DropdownMenuItem onClick={() => openApproveAlert(quotation)} disabled={!canWrite}>
+                                                        <CheckCircle className="mr-2 h-4 w-4 text-emerald-600" />
+                                                        Mark as Accepted
+                                                    </DropdownMenuItem>
+                                                )}
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem 
+                                                    onClick={() => openDeleteAlert(quotation)} 
+                                                    disabled={!canWrite}
+                                                    className="text-destructive focus:text-destructive"
+                                                >
+                                                    <Trash2 className="mr-2 h-4 w-4 text-red-500" />
+                                                    Delete
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </TableCell>
                                 </TableRow>
                             )})}
                         </TableBody>
                     </Table>
-                    </TooltipProvider>
                     {quotations.length === 0 && (
                         <div className="text-center py-10 text-muted-foreground">
                             No quotations found.
@@ -224,26 +245,26 @@ export default function QuotationList({
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the quotation.
+                            This action cannot be undone. This will permanently delete quotation <span className="font-semibold">{quotationToDelete?.id}</span>.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteConfirm}>Delete</AlertDialogAction>
+                        <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
             <AlertDialog open={isApproveAlertOpen} onOpenChange={setIsApproveAlertOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure you want to accept this quotation?</AlertDialogTitle>
+                        <AlertDialogTitle>Accept Quotation?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This will mark the quotation as 'Accepted' and it cannot be reverted.
+                            This will mark quotation <span className="font-semibold">{quotationToApprove?.id}</span> as 'Accepted', allowing you to generate a Sales Order.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleApproveConfirm}>Accept</AlertDialogAction>
+                        <AlertDialogAction onClick={handleApproveConfirm} className="bg-emerald-600 hover:bg-emerald-700">Accept Quotation</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

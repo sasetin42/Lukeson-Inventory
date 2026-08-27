@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -56,7 +56,7 @@ export default function PurchaseOrderForm({ purchaseOrder, onSuccess, onCancel }
             }
         };
         fetchData();
-    }, [toast]);
+    }, []);
     
     useEffect(() => {
         const generatePurchaseOrderId = async () => {

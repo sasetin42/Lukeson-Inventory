@@ -19,7 +19,8 @@ import {
   FileText,
   DollarSign,
   Edit,
-  ShoppingCart
+  ShoppingCart,
+  Printer
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { format } from 'date-fns';
@@ -35,6 +36,7 @@ interface QuotationDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onEdit: (quotation: Quotation) => void;
+  onPrintPreview?: (quotation: Quotation) => void;
 }
 
 export default function QuotationDetailsModal({
@@ -43,6 +45,7 @@ export default function QuotationDetailsModal({
   isOpen,
   onClose,
   onEdit,
+  onPrintPreview,
 }: QuotationDetailsModalProps) {
   const router = useRouter();
   const { hasWriteAccess } = useAuth();
@@ -194,6 +197,10 @@ export default function QuotationDetailsModal({
                 </TooltipProvider>
             </div>
             <div className="flex gap-2">
+                <Button variant="outline" onClick={() => { if (onPrintPreview && quotation) { onClose(); onPrintPreview(quotation); } }} className="bg-[#FF9D00] text-white hover:bg-[#FF9D00]/90">
+                    <Printer className="h-4 w-4 mr-2" />
+                    Print Preview
+                </Button>
                 <Button variant="outline" onClick={handleEditClick} className="bg-[#2C2C2C] text-white hover:bg-[#151515] hover:text-white" disabled={!canWrite}>
                     <Edit className="h-4 w-4 mr-2" />
                     Edit Quotation

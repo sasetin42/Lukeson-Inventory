@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useState, useEffect, Suspense, useMemo } from 'react';
@@ -103,7 +103,7 @@ function JobOrdersContent() {
         unsubscribeQtns();
         unsubscribeCustomers();
     };
-  }, [toast]);
+  }, []);
 
   const filteredJobOrders = useMemo(() => {
     return jobOrders.filter(jo => {

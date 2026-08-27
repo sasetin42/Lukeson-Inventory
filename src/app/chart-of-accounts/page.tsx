@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -28,7 +28,7 @@ export default function ChartOfAccountsPage() {
         toast({ title: "Error", description: "Failed to load chart of accounts.", variant: "destructive" });
     });
     return () => unsubscribe();
-  }, [toast]);
+  }, []);
   
   const handleOpenModal = (account: Account | null) => {
     setEditingAccount(account);

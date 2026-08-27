@@ -1,4 +1,4 @@
-
+﻿
 
 'use client';
 
@@ -133,7 +133,7 @@ export default function SettingsPage() {
             }
         };
         fetchSettings();
-    }, [toast]);
+    }, []);
 
     const handleSave = async () => {
         setIsSaving(true);
@@ -213,13 +213,13 @@ export default function SettingsPage() {
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                  <div className="space-y-2">
                                     <Label>Company Logo</Label>
-                                    {companyLogo && <Image src={companyLogo} alt="Company Logo" width={96} height={64} className="max-h-16 max-w-24 w-auto h-auto object-contain border p-1 rounded-md" data-ai-hint="logo"/>}
+                                    {companyLogo && <Image src={companyLogo} alt="Company Logo" width={96} height={64} style={{ width: 'auto', height: 'auto' }} className="max-h-16 max-w-24 object-contain border p-1 rounded-md" data-ai-hint="logo"/>}
                                     <Input type="file" onChange={(e) => handleFileChange(e, setCompanyLogoFile, setCompanyLogo, 'Company Logo')} accept="image/*" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label className="flex items-center gap-2"><ImageIcon className="h-4 w-4" /> Site Icon (Favicon)</Label>
                                     <div className="flex items-center gap-4">
-                                        {siteIcon && <Image src={siteIcon} alt="Site Icon" width={32} height={32} className="h-8 w-8 object-contain border p-1 rounded-md" data-ai-hint="favicon"/>}
+                                        {siteIcon && <Image src={siteIcon} alt="Site Icon" width={32} height={32} style={{ width: 'auto', height: 'auto' }} className="max-h-8 max-w-8 object-contain border p-1 rounded-md" data-ai-hint="favicon"/>}
                                         <Input type="file" onChange={(e) => handleFileChange(e, setSiteIconFile, setSiteIcon, 'Site Icon')} accept="image/png, image/x-icon, image/svg+xml" />
                                     </div>
                                     <p className="text-xs text-muted-foreground">Upload a .png, .ico, or .svg file. Recommended size: 32x32 pixels.</p>

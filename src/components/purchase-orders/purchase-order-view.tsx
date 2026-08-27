@@ -3,7 +3,6 @@
 
 import { PurchaseOrder } from '@/lib/types';
 import { format } from 'date-fns';
-import Image from 'next/image';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
@@ -98,7 +97,6 @@ export default function PurchaseOrderView({ purchaseOrder }: PurchaseOrderViewPr
         <div className="p-8 bg-white text-black">
             <div className="flex justify-between items-center">
                  <div className="flex items-center gap-4">
-                    <Image src={logo} width={96} height={64} className="max-h-16 max-w-24 w-auto h-auto object-contain shrink-0" alt="Company Logo" data-ai-hint="logo" />
                     <div className="text-xs">
                         <p className="font-bold text-lg" style={{ color: accentColor }}>{companyName}</p>
                         <p>{address}</p>

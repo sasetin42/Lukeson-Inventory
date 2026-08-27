@@ -12,11 +12,12 @@ import {
 import { SalesOrder, JobOrder, Quotation, Product } from '@/lib/types';
 import { Button } from '../ui/button';
 import SalesOrderView from './sales-order-view';
-import { Printer, PlusCircle, Edit } from 'lucide-react';
-import { useRef } from 'react';
+import { Printer, PlusCircle, Edit, Truck } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useAuth } from '@/context/auth-context';
+import DeliveryReceiptView from '../delivery-receipts/delivery-receipt-view';
 
 interface SalesOrderViewModalProps {
   salesOrder: SalesOrder | null;
@@ -38,6 +39,8 @@ export default function SalesOrderViewModal({
   onEdit,
 }: SalesOrderViewModalProps) {
   const printableRef = useRef<HTMLDivElement>(null);
+  const drPrintableRef = useRef<HTMLDivElement>(null);
+  const [viewMode, setViewMode] = useState<'salesOrder' | 'deliveryReceipt'>('salesOrder');
   const router = useRouter();
   const { hasWriteAccess } = useAuth();
   const canWriteSales = hasWriteAccess('Sales Orders');
@@ -46,11 +49,11 @@ export default function SalesOrderViewModal({
   if (!salesOrder) return null;
 
   const handlePrint = () => {
-    const printContent = printableRef.current;
+    const printContent = viewMode === 'deliveryReceipt' ? drPrintableRef.current : printableRef.current;
     if (printContent) {
         const printWindow = window.open('', '_blank', 'height=800,width=800');
         if (printWindow) {
-            printWindow.document.write('<html><head><title>Print Sales Order</title>');
+            printWindow.document.write(`<html><head><title>Print ${viewMode === 'deliveryReceipt' ? 'Delivery Receipt' : 'Sales Order'}</title>`);
             
             const headElements = document.querySelectorAll('head > link[rel="stylesheet"], head > style');
             headElements.forEach(el => {
@@ -112,20 +115,53 @@ export default function SalesOrderViewModal({
 
   const quotation = quotations.find(q => q.id === salesOrder?.quotationId);
 
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) setViewMode('salesOrder'); onClose(); }}>
       <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
-            <DialogTitle>Sales Order: <span className="font-semibold text-primary">{salesOrder.id}</span></DialogTitle>
-            <DialogDescription>
-                Review the details of the sales order below.
-            </DialogDescription>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <DialogTitle>
+                  {viewMode === 'deliveryReceipt' ? 'Delivery Receipt: ' : 'Sales Order: '}
+                  <span className="font-semibold text-primary">
+                    {viewMode === 'deliveryReceipt' ? salesOrder.id.replace(/^SO-/, 'DR-') : salesOrder.id}
+                  </span>
+                </DialogTitle>
+                <DialogDescription>
+                  {viewMode === 'deliveryReceipt' ? 'Official delivery receipt document ready for dispatch and signing.' : 'Review the details of the sales order below.'}
+                </DialogDescription>
+              </div>
+              <div className="flex items-center gap-1.5 bg-muted/60 p-1 rounded-md border text-xs">
+                <Button
+                  size="sm"
+                  variant={viewMode === 'salesOrder' ? 'default' : 'ghost'}
+                  onClick={() => setViewMode('salesOrder')}
+                  className="h-7 text-xs px-2.5"
+                >
+                  Sales Order
+                </Button>
+                <Button
+                  size="sm"
+                  variant={viewMode === 'deliveryReceipt' ? 'default' : 'ghost'}
+                  onClick={() => setViewMode('deliveryReceipt')}
+                  className="h-7 text-xs px-2.5 bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  <Truck className="h-3.5 w-3.5 mr-1" />
+                  Delivery Receipt
+                </Button>
+              </div>
+            </div>
         </DialogHeader>
         <div className="max-h-[70vh] overflow-y-auto p-1">
-          <div ref={printableRef}>
-            <SalesOrderView salesOrder={salesOrder} quotation={quotation} products={products} />
-          </div>
+          {viewMode === 'salesOrder' ? (
+            <div ref={printableRef}>
+              <SalesOrderView salesOrder={salesOrder} quotation={quotation} products={products} />
+            </div>
+          ) : (
+            <div ref={drPrintableRef}>
+              <DeliveryReceiptView salesOrder={salesOrder} products={products} />
+            </div>
+          )}
         </div>
         <DialogFooter className="justify-between">
           <TooltipProvider>
@@ -166,10 +202,10 @@ export default function SalesOrderViewModal({
                 className="bg-[#FF9D00] text-white hover:bg-[#FF9D00]/90"
             >
               <Printer className="mr-2 h-4 w-4" />
-              Print
+              Print {viewMode === 'deliveryReceipt' ? 'DR' : 'SO'}
             </Button>
             <Button 
-                onClick={onClose}
+                onClick={() => { setViewMode('salesOrder'); onClose(); }}
                 className="bg-[#588B00] text-white hover:bg-[#588B00]/90"
             >
                 Close

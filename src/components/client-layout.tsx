@@ -18,8 +18,6 @@ import { AuthProvider, useAuth } from '@/context/auth-context';
 import SupportModal from '@/components/support/support-modal';
 
 import { navGroups } from '@/lib/nav-config';
-export { navGroups } from '@/lib/nav-config';
-
 import { NavigationProgress } from '@/components/ui/navigation-progress';
 
 function AppContent({ children }: { children: React.ReactNode }) {
@@ -38,15 +36,29 @@ function AppContent({ children }: { children: React.ReactNode }) {
     }
   };
   
+  const normalizedPathname = pathname ? pathname.replace(/\/$/, '') || '/' : '/';
+  const isAuthPage = normalizedPathname === '/login';
+  
   if (isLoading) {
-    return null;
+    return (
+      <div className="flex items-center justify-center min-h-screen w-full bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-xs text-muted-foreground font-medium">Loading IMIS...</p>
+        </div>
+      </div>
+    );
   }
   
-  if (!isAuthenticated && pathname !== '/login') {
-      return null;
+  if (!isAuthenticated && !isAuthPage) {
+      return (
+        <div className="flex items-center justify-center min-h-screen w-full bg-background">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      );
   }
   
-  if (pathname === '/login') {
+  if (isAuthPage) {
       return (
         <div className="w-full min-h-screen">
           <NavigationProgress />
@@ -84,7 +96,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
           <SidebarHeader className="pt-4 pb-2 px-3">
             <div className="flex flex-col items-start text-left gap-2">
               {companyProfile.logo ? (
-                  <Image src={companyProfile.logo} alt={companyProfile.name} width={72} height={72} className="h-16 w-16 object-contain rounded-md" data-ai-hint="logo" />
+                  <Image src={companyProfile.logo} alt={companyProfile.name} width={72} height={72} style={{ width: 'auto', height: 'auto' }} className="max-h-16 max-w-16 object-contain rounded-md" data-ai-hint="logo" />
               ) : (
                   <Logo className="size-16 text-primary" />
               )}
@@ -112,7 +124,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
                                     return (
                                       <SidebarMenuItem key={link.label}>
                                         <SidebarMenuButton asChild isActive={isActive} className={isActive ? 'bg-primary/10 text-primary font-medium text-[12px]' : 'text-[12px] font-medium'}>
-                                            <Link href={link.href} prefetch={true}>
+                                            <Link href={link.href} prefetch={false}>
                                               <link.icon className={isActive ? 'text-primary' : link.color} />
                                               <span className="font-medium leading-[16px] text-[12px]">{link.label}</span>
                                             </Link>
@@ -151,7 +163,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
                     <span>Profile</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href="/settings" prefetch={true}>
+                  <Link href="/settings" prefetch={false}>
                     <Settings className="mr-2 h-4 w-4 text-blue-500" />
                     <span>Settings</span>
                   </Link>

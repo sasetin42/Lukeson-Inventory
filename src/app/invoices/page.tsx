@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
@@ -85,7 +85,7 @@ function InvoicesContent() {
         unsubscribeInvoices();
         unsubscribeProducts();
     };
-  }, [toast]);
+  }, []);
 
   const filteredInvoices = useMemo(() => {
     return invoices.filter(invoice => {

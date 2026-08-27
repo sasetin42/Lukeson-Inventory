@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 import { useState, useEffect } from 'react';
 import PageHeader from "@/components/page-header";
@@ -64,12 +64,16 @@ export default function DashboardPage() {
 
     return () => unsubscribes.forEach(unsub => unsub());
 
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     // This effect runs when sales, quotations, jobOrders, or invoices change,
     // and rebuilds the recentTransactions list.
-    const recentSales = sales.sort((a, b) => ((b.orderDate as any).toDate() || new Date(b.orderDate as string)).getTime() - ((a.orderDate as any).toDate() || new Date(a.orderDate as string)).getTime()).slice(0, 10);
+    const recentSales = sales.sort((a, b) => {
+      const dateA = a?.orderDate ? ((a.orderDate as any).toDate?.() || new Date(a.orderDate as string)) : new Date(0);
+      const dateB = b?.orderDate ? ((b.orderDate as any).toDate?.() || new Date(b.orderDate as string)) : new Date(0);
+      return dateB.getTime() - dateA.getTime();
+    }).slice(0, 10);
     
     const enrichedTransactions = recentSales.map(sale => {
         const quotation = sale.quotationId ? quotations.find(q => q.id === sale.quotationId) : undefined;
